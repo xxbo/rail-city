@@ -27,10 +27,10 @@ Rust固定为 `rust/rail-routing/rust-toolchain.toml` 所指定的1.99.1，需�
 
 ## Rust迁移状态与基准
 
-P0、P1、P2-1与P2-2完成；继续P2-3运营诊断与P2-4存档兼容。
+P0、P1、P2-1、P2-2与P2-3完成；剩余P2-4存档兼容收尾。
 
 - [当前盘点](rail/core-rust-inventory.md)
-- [MAP63验收与双基线测量](rail/rust-wasm-map63.md)
+- [MAP64验收与双基线测量](rail/rust-wasm-map64.md)
 - [迁移审计](rail/rust-migration-audit.md)
 
-纯JS固定提交 `498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa` 保留于迁移前历史，性能脚本继续支持 `RAIL_JS_BASELINE` 与 `RAIL_PREVIOUS_ROOT` 指向独立干净工作树。分仓不修改模拟规则、存档格式或WASM字节，预期收益是仓库职责和CI隔离，运行性能沿用MAP63实测。
+纯JS固定提交 `498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa` 保留于迁移前历史，性能脚本继续支持 `RAIL_JS_BASELINE` 与 `RAIL_PREVIOUS_ROOT` 指向独立干净工作树。分仓保持模拟规则与存档格式；P2-3更新诊断内核，运行性能与冷查询开销见MAP64实测。当前文件边界见 [分仓复核](rail/repository-boundary.md)。

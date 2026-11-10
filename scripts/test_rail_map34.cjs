@@ -51,13 +51,14 @@ function worker(file) {
       URL,
       WebAssembly,
       Float64Array,
+      Uint8Array, TextEncoder, TextDecoder,
       location: {
         href: 'https://test.invalid/rail/operations-worker.js'
       },
       fetch: async () => ({
         ok: true,
         arrayBuffer: async () => {
-          const b = fs.readFileSync(path.join(__dirname, '../rail/wasm/rail-core-v23.wasm'));
+          const b = fs.readFileSync(path.join(__dirname, '../rail/wasm/rail-core-v24.wasm'));
           return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
         }
       }),
