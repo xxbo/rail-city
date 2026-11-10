@@ -1,0 +1,449 @@
+//! P3-0 opt-in cold-world contract. Not connected to the live MAP65 runtime.
+//! Reuses asset/editor rules; simulation, initialization and persistence follow in P3-1+.
+use crate::{assets, editor, editor_support::*, queues::Read, value, value::Value as V, CORE};
+use std::{cell::RefCell, collections::VecDeque};
+
+const VERSION: f64 = 1.0;
+const RECEIPTS: usize = 128;
+const MAX_SAFE: f64 = 9_007_199_254_740_991.0;
+
+fn same(a: &V, b: &V) -> bool {
+    value::write(a)
+        .iter()
+        .map(|v| v.to_bits())
+        .eq(value::write(b).iter().map(|v| v.to_bits()))
+}
+fn id(v: &V) -> Option<u64> {
+    if integer(v) && v.n() >= 1.0 && v.n() <= MAX_SAFE {
+        Some(v.n() as u64)
+    } else {
+        None
+    }
+}
+fn revision(v: &V) -> Option<u64> {
+    if integer(v) && v.n() >= 0.0 && v.n() <= MAX_SAFE {
+        Some(v.n() as u64)
+    } else {
+        None
+    }
+}
+fn envelope(ok: bool, sid: u64, rev: u64, result: V) -> V {
+    obj(&[
+        ("protocolVersion", n(VERSION)),
+        ("ok", boolean(ok)),
+        ("sessionId", n(sid as f64)),
+        ("revision", n(rev as f64)),
+        ("result", result),
+        ("events", arr(vec![])),
+    ])
+}
+fn error(code: &str, sid: u64, rev: u64) -> V {
+    let mut v = envelope(false, sid, rev, V::Missing);
+    v.set("error", obj(&[("code", text(code))]));
+    v
+}
+// Validate lengths/tags before the existing trusted value reader. Malformed ABI calls
+// produce a structured error, never a partially replaced session or a wasm trap.
+fn valid_wire(v: &[f64]) -> bool {
+    fn count(v: &[f64], at: &mut usize) -> Option<usize> {
+        let x = *v.get(*at)?;
+        *at += 1;
+        if x.is_finite() && x >= 0.0 && x.fract() == 0.0 && x <= 2_000_000.0 {
+            Some(x as usize)
+        } else {
+            None
+        }
+    }
+    fn tree(v: &[f64], at: &mut usize, strings: usize, depth: usize) -> Option<()> {
+        if depth > 80 {
+            return None;
+        }
+        let tag = count(v, at)?;
+        match tag {
+            0..=3 => (),
+            4 => {
+                v.get(*at)?;
+                *at += 1;
+            }
+            5 => {
+                if count(v, at)? >= strings {
+                    return None;
+                }
+            }
+            6 => {
+                for _ in 0..count(v, at)? {
+                    tree(v, at, strings, depth + 1)?;
+                }
+            }
+            7 => {
+                for _ in 0..count(v, at)? {
+                    if count(v, at)? >= strings {
+                        return None;
+                    }
+                    tree(v, at, strings, depth + 1)?;
+                }
+            }
+            _ => return None,
+        }
+        Some(())
+    }
+    fn check(v: &[f64]) -> Option<()> {
+        let mut at = 0;
+        let strings = count(v, &mut at)?;
+        for _ in 0..strings {
+            let len = count(v, &mut at)?;
+            for _ in 0..len {
+                let c = *v.get(at)?;
+                at += 1;
+                if !c.is_finite() || c < 0.0 || c > 65535.0 || c.fract() != 0.0 {
+                    return None;
+                }
+            }
+        }
+        tree(v, &mut at, strings, 0)?;
+        if at == v.len() {
+            Some(())
+        } else {
+            None
+        }
+    }
+    v.len() <= 2_000_000 && check(v).is_some()
+}
+
+struct Receipt {
+    id: u64,
+    request: V,
+    response: V,
+}
+struct State {
+    id: u64,
+    revision: u64,
+    world: V,
+    config: V,
+    high_water: u64,
+    receipts: VecDeque<Receipt>,
+}
+
+/// Opaque owned session. Wire is the existing ordered f64 value codec, not JSON.
+/// P3-0 accepts an existing cold checkpoint; new-game/RNG/runtime ownership is P3-1+.
+#[derive(Default)]
+pub struct SessionHost {
+    next_id: u64,
+    state: Option<State>,
+}
+impl SessionHost {
+    pub fn request(&mut self, wire: &[f64]) -> Vec<f64> {
+        if !valid_wire(wire) {
+            return value::write(&error("INVALID_WIRE", 0, 0));
+        }
+        let input = value::read(&mut Read { v: wire, at: 0 });
+        value::write(&self.handle(&input))
+    }
+    fn handle(&mut self, input: &V) -> V {
+        if !matches!(input.get("protocolVersion"), V::Number(v) if *v == VERSION) {
+            return error("UNSUPPORTED_PROTOCOL", 0, 0);
+        }
+        if input.get("op").text() == "open" {
+            let w = input.get("world");
+            let cfg = input.get("config");
+            if input.get("runtime").truth() {
+                return error("RUNTIME_NOT_SUPPORTED_YET", 0, 0);
+            }
+            if !["tokyo", "gba"].contains(&w.get("region").text())
+                || w.num("routeModel") != 9.0
+                || !editor::validate_world(w, cfg)
+                || !editor::validate(w, cfg)
+                || !assets::economy_valid(w)
+            {
+                return error("INVALID_CHECKPOINT", 0, 0);
+            }
+            if self.next_id as f64 >= MAX_SAFE {
+                return error("SESSION_LIMIT", 0, 0);
+            }
+            self.next_id += 1;
+            self.state = Some(State {
+                id: self.next_id,
+                revision: 0,
+                world: w.clone(),
+                config: cfg.clone(),
+                high_water: 0,
+                receipts: VecDeque::new(),
+            });
+            return envelope(
+                true,
+                self.next_id,
+                0,
+                obj(&[(
+                    "capabilities",
+                    arr(vec![
+                        text("cold-assets"),
+                        text("snapshot"),
+                        text("receipts"),
+                    ]),
+                )]),
+            );
+        }
+        let Some(s) = self.state.as_mut() else {
+            return error("NO_SESSION", 0, 0);
+        };
+        if id(input.get("sessionId")) != Some(s.id) {
+            return error("SESSION_MISMATCH", s.id, s.revision);
+        }
+        if ["dispatch", "preview"].contains(&input.get("op").text())
+            && value::write(input).len() > 4096
+        {
+            return error("COMMAND_TOO_LARGE", s.id, s.revision);
+        }
+        match input.get("op").text() {
+            "query" => match input.get("view").text() {
+                "snapshot" => envelope(true, s.id, s.revision, s.world.clone()),
+                "status" => envelope(
+                    true,
+                    s.id,
+                    s.revision,
+                    obj(&[
+                        ("highWater", n(s.high_water as f64)),
+                        ("receiptLimit", n(RECEIPTS as f64)),
+                    ]),
+                ),
+                "receipt" => {
+                    if let Some(r) = s
+                        .receipts
+                        .iter()
+                        .find(|r| Some(r.id) == id(input.get("commandId")))
+                    {
+                        let mut out = r.response.clone();
+                        out.set("replayed", boolean(true));
+                        out.set("currentRevision", n(s.revision as f64));
+                        out
+                    } else {
+                        error("RECEIPT_UNAVAILABLE", s.id, s.revision)
+                    }
+                }
+                _ => error("UNKNOWN_VIEW", s.id, s.revision),
+            },
+            "preview" => {
+                if revision(input.get("expectedRevision")) != Some(s.revision) {
+                    return error("REVISION_CONFLICT", s.id, s.revision);
+                }
+                Self::asset(s, input.get("command"), false)
+            }
+            "dispatch" => {
+                let Some(cid) = id(input.get("commandId")) else {
+                    return error("INVALID_COMMAND_ID", s.id, s.revision);
+                };
+                if let Some(r) = s.receipts.iter().find(|r| r.id == cid) {
+                    if !same(&r.request, input) {
+                        return error("COMMAND_ID_REUSED", s.id, s.revision);
+                    }
+                    let mut out = r.response.clone();
+                    out.set("replayed", boolean(true));
+                    out.set("currentRevision", n(s.revision as f64));
+                    return out;
+                }
+                if cid <= s.high_water {
+                    return error("COMMAND_EXPIRED", s.id, s.revision);
+                }
+                let out = if revision(input.get("expectedRevision")) != Some(s.revision) {
+                    error("REVISION_CONFLICT", s.id, s.revision)
+                } else if s.revision as f64 >= MAX_SAFE {
+                    error("REVISION_LIMIT", s.id, s.revision)
+                } else {
+                    Self::asset(s, input.get("command"), true)
+                };
+                s.high_water = cid;
+                if s.receipts.len() == RECEIPTS {
+                    s.receipts.pop_front();
+                }
+                s.receipts.push_back(Receipt {
+                    id: cid,
+                    request: input.clone(),
+                    response: out.clone(),
+                });
+                out
+            }
+            "close" => {
+                let out = envelope(true, s.id, s.revision, V::Null);
+                self.state = None;
+                out
+            }
+            _ => error("UNKNOWN_OPERATION", s.id, s.revision),
+        }
+    }
+    fn asset(s: &mut State, command: &V, commit: bool) -> V {
+        // P3-0 deliberately exercises existing cold rules, not live-edit migration.
+        if !((command.get("kind").text() == "fleet" && command.get("op").text() == "purchase")
+            || (command.get("kind").text() == "network"
+                && command.get("op").text() == "renameStation"))
+        {
+            return error("COMMAND_NOT_SUPPORTED_YET", s.id, s.revision);
+        }
+        let out = assets::run(
+            &obj(&[
+                ("state", s.world.clone()),
+                ("op", text("transaction")),
+                ("command", command.clone()),
+                ("commit", boolean(commit)),
+                ("accounts", s.world.get("economy").clone()),
+            ]),
+            &s.config,
+        );
+        if out.get("result").get("error").truth() || has(out.get("result"), "insufficient") {
+            let mut e = error("COMMAND_REJECTED", s.id, s.revision);
+            e.set("details", out.get("result").clone());
+            return e;
+        }
+        if commit {
+            let mut candidate = s.world.clone();
+            for patch in out.get("patch").array() {
+                let row = patch.array();
+                let key = row[0].text();
+                match row[1].n() as u32 {
+                    0 => (),
+                    1 => {
+                        let old = s.world.get(key).array();
+                        let rows = row[2]
+                            .array()
+                            .iter()
+                            .map(|x| {
+                                if x.array()[0].n() >= 0.0 {
+                                    old[x.array()[0].n() as usize].clone()
+                                } else {
+                                    x.array()[1].clone()
+                                }
+                            })
+                            .collect();
+                        candidate.set(key, arr(rows));
+                    }
+                    2 => candidate.set(key, row[2].clone()),
+                    _ => return error("INVALID_RULE_PATCH", s.id, s.revision),
+                }
+            }
+            if !editor::validate_world(&candidate, &s.config) || !assets::economy_valid(&candidate)
+            {
+                return error("INVALID_CANDIDATE", s.id, s.revision);
+            }
+            s.world = candidate;
+            s.revision += 1;
+        }
+        let mut reply = envelope(
+            true,
+            s.id,
+            s.revision,
+            obj(&[
+                ("value", out.get("result").clone()),
+                ("quote", out.get("quote").clone()),
+            ]),
+        );
+        if commit {
+            reply.set(
+                "events",
+                arr(vec![obj(&[
+                    ("type", text("WorldCommitted")),
+                    ("revision", n(s.revision as f64)),
+                ])]),
+            );
+        }
+        reply
+    }
+}
+
+thread_local! { static HOST: RefCell<SessionHost> = RefCell::new(SessionHost::default()); }
+#[no_mangle]
+pub extern "C" fn session_abi() -> u32 {
+    1
+}
+#[no_mangle]
+pub extern "C" fn session_contract() -> *const f64 {
+    let input = CORE.with(|c| c.borrow().input.clone());
+    let result = HOST.with(|h| h.borrow_mut().request(&input));
+    CORE.with(|c| {
+        let mut c = c.borrow_mut();
+        c.output = result;
+        c.output.as_ptr()
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn call(h: &mut SessionHost, v: V) -> V {
+        let data = h.request(&value::write(&v));
+        value::read(&mut Read { v: &data, at: 0 })
+    }
+    #[test]
+    fn malformed_inputs_and_versions_are_structured_failures() {
+        let mut h = SessionHost::default();
+        for wire in [
+            vec![],
+            vec![f64::NAN],
+            vec![0.0, 7.0, 1.0],
+            vec![1.0, -1.0],
+            vec![0.0, 4.0],
+        ] {
+            let out = h.request(&wire);
+            let v = value::read(&mut Read { v: &out, at: 0 });
+            assert_eq!(v.get("error").get("code").text(), "INVALID_WIRE");
+        }
+        assert_eq!(
+            call(&mut h, obj(&[])).get("error").get("code").text(),
+            "UNSUPPORTED_PROTOCOL"
+        );
+        assert_eq!(
+            call(
+                &mut h,
+                obj(&[("protocolVersion", n(1.0)), ("op", text("query"))])
+            )
+            .get("error")
+            .get("code")
+            .text(),
+            "NO_SESSION"
+        );
+    }
+    #[test]
+    fn pure_rust_open_dispatch_query_with_frozen_world() {
+        let bytes = include_bytes!("../../../scripts/fixtures/rail-p3-map65-session.wire");
+        let wire: Vec<f64> = bytes
+            .chunks_exact(8)
+            .map(|x| f64::from_le_bytes(x.try_into().unwrap()))
+            .collect();
+        let mut h = SessionHost::default();
+        let response = h.request(&wire);
+        let opened = value::read(&mut Read {
+            v: &response,
+            at: 0,
+        });
+        assert!(opened.get("ok").truth());
+        let cmd = obj(&[
+            ("protocolVersion", n(1.0)),
+            ("sessionId", n(1.0)),
+            ("op", text("dispatch")),
+            ("commandId", n(1.0)),
+            ("expectedRevision", n(0.0)),
+            (
+                "command",
+                obj(&[
+                    ("kind", text("fleet")),
+                    ("op", text("purchase")),
+                    ("args", obj(&[("spec", text("6B")), ("count", n(1.0))])),
+                ]),
+            ),
+        ]);
+        let result = call(&mut h, cmd.clone());
+        assert!(result.get("ok").truth());
+        assert_eq!(result.num("revision"), 1.0);
+        let again = call(&mut h, cmd);
+        assert!(again.get("replayed").truth());
+        assert_eq!(again.num("revision"), 1.0);
+        let state = call(
+            &mut h,
+            obj(&[
+                ("protocolVersion", n(1.0)),
+                ("sessionId", n(1.0)),
+                ("op", text("query")),
+                ("view", text("snapshot")),
+            ]),
+        );
+        assert_eq!(state.get("result").get("depot").get("stock").num("6B"), 1.0);
+    }
+}

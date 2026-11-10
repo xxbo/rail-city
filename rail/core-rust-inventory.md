@@ -1,5 +1,7 @@
 # 核心 Rust 迁移盘点（MAP65）
 
+P3-0已建立完整非界面迁移的生产AST清单、固定MAP65行为夹具与opt-in Rust会话合同，见[P3-0](rust-wasm-p3-0.md)。P0～P2的“规则范围完成”不代表状态/事务/平台层全部迁移；P3阶段逐函数去向和下一步见[完整计划](rust-ui-only-plan.md)。生产运行仍为MAP65，真实状态接管从P3-1开始。
+
 P0 与 P1-1、P1-2、P1-3、P1-4 已验收默认 routeModel 9 路径。按实际调用链记录职责；性能以同输入对照为准。P2-1 站线编辑链已整体完成并复核；P2-4完整文件/数据库入口验收、签名/城市/需求/恢复校验及旧加权时窗/发车规则已完成，见 [MAP65](rust-wasm-map65.md)。P2-3运营诊断/预测统计/告警/实际效果观察已完成，见 [MAP64验收](rust-wasm-map64.md)。P2-2建设/车库/设施资产事务也已完成，见 [MAP63验收](rust-wasm-map63.md)。站线编辑见 [MAP62 统一验收报告](rust-wasm-map62.md)；此前交路与容量单元见 [MAP61](rust-wasm-map61.md)、[MAP60](rust-wasm-map60.md)。P1 实现、验证和正负收益见 [P1 验收报告](rust-wasm-map59.md)；原始排期保存在 [迁移审计](rust-migration-audit.md)。
 
 | 能力域 | 当前核心实现 | 宿主边界 |
