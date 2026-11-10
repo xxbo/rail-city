@@ -89,7 +89,7 @@ fn lat_lon(p: &V) -> V {
         ("lat", n(r.num("north") - (p.num("y") - 60.0) / r.num("sy"))),
     ])
 }
-fn round(v: f64) -> f64 {
+pub(super) fn round(v: f64) -> f64 {
     if !v.is_finite() || v == 0.0 {
         return v;
     }

@@ -1,5 +1,5 @@
 //! Detached projections for UI panels. No model mutation or RNG consumption.
-use crate::{editor_support::*,value::Value as V};
+use crate::{bootstrap::round,editor_support::*,value::Value as V};
 const WEIGHTS:[(&str,f64);7]=[("crowding",0.22),("waiting",0.18),("speed",0.15),("coverage",0.15),("fare",0.13),("reliability",0.10),("hours",0.07)];
 fn line(s:&V,id:&V)->V{let q=s.get("ridership").get("lines").get(&jsstring(id));if !q.truth(){return obj(&[("awareness",n(1.0)),("trust",n(1.0)),("serviceDays",n(0.0)),("factor",n(1.0)),("bestDay",n(0.0))]);}let mut out=q.clone();let factor=if s.get("ridership").num("model")==22.0{0.25+0.75*fallback(q.get("satisfaction"),0.7).clamp(0.0,1.0)}else{q.num("awareness")*q.num("trust")};out.set("factor",n(factor));out}
 fn awards(records:&V)->V{
