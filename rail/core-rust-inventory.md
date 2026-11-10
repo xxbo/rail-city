@@ -1,6 +1,6 @@
-# 核心 Rust 迁移盘点（MAP65）
+# 核心 Rust 迁移盘点（P3-1）
 
-P3-0已建立完整非界面迁移的生产AST清单、固定MAP65行为夹具与opt-in Rust会话合同，见[P3-0](rust-wasm-p3-0.md)。P0～P2的“规则范围完成”不代表状态/事务/平台层全部迁移；P3阶段逐函数去向和下一步见[完整计划](rust-ui-only-plan.md)。生产运行仍为MAP65，真实状态接管从P3-1开始。
+P3-0已建立完整非界面迁移的生产AST清单、固定MAP65行为夹具与opt-in Rust会话合同，见[P3-0](rust-wasm-p3-0.md)。P0～P2的“规则范围完成”不代表状态/事务/平台层全部迁移；P3阶段逐函数去向和下一步见[完整计划](rust-ui-only-plan.md)。P3-1已接管初始化会话与数据生成，见[P3-1](rust-wasm-p3-1.md)；运行期完整所有权继续由P3-2～P3-8推进。
 
 P0 与 P1-1、P1-2、P1-3、P1-4 已验收默认 routeModel 9 路径。按实际调用链记录职责；性能以同输入对照为准。P2-1 站线编辑链已整体完成并复核；P2-4完整文件/数据库入口验收、签名/城市/需求/恢复校验及旧加权时窗/发车规则已完成，见 [MAP65](rust-wasm-map65.md)。P2-3运营诊断/预测统计/告警/实际效果观察已完成，见 [MAP64验收](rust-wasm-map64.md)。P2-2建设/车库/设施资产事务也已完成，见 [MAP63验收](rust-wasm-map63.md)。站线编辑见 [MAP62 统一验收报告](rust-wasm-map62.md)；此前交路与容量单元见 [MAP61](rust-wasm-map61.md)、[MAP60](rust-wasm-map60.md)。P1 实现、验证和正负收益见 [P1 验收报告](rust-wasm-map59.md)；原始排期保存在 [迁移审计](rust-migration-audit.md)。
 
@@ -18,7 +18,7 @@ P0 与 P1-1、P1-2、P1-3、P1-4 已验收默认 routeModel 9 路径。按实际
 | 城市生长与系统设施 | `urban.rs` | 地理陆地判定；一次城市 tick 的输入/输出；手动建设命令校验归 P2。 |
 | 预测目录及连接摘要 | `catalog.rs`、`connections.rs` | Rust 生成紧凑表；跨线程传数值 DTO，预测视图按需建立，受控日需求增量同步；实际定义视图保留既有 ID。 |
 | 交路编译 | `services.rs` | JS 提供紧凑数值描述和元数据，保留两份按完整输入比对的原生结果缓存；普通/区间/快速/直达/跨线展开与配车在 Rust。配置约束和两段容量由 `service_validation.rs` 一次校验。 |
-| 站线编辑与几何 | `editor.rs`、`editor_geometry.rs`、`editor_support.rs` | 新建/增删插站/并站、几何、配置、结构/库存约束读取、提交/撤销检查和站名选择均原生；宿主保留模板/地名字典、泛型快照和显示投影。 |
+| 站线编辑与几何 | `editor.rs`、`editor_geometry.rs`、`editor_support.rs` | 新建/增删插站/并站、几何、配置、结构/库存约束读取、提交/撤销检查和站名选择均原生；模板/地名字典与初始配置已在P3-1迁入Rust；宿主保留泛型快照和显示投影。 |
 | 建设/车库/手动设施资产交易 | `assets.rs` 复用 `editor.rs` | 结构化命令一次完成编辑/校验/报价/库存/扣款；宿主投影和欠费清算调度。 |
 | 运营诊断、预测统计、告警及实际效果观察 | `diagnostics.rs`、`diagnostic_aggregate.rs`、`diagnostic_review.rs` | 一次批量查询、紧凑预测数值缓存；前端保留中文文案/图表、到期调度及对象引用应用。 |
 | 完整存档与旧模型兼容 | `save.rs` 复用 `editor.rs`、`assets.rs`、`diagnostic_review.rs` | 原生决定文件/数据库版本、模型校验、完整运行关联及守恒、签名和旧加权运营规则。宿主保留通用结构扫描/有界数值传输、JSON、文件/IndexedDB、缓存和引用应用。 |
@@ -59,3 +59,7 @@ P0 与 P1-1、P1-2、P1-3、P1-4 已验收默认 routeModel 9 路径。按实际
 每批同时给出上一版与固定未 Rust 提交 `498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa` 的对照。连续运营、结构变更、城市 tick 和预测构建分别测量；JS 堆、ArrayBuffer、WASM 和 RSS 分列。主线程隔离、规则集中和吞吐收益分别评价，保留冷事务的回退数据；Node 延迟探针不代表浏览器 FPS。
 
 历史实施记录：[MAP53](rust-wasm-map53.md)、[MAP54](rust-wasm-map54.md)、[MAP55](rust-wasm-map55.md)、[MAP56](rust-wasm-map56.md)、[MAP57](rust-wasm-map57.md)。
+
+## P3-1 初始化接管
+
+`bootstrap.rs` 持有版本化数据、区域/枢纽派生、两地图世界与城市初始化、配置、命名随机调用顺序、旧启动状态修复和恢复选择。`SessionHost` 默认编入生产核心，负责初始化候选与会话替换。JS只转发初始化参数、通用值编码及显示。地理/配置返回只读兼容视图，活动世界仍通过现有适配器运行；预测目录、实时运行和编辑事务所有权按后续阶段收口。完整测量见[P3-1](rust-wasm-p3-1.md)。

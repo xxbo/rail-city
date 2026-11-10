@@ -16,66 +16,12 @@
     return node ? require('./tokyo-data') : root.RailCityData;
   }
 
-  function create(region = 'tokyo') {
-    if (region === 'gba') return (node ? require('./gba-data') : root.RailGBA).create();
-    if (cached) return cached;
-    const d = source();
-    if (!d) throw Error('真实密度数据尚未加载');
-    const cells = [],
-      totals = {
-        people: 0,
-        jobs: 0,
-        shops: 0,
-        industry: 0,
-        leisure: 0
-      };
-    for (let row = 0; row < d.rows; row++)
-      for (let col = 0; col < d.cols; col++) {
-        const i = (row * d.cols + col) * d.recordBytes,
-          lon = d.lon0 + col * d.stepLon,
-          lat = d.lat0 + row * d.stepLat,
-          area = Math.abs(d.stepLat * d.stepLon) * 111.32 ** 2 * Math.cos(lat * Math.PI / 180),
-          populationValid = d.raw[i + 2] === 1,
-          people = d.raw[i] + 256 * d.raw[i + 1],
-          survey = d.raw[i + 3] / 255,
-          high = d.raw[i + 4] / 255 * area,
-          factory = d.raw[i + 5] / 255 * area,
-          low = d.raw[i + 6] / 255 * area,
-          park = d.raw[i + 7] / 255 * area,
-          publicArea = d.raw[i + 8] / 255 * area;
-        const c = {
-          id: row + ':' + col,
-          x: (lon - 139.15) * 2000 + 80,
-          y: (36.04 - lat) * 2470 + 60,
-          w: d.stepLon * 2000,
-          h: -d.stepLat * 2470,
-          area,
-          populationValid,
-          survey,
-          factory,
-          high,
-          park,
-          people,
-          jobs: Math.round(people * .25 + high * 18000 + factory * 5000 + publicArea * 5000),
-          shops: Math.round(people * .04 + high * 5000),
-          industry: Math.round(factory * 5000),
-          leisure: Math.round(people * .05 + park * 5000 + publicArea * 3000)
-        };
-        cells.push(c);
-        for (const k of Object.keys(totals)) totals[k] += c[k];
-      }
-    let demand = null;
-    cached = {
-      cells,
-      totals,
-      cell: CELL,
-      area: AREA,
-      metadata: d,
-      get demand() {
-        return demand || (demand = buildDemand(cells));
-      }
-    };
-    return cached;
+  function create(region='tokyo') {
+    if(region==='gba')return (node?require('./gba-data'):root.RailGBA).create();
+    if(cached)return cached;
+    cached=(node?require('./bootstrap-wasm'):root.RailBootstrap).view('city',region);
+    cached.metadata.raw=(node?require('./tokyo-data'):root.RailCityData).raw;
+    let demand;Object.defineProperty(cached,'demand',{enumerable:true,get:()=>demand||(demand=buildDemand(cached.cells))});return (node?require('./bootstrap-wasm'):root.RailBootstrap).readonly(cached);
   }
 
   function buildDemand(cells) {

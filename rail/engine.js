@@ -11,122 +11,7 @@
   const round = x => Math.round(x * 100) / 100;
   const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) * SCALE;
   const key = (a, b) => [a, b].sort((x, y) => x - y).join(':');
-  const seed = [
-    ['北野', 285, 110, '住宅', 9500, 900],
-    ['緑丘', 125, 190, '田园', 1100, 180],
-    ['池袋', 465, 180, '商业', 8500, 14500],
-    ['上野', 735, 215, '商业', 6500, 10500],
-    ['亀戸', 900, 270, '住宅', 12500, 2200],
-    ['新宿', 455, 345, '办公', 11000, 23500],
-    ['四谷', 575, 325, '住宅', 9000, 5200],
-    ['大手町', 720, 350, '办公', 4500, 28500],
-    ['渋谷', 455, 485, '商业', 8500, 15500],
-    ['六本木', 605, 465, '办公', 7500, 13000],
-    ['東京', 790, 420, '办公', 4500, 21000],
-    ['品川', 640, 615, '办公', 9000, 12500],
-    ['二子橋', 310, 495, '住宅', 8500, 1800],
-    ['丘の上', 205, 420, '住宅', 6500, 800],
-    ['青葉台', 100, 480, '住宅', 8500, 1500],
-    ['多摩野', 100, 320, '田园', 900, 120],
-    ['学園前', 310, 290, '教育', 8000, 6500],
-    ['東川', 900, 420, '住宅', 13000, 1800],
-    ['新港', 940, 545, '工业', 6500, 10000],
-    ['湾岸', 820, 590, '住宅', 11000, 4000],
-    ['川崎', 435, 660, '工业', 12000, 13500],
-    ['西の森', 80, 620, '田园', 650, 90],
-    ['南町', 250, 625, '住宅', 6500, 1700],
-    ['北新町', 675, 85, '田园', 800, 100],
-    ['花見台', 295, 80, '田园', 550, 80]
-  ];
-
-  function newGame() {
-    const s = {
-      version: VERSION,
-      quarter: 0,
-      companies: [{
-          id: 'aoba',
-          name: '青葉電鉄',
-          short: '青葉',
-          color: '#078a73',
-          cash: 620,
-          fare: 220,
-          ledger: []
-        },
-        {
-          id: 'metro',
-          name: '都心メトロ',
-          short: 'メトロ',
-          color: '#d46b36',
-          cash: 800,
-          fare: 200,
-          ledger: []
-        },
-        {
-          id: 'jr',
-          name: '東都 JR',
-          short: 'JR',
-          color: '#446ccf',
-          cash: 950,
-          fare: 240,
-          ledger: []
-        }
-      ],
-      nodes: seed.map((r, id) => ({
-        id,
-        name: r[0],
-        x: r[1],
-        y: r[2],
-        type: r[3],
-        people: r[4],
-        jobs: r[5],
-        initialPeople: r[4],
-        initialJobs: r[5],
-        housing: r[3] === '田园' ? 14000 : Math.round(r[4] * 1.7 + 2500),
-        growth: 0
-      })),
-      tracks: [],
-      services: [],
-      log: [],
-      nextId: 1
-    };
-    addSeed(s, 'jr', '山手环状线', [2, 3, 10, 11, 8, 5, 2], 5);
-    addSeed(s, 'aoba', '青葉本线', [14, 13, 12, 8], 8);
-    addSeed(s, 'metro', '都心穿越线', [8, 9, 7, 3], 6);
-    s.log = [{
-      q: 0,
-      text: '三家公司已开始运营。先试试调整票价、班次，或将青葉本线与都心穿越线直通。'
-    }];
-    return s;
-  }
-
-  function addSeed(s, owner, name, stops, headway) {
-    const ids = [];
-    for (let i = 1; i < stops.length; i++) {
-      const a = stops[i - 1],
-        b = stops[i];
-      let t = s.tracks.find(t => key(t.a, t.b) === key(a, b));
-      if (!t) {
-        t = {
-          id: 't' + s.nextId++,
-          a,
-          b,
-          owner,
-          km: distance(s.nodes[a], s.nodes[b])
-        };
-        s.tracks.push(t);
-      }
-      ids.push(t.id);
-    }
-    s.services.push({
-      id: 's' + s.nextId++,
-      name,
-      owner,
-      stops,
-      trackIds: ids,
-      headway,
-      through: false
-    });
-  }
+  function newGame(){return (typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).run('seed');}
 
   function company(s, id) {
     return s.companies.find(c => c.id === id);
@@ -622,15 +507,7 @@
 
   function validate(s){try{const E=typeof module!=='undefined'&&module.exports?require('./editor-wasm'):root.RailEditor;return E.query(s,'validateWorld');}catch{return false;}}
 
-  function upgrade(s) {
-    const v = clone(s);
-    if (v.version === 1) {
-      v.version = VERSION;
-      for (const l of v.services)
-        if (l.through) l.operators = l.trackIds.map(id => v.tracks.find(t => t.id === id).owner);
-    }
-    return v;
-  }
+  function upgrade(s){return (typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).run('upgrade',{state:s});}
   const api = {
     capacity,
     effectiveHeadway,

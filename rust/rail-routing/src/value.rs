@@ -145,7 +145,7 @@ pub(super) fn read(r: &mut Read) -> Value {
     }
     tree(r, &strings)
 }
-pub(super) fn write(value: &Value) -> Vec<f64> {
+fn collect(value: &Value) -> (Vec<String>, Vec<f64>) {
     let mut strings = vec![];
     let mut ids = std::collections::HashMap::<String, usize>::new();
     let mut body = vec![];
@@ -191,6 +191,10 @@ pub(super) fn write(value: &Value) -> Vec<f64> {
         }
     }
     tree(value, &mut strings, &mut ids, &mut body);
+    (strings, body)
+}
+pub(super) fn write(value: &Value) -> Vec<f64> {
+    let (strings, body) = collect(value);
     let mut out = vec![strings.len() as f64];
     for s in strings {
         let v = s.encode_utf16().collect::<Vec<_>>();
@@ -200,9 +204,133 @@ pub(super) fn write(value: &Value) -> Vec<f64> {
     out.extend(body);
     out
 }
+pub(super) fn write_packed(value: &Value) -> (Vec<f64>, Vec<u8>) {
+    let (strings, body) = collect(value);
+    let mut values = vec![strings.len() as f64];
+    let mut bytes = vec![];
+    for s in strings {
+        let at = bytes.len();
+        let units = s.encode_utf16().collect::<Vec<_>>();
+        values.extend([at as f64, units.len() as f64]);
+        for c in units {
+            bytes.extend(c.to_le_bytes());
+        }
+    }
+    values.extend(body);
+    (values, bytes)
+}
+pub(super) fn read_packed(v: &[f64], bytes: &[u8]) -> Option<Value> {
+    fn count(v: &[f64], at: &mut usize) -> Option<usize> {
+        let x = *v.get(*at)?;
+        *at += 1;
+        if x.is_finite() && x >= 0.0 && x.fract() == 0.0 && x <= 134217728.0 {
+            Some(x as usize)
+        } else {
+            None
+        }
+    }
+    fn tree(
+        v: &[f64],
+        at: &mut usize,
+        strings: &[String],
+        depth: usize,
+        nodes: &mut usize,
+    ) -> Option<Value> {
+        if depth > 80 || *nodes >= 2_000_000 {
+            return None;
+        }
+        *nodes += 1;
+        Some(match count(v, at)? {
+            0 => Value::Missing,
+            1 => Value::Null,
+            2 => Value::Bool(false),
+            3 => Value::Bool(true),
+            4 => {
+                let x = *v.get(*at)?;
+                *at += 1;
+                Value::Number(x)
+            }
+            5 => Value::String(strings.get(count(v, at)?)?.clone()),
+            6 => {
+                let n = count(v, at)?;
+                if n > 2_000_000 {
+                    return None;
+                }
+                let mut out = vec![];
+                for _ in 0..n {
+                    out.push(tree(v, at, strings, depth + 1, nodes)?);
+                }
+                Value::Array(out)
+            }
+            7 => {
+                let n = count(v, at)?;
+                if n > 2_000_000 {
+                    return None;
+                }
+                let mut out = vec![];
+                for _ in 0..n {
+                    let key = strings.get(count(v, at)?)?.clone();
+                    out.push((key, tree(v, at, strings, depth + 1, nodes)?));
+                }
+                Value::Object(out)
+            }
+            _ => return None,
+        })
+    }
+    if v.len() > 12_000_000 || bytes.len() > 134217728 {
+        return None;
+    }
+    let mut at = 0;
+    let n = count(v, &mut at)?;
+    if n > v.len() / 2 {
+        return None;
+    }
+    let mut strings = vec![];
+    for _ in 0..n {
+        let offset = count(v, &mut at)?;
+        let len = count(v, &mut at)?;
+        let end = offset.checked_add(len.checked_mul(2)?)?;
+        let data = bytes.get(offset..end)?;
+        let units = data
+            .chunks_exact(2)
+            .map(|x| u16::from_le_bytes([x[0], x[1]]))
+            .collect::<Vec<_>>();
+        strings.push(String::from_utf16_lossy(&units));
+    }
+    let result = tree(v, &mut at, &strings, 0, &mut 0)?;
+    if at != v.len() {
+        None
+    } else {
+        Some(result)
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn packed_values_preserve_wire_semantics_and_bound_strings() {
+        let v = object([
+            ("missing", Value::Missing),
+            ("negativeZero", Value::Number(-0.0)),
+            ("unicode", Value::String("\u{feff}地图😀".into())),
+            ("nonfinite", Value::Number(f64::INFINITY)),
+        ]);
+        let (a, b) = write_packed(&v);
+        let decoded = read_packed(&a, &b).unwrap();
+        assert_eq!(
+            write(&v).iter().map(|v| v.to_bits()).collect::<Vec<_>>(),
+            write(&decoded)
+                .iter()
+                .map(|v| v.to_bits())
+                .collect::<Vec<_>>()
+        );
+        assert!(read_packed(&[1.0, 0.0, 1000.0, 1.0], &[0, 0]).is_none());
+        let large = Value::String("x".repeat(9 * 1024 * 1024));
+        let (a, b) = write_packed(&large);
+        assert!(a.len() < 10);
+        assert_eq!(b.len(), 18 * 1024 * 1024);
+        assert_eq!(read_packed(&a, &b).unwrap().text().len(), 9 * 1024 * 1024);
+    }
     #[test]
     fn cold_wire_preserves_missing_nonfinite_unicode_and_field_order() {
         let value = object([

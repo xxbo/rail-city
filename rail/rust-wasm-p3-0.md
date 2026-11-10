@@ -12,7 +12,7 @@
 
 ## 清单与调用边界
 
-机器清单：[rail-p3-production-inventory.json](../scripts/fixtures/rail-p3-production-inventory.json)。政策：[rail-p3-boundary-policy.json](../scripts/rail-p3-boundary-policy.json)。生成/验证：[audit_rail_p3.cjs](../scripts/audit_rail_p3.cjs)。使用固定Acorn 8.15.0源代码解析，不以正则识别函数；无npm安装需求，MIT许可证与来源随开发工具保留。
+以下统计为P3-0历史结果，精确历史文件固定于e2f5414提交；链接的机器清单随当前阶段更新。机器清单：[rail-p3-production-inventory.json](../scripts/fixtures/rail-p3-production-inventory.json)。政策：[rail-p3-boundary-policy.json](../scripts/rail-p3-boundary-policy.json)。生成/验证：[audit_rail_p3.cjs](../scripts/audit_rail_p3.cjs)。使用固定Acorn 8.15.0源代码解析，不以正则识别函数；无npm安装需求，MIT许可证与来源随开发工具保留。
 
 | 上下文 | 直接脚本/导入闭包数量 | 职责 |
 | --- | ---: | --- |

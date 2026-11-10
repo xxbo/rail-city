@@ -13,7 +13,7 @@
     originX = (cfg.west + 180) / 360 * 256 - 80 / K;
     originY = mercY(cfg.north) - 60 / K;
   }
-  setRegion('tokyo');
+  if(typeof module!=='undefined'&&module.exports)setRegion('tokyo');else root.RailRoutingReady.then(()=>setRegion('tokyo')).catch(()=>{});
 
   function display(p) {
     const cfg = B.get(region),

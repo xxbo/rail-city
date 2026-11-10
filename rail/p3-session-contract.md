@@ -1,19 +1,23 @@
-# P3-0 会话、命令与平台绑定合同 v1
+# 会话、命令与平台绑定合同（P3-1，协议v1）
 
-状态：可执行原型；通过 Cargo feature `session-contract` 启用。当前网页继续使用 MAP65。原型加载冷世界并复用既有资产/编辑规则，实时乘客、初始化、城市和存档接管按 P3-1～P3-8 推进。
+状态：初始化接口已用于生产v26，session默认编译。历史v1原型字节仍冻结在测试目录，当前可复现产物为v2；协议号仍为1。实时乘客、编辑运行事务与持久化接管按P3-2～P3-8推进。
 
 ## 唯一所有者
 
 Rust `SessionHost` 保存 sessionId、revision、世界、配置与有界命令回执。调用者拿到的是脱离内部状态的查询值。Rust 原生调用 `SessionHost::request(&[f64])` 和 WASM `session_contract()` 使用同一有序值协议；没有 JS 业务实现。
 
-本轮 open 接受已生成的 MAP65 冷世界和配置。配置来自固定测试夹具，是待移除的过渡输入；P3-1 再迁移 Rust 新游戏与配置初始化。本轮明确拒绝携带活动 runtime 的 open，避免产生“世界已更新、运行队列仍旧”的假事务。
+生产 `start` 只接收区域与可选存储读取结果，世界和配置由Rust构建；`open` 保留为冻结合同的低层兼容入口。本轮明确拒绝携带活动 runtime 的 open，避免产生“世界已更新、运行队列仍旧”的假事务。
 
 ## 请求与结果
 
-所有请求携带数值 `protocolVersion: 1`。除 open 外须携带当前 sessionId；命令编号为递增正安全整数，revision 为非负安全整数。
+所有请求携带数值 `protocolVersion: 1`。初始化start/prepare_start/commit_start/cancel_start以外，除open外须携带当前sessionId；命令编号为递增正安全整数，revision 为非负安全整数。
 
 | op | 必需字段 | 原型行为 |
 | --- | --- | --- |
+| start | region、可选stored/legacy | Rust生成或接纳恢复状态后打开初始化会话 |
+| prepare_start | region、可选启动参数 | 验证候选但保留旧会话，返回token |
+| commit_start | token | 检查token及原会话修订后替换 |
+| cancel_start | token | 丢弃候选，保留旧会话 |
 | open | world、config | 完整校验后替换冷会话，分配新的 sessionId，revision=0；失败保留旧会话 |
 | query | sessionId、view | snapshot 返回完整世界；status 返回命令高水位与回执上限；receipt 按 commandId 查已处理结果 |
 | preview | sessionId、expectedRevision、command | 调用现有原生规则预览报价，保持实际世界和revision不变 |
@@ -42,7 +46,7 @@ advance/pulse、订阅增量ViewModel、导入预览token/确认、保存/导出
 
 ## 平台绑定决策
 
-本阶段选择已有的无第三方运行依赖、显式有序值ABI，沿用Rust 1.99.1与wasm32-unknown-unknown固定构建。新增导出为session_abi/session_contract；原型二进制仅放在scripts/fixtures，不改页面、生产Worker或生产WASM。
+本阶段选择已有的无第三方运行依赖、显式有序值ABI，沿用Rust 1.99.1与wasm32-unknown-unknown固定构建。生产新增bootstrap_abi/bootstrap_run/bootstrap_packed与session_abi/session_contract/session_packed。初始化使用独立实例，避免运行arena回收销毁原始缓存和会话；实例驻留开销单独计量。
 
 不在本轮引入wasm-bindgen/web-sys及其生成工具链；后续Rust平台层可在同一合同下采用固定生成绑定，或最小显式导入。两者都只允许API/字节/事件转发，游戏默认值、排队、重试、修订接纳和失败恢复策略归Rust。原型已经验证Rust持有会话和Worker可转移缓冲；浏览器File/Storage/IndexedDB探针验证平台能力和字节往返，不代表P3-7持久化策略已迁入Rust。
 
@@ -60,3 +64,7 @@ node scripts/run_rail_tests.cjs
 ```
 
 真实浏览器：开发主机提供Playwright 1.62.1及Chromium后运行 `node scripts/probe_rail_p3_browser.cjs /tmp/rail-p3-browser-results.json`；可通过RAIL_CHROMIUM指定现有浏览器。CI安装固定Playwright后执行同一入口。覆盖主线程/Worker的真实WASM、可转移缓冲、重复命令、完整状态、浏览器文件和数据库往返，以及两地图开始/暂停操作。所有测试夹具均在scripts，不随游戏发布。
+
+## P3-1 大字符串传输
+
+初始化与会话生产调用使用packed双通道：结构f64 + UTF-16LE字节字符串表；旧有序值协议保持用于冻结夹具。Rust检查偏移、长度、标签、80层深度、200万值节点、1200万结构数值及128MiB字符串字节限额，保留缺省、非有限数、负零、BOM和属性顺序。9MB扩展字段完整往返有专项验证。JSON编解码与数据库实际I/O目前仍由宿主转发，策略继续迁入P3-7。随机选择入口与消耗记录由Rust持有，底层熵原语仍为host Math.random，数学/熵导入最终收口在P3-8。

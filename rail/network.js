@@ -11,25 +11,8 @@
   const tokyo = () => defaults(T.create(R));
   const fresh = () => defaults(R.newGame());
 
-  function emptyWorld(region = 'tokyo') {
-    const B = node ? require('./regions') : root.RailRegions,
-      cfg = B.get(region),
-      s = R.newGame();
-    Object.assign(s, {
-      region: cfg.id,
-      routeModel: 9,
-      world: {
-        width: cfg.width,
-        height: cfg.height
-      },
-      nodes: [],
-      tracks: [],
-      services: [],
-      log: [],
-      nextId: 1
-    });
-    return defaults(s);
-  }
+  const emptyWorld=(region='tokyo')=>(typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).run('empty',{region});
+
   const removePreset = s => Editor.command(R.clone(s), 'removePreset', {
     seed: T.create(R)
   });

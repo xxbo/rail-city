@@ -5,52 +5,7 @@
     USES = ['r', 'c', 'i'],
     clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x)),
     distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) * .045;
-  const KINDS = {
-    residential: {
-      name: '住宅拓展',
-      color: '#328a62',
-      mix: {
-        r: 1,
-        c: .35,
-        i: .1
-      },
-      reason: '学校与生活服务完善后吸引居民，需要连接就业目的地。'
-    },
-    business: {
-      name: '商务集聚',
-      color: '#cf842b',
-      mix: {
-        r: .35,
-        c: 1,
-        i: .12
-      },
-      reason: '依赖居民腹地与换乘可达性，单独建设商业站不能保证客流。'
-    },
-    industry: {
-      name: '产业发展',
-      color: '#8865b1',
-      mix: {
-        r: .3,
-        c: .25,
-        i: 1
-      },
-      reason: '靠近劳动力、物流及对外交通更有优势，需要接通居住片区。'
-    },
-    mixed: {
-      name: '城区更新',
-      color: '#378694',
-      mix: {
-        r: .8,
-        c: .8,
-        i: .2
-      },
-      reason: '住宅与服务就业混合发展，适合补齐既有城区的连接。'
-    }
-  };
-  const preferred = {
-    gba: ['福田', '天河', '科技园', '松山湖', '宝安中心', '南沙', '禅城', '横琴', '沙田', '江北', '石岐', '新会'],
-    tokyo: ['新宿', '渋谷', '池袋', '横浜', '大宮', '千葉', '立川', '町田', '川崎', '柏', '八王子', '船橋']
-  };
+  const KINDS=new Proxy({}, {get:(_,key)=>(typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).settings().developmentKinds[key],ownKeys:()=>Object.keys((typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).settings().developmentKinds),getOwnPropertyDescriptor:()=>({enumerable:true,configurable:true})});
 
   const native=(op,s,extra={})=>(typeof module!=='undefined'&&module.exports?require('./transactions-wasm'):root.RailTransactions).run(op,{state:{urban:{lastMinute:s.urban.lastMinute,development:s.urban.development,totals:s.urban.totals}},...extra});
   function enable(s, base, places, hubs, buildable) {

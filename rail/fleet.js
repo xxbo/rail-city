@@ -3,18 +3,6 @@
   'use strict';
   const node = typeof module !== 'undefined' && module.exports,
     B = node ? require('./game-balance') : root.RailBalance;
-  const SPECS = Object.fromEntries([4, 6, 8].flatMap(cars => ['B', 'A'].map(type => {
-    const id = cars + type;
-    return [id, {
-      id,
-      cars,
-      type,
-      width: type === 'A' ? 3 : 2.8,
-      length: cars * (type === 'A' ? 23 : 20),
-      capacity: cars * (type === 'A' ? 310 : 240),
-      price: cars * B.CAR * (type === 'A' ? 1.3 : 1)
-    }];
-  })));
   const native = () => node ? require('./assets-wasm') : root.RailAssets;
   function upgrade(s) { native().mutate(s,'fleetUpgrade'); return s; }
 
@@ -38,7 +26,7 @@
     return out.result;
   }
   const api = {
-    SPECS,
+    get SPECS(){return (node?require('./bootstrap-wasm'):root.RailBootstrap).settings().specs;},
     upgrade,
     peak,
     planned,

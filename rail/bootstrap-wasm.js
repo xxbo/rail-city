@@ -1,0 +1,12 @@
+/* P3-1 Rust initialization transport. Returned objects are compatibility views. */
+(function(root){'use strict';const node=typeof module!=='undefined'&&module.exports;
+const modules=()=>({Core:node?require('./routing-wasm'):root.RailRouting,Wire:node?require('./value-wire'):root.RailValueWire});
+function session(op,args){const out=call('session_contract',{protocolVersion:1,op,...args});if(!out.ok)throw Error(out.error.code);return {...out.result,sessionId:out.sessionId,revision:out.revision};}
+let workspace;function call(name,value){const{Core,Wire}=modules();workspace||=Core.createWorkspace();const packet=Wire.encodePacked(value);return Wire.decodePacked(workspace.kernel(name==='bootstrap_run'?'bootstrap_packed':'session_packed',packet.values,packet.bytes)).value;}
+function run(op,args={}){const out=call('bootstrap_run',{op,...args});if(out?.error)throw Error(out.error);return out;}
+function readonly(v){if(!v||typeof v!=='object'||ArrayBuffer.isView(v)||Object.isFrozen(v))return v;for(const d of Object.values(Object.getOwnPropertyDescriptors(v)))if(Object.hasOwn(d,'value'))readonly(d.value);return Object.freeze(v);}
+let settingsValue;const settings=()=>settingsValue||(settingsValue=readonly(run('settings')));
+const views=new Map(),geoViews=new WeakMap();function view(op,region='tokyo'){const key=op+':'+region;if(!views.has(key)){const value=run(op,{region});if(op==='hubs')readonly(value);views.set(key,value);if(op==='city')geoViews.set(value,region);}return views.get(key);}
+const api={run,settings,view,readonly,prepareStart:args=>session('prepare_start',args),commitStart:token=>session('commit_start',{token}),cancelStart:token=>session('cancel_start',{token}),geo:base=>geoViews.has(base)?{geoId:geoViews.get(base)}:{base},start:args=>{const out=call('session_contract',{protocolVersion:1,op:'start',...args});if(!out.ok)throw Error(out.error.code);return {...out.result,sessionId:out.sessionId,revision:out.revision};},query:args=>call('session_contract',{protocolVersion:1,op:'query',...args}),decode:text=>{if(!text)return {present:false};try{return {present:true,value:JSON.parse(text)};}catch{return {present:true,error:true};}},memoryBytes:()=>workspace?.memoryBytes()||0,ensure:()=>{const{Core,Wire}=modules();if(!Core.editorReady())Core.kernel('bootstrap_run',Wire.encode({op:'installConfig'}));}};
+if(node)module.exports=api;else root.RailBootstrap=api;
+})(typeof globalThis!=='undefined'?globalThis:this);

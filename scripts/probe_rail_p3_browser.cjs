@@ -14,9 +14,12 @@ const root=path.resolve(__dirname,'..');
    await app.waitForFunction(()=>document.querySelector('#play')?.getAttribute('aria-label')==='开始运行');
    await app.locator('#play').click();await app.waitForFunction(()=>document.querySelector('#play')?.getAttribute('aria-label')==='暂停运行');
    await app.locator('#play').click();await app.waitForFunction(()=>document.querySelector('#play')?.getAttribute('aria-label')==='开始运行');
-   assert.equal(faults.length,0,faults.join('\n'));games.push({region,startPause:true,pageErrors:faults});await app.close();
+   if(await app.locator('#dismiss-guide').isVisible())await app.locator('#dismiss-guide').click();
+   await app.locator('#manage-toggle').click();await app.locator('#new-game').click();await app.locator('#confirm-newgame').click();
+   await app.waitForFunction(()=>document.querySelector('#toast')?.textContent.includes('新游戏已开始'));
+   assert.equal(faults.length,0,faults.join('\n'));games.push({region,startPause:true,newGame:true,pageErrors:faults});await app.close();
   }
-  const result={scope:'P3-0 binding and unchanged MAP65 browser smoke; not a final P3 UI-only acceptance',browser:browser.version(),probe,games};
+  const result={scope:'P3-1 Rust initialization and compatibility session/browser acceptance',browser:browser.version(),probe,games};
   if(process.argv[2])fs.writeFileSync(path.resolve(process.argv[2]),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
