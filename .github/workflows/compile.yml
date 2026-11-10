@@ -1,0 +1,39 @@
+name: Rail City compile only
+on:
+  workflow_dispatch:
+  push:
+    branches: ['compile/**']
+permissions:
+  contents: read
+concurrency:
+  group: rail-compile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install pinned compiler
+        run: rustup toolchain install 1.99.1 --profile minimal --target wasm32-unknown-unknown
+      - name: Compile native library
+        run: cargo +1.99.1 build --locked --release --features session-contract --manifest-path rust/rail-routing/Cargo.toml
+      - name: Compile WASM library
+        env:
+          CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS: '-C link-arg=--max-memory=268435456'
+        run: |
+          cargo +1.99.1 build --locked --release --target wasm32-unknown-unknown --manifest-path rust/rail-routing/Cargo.toml
+          cargo +1.99.1 build --locked --release --target wasm32-unknown-unknown --features session-contract --manifest-path rust/rail-routing/Cargo.toml
+      - name: Compile test targets without executing cases
+        run: cargo +1.99.1 test --locked --no-run --features session-contract --manifest-path rust/rail-routing/Cargo.toml
+      - name: Check JavaScript syntax only
+        run: |
+          for file in rail/*.js; do node --check "$file"; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rail-compile-only-wasm
+          path: rust/rail-routing/target/wasm32-unknown-unknown/release/rail_routing.wasm
+          if-no-files-found: error
