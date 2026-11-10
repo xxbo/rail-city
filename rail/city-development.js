@@ -57,19 +57,7 @@
     if(!s.urban||s.urban.development)return false;s.urban.development=native(10,s,{region:s.region,places:places.filter(buildable),hubs});s.urban.revision++;return true;
   }
 
-  function valid(s) {
-    const d = s.urban?.development;
-    if (d === undefined) return true;
-    return d && d.version === VERSION && Number.isFinite(d.started) && d.started >= 420 && d.started <= s
-      .urban.lastMinute + .01 && Array.isArray(d.projects) && d.projects.length <= 12 && new Set(d.projects
-        .map(p => p.id)).size === d.projects.length && d.projects.every(p => typeof p.id === 'string' &&
-        /^[a-zA-Z0-9_-]{1,23}$/.test(p.id) && typeof p.name === 'string' && p.name.length <= 80 && Object
-        .hasOwn(KINDS, p.kind) && Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 25 && p.y >= 25 &&
-        p.x <= s.world.width - 25 && p.y <= s.world.height - 25 && Number.isFinite(p.radius) && p.radius >=
-        1 && p.radius <= 4 && Number.isInteger(p.startDay) && p.startDay >= 0 && p.startDay <= 24) && (!d
-        .last || ['r', 'c', 'i'].every(k => Number.isFinite(d.last.daily?.[k]) && d.last.daily[k] >= 0 &&
-          Number.isFinite(d.last.added?.[k]) && d.last.added[k] >= 0));
-  }
+  function valid(s) {return (typeof module!=='undefined'&&module.exports?require('./save-wasm'):root.RailSave).run('development',{state:s});}
 
   function phase(s, p) {
     const v=native(5,s,{point:p});return {day:v.day,age:v.age,release:v.release,label:v.age<0?'筹备中':v.age<6?'启动建设':v.age<18?'持续建设':'成熟片区',until:v.until};

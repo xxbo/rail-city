@@ -19,52 +19,7 @@
   const migrationFields=['minute','nextRouteRevision','routeArchives','retiredTracks','trains','defs','queues','waitSince','outside','outsideSince','transfers','stationLimits','departures','cancelled','rejected','stationOccupancy','fleetMinute'];
   const migrationState=rt=>Object.fromEntries(migrationFields.filter(k=>Object.hasOwn(rt,k)).map(k=>[k,rt[k]]));
   function adoptMigration(rt,result){if(result.definitionOrder){result.defs=result.definitionOrder.map((id,index)=>({...rt.defs[id],id:index,daily:0}));delete result.definitionOrder;delete result.definitionCount;}const trains=new Map(rt.trains.map(t=>[t.id,t]));result.trains=result.trains.map(t=>{const old=trains.get(t.id);return old?Object.assign(old,t):t;});Object.assign(rt,result);}
-  function definitions(s, m) {
-    s = X.expand(s);
-    return m.flows.map((f, id) => {
-      const legs = [];
-      let from = f.from,
-        current = null;
-      for (const e of f.path.edges) {
-        const l = s.services.find(l => l.id === e.service),
-          i = l.trackIds.findIndex((t, j) => t === e.track && ((l.stops[j] === from && l
-            .stops[j +
-              1] === e.to) || (l.stops[j + 1] === from && l.stops[j] === e.to))),
-          dir = e.dir || (l.stops[i] === from ? 1 : -1);
-        if (!current || current.service !== l.id || current.dir !== dir) {
-          current = {
-            service: l.id,
-            dir,
-            from,
-            to: e.to
-          };
-          legs.push(current);
-        } else current.to = e.to;
-        from = e.to;
-      }
-      const byLine = {};
-      if (f.path.fares && f.path.fare > 0) {
-        for (const [id, amount] of Object.entries(f.path.fares)) byLine[id] = amount / f.path
-          .fare;
-      } else
-        for (const e of f.path.edges) byLine[e.service] = (byLine[e.service] || 0) + e.km / f
-          .path.km;
-      return {
-        id,
-        legs,
-        daily: f.demandTrips ?? f.trips,
-        fare: f.path.fare,
-        purpose: f.purpose || 'work',
-        back: !!f.back,
-        hub: f.hub || null,
-        externalKind: f.externalKind || null,
-        from: f.from,
-        to: f.to,
-        lineIds: Object.keys(f.path.fares || byLine),
-        byLine
-      };
-    });
-  }
+  function definitions(s,m) {const plan=X.expand(s),native=node?require('./save-wasm'):root.RailSave,out=[];for(let offset=0;offset<m.flows.length;offset+=512){const rows=native.run('definitions',{plan,flows:m.flows.slice(offset,offset+512),offset});for(const row of rows)out.push(row);}return out;}
   const MAX_SAVED_DEFINITIONS = 300000;
   const journeyKeys = new WeakMap();
 
@@ -82,9 +37,7 @@
 
   function validateCatalog(fresh) {
     const Compact=node?require('./forecast-catalog'):root.RailForecastCatalog;
-    if (!Array.isArray(fresh) || (Compact.meta(fresh)?!Compact.totals(fresh).valid:fresh.some(j => !Number.isFinite(j.daily) || j.daily < 0 || !
-        Number
-        .isFinite(j.fare) || j.fare < 0 || !j.legs?.length))) throw Error('客流预测包含无效出行，已保留上次需求。');
+    if (!Array.isArray(fresh) || (Compact.meta(fresh)?!Compact.totals(fresh).valid:!(node?require('./save-wasm'):root.RailSave).run('catalogValid',{value:fresh}))) throw Error('客流预测包含无效出行，已保留上次需求。');
     return fresh;
   }
 
@@ -273,6 +226,8 @@
     return [rt,s,index,trainTrack,frames,reroute,settlement,journeyKey];
   }
 
+  const legacyWindowsCache=new WeakMap();
+  function legacyWindows(rt,s,minute){const services=s.services.map(l=>({id:l.id,open:l.open,close:l.close,fleetManaged:l.fleetManaged,fleet:l.fleet})),key=JSON.stringify(services),cached=legacyWindowsCache.get(rt);if(cached&&cached.key===key&&minute>=cached.start&&minute<cached.until)return cached.ids;const result=(node?require('./save-wasm'):root.RailSave).run('legacyWindows',{services,minute}),value={...result,key,ids:new Set(result.ids)};legacyWindowsCache.set(rt,value);return value.ids;}
   // Version-1 weighted saves retain their established streaming adapter. The default
   // version-9 game uses canonical native identities; avoid a second large key index for
   // historical all-positive weighted catalogs until their save migration is performed.
@@ -282,8 +237,7 @@
     const incoming = [];
     const catalog = rt.demandCatalog || rt.defs,
       minute = Math.round(rt.minute * 1e6) / 1e6;
-    const open = interval?new Set(s.services.filter(l => B.isOpen(l, minute) && (!l.fleetManaged || l
-      .fleet > 0)).map(l => l.id)):null;
+    const open = interval?legacyWindows(rt,s,minute):null;
     function arrive(j, n) {
       if (n > 0) incoming.push({
         j,
@@ -313,39 +267,7 @@
       dispatch:result.dispatch
     };
     })();
-    for (const {
-        l,
-        dir,
-        d,
-        action,
-        next
-      }
-      of incoming.dispatch) {
-      if (action < 0) continue;
-      if (action === 1) {
-        const loop = l.stops[0] === l.stops.at(-1);
-        rt.trains.push({
-          id: 'T' + String(rt.nextId++).padStart(4, '0'),
-          service: l.id,
-          parentLine: l.parentLine || l.id,
-          callStops: l.callStops || l.stops,
-          dir,
-          stops: [...l.stops],
-          trackIds: [...l.trackIds],
-          index: dir === 1 ? 0 : l.stops.length - 1,
-          status: 'dwell',
-          ready: rt.minute + (loop ? X.loopDwell(s, l) : B.DWELL),
-          onboard: 0,
-          capacity: R.capacity(l),
-          passengers: {},
-          progress: 0,
-          loop,
-          segment: null
-        });
-        d.lastRun = rt.minute;
-      }
-      d.next = next;
-    }
+    if(incoming.dispatch.length){const result=(node?require('./save-wasm'):root.RailSave).run('legacyDispatch',{state:s,minute:rt.minute,nextId:rt.nextId,records:incoming.dispatch.map(({l,dir,action,next})=>({l,dir,action,next}))});for(const train of result.trains)rt.trains.push(train);rt.nextId=result.nextId;for(const[index,next,ran]of result.updates){const d=incoming.dispatch[index].d;if(ran)d.lastRun=rt.minute;d.next=next;}}
     QUEUES.step(rt, s, index, trainTrack, incoming.arrivals, incoming.gates, reroute, settlement);
   }
   function tick(...args) {
@@ -455,133 +377,13 @@
 
   function restore(s, m, saved) {
     try {
-      if (!saved || !Number.isFinite(saved.minute) || saved.minute < 420 || saved.minute > 1e8 ||
-        !Array
-        .isArray(saved.trains) || saved.trains.length > 2400 || !saved.queues || !saved.waitSince)
-        return null;
-      if (!saved.stationOccupancy || !saved.outside || !saved.outsideSince) return null;
-      if (saved.arrivalMode === 'integer' && (!Number.isFinite(saved.arrivalRemainder) || saved
-          .arrivalRemainder < 0 || saved.arrivalRemainder >= 1 + 1e-8 || !Number.isFinite(saved
-            .expectedGenerated) || saved.expectedGenerated < 0 || !Number.isInteger(saved
-            .rngState) || saved
-          .rngState < 0 || saved.rngState > 4294967295)) return null;
-      const plan = X.expand(s),
-        rt = {
-          ...saved,
-          transfers: saved.transfers || [],
-          plan,
-          defs: definitions(s, m)
-        };
-      if (!Array.isArray(saved.retiredTracks || []) || (saved.retiredTracks || []).length >
-        5000 || (saved
-          .retiredTracks || []).some(t => typeof t.id !== 'string' || !s.nodes[t.a] || !s.nodes[t
-            .b] || !
-          Number.isFinite(t.km) || t.km <= 0 || t.bends?.some(p => !Number.isFinite(p.x) || !
-            Number
-            .isFinite(p.y)))) return null;
-      plan.tracks = [...s.tracks, ...(saved.retiredTracks || []).filter(t => !s.tracks.some(x => x
-        .id === t
-        .id))];
-      if (saved.routeArchives && (typeof saved.routeArchives !== 'object' || Object.keys(saved
-          .routeArchives).length > 2400 || Object.values(saved.routeArchives).some(a => !Array
-          .isArray(a
-            .tracks) || a.tracks.length > 120 || a.tracks.some(t => typeof t.id !== 'string' ||
-            !s.nodes[t
-              .a] || !s.nodes[t.b] || !Number.isFinite(t.km) || t.km <= 0 || [...(t.bends ||
-            []), t.curve
-              ?.before, t.curve?.after
-            ].filter(Boolean).some(p => !Number.isFinite(p.x) || !Number.isFinite(p.y))))))
-        return null;
-      plan.routeArchives = saved.routeArchives || {};
-      if (s.urban && saved.urbanDefs) {
-        if (!Array.isArray(saved.urbanDefs) || saved.urbanDefs.length > MAX_SAVED_DEFINITIONS ||
-          saved
-          .urbanDefs.some((j, i) => j.id !== i || !Number.isFinite(j.daily) || j.daily < 0 || !
-            Number
-            .isFinite(j.fare) || j.fare < 0 || !Array.isArray(j.legs) || !j.legs.length || j.legs
-            .some(
-              e => {
-                const l = plan.services.find(l => l.id === e.service);
-                return ![1, -1].includes(e.dir) || !s.nodes[e.from] || !s.nodes[e.to] || (j
-                  .daily > 0 && (!
-                    l || !l.stops.includes(e.from) || !l.stops.includes(e.to)));
-              }))) return null;
-        rt.defs = saved.urbanDefs;
-      }
-      if (!['generated', 'completed', 'cancelled', 'boarded', 'alighted', 'revenue',
-          'vehicleExpense',
-          'nextId'
-        ].every(k => Number.isFinite(rt[k]) && rt[k] >= 0)) return null;
-      for (const t of rt.trains) {
-        const l = t.retiringRun || plan.services.find(l => l.id === t.service);
-        if (t.retiringKey && !plan.routeArchives[t.retiringKey]) return null;
-        if (t.retiringRun && (!Array.isArray(l.stops) || !Array.isArray(l.trackIds) || l.stops
-            .length !== l
-            .trackIds.length + 1 || l.stops.length > 120 || l.stops.some(id => !s.nodes[id]) || l
-            .trackIds
-            .some((id, i) => !(plan.routeArchives[t.retiringKey]?.tracks || plan.tracks).some(
-              tr => tr
-              .id === id && R.key(tr.a, tr.b) === R.key(l.stops[i], l.stops[i + 1])))))
-          return null;
-        if (!l || t.stops.join() !== l.stops.join() || t.trackIds.join() !== l.trackIds.join() ||
-          !Number
-          .isFinite(t.capacity) || t.capacity !== R.capacity(l) || !Number.isFinite(t.onboard) ||
-          t
-          .onboard < 0 || t.onboard > R.capacity(l) + 1e-5 || !['moving', 'dwell', 'signal']
-          .includes(t
-            .status) || !Number.isInteger(t.index) || !s.nodes[t.stops[t.index]]) return null;
-        for (const token of Object.keys(t.passengers))
-          if (!rt.defs[+token.split(':')[0]]) return null;
-      }
-      for (const [k, q] of Object.entries(rt.queues)) {
-        if (!/^s\d+(?:p\d+)?\|(-1|1)\|\d+$/.test(k)) return null;
-        for (const [token, n] of Object.entries(q))
-          if (!/^\d+:\d+(?::\d+)?$/.test(token) || !rt.defs[+token.split(':')[0]] || !Number
-            .isFinite(n) ||
-            n < 0) return null;
-      }
-      if (!Array.isArray(rt.transfers) || rt.transfers.some(x => !rt.defs[x.journey]?.legs[x
-            .leg] || !Number
-          .isFinite(x.amount) || x.amount < 0 || !Number.isFinite(x.ready) || !s.nodes[x.station]
-        ))
-        return null;
-      const counted = {};
-      for (const [k, q] of Object.entries(rt.queues)) {
-        const id = +k.split('|')[2];
-        counted[id] = (counted[id] || 0) + Object.values(q).reduce((a, b) => a + b, 0);
-      }
-      for (const t of rt.transfers) counted[t.station] = (counted[t.station] || 0) + t.amount;
-      for (const [id, q] of Object.entries(rt.outside)) {
-        if (!s.nodes[+id] || typeof q !== 'object') return null;
-        for (const [token, n] of Object.entries(q)) {
-          const [ji, leg] = token.split(':').map(Number);
-          if (!rt.defs[ji]?.legs[leg] || rt.defs[ji].legs[leg].from !== +id || !Number.isFinite(
-              n) || n <
-            0 || !Number.isFinite(rt.outsideSince[id + '#' + token])) return null;
-        }
-        if (s.routeModel === 9 && Object.values(q).reduce((a, b) => a + b, 0) > Math.max(Q.limits(
-              s, +id)
-            .outsideCapacity, Math.min(10000, saved.stationLimits?.[id]?.outsideCapacity || 0)) +
-          1e-5)
-          return null;
-      }
-      for (const id of new Set([...Object.keys(counted), ...Object.keys(rt.stationOccupancy)])) {
-        const n = counted[id] || 0;
-        if (!Number.isFinite(rt.stationOccupancy[id] || 0) || Math.abs(n - (rt.stationOccupancy[
-            id] || 0)) >
-          1e-5) return null;
-        if (s.routeModel === 9 && n > Math.max(Q.limits(s, +id).capacity, Math.min(20000, saved
-            .stationLimits?.[id]?.capacity || 0)) + 1e-5) return null;
-      }
-      const x = summary(rt);
-      if (Math.abs(x.generated - x.completed - x.cancelled - x.waiting - x.onboard) > Math.max(.1,
-          x
-          .generated * 1e-8)) return null;
-      installCatalog(rt, validateCatalog(m.preparedDefinitions || definitions(s, m)));
-      return rt;
-    } catch {
-      return null;
-    }
+      const plan={...X.expand(s)},catalog=m.preparedDefinitions||definitions(s,m),defs=s.urban&&saved?.urbanDefs?saved.urbanDefs:catalog;
+      plan.tracks=[...s.tracks,...(saved?.retiredTracks||[]).filter(t=>!s.tracks.some(x=>x.id===t.id))];
+      plan.routeArchives=saved?.routeArchives||{};
+      if(!(node?require('./save-wasm'):root.RailSave).run('restore',{state:s,plan,saved,defs}))return null;
+      const rt={...saved,transfers:saved.transfers||[],plan,defs};
+      installCatalog(rt,validateCatalog(catalog));return rt;
+    }catch{return null;}
   }
   // A changed route drains its existing vehicles to their original terminus. New departures
   // use the new route immediately; existing passenger contracts retain their fare and destination.

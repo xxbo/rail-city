@@ -247,20 +247,20 @@
     const raw = stored?.text || (region === 'tokyo' ? (localStorage.getItem('guanchao-rail-game-v6') ||
       localStorage.getItem('guanchao-rail-map-v4')) : null);
     if (raw) {
-      const v = JSON.parse(raw),
-        state = [6, 7].includes(v.gameVersion) ? v.state : v;
-      if (N.validate(state) && state.region === region) {
-        s = v.gameVersion === 7 ? state : N.removePreset(state);
-        if (v.gameVersion === 7) {
-          personalRecords = Q.mergeRecords(personalRecords, LS.records(v.personalRecords));
+      const v = JSON.parse(raw), accepted=RailSave.run('checkpoint',{value:v,region}),
+        state = accepted.kind ? v.state : v;
+      if (accepted.valid) {
+        s = accepted.kind === 7 ? state : N.removePreset(state);
+        if (accepted.kind === 7) {
+          personalRecords = Q.mergeRecords(personalRecords, accepted.records);
           if (typeof v.playing === 'boolean') playing = v.playing;
           if ([1, 3, 6, 12, 24].includes(v.speed)) speed = v.speed;
-          if (v.signature === M.signature(s)) savedRuntime = v.runtime;
+          if (accepted.useRuntime) savedRuntime = v.runtime;
         }
       } else {
         storageOK = false;
         storageReadBlocked = true;
-        saveStatus = '存档校验失败，已禁止自动覆盖';
+        saveStatus = '存档版本或运行数据校验失败，已禁止自动覆盖';
       }
     }
   } catch {
@@ -299,7 +299,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=64') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=65') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -409,6 +409,7 @@
       memoryAudit.record('save-start', s, forecast, traffic, saveQueue);
       const payload = {
         gameVersion: 7,
+        runtimeVersion: 1,
         playing,
         speed,
         personalRecords,
@@ -2808,7 +2809,7 @@
     }
     try {
       if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=64');
+        centerWorker = new Worker('operations-worker.js?v=65');
         centerForecastSent = null;
       }
       centerWorker.onerror = e => fail(e.message || '后台诊断不可用');
@@ -3326,6 +3327,7 @@
         state: c.state,
         runtime: c.runtime,
         signature: c.signature,
+        runtimeVersion: 1,
         speed: c.speed,
         playing: false,
         personalRecords: restoredRecords

@@ -179,26 +179,7 @@
     const v=native(15,s,{facility:f});return {...v,status:v.connected?'已接驳':v.nearest&&v.nearest.walk<=.8?'车站未投放列车':'待接驳'};
   }
 
-  function validate(s) {
-    const u = s.urban;
-    if (!D.valid(s)) return false;
-    if (!u) return true;
-    if (u.facilityMode === 'automatic' && (!Array.isArray(u.autoCandidates) || u.autoCandidates.length >
-        96 || u.autoCandidates.some(f => !TYPES[f.kind] || !Number.isFinite(f.x) || !Number.isFinite(f.y) ||
-          ![1, 2, 3].includes(f.level) || f.x < 25 || f.y < 25 || f.x > s.world.width - 25 || f.y > s.world
-          .height - 25))) return false;
-    return u.version === VERSION && Number.isInteger(u.revision) && u.revision >= 0 && Number.isInteger(u
-        .step) && u.step >= 0 && Number.isFinite(u.lastMinute) && u.lastMinute >= 420 && Number.isFinite(u
-        .started) && u.started >= 420 && Number.isInteger(u.nextId) && u.nextId > 0 && u.cells && Object
-      .keys(u.cells).length <= 24000 && Object.values(u.cells).every(c => c && Number.isFinite(c.x) &&
-        Number.isFinite(c.y) && c.x >= 25 && c.y >= 25 && c.x <= s.world.width - 25 && c.y <= s.world
-        .height - 25 && ['r', 'c', 'i'].every(k => Number.isFinite(c[k]) && c[k] >= 0 && c[k] <= 2e5)) &&
-      Array.isArray(u.facilities) && u.facilities.length <= 160 && new Set(u.facilities.map(f => f.id))
-      .size === u.facilities.length && u.facilities.every(f => TYPES[f.kind] && [1, 2, 3].includes(f
-          .level) && Number.isFinite(f.x) && Number.isFinite(f.y) && f.x >= 25 && f.y >= 25 && f.x <= s
-        .world
-        .width - 25 && f.y <= s.world.height - 25) && Array.isArray(u.history) && u.history.length <= 60;
-  }
+  function validate(s) {return (node?require('./save-wasm'):root.RailSave).run('urban',{state:s});}
 
   function terrain(base, p) {
     let index = terrainCache.get(base);

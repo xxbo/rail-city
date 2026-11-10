@@ -215,17 +215,7 @@
     settled.finally(()=>{if(pending.get(rt)===settled)pending.delete(rt);});
     return task;
   }
-  function signature(s) {
-    return 'transit-city-v19|' + s.region + '|' + JSON.stringify([s.routeModel, s.services.map(
-      l => [l.id, l
-        .stops, l.trackIds, l.headway, l.fleet, l.cars, l.open, l.close, l.fareBands, l
-        .patterns, l
-        .loopDirection, l.stockSpec, l.fleetManaged, l.dispatch
-      ]), s.depot, s.urban ? [s.urban.version, s.urban.revision] : null, s.tracks.map(t => [
-      t.id, t.km,
-      t.bends, t.curve
-    ])]);
-  }
+  function signature(s) {return (node?require('./save-wasm'):root.RailSave).run('signature',{state:s});}
   const api = {
     command,
     init,
