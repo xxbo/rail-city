@@ -24,7 +24,7 @@ pub(super) struct Router{graph:crate::Graph,meta:V}
 impl Router{
     pub fn new(s:&V,adj:&V,legacy:bool)->Self{let meta=crate::forecast_session::graph_frame(&obj(&[("state",s.clone()),("adjacency",adj.clone()),("legacy",boolean(legacy))]));let data=meta.get("data").array().iter().map(V::n).collect::<Vec<_>>();let mut graph=crate::parse_graph(&data);let prices=crate::forecast_session::graph_prices(s,meta.get("lines"));for(i,row)in graph.prices.iter_mut().enumerate(){for k in 0..6{row[k]=prices.array()[i*6+k].n();}}for(i,c)in s.get("companies").array().iter().enumerate(){graph.companies[i]=c.num("fare");}Self{graph,meta}}
     pub fn paths(&self,origin:usize,value:f64)->Vec<V>{let wire=crate::search(&self.graph,origin,value,u32::MAX);(0..self.graph.adj.len()).map(|id|self.path(&wire,id)).collect()}
-    fn path(&self,w:&[f64],id:usize)->V{let at=8+id*14;if w[at]<0.0{return V::Missing;}let mut trail=w[at+11]as usize;let offset=w[5]as usize;let mut edges=vec![];while w[offset+trail*2]>=0.0{edges.push(self.meta.get("edges").array()[w[offset+trail*2+1]as usize].clone());trail=w[offset+trail*2]as usize;}edges.reverse();let mut out=obj(&[("node",n(w[at])),("service",self.meta.get("services").array()[w[at+1]as usize].clone()),("paid",n(w[at+3])),("discounted",n(w[at+4])),("cost",n(w[at+6])),("minutes",n(w[at+7])),("fare",n(w[at+8])),("km",n(w[at+9])),("edges",arr(edges)),("transfers",n(w[at+10]))]);if !self.graph.legacy{del(&mut out,"paid");del(&mut out,"discounted");out.set("dir",n(w[at+2]));out.set("lastLine",self.meta.get("lines").array()[w[at+3]as usize].clone());out.set("fareKm",n(w[at+5]));out.set("board",n(w[at+4]));let mut fares=obj(&[]);for i in 0..w[at+13]as usize{let p=w[at+12]as usize+i*2;fares.set(self.meta.get("lines").array()[w[p]as usize].text(),n(w[p+1]));}out.set("fares",fares);}out}
+    fn path(&self,w:&[f64],id:usize)->V{let at=8+id*14;if id>=w[1]as usize||w[at]<0.0{return V::Missing;}let mut trail=w[at+11]as usize;let offset=w[5]as usize;let mut edges=vec![];while w[offset+trail*2]>=0.0{edges.push(self.meta.get("edges").array()[w[offset+trail*2+1]as usize].clone());trail=w[offset+trail*2]as usize;}edges.reverse();let mut out=obj(&[("node",n(w[at])),("service",self.meta.get("services").array()[w[at+1]as usize].clone()),("paid",n(w[at+3])),("discounted",n(w[at+4])),("cost",n(w[at+6])),("minutes",n(w[at+7])),("fare",n(w[at+8])),("km",n(w[at+9])),("edges",arr(edges)),("transfers",n(w[at+10]))]);if !self.graph.legacy{del(&mut out,"paid");del(&mut out,"discounted");out.set("dir",n(w[at+2]));out.set("lastLine",self.meta.get("lines").array()[w[at+3]as usize].clone());out.set("fareKm",n(w[at+5]));out.set("board",n(w[at+4]));let mut fares=obj(&[]);for i in 0..w[at+13]as usize{let p=w[at+12]as usize+i*2;fares.set(self.meta.get("lines").array()[w[p]as usize].text(),n(w[p+1]));}out.set("fares",fares);}out}
 }
 pub(super) fn quote(s:&V,owner:&V,stops:&V,mode:&str)->V{
     if !company(s,owner).truth(){return fail("请选择运营公司。");}if !["shared","dedicated"].contains(&mode){return fail("请选择建设方式。");}if s.get("services").array().len()>=60||s.get("tracks").array().len()>=150{return fail("Demo 网络规模上限已到。");}let stops=stops.array();if stops.len()<2{return fail("至少选择两个候选站。");}if stops.len()>10||unique(stops).len()!=stops.len(){return fail("一条新线最多选 10 个不同车站。");}if stops.iter().any(|id|!integer(id)||id.n()<0.0||s.get("nodes").array().get(id.n()as usize).is_none()){return fail("站点无效。");}
@@ -78,3 +78,20 @@ pub(super) fn run(input:&V)->V{let before=input.get("state");let mut s=before.cl
     action if action.starts_with("city")=>crate::legacy_city::run(action,&s,a),
     action if action.starts_with("operations")=>crate::legacy_operations::run(action,&s,a),
     _=>fail("UNKNOWN_COMPATIBILITY_COMMAND"),};if result.get("error").truth(){s=before.clone();}obj(&[("state",s),("result",result)])}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn isolated_origins_preserve_missing_routes_without_indexing_short_wire() {
+        let state=crate::bootstrap::run(&obj(&[("op",text("seed"))]));
+        let adjacency=graph(&state,&V::Missing);
+        assert!(adjacency.array()[0].array().is_empty());
+        let paths=Router::new(&state,&adjacency,true).paths(0,0.045);
+        assert_eq!(paths.len(),state.get("nodes").array().len());
+        assert!(paths.iter().skip(1).all(|path|matches!(path,V::Missing)));
+        let forecast=evaluate(&state);
+        assert!(forecast.num("riders").is_finite());
+        assert!(forecast.num("riders")>0.0);
+    }
+}
