@@ -16,14 +16,14 @@
     },
     "rail/bootstrap-wasm.js": {
       "role": "platform",
-      "phase": "P3-1 bridge",
-      "owner": "Rust-owned initialization/session transport; view caching to be consolidated in P3-2",
+      "phase": "P3-2 bridge",
+      "owner": "Rust initialization/session/forecast transport",
       "bridgeDisposition": "Only input marshalling, immutable-view caching and ABI forwarding. Initialization and data/model decisions execute in bootstrap.rs."
     },
     "rail/bounded-cache.js": {
       "role": "domain",
-      "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "phase": "P3-6",
+      "owner": "No production imports or callers; historical compatibility helper pending fixture-only cleanup"
     },
     "rail/city-development.js": {
       "role": "domain",
@@ -95,9 +95,10 @@
       "owner": "Rust graph/forecast/directory/cache"
     },
     "rail/demand-snapshot.js": {
-      "role": "domain",
-      "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "role": "platform",
+      "phase": "P3-2 bridge",
+      "owner": "Rust ForecastOwner; opaque handles and immutable projections",
+      "bridgeDisposition": "Only value/buffer transport, object-identity handles, leases and read-only array compatibility. Table indexing, view limits, revisions, daily mutation, summaries and filtering execute in Rust."
     },
     "rail/demand-worker.js": {
       "role": "platform",
@@ -164,9 +165,10 @@
       "owner": "Rust city/statistics/observation"
     },
     "rail/forecast-catalog.js": {
-      "role": "domain",
-      "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "role": "platform",
+      "phase": "P3-2 bridge",
+      "owner": "Rust ForecastOwner; opaque handles and immutable projections",
+      "bridgeDisposition": "Only value/buffer transport, object-identity handles, leases and read-only array compatibility. Table indexing, view limits, revisions, daily mutation, summaries and filtering execute in Rust."
     },
     "rail/game-balance.js": {
       "role": "platform",
@@ -408,7 +410,19 @@
     "rail/routing-wasm.js": {
       "role": "domain",
       "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "owner": "Rust graph/forecast/directory/cache",
+      "overrides": {
+        "prepare": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering"
+        },
+        "prices": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering"
+        }
+      }
     },
     "rail/save-queue.js": {
       "role": "domain",
@@ -435,7 +449,24 @@
     "rail/service-plan.js": {
       "role": "domain",
       "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "owner": "Rust graph/forecast/directory/cache",
+      "overrides": {
+        "serviceFrame": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering"
+        },
+        "serviceOwner": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering"
+        },
+        "compileServices": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering"
+        }
+      }
     },
     "rail/shell-ui.js": {
       "role": "ui",

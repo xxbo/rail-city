@@ -550,7 +550,6 @@
       const p=result[at],id=result[at+1];
       if(id!==rt.defs.length) throw Error('原生出行编号不连续');
       const j={...catalog[p],id,daily:0};rt.defs.push(j);
-      if(rt._demandIndex)rt._demandIndex.set(journeyKey(j),j);
     }
     c.sent=rt.defs.length;
     if(c.keySent)c.keySent=rt.defs.length;

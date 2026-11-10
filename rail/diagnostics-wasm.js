@@ -1,9 +1,8 @@
 /* Native diagnostic transport, standard codecs and UI projections. */
 (function(root){'use strict';const node=typeof module!=='undefined'&&module.exports;
 const Core=node?require('./routing-wasm'):root.RailRouting,Wire=node?require('./value-wire'):root.RailValueWire;
-const tokens=new WeakMap();
 function forecastFrame(f){const Compact=node?require('./forecast-catalog'):root.RailForecastCatalog,dto=Compact?.source(f);
- if(dto){let token=tokens.get(dto);if(!token){token=Core.allocateToken();tokens.set(dto,token);}return {token,meta:{graph:dto.graph,count:dto.count,compact:true,population:f.population,covered:f.catchment?.covered},data:dto.flowData};}
+ if(dto)return Compact.diagnostic(f);
  const graph={lines:[],edges:[]},ids=new Map(),edges=new Map(),data=[];const id=k=>{if(!ids.has(k)){ids.set(k,graph.lines.length);graph.lines.push(k);}return ids.get(k);};const edge=e=>{if(!edges.has(e)){edges.set(e,graph.edges.length);graph.edges.push(e);}return edges.get(e);};
  for(const v of f.flows||[]){data.push(v.from,v.trips,v.demandTrips??v.trips,v.path.km,v.path.transfers,+!!v.hub,v.path.fare);if(v.lineIds){data.push(v.lineIds.length);for(const k of v.lineIds)data.push(id(k));}else data.push(-1);const fares=Object.entries(v.path.fares||{});data.push(fares.length);for(const[k,n]of fares)data.push(id(k),n);data.push((v.path.edges||[]).length);for(const e of v.path.edges||[])data.push(edge(e));}
  return {token:Core.allocateToken(),meta:{graph,count:(f.flows||[]).length,compact:false,population:f.population,covered:f.catchment?.covered},data};

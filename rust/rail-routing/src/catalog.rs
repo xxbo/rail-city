@@ -81,7 +81,7 @@ pub extern "C" fn catalog_summary() -> *const f64 {
         c.output.as_ptr()
     })
 }
-fn run(input: &[f64]) -> Vec<f64> {
+pub(super) fn run(input: &[f64]) -> Vec<f64> {
     let mut r = Read { v: input, at: 0 };
     assert_eq!(r.f(), 1.0);
     let count = r.u();
@@ -89,6 +89,10 @@ fn run(input: &[f64]) -> Vec<f64> {
     let edges = (0..ne)
         .map(|_| [r.f(), r.f(), r.f(), r.f()])
         .collect::<Vec<_>>();
+    compile(count,&edges,&input[r.at..])
+}
+pub(super) fn compile(count:usize,edges:&[[f64;4]],flows:&[f64])->Vec<f64>{
+    let mut r=Read{v:flows,at:0};
     let mut out = vec![count as f64];
     for id in 0..count {
         let header = (0..24).map(|_| r.f()).collect::<Vec<_>>();
@@ -154,7 +158,7 @@ fn run(input: &[f64]) -> Vec<f64> {
         out.push(row.len() as f64);
         out.extend(row);
     }
-    assert_eq!(r.at, input.len());
+    assert_eq!(r.at, flows.len());
     out
 }
 #[no_mangle]

@@ -40,7 +40,7 @@
   function evaluate(state,city,options={}) {
     const result=W.evaluate(state,city,options);
     if(city.metadata?.effectiveConnections)result.lineConnections=K.summarize(state,result);
-    return result;
+    return (typeof module!=='undefined'&&module.exports?require('./forecast-catalog'):root.RailForecastCatalog).seal(result);
   }
   const api={...W,evaluate,ipf:KD.ipf,modeShare:KD.modeShare,strategy:KD.strategy,profiles,MODE_ASSUMPTIONS,ACCESS_WEIGHTS};
   if(node)module.exports=api;else root.RailDemand=api;

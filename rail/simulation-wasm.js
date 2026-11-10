@@ -15,8 +15,8 @@
   function setDaily(catalog,index,value) {
     if(!Number.isInteger(index)||index<0||index>=catalog.length||!Number.isFinite(value)||value<0)
       throw Error('Invalid demand update');
+    if(Compact.meta(catalog)){Compact.setDaily(catalog,index,value);return;}
     if(Object.is(catalog[index].daily,value))return;
-    if(Compact.meta(catalog)){prepare(catalog);catalog[index].daily=value;return;}
     catalog[index].daily=value;
     const c=prepare(catalog);c.revision=(c.revision||0)+1;
     if(c.timed){c.timed.dirty.add(index);c.timed.revision=c.revision;}
@@ -385,6 +385,7 @@
     let c = catalogs.get(catalog);
     if (c && c.length === catalog.length) return c;
     const compact=Compact.meta(catalog);
+    if(compact){const native=Compact.sampling(catalog);c={length:catalog.length,custom:false,managed:true,factors:native.factors,profiles:native.profiles,fi:Uint32Array.from(native.fi),pi:Uint32Array.from(native.pi),native,nativeRevision:0,token:Core.allocateToken(),input:null};catalogs.set(catalog,c);return c;}
     const factors = [],
       profiles = [],
       fm = new Map(),
@@ -417,7 +418,6 @@
       token: Core.allocateToken(),
       input: null
     };
-    if(compact){c.managed=true;compact.onDaily=i=>{c.revision=(c.revision||0)+1;if(c.timed){c.timed.dirty.add(i);c.timed.revision=c.revision;}};}
     catalogs.set(catalog, c);
     return c;
   }
@@ -432,7 +432,7 @@
     input.set([7, c.token, +load, catalog.length, nf, np, remainder, rng]);
     input.set(c.factors.map(factor), 8);
     input.set(c.profiles.map(profile), 8 + nf);
-    for (let i = 0; i < catalog.length; i++) input[8 + nf + np + i] = (Compact.meta(catalog)?Compact.daily(catalog,i):catalog[i].daily);
+    if(Compact.meta(catalog)){for(const[i,v]of Compact.dailyPatch(catalog,0,true).entries)input[8+nf+np+i]=v;}else for(let i=0;i<catalog.length;i++)input[8+nf+np+i]=catalog[i].daily;
     if (load)
       for (let i = 0; i < catalog.length; i++) {
         input[c.input.length + i * 2] = c.fi[i];
@@ -461,12 +461,12 @@
         return ids.get(id);
       };
       const meta = [];
-      for (const j of c.factors) {
+      for (const j of c.native?[]:c.factors) {
         const ls = j.lineIds || Object.keys(j.path?.fares || {});
         meta.push(+!!j.hub, ls.length, ...ls.map(intern));
       }
-      for (const j of c.profiles) meta.push(T.purpose(j.purpose), +!!j.back, T.external(j
-        .externalKind));
+      for (const j of c.native?[]:c.profiles) meta.push(T.purpose(j.purpose), +!!j.back, T.external(j.externalKind));
+      if(c.native){names.push(...c.native.names);meta.push(...c.native.meta);}
       c.timed = {
         token: Core.allocateToken(),
         names,
@@ -484,16 +484,16 @@
       load = Core.samplingToken() !== t.token,
       q = s.ridership;
     const changes = [];
-    const indices=load||!c.managed?catalog.keys():new Set([...t.dirty,...t.untracked]);
-    for (const i of indices) {
-      const daily = (Compact.meta(catalog)?Compact.daily(catalog,i):catalog[i].daily);
-      t.reads++;
-      if (load || !Object.is(t.daily[i], daily)) {
-        if (!load) changes.push(i, daily);
-        t.daily[i] = daily;
-      }
+    if(Compact.meta(catalog)){
+      const patch=Compact.dailyPatch(catalog,t.revision,load);
+      for(const[i,value]of patch.entries){t.daily[i]=value;if(!load)changes.push(i,value);}
+      t.revision=patch.revision;t.reads+=patch.entries.length;
+    }else{
+      const indices=load||!c.managed?catalog.keys():new Set([...t.dirty,...t.untracked]);
+      for(const i of indices){const value=catalog[i].daily;t.reads++;if(load||!Object.is(t.daily[i],value)){if(!load)changes.push(i,value);t.daily[i]=value;}}
+      t.dirty.clear();
     }
-    t.dirty.clear(); t.sent+=load?catalog.length:changes.length/2;
+    t.sent+=load?catalog.length:changes.length/2;
     const input = new Float64Array(t.input.length + (load ? catalog.length + t.meta.length +
       catalog.length * 2 : 1 + changes.length));
     input.set([9, t.token, +load, catalog.length, c.factors.length, c.profiles.length, remainder,

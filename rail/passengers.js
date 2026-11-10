@@ -19,21 +19,9 @@
   const migrationFields=['minute','nextRouteRevision','routeArchives','retiredTracks','trains','defs','queues','waitSince','outside','outsideSince','transfers','stationLimits','departures','cancelled','rejected','stationOccupancy','fleetMinute'];
   const migrationState=rt=>Object.fromEntries(migrationFields.filter(k=>Object.hasOwn(rt,k)).map(k=>[k,rt[k]]));
   function adoptMigration(rt,result){if(result.definitionOrder){result.defs=result.definitionOrder.map((id,index)=>({...rt.defs[id],id:index,daily:0}));delete result.definitionOrder;delete result.definitionCount;}const trains=new Map(rt.trains.map(t=>[t.id,t]));result.trains=result.trains.map(t=>{const old=trains.get(t.id);return old?Object.assign(old,t):t;});Object.assign(rt,result);}
-  function definitions(s,m) {const plan=X.expand(s),native=node?require('./save-wasm'):root.RailSave,out=[];for(let offset=0;offset<m.flows.length;offset+=512){const rows=native.run('definitions',{plan,flows:m.flows.slice(offset,offset+512),offset});for(const row of rows)out.push(row);}return out;}
+  function definitions(s,m) {const compact=(node?require('./forecast-catalog'):root.RailForecastCatalog).definitions(m);if(compact)return compact;const plan=X.expand(s),native=node?require('./save-wasm'):root.RailSave,out=[];for(let offset=0;offset<m.flows.length;offset+=512){const rows=native.run('definitions',{plan,flows:m.flows.slice(offset,offset+512),offset});for(const row of rows)out.push(row);}return out;}
   const MAX_SAVED_DEFINITIONS = 300000;
-  const journeyKeys = new WeakMap();
-
-  function journeyKey(j) {
-    let key = journeyKeys.get(j);
-    if (!key) {
-      key = JSON.stringify([j.legs, j.from, j.to, j.purpose, j.back, j.hub, j.externalKind, j
-        .fare, j
-        .byLine
-      ]);
-      journeyKeys.set(j, key);
-    }
-    return key;
-  }
+  const journeyKey=j=>(node?require('./forecast-catalog'):root.RailForecastCatalog).key(j);
 
   function validateCatalog(fresh) {
     const Compact=node?require('./forecast-catalog'):root.RailForecastCatalog;
@@ -44,12 +32,6 @@
   function installCatalog(rt, fresh) {
     Object.defineProperty(rt, 'demandCatalog', {
       value: fresh,
-      writable: true,
-      configurable: true,
-      enumerable: false
-    });
-    Object.defineProperty(rt, '_demandIndex', {
-      value: null,
       writable: true,
       configurable: true,
       enumerable: false
@@ -66,19 +48,7 @@
 
   function materialize(rt, j) {
     if (!rt.demandCatalog) return j;
-    if (!rt._demandIndex) rt._demandIndex = new Map(rt.defs.map(j => [journeyKey(j), j]));
-    const key = journeyKey(j);
-    let live = rt._demandIndex.get(key);
-    if (!live) {
-      live = {
-        ...j,
-        id: rt.defs.length,
-        daily: 0
-      };
-      rt.defs.push(live);
-      rt._demandIndex.set(key, live);
-    }
-    return live;
+    return (node?require('./forecast-catalog'):root.RailForecastCatalog).materialize(rt,j);
   }
 
   function demandSummary(rt) {
@@ -164,7 +134,6 @@
         Infinity) >= 5) {
       compactDefinitions(rt);
       rt.lastDefCompact = rt.minute;
-      rt._demandIndex = null;
     }
     rt.demandCarry = carry;
     const dt=interval;

@@ -174,6 +174,9 @@ pub(super) fn pattern_values(p: &V, services: &[V], strict: bool) -> Vec<f64> {
     v
 }
 pub(super) fn service_frame(s: &V, minute: f64, strict: bool) -> (Vec<f64>, Vec<V>) {
+    service_frame_with_targets(s,minute,strict,s.get("services").array())
+}
+pub(super) fn service_frame_with_targets(s:&V,minute:f64,strict:bool,targets:&[V])->(Vec<f64>,Vec<V>){
     let services = s.get("services").array();
     let mut keys = vec![];
     let mut specs = vec![];
@@ -200,7 +203,7 @@ pub(super) fn service_frame(s: &V, minute: f64, strict: bool) -> (Vec<f64>, Vec<
         v.push(l.get("patterns").truth() as u8 as f64);
         v.push(l.get("patterns").array().len() as f64);
         for p in l.get("patterns").array() {
-            v.extend(pattern_values(p, services, strict));
+            v.extend(pattern_values(p, targets, strict));
         }
     }
     (v, tracks)

@@ -78,79 +78,19 @@
     }];
   }
 
-  const compiledViews = new WeakMap();
-  const PATTERN_CODES = ['local', 'short', 'express', 'direct', 'cross'];
   const COMPILE_ERRORS = ['', '跨线目标不存在。', '两条线路必须在同一座车站连接。', '跨线目标不能是本线路。', '跨线交路需要相同车型与编组。',
     '交路不能重复经过同一车站。',
     '直达交路的起终点必须不同。', '交路端点无效。', '交路车队分配无效。'
   ];
 
-  function serviceFrame(s, minute, line = null, p = null, index, strict = false) {
-    const sources = [...s.services];
-    if (line && sources.indexOf(line) < 0) sources.push(line);
-    const source = line ? sources.indexOf(line) : 0,
-      trackNames = [],
-      trackIds = new Map(),
-      keys = new Map(),
-      specs = new Map();
-    const intern = (map, value) => {
-      if (!map.has(value)) map.set(value, map.size);
-      return map.get(value);
-    };
-    const track = id => {
-      if (!trackIds.has(id)) {
-        trackIds.set(id, trackNames.length);
-        trackNames.push(id);
-      }
-      return trackIds.get(id);
-    };
-    const numericIndex = line ? ((typeof index === 'number' || typeof index === 'string') && String(Number(
-      index)) === String(index) ? Number(index) : NaN) : 0;
-    const values = [1, line ? 1 : 0, minute, source, numericIndex, sources.length];
-    const num = v => strict ? (typeof v === 'number' ? v : NaN) : Number(v);
-    const write = p => {
-      const calls = Array.isArray(p.calls) ? (strict ? p.calls.filter(() => true) : p.calls).map(num) :
-    [];
-      values.push(PATTERN_CODES.indexOf(p.kind), num(p.from), num(p.to), num(p.fleet), p.kind ===
-        'cross' ? s.services.findIndex(l => l.id === p.target) : -1, num(p.targetEnd), calls.length, ...
-        calls);
-    };
-    for (const l of sources) {
-      const d = l.dispatch;
-      values.push(intern(keys, l.id), intern(specs, l.stockSpec), +!!l.fleetManaged, +(d?.mode === 'auto'),
-        Number(d?.manual), Number(d?.offPeak), Number(d?.peak), Number(l.fleet), l.stops.length, ...l
-        .stops,
-        l.trackIds.length, ...l.trackIds.map(track), +!!l.patterns, l.patterns?.length || 0);
-      for (const p of l.patterns || []) write(p);
-    }
-    if (line) write(p);
-    return {
-      input: Float64Array.from(values),
-      sources,
-      trackNames,
-      trackIndex: trackIds
-    };
+  function serviceOwner(action,s,minute,line,p,index,strict=false){
+    const node=typeof module!=='undefined'&&module.exports,B=node?require('./bootstrap-wasm'):root.RailBootstrap;
+    const frame=B.forecast(action,{state:{services:s.services},minute,line,sourceIndex:line?s.services.indexOf(line):0,pattern:p,index,strict});
+    frame.input=Float64Array.from(frame.input);frame.trackIndex=new Map(frame.trackNames.map((id,i)=>[id,i]));return frame;
   }
-
-  function compileServices(s, minute, line = null, p = null, index) {
-    // The native temporal rule supplies the only time-dependent compiler input.
-    const frame = serviceFrame(s, F.peak(minute) ? 480 : 600, line, p, index);
-    const entries = compiledViews.get(s) || [];
-    let cached = entries.find(x => x.input.length === frame.input.length && x.input.every((v, i) => Object
-      .is(
-        v, frame.input[i])));
-    if (!cached) {
-      cached = {
-        input: frame.input,
-        data: ROUTING.kernel('service_compile', frame.input),
-        rows: null
-      };
-      entries.unshift(cached);
-      entries.length = Math.min(2, entries.length);
-      compiledViews.set(s, entries);
-    }
-    const data = cached.data;
-
+  function serviceFrame(s,minute,line=null,p=null,index,strict=false){return serviceOwner('serviceFrame',s,minute,line,p,index,strict);}
+  function compileServices(s,minute,line=null,p=null,index){
+    const frame=serviceOwner('serviceCompile',s,minute,line,p,index),data=Float64Array.from(frame.data);
     if (data[0] !== 1) throw Error('交路编译接口版本不匹配');
     if (data[1]) throw Error(COMPILE_ERRORS[data[1]] || '交路配置无效。');
     const render = row => {
@@ -187,7 +127,6 @@
         parents: undefined
       };
     };
-    if (cached.rows) return cached.rows.map(render);
     const rows = [];
     let at = 3;
     for (let n = 0; n < data[2]; n++) {
@@ -221,7 +160,6 @@
       });
     }
     if (at !== data.length) throw Error('交路编译结果含多余数据');
-    cached.rows = rows;
     return rows.map(render);
   }
 

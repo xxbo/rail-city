@@ -240,8 +240,6 @@
   unlocked = new Set(Q.awards(personalRecords).filter(a => a.unlocked).map(a => a.id));
   let calculating = false,
     networkRevision = 0,
-    forecastPending = false,
-    forecastDirty = false,
     forecastTimer = null;
   const demandState = {
     status: 'starting',
@@ -249,7 +247,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=66') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=67') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -264,9 +262,9 @@
     })
   });
 
-  function calculate(state) {
+  function calculate(state,snapshot) {
     return demandClient.request({
-      state: RailDemandSnapshot.capture(state)
+      state: snapshot || RailDemandSnapshot.capture(state)
     }).then(message => RailForecastCatalog.hydrate(message.result));
   }
   let forecast = await calculate(s).catch(() => C.evaluate(s,{compact:true}));
@@ -714,8 +712,9 @@
     return result || true;
   }
 
+  function forecastStamp(){return {network:networkRevision,city:s.urban.revision,demand:s.urban.step};}
   function scheduleForecast() {
-    forecastDirty = true;
+    RailBootstrap.forecast('invalidate',{stamp:forecastStamp()});
     if (forecastTimer) clearTimeout(forecastTimer);
     forecastTimer = setTimeout(refreshUrbanDemand, 120);
   }
@@ -864,29 +863,21 @@
     urbanDrawRevision = s.urban.revision;
   }
   async function refreshUrbanDemand() {
-    if (forecastPending) {
-      forecastDirty = true;
-      return;
-    }
+    const job=RailBootstrap.forecast('begin',{background:true,state:s,stamp:forecastStamp()});
+    if(job.busy)return;
     forecastTimer = null;
-    forecastDirty = false;
-    forecastPending = true;
     urbanJob = true;
     memoryAudit.record('demand-start', s, forecast, traffic, saveQueue);
-    const identity = traffic,
-      revision = networkRevision,
-      urbanRevision = s.urban.revision;
+    const urbanRevision=s.urban.revision;
     demandState.status = 'updating';
     $('calculation-status').hidden = false;
     $('calculation-status').textContent = '需求后台更新中' + (playing ? ' · 运营继续' : '');
     try {
-      const next = await calculate(s);
+      const next = await calculate(s,job.snapshot);
       await M.whenIdle(traffic);
-      if (calculating || identity !== traffic || revision !== networkRevision) {
-        forecastDirty = true;
-        return;
-      }
+      if(!RailBootstrap.forecast('accept',{ticket:job.ticket,stamp:forecastStamp(),busy:calculating}).accepted)return;
       await O.materializeAsync(traffic);
+      if(!RailBootstrap.forecast('accept',{ticket:job.ticket,stamp:forecastStamp(),busy:calculating}).accepted)return;
       O.rebase(traffic, s, next);
       delete next.preparedDefinitions;
       REVIEW.ready(s, traffic.minute);
@@ -915,10 +906,10 @@
         scheduleForecast();
       }, 10000);
     } finally {
-      forecastPending = false;
+      const completion=RailBootstrap.forecast('finish',{ticket:job.ticket,stamp:forecastStamp()});
       urbanJob = false;
       if (!calculating) $('calculation-status').hidden = true;
-      if (forecastDirty) scheduleForecast();
+      if (completion.dirty) scheduleForecast();
     }
   }
 
@@ -2755,7 +2746,7 @@
     }
     try {
       if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=66');
+        centerWorker = new Worker('operations-worker.js?v=67');
         centerForecastSent = null;
       }
       centerWorker.onerror = e => fail(e.message || '后台诊断不可用');
@@ -3651,7 +3642,7 @@
     await M.whenIdle(traffic);
     try {
     prepared=RailBootstrap.prepareStart({region});
-    nextState=prepared.state;nextForecast=C.evaluate(nextState);
+    nextState=prepared.state;nextForecast=C.evaluate(nextState,{compact:true});
     nextTraffic=O.create(nextState,nextForecast);REVIEW.init(nextState,nextTraffic);Q.updateSatisfaction(nextState,nextTraffic);
     RailBootstrap.commitStart(prepared.token);
     } catch(error){if(prepared)try{RailBootstrap.cancelStart(prepared.token);}catch{}if(nextTraffic)O.dispose(nextTraffic);setPlaying(wasPlaying);toast('新游戏准备失败，当前进度已保留：'+error.message);return;}

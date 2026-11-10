@@ -11,12 +11,11 @@
   const PURPOSES = ['work','shopping','leisure'], MODES = ['walk','bike','bus'];
   const KINDS = ['visitor-arrival','visitor-return','staff-outbound','staff-homebound','local-departure','local-return'];
   const tokens = new WeakMap();
-  let serial = 0, fixed;
   function cellValues(c) {
     return [c.x,c.y,c.w,c.h,c.area,...FIELDS.map(k => c[k]),c.factory,c.survey,c.populationValid ? 1 : 0];
   }
   function encode(state,city,adj=null) {
-    if (!tokens.has(city)) tokens.set(city,++serial);
+    if (!tokens.has(city)) tokens.set(city,(node?require('./bootstrap-wasm'):root.RailBootstrap).forecast('cityIdentity'));
     const plan = X.expand(state), effective = !!city.metadata?.effectiveConnections;
     const ids = [...new Set(plan.services.filter(l => !effective || l.fleet > 0).flatMap(l => l.callStops || l.stops))];
     const hubs = H.forRegion(state.region), tracks = state.tracks.map(t=>t.id), trackIds = new Map(tracks.map((id,i)=>[id,i]));
@@ -86,7 +85,6 @@
     const out=fields(r,[...FIELDS,'cells','area','factory','surveyArea','populationArea']);r.done();return out;
   }
   function distribution(city) {
-    if(fixed?.city===city)return fixed;
     const state={nodes:[],services:[],tracks:[],companies:[],region:city.metadata?.region};
     const e=encode(state,city),r=cursor(Core.kernel('world_run',[1,...e.values])),n=r.f(),zones=[];
     for(let i=0;i<n;i++){
@@ -95,8 +93,8 @@
     }
     const budgets=readBudgets(r,true),[ipfError,ipfIterations]=r.take(2);r.take(3);
     const matrices=Object.fromEntries(PURPOSES.map(p=>[p,r.take(n*n)]));r.done();
-    fixed={city,zones,matrices,diagnostics:{ipfError,ipfIterations,...(e.effective?{activityBudgets:budgets}:{})}};
-    return fixed;
+    const result={city,zones,matrices,diagnostics:{ipfError,ipfIterations,...(e.effective?{activityBudgets:budgets}:{})}};
+    return result;
   }
   function readStats(r){const o=fields(r,['entries','limit','peak','hits','misses','evictions','weight','maxWeight','peakWeight','oversized']);if(!Number.isFinite(o.maxWeight))o.maxWeight=null;return o;}
   function readForecast(data,context) {
@@ -120,16 +118,17 @@
       const n=r.f();for(let i=0;i<n;i++){const id=r.f();base[key][ids[id]]=r.f();}
     }
     const nf=r.f(),flowStart=r.position();let railDemand=0;
-    for(let i=0;i<nf;i++){
+    if(context.compact){const owned=(node?require('./forecast-catalog'):root.RailForecastCatalog).attachOutput(base,{count:nf,graph:{services:graph.services,lines:graph.lines,edges:graph.edges},hubs:hubs.map(h=>h.id),effective},data.subarray(flowStart));r.take(owned.flowLength);railDemand=owned.railDemand;}
+    else for(let i=0;i<nf;i++){
       const [from,to,purpose,back,trips,demandTrips,population,walk,rail,road,hub,kind,routeOptions]=r.take(13);
       const [service,dir,lastLine,fareKm,board,cost,minutes,fare,km,transfers,ne]=r.take(11);
       const edges=Array.from(r.take(ne),ix=>graph.edges[ix]),nfare=r.f(),fares={};
       for(let j=0;j<nfare;j++){const id=r.f();fares[graph.lines[id]]=r.f();}
-      railDemand+=demandTrips;if(context.compact)continue;
+      railDemand+=demandTrips;
       const path={service:graph.services[service],dir,lastLine:graph.lines[lastLine],fareKm,board,cost,minutes,fare,km,edges,transfers,fares};
       base.flows.push({from,to,purpose:PURPOSES[purpose],back:!!back,trips,demandTrips,path,population,walk,rail,road,hub:hub<0?null:hubs[hub].id,externalKind:kind<0?null:KINDS[kind],...(effective?{routeOptions}:{})});
     }
-    if(context.compact)(node?require('./forecast-catalog'):root.RailForecastCatalog).attach(base,{count:nf,flowData:data.slice(flowStart,r.position()),graph:{services:graph.services,lines:graph.lines,edges:graph.edges},hubs:hubs.map(h=>h.id),effective});
+
     if(populated){
       const routeTrees=readStats(r),strategies=readStats(r);
       Object.assign(base.diagnostics,{ipfError,ipfIterations,connectedDemand,railDemand,zones,eligiblePairs,

@@ -3,6 +3,7 @@
 mod assets;
 mod calendar;
 mod catalog;
+mod forecast_session;
 mod connections;
 mod cycle;
 mod daily;

@@ -1,5 +1,5 @@
-//! P3-0 opt-in cold-world contract. Not connected to the live MAP65 runtime.
-//! Reuses asset/editor rules; simulation, initialization and persistence follow in P3-1+.
+//! Session-owned initialization, forecast catalogs and revision acceptance.
+//! Live runtime stepping and persistence continue in subsequent phases.
 use crate::{assets, editor, editor_support::*, queues::Read, value, value::Value as V, CORE};
 use std::{cell::RefCell, collections::VecDeque};
 
@@ -132,6 +132,7 @@ pub struct SessionHost {
     state: Option<State>,
     next_prepared: u64,
     pending: Option<(u64, u64, u64, V)>,
+    forecasts: crate::forecast_session::ForecastOwner,
 }
 impl SessionHost {
     pub fn request_packed(&mut self, wire: &[f64], bytes: &[u8]) -> (Vec<f64>, Vec<u8>) {
@@ -151,6 +152,11 @@ impl SessionHost {
     fn handle(&mut self, input: &V) -> V {
         if !matches!(input.get("protocolVersion"), V::Number(v) if *v == VERSION) {
             return error("UNSUPPORTED_PROTOCOL", 0, 0);
+        }
+        if input.get("op").text() == "forecast" {
+            let result=self.forecasts.handle(input);
+            if result.get("error").truth(){return error(result.get("error").text(),0,0);}
+            return envelope(true,self.state.as_ref().map_or(0,|s|s.id),self.state.as_ref().map_or(0,|s|s.revision),result);
         }
         if input.get("op").text() == "prepare_start" {
             if self.next_prepared as f64 >= MAX_SAFE {
@@ -224,6 +230,7 @@ impl SessionHost {
                 return error("SESSION_LIMIT", 0, 0);
             }
             self.next_id += 1;
+            self.forecasts.advance_epoch();
             self.pending = None;
             self.state = Some(State {
                 id: self.next_id,
@@ -329,6 +336,7 @@ impl SessionHost {
             "close" => {
                 let out = envelope(true, s.id, s.revision, V::Null);
                 self.state = None;
+                self.forecasts.advance_epoch();
                 out
             }
             _ => error("UNKNOWN_OPERATION", s.id, s.revision),
@@ -525,4 +533,20 @@ pub extern "C" fn session_packed() -> *const f64 {
         c.cycle_bytes = b;
         c.output.as_ptr()
     })
+}
+
+// Numeric forecast tables bypass the generic value-node limit and retain f64 bits.
+#[no_mangle]
+pub extern "C" fn forecast_numeric() -> *const f64 {
+    let result=CORE.with(|cell|{
+        let c=cell.borrow();let input=&c.input;
+        (||{
+            let len=*input.first()?;
+            if !len.is_finite()||len<0.0||len.fract()!=0.0||len as usize>input.len().saturating_sub(1){return None;}
+            let split=1+len as usize;let metadata=value::read_packed(&input[1..split],&c.cycle_bytes)?;
+            Some(HOST.with(|host|host.borrow_mut().forecasts.handle_numeric(&metadata,&input[split..])))
+        })()
+    }).unwrap_or_else(||obj(&[("error",text("INVALID_FORECAST_WIRE"))]));
+    let (values,bytes)=value::write_packed(&result);
+    CORE.with(|c|{let mut c=c.borrow_mut();c.output=values;c.cycle_bytes=bytes;c.output.as_ptr()})
 }

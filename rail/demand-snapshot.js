@@ -3,24 +3,7 @@
   'use strict';
 
   function capture(state) {
-    const {
-      ridership,
-      economy,
-      operationsReview,
-      log,
-      ...inputs
-    } = state;
-    return {
-      ...inputs,
-      economy: economy ? {
-        minute: economy.minute
-      } : undefined,
-      ridership: ridership ? {
-        version: ridership.version,
-        model: ridership.model,
-        lines: ridership.lines
-      } : undefined
-    };
+    return (typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).forecast('snapshot',{state});
   }
   const api = {
     capture

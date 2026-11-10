@@ -5,7 +5,6 @@
   const ABI = 1,
     STRIDE = 14,
     UNRESTRICTED = 0xffffffff;
-  const DEFAULT_PRICES = [180, 210, 260, 300, 330, 400];
   const GRAPH = new WeakMap();
   let nativeEditorConfiguration=null;
   let editorConfiguration=null;
@@ -46,7 +45,7 @@
     peakMemoryBytes = 0;
   const recycleLimit = () => recycleBytes === 0 ? 0 : Math.max(recycleBytes,
     simulationRecycleBytes);
-  const asset = node ? null : new URL('wasm/rail-core-v26.wasm?v=66',
+  const asset = node ? null : new URL('wasm/rail-core-v27.wasm?v=67',
     root.document?.currentScript?.src || root.location.href).href;
 
   function install(module) {
@@ -60,7 +59,7 @@
         now:()=>kernelNow()
       }
     });
-    if (next.exports.bootstrap_abi?.() !== 1 || next.exports.session_abi?.() !== 1 || next.exports.routing_abi() !== ABI || next.exports.demand_abi?.() !== 1 || next.exports
+    if (next.exports.forecast_session_abi?.() !== 1 || next.exports.bootstrap_abi?.() !== 1 || next.exports.session_abi?.() !== 1 || next.exports.routing_abi() !== ABI || next.exports.demand_abi?.() !== 1 || next.exports
       .world_abi?.() !== 1 || next.exports.simulation_abi?.() !== 1 || next.exports.queue_abi?.
       () !== 1 || next.exports.statistics_abi?.() !== 1 || next.exports.operations_abi?.() !== 1 || next.exports.engine_abi?.() !== 1 || next.exports.engine_prepare_abi?.() !== 1 || next.exports.cycle_abi?.() !== 1 || next.exports.engine_continue_abi?.() !== 1 || next.exports.projection_abi?.() !== 1 || next.exports.calendar_abi?.() !== 1 || next.exports.runtime_query_abi?.() !== 1 || next.exports.history_abi?.() !== 1 || next.exports.diagnostic_abi?.()!==1 || next.exports.assets_abi?.()!==1 || next.exports.transaction_abi?.()!==1 || next.exports.catalog_abi?.()!==1 || next.exports.service_abi?.()!==1 || next.exports.service_validate_abi?.()!==1 || next.exports.editor_abi?.()!==1 || next.exports.geometry_abi?.()!==1)
       throw Error('寻路WASM接口版本不匹配');
@@ -107,75 +106,14 @@
     return value;
   };
 
-  function prepare(state, adjacency, legacy = false) {
-    const services = [''],
-      serviceIds = new Map([
-        ['', 0]
-      ]),
-      lines = [''],
-      lineIds = new Map([
-        ['', 0]
-      ]),
-      groups = new Map(),
-      edges = [],
-      records = [],
-      parts = [];
-
-    function intern(map, names, id) {
-      if (!map.has(id)) {
-        map.set(id, names.length);
-        names.push(id);
-      }
-      return map.get(id);
-    }
-    for (const line of state.services) intern(lineIds, lines, line.id);
-    for (let from = 0; from < adjacency.length; from++) {
-      for (const edge of adjacency[from]) {
-        const service = intern(serviceIds, services, edge.service);
-        const group = edge.service + '|' + (edge.dir || 0);
-        if (!groups.has(group)) groups.set(group, groups.size);
-        const start = parts.length / 2;
-        for (const part of edge.parts || []) parts.push(intern(lineIds, lines, part.line), number(
-          part.km));
-        edges.push(edge);
-        const owner = state.companies?.findIndex(c => c.id === edge.owner) ?? -1;
-        records.push(from, edge.to, service, edge.dir || 0, 0, number(edge.km), number(edge
-            .minutes),
-          number(edge.headway), groups.get(group), start, parts.length / 2 - start,
-          owner < 0 ? 31 : owner, number(edge.fare, 0), number(edge.penalty, 0), edge.through ?
-          1 : 0);
-      }
-    }
-    const data = new Float64Array(7 + records.length + parts.length);
-    data.set([ABI, legacy ? 1 : 0, adjacency.length, lines.length, edges.length, parts.length / 2,
-      state.companies?.length || 0
-    ]);
-    data.set(records, 7);
-    data.set(parts, 7 + records.length);
-    const graph = {
-      data,
-      services,
-      lines,
-      groups,
-      edges,
-      legacy
-    };
-    GRAPH.set(adjacency, graph);
-    return graph;
+  const graphLeases=typeof FinalizationRegistry==='function'?new FinalizationRegistry(id=>{try{(node?require('./bootstrap-wasm'):root.RailBootstrap).forecast('release',{id});}catch{}}):null;
+  function prepare(state,adjacency,legacy=false){
+    const B=node?require('./bootstrap-wasm'):root.RailBootstrap;
+    const owned=B.forecast('graphFrame',{state:{services:state.services,companies:state.companies},adjacency,legacy});
+    const graph={...owned,data:Float64Array.from(owned.data),groups:new Map(owned.groups),edges:B.readonly(owned.edges)};
+    graphLeases?.register(graph,graph.id);GRAPH.set(adjacency,graph);return graph;
   }
-
-  function prices(state, graph) {
-    const lines = new Map(state.services.map(line => [line.id, line]));
-    const values = new Float64Array(graph.lines.length * 6 + (state.companies?.length || 0));
-    graph.lines.forEach((id, index) => {
-      const band = lines.get(id)?.fareBands || DEFAULT_PRICES;
-      for (let i = 0; i < 6; i++) values[index * 6 + i] = number(band[i]);
-    });
-    state.companies?.forEach((company, index) => {
-      values[graph.lines.length * 6 + index] = number(company.fare, 0);
-    });
-    return values;
-  }
+  function prices(state,graph){return Float64Array.from((node?require('./bootstrap-wasm'):root.RailBootstrap).forecast('graphPrices',{id:graph.id,state:{services:state.services,companies:state.companies}}));}
 
   function compactPaths(state, adjacency, origin, value = .045, firstKey = null, legacy = false) {
     const graph = GRAPH.get(adjacency) || prepare(state, adjacency, legacy);
@@ -427,7 +365,7 @@
     createWorkspace:()=>{
       let e;const Wire=node?require('./value-wire'):root.RailValueWire;
       const module=new WebAssembly.Instance(compiled,{rail_math:{cos:Math.cos,exp:Math.exp,log:Math.log,hypot:Math.hypot,sin:Math.sin,acos:Math.acos,atan2:Math.atan2,random:()=>Math.random(),log1p:Math.log1p,pow:Math.pow,now:()=>performance.now()},rail_host:{json_utf8:(p,n,t,c)=>{const bytes=new TextEncoder().encode(JSON.stringify(Wire.decode(new Float64Array(e.memory.buffer,p,n)).value));if(c)new Uint8Array(e.memory.buffer,t,bytes.length).set(bytes);return bytes.length;}}});e=module.exports;
-      return {kernel:(name,values,bytes)=>{if(!['bootstrap_run','session_contract','bootstrap_packed','session_packed'].includes(name))throw Error('Unknown initialization operation');const p=e.input_resize(values.length);new Float64Array(e.memory.buffer,p,values.length).set(values);if(bytes){const b=e.cycle_bytes_resize(bytes.length);new Uint8Array(e.memory.buffer,b,bytes.length).set(bytes);}const at=e[name](),out=new Float64Array(e.memory.buffer,at,e.output_len()).slice();const result=bytes?{values:out,bytes:new Uint8Array(e.memory.buffer,e.bootstrap_bytes_ptr(),e.bootstrap_bytes_len()).slice()}:out;e.output_clear();return result;},memoryBytes:()=>e.memory.buffer.byteLength};
+      return {kernel:(name,values,bytes)=>{if(!['bootstrap_run','session_contract','bootstrap_packed','session_packed','forecast_numeric'].includes(name))throw Error('Unknown initialization operation');const p=e.input_resize(values.length);new Float64Array(e.memory.buffer,p,values.length).set(values);if(bytes){const b=e.cycle_bytes_resize(bytes.length);new Uint8Array(e.memory.buffer,b,bytes.length).set(bytes);}const at=e[name](),out=new Float64Array(e.memory.buffer,at,e.output_len()).slice();const result=bytes?{values:out,bytes:new Uint8Array(e.memory.buffer,e.bootstrap_bytes_ptr(),e.bootstrap_bytes_len()).slice()}:out;e.output_clear();return result;},memoryBytes:()=>e.memory.buffer.byteLength};
     },
     catalogViewToken:()=>exports().catalog_view_token(),
     pathsFromFrame:(values,graph)=>{const data=Float64Array.from(values),tree=new Array(data[1]);for(let i=0;i<tree.length;i++)if(data[8+i*STRIDE]!==-1)tree[i]=i;Object.defineProperty(tree,'routingData',{value:{data,graph}});return tree.map((_,id)=>pathAt(tree,id));},
@@ -515,7 +453,7 @@
     const fs = require('node:fs'),
       path = require('node:path');
     install(new WebAssembly.Module(fs.readFileSync(path.join(__dirname,
-      'wasm/rail-core-v26.wasm'))));
+      'wasm/rail-core-v27.wasm'))));
     module.exports = api;
   } else {
     root.RailRouting = api;
