@@ -42,69 +42,20 @@
       MODES.auto;
   }
 
-  function createClock() {
-    let pending = 0, busy=false,epoch=0,fault=null,lastOk=true,lastMs=0;
-    return {
-      reset() {
-        pending = 0;epoch++;lastOk=true;fault=null;
-      },
-      get pending() {
-        return pending;
-      },
-      runAsync(elapsed,speed,budget,advance,now) {
-        pending+=Math.max(0,Math.min(.12,elapsed))*speed;
-        if(fault){const error=fault;fault=null;throw error;}
-        if(!busy&&pending>1e-8&&lastOk) {
-          const requested=pending,version=epoch,started=now();busy=true;
-          Promise.resolve().then(()=>advance(requested,{budget,maxSteps:100,now})).then(result=>{
-            if(!Number.isFinite(result.remaining)||result.remaining<0||result.remaining>requested||
-              !Number.isInteger(result.steps)||result.steps<0||result.steps>100)throw Error('Invalid async simulation result');
-            if(version===epoch){lastOk=result.running;pending=lastOk?Math.max(0,pending-(requested-result.remaining)):0;}
-          }).catch(error=>{fault=error;}).finally(()=>{lastMs=now()-started;busy=false;});
-        }
-        return {ok:lastOk,pending,busy,ms:lastMs};
-      },
-      runBudget(elapsed, speed, budget, advance, now) {
-        pending += Math.max(0, Math.min(.12, elapsed)) * speed;
-        const start = now();
-        let ok = true,
-          steps = 0;
-        if (pending > 1e-8) {
-          const result = advance(pending, {budget, maxSteps: 100, now});
-          if (!Number.isFinite(result.remaining) || result.remaining < 0 ||
-            result.remaining > pending || !Number.isInteger(result.steps) ||
-            result.steps < 0 || result.steps > 100) throw Error('Invalid simulation batch result');
-          ok = result.running;
-          steps = result.steps;
-          pending = ok ? result.remaining : 0;
-        }
-        return {ok, steps, pending, ms: now() - start};
-      },
-      run(elapsed, speed, budget, advance, now) {
-        pending += Math.max(0, Math.min(.12, elapsed)) * speed;
-        const start = now();
-        let steps = 0,
-          ok = true;
-        while (pending > 1e-8 && steps < 100) {
-          const dt = Math.min(.1, pending);
-          if (advance(dt) === false) {
-            ok = false;
-            pending = 0;
-            break;
-          }
-          pending -= dt;
-          steps++;
-          if (now() - start >= budget) break;
-        }
-        return {
-          ok,
-          steps,
-          pending,
-          ms: now() - start
-        };
-      }
+  function createClock(){
+    const B=()=>typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap;
+    const id=B().clock('create'),call=(action,args={})=>B().clock(action,{id,...args});
+    const check=view=>{if(view.fault)throw Error(view.fault);return view;};
+    function runBudget(elapsed,speed,budget,advance,now){const start=now(),view=check(call('begin',{elapsed,speed,budget})),request=view.request;if(!request)return view;try{const result=advance(request.minutes,{budget:request.budget,maxSteps:request.maxSteps,now});return {...call('complete',{ticket:request.ticket,result,ms:now()-start}),steps:result.steps};}catch(error){call('fail',{ticket:request.ticket,fault:error.message});throw error;}}
+    return{reset:()=>call('reset'),get pending(){return call('status').pending;},
+      runAsync(elapsed,speed,budget,advance,now){const view=check(call('begin',{elapsed,speed,budget})),request=view.request;if(request){const start=now();Promise.resolve().then(()=>advance(request.minutes,{budget:request.budget,maxSteps:request.maxSteps,now})).then(result=>call('complete',{ticket:request.ticket,result,ms:now()-start})).catch(error=>call('fail',{ticket:request.ticket,fault:error.message}));}return view;},
+      runBudget,
+      // Compatibility callback API; native control selects slices and owns their accounting.
+      run(elapsed,speed,budget,advance,now){let view=check(call('compatStart',{elapsed,speed,budget,wall:now()}));if(!view.request)return {...view,steps:0};let previous=true;for(;;){view=call('compatNext',{wall:now(),previous});if(view.done)return view;previous=advance(view.dt)!==false;}},
+      close:()=>call('close')
     };
   }
+
   const api = {
     MODES,
     settings,

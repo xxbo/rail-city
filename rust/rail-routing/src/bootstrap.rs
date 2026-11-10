@@ -951,7 +951,7 @@ pub(super) fn urban_init(s: &mut V) {
         );
     }
 }
-fn ridership_init(s: &mut V, enable: bool) {
+pub(super) fn ridership_init(s: &mut V, enable: bool) {
     if s.num("routeModel") != 9.0 {
         return;
     }

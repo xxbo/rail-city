@@ -118,10 +118,13 @@ fn journey_key(j:&V)->Vec<u64>{journey_text(j).encode_utf16().map(|c|c as u64).c
 pub(super) struct ForecastOwner {
     serial:u64, catalogs:HashMap<u64,Catalog>, live:HashMap<u64,Live>,
     graphs:HashMap<u64,Rc<V>>,
+    pins:HashMap<u64,usize>, deferred_release:std::collections::HashSet<u64>,
     epoch:u64, jobs:HashMap<u64,Job>, pending:Option<u64>, dirty:bool,
     service_cache:VecDeque<(Vec<u64>,Vec<f64>)>,
 }
 impl ForecastOwner {
+    pub(super) fn retain(&mut self,id:u64)->Result<(),String>{if !self.catalogs.contains_key(&id){return Err("FORECAST_EXPIRED".into());}*self.pins.entry(id).or_default()+=1;Ok(())}
+    pub(super) fn release_owned(&mut self,id:u64){if let Some(count)=self.pins.get_mut(&id){*count=count.saturating_sub(1);if *count==0{self.pins.remove(&id);if self.deferred_release.remove(&id){self.catalogs.remove(&id);}}}}
     fn next(&mut self)->Option<u64>{if self.serial>=MAX_SAFE{None}else{self.serial+=1;Some(self.serial)}}
     pub(super) fn advance_epoch(&mut self){self.epoch+=1;self.jobs.clear();self.pending=None;self.dirty=false;self.service_cache.clear();}
     pub(super) fn handle_numeric(&mut self,input:&V,data:&[f64])->V {
@@ -174,7 +177,7 @@ impl ForecastOwner {
             let definitions=input.get("definitions").array().to_vec();let index=definitions.iter().enumerate().map(|(i,j)|(journey_key(j),i)).collect();let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};self.live.insert(id,Live{definitions,index});return n(id as f64);
         }
         let Some(id)=unsigned(input.get("id")).map(|x|x as u64)else{return fault("INVALID_FORECAST_HANDLE")};
-        if op=="release"{self.catalogs.remove(&id);self.live.remove(&id);self.graphs.remove(&id);return boolean(true);}
+        if op=="release"{if self.pins.get(&id).copied().unwrap_or(0)>0{self.deferred_release.insert(id);return boolean(true);}self.catalogs.remove(&id);self.live.remove(&id);self.graphs.remove(&id);return boolean(true);}
         if op=="graphPrices"{let Some(g)=self.graphs.get(&id)else{return fault("GRAPH_EXPIRED")};return graph_prices(input.get("state"),g.get("lines"));}
         if op=="materialize"{
             let Some(live)=self.live.get_mut(&id)else{return fault("LIVE_CATALOG_EXPIRED")};let j=input.get("journey");let key=journey_key(j);if let Some(&ix)=live.index.get(&key){return obj(&[("index",n(ix as f64)),("created",boolean(false))]);}
@@ -193,6 +196,7 @@ impl ForecastOwner {
             "connections"=>c.connections(input),
             "sampling"=>c.sampling(),
             "totals"=>c.totals(),
+            "runtimeGraph"=>(*c.graph).clone(),
             "diagnostic"=>obj(&[("graph",(*c.graph).clone()),("count",n(c.count() as f64)),("flowData",numeric(&c.flows))]),
             "status"=>obj(&[("count",n(c.count() as f64)),("bytes",n(((c.flows.len()+c.contracts.len())*8) as f64)),("revision",n(c.revision as f64)),("retainedFlowViews",n(c.views.iter().filter(|x|!x.0).count() as f64)),("retainedContractViews",n(c.views.iter().filter(|x|x.0).count() as f64)),("limit",n(PAGE as f64))]),
             "dailyPatch"=>{let Some(after)=unsigned(input.get("after"))else{return fault("INVALID_DEMAND_REVISION")};let load=input.get("load").truth();let rows=(0..c.count()).filter(|i|load||c.changed.get(i).is_some_and(|r|*r>after as u64)).map(|i|arr(vec![n(i as f64),n(c.contracts[c.cp[i]+1])])).collect();obj(&[("revision",n(c.revision as f64)),("entries",arr(rows))])},

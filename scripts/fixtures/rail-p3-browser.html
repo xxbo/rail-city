@@ -10,7 +10,7 @@ async function bridge(asset){let e;const W=RailValueWire;
  const wire=input=>{const p=e.input_resize(input.length);new Float64Array(e.memory.buffer,p,input.length).set(input);const out=e.session_contract(),v=new Float64Array(e.memory.buffer,out,e.output_len()).slice();e.output_clear();return v;};
  return {wire,request:v=>W.decode(wire(W.encode(v))).value};
 }
-async function run(){const oracle=await(await fetch('rail-p3-map65-oracle.json')).json(),bootstrapOracle=await(await fetch('rail-p31-map65-oracle.json')).json(),asset=new URL('rail-session-contract-v3.wasm',location.href).href,main=await bridge(asset),initial=oracle.worlds[1];
+async function run(){const oracle=await(await fetch('rail-p3-map65-oracle.json')).json(),bootstrapOracle=await(await fetch('rail-p31-map65-oracle.json')).json(),asset=new URL('rail-session-contract-v4.wasm',location.href).href,main=await bridge(asset),initial=oracle.worlds[1];
  const open={protocolVersion:1,op:'open',world:initial,config:oracle.config};
  const opened=main.request(open);if(!opened.ok)throw Error('Main-thread Rust open failed');
  const purchase={protocolVersion:1,sessionId:1,op:'dispatch',expectedRevision:0,commandId:1,command:oracle.cold[1].command};

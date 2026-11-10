@@ -21,6 +21,8 @@ jobs:
           node scripts/build_rail_wasm.cjs --check
       - name: Verify Rust initialization and session artifact
         run: node scripts/build_rail_session_contract.cjs --check
+      - name: Verify Rust unit tests after compilation
+        run: cargo +1.99.1 test --locked --features session-contract --manifest-path rust/rail-routing/Cargo.toml
       - name: Verify simulation and standalone publication
         run: node scripts/run_rail_tests.cjs
       - name: Verify Rust session and game in Chromium

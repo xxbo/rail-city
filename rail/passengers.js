@@ -14,6 +14,7 @@
   const QUEUES = node ? require('./queue-runtime') : root.RailQueueRuntime;
   const key = (id, dir, station) => `${id}|${dir}|${station}`;
 
+  const Runtime=node?require('./runtime-wasm'):root.RailRuntime;
   const TX=node?require('./transactions-wasm'):root.RailTransactions;
   const Routing=node?require('./routing-wasm'):root.RailRouting;
   const migrationFields=['minute','nextRouteRevision','routeArchives','retiredTracks','trains','defs','queues','waitSince','outside','outsideSince','transfers','stationLimits','departures','cancelled','rejected','stationOccupancy','fleetMinute'];
@@ -65,6 +66,7 @@
   }
 
   function create(s, m, start = 420, warm = true) {
+    if(Runtime.supports(s,m))return Runtime.create(s,m,start,warm);
     Q.init(s, start);
     const plan = X.expand(s);
     const rt = {
@@ -334,6 +336,7 @@
   }
 
   function snapshot(rt) {
+    if(Runtime.has(rt))return Runtime.snapshot(rt);
     if(!QUEUES.canSnapshot(rt))throw Error('原生运行中的存档请使用 snapshotAsync');
     const out = {
       ...rt
@@ -350,6 +353,7 @@
       plan.tracks=[...s.tracks,...(saved?.retiredTracks||[]).filter(t=>!s.tracks.some(x=>x.id===t.id))];
       plan.routeArchives=saved?.routeArchives||{};
       if(!(node?require('./save-wasm'):root.RailSave).run('restore',{state:s,plan,saved,defs}))return null;
+      if(Runtime.supports(s,m))return Runtime.create(s,m,saved.minute,false,saved);
       const rt={...saved,transfers:saved.transfers||[],plan,defs};
       installCatalog(rt,validateCatalog(catalog));return rt;
     }catch{return null;}
@@ -427,7 +431,7 @@
   }
 
   function rebase(rt, s, m) {
-    return reconcile(rt, s, m);
+    const result=reconcile(rt,s,m);if(Runtime.has(rt)&&m)Runtime.rebind(rt,s,m);return result;
   }
   const api = {
     advanceTick: (rt, s, dt, target, carry, interval, settlement=null) => {
@@ -437,7 +441,7 @@
     continueRun:(rt,s,minutes,options)=>QUEUES.continueRun(rt,s,minutes,{...options,reroute}),
     continueAsync:(rt,s,minutes,options)=>QUEUES.continueAsync(rt,s,minutes,{...options,reroute}),
     advanceTickAsync:(rt,s,dt,target,carry,interval,settlement)=>dt>1e-9?tickAsync(rt,s,dt,target,carry,interval,settlement):Promise.resolve(rt),
-    dispose:rt=>QUEUES.dispose(rt),
+    dispose:rt=>{if(Runtime.has(rt))Runtime.dispose(rt);else QUEUES.dispose(rt);},
     demandSummary,
     MAX_SAVED_DEFINITIONS,
     reconcile,
@@ -451,13 +455,14 @@
     summary,
     station,
     snapshot,
-    snapshotAsync:async rt=>{await QUEUES.historyAsync(rt);return snapshot(await QUEUES.queryAsync(rt));},
-    historyAsync:QUEUES.historyAsync,
+    snapshotAsync:async rt=>{if(Runtime.has(rt))return Runtime.snapshotAsync(rt);await QUEUES.historyAsync(rt);return snapshot(await QUEUES.queryAsync(rt));},
+    historyAsync:rt=>Runtime.has(rt)?Runtime.materializeAsync(rt):QUEUES.historyAsync(rt),
     detailsAsync:async(rt,kind,id)=>{
+      if(Runtime.has(rt)){await Runtime.materializeAsync(rt);return kind==='station'?station(rt,id):rt.trains.find(t=>t.id===id)?.passengers||{};}
       if(kind==='station')return station(await QUEUES.queryAsync(rt,3,id),id);
       const temp=await QUEUES.queryAsync(rt,4,id);return temp.trains.find(t=>t.id===id)?.passengers||{};
     },
-    materializeAsync:QUEUES.materializeAsync,
+    materializeAsync:rt=>Runtime.has(rt)?Runtime.materializeAsync(rt):QUEUES.materializeAsync(rt),
     nativeViews:QUEUES.nativeViews,
     setDaily:(rt,index,value)=>{
       const catalog=rt.demandCatalog||rt.defs,previous=catalog[index]?.daily;

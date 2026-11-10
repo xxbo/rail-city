@@ -206,7 +206,7 @@
     "rail/management.js": {
       "role": "domain",
       "phase": "P3-3",
-      "owner": "Rust runtime/clock; edit lifecycle P3-4"
+      "owner": "Rust RuntimeOwner for modern session runs; remaining legacy/edit adapters tracked by P3-4/P3-6"
     },
     "rail/map-detail.js": {
       "role": "ui",
@@ -262,7 +262,7 @@
     "rail/passengers.js": {
       "role": "domain",
       "phase": "P3-3",
-      "owner": "Rust runtime/clock; edit lifecycle P3-4",
+      "owner": "Rust RuntimeOwner for modern session runs; remaining legacy/edit adapters tracked by P3-4/P3-6",
       "overrides": {
         "reconcile": {
           "role": "domain",
@@ -360,6 +360,11 @@
           "role": "ui",
           "phase": "UI",
           "owner": "Presentation frame/detail settings"
+        },
+        "createClock": {
+          "role": "platform",
+          "phase": "P3-3 bridge",
+          "owner": "Rust Controls; callback forwarding only, including legacy resumable callback compatibility"
         }
       }
     },
@@ -377,7 +382,7 @@
     "rail/queue-runtime.js": {
       "role": "domain",
       "phase": "P3-3",
-      "owner": "Rust runtime/clock; edit lifecycle P3-4"
+      "owner": "Rust RuntimeOwner for modern session runs; remaining legacy/edit adapters tracked by P3-4/P3-6"
     },
     "rail/regions.js": {
       "role": "platform",
@@ -693,6 +698,12 @@
       "phase": "P3-8",
       "owner": "Rust task/revision/timeout/worker ownership",
       "bridgeDisposition": "Generated or minimal API forwarding; queues, fallback and retry policies move to Rust"
+    },
+    "rail/runtime-wasm.js": {
+      "role": "platform",
+      "phase": "P3-3 bridge",
+      "owner": "Rust RuntimeOwner and clock; detached view and RPC transport",
+      "bridgeDisposition": "Forwards snapshots, intents and native commands; projects committed views. Existing city/review cold transactions remain P3-5 boundaries; Worker transport lifecycle policies finish in P3-8."
     }
   }
 }

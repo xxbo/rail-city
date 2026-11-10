@@ -2,14 +2,14 @@
 (function(){
   'use strict';
   const node=typeof module!=='undefined'&&module.exports;
-  let Core,send,listen;
+  let Core,send,listen,Bootstrap,Catalog;
   if(node){
-    Core=require('./routing-wasm');
+    Core=require('./routing-wasm');Bootstrap=require('./bootstrap-wasm');Catalog=require('./forecast-catalog');
     const {parentPort}=require('node:worker_threads');
     send=(data,transfer)=>parentPort.postMessage(data,transfer);
     listen=fn=>parentPort.on('message',fn);
   }else{
-    importScripts('value-wire.js?v=67', 'bootstrap-wasm.js?v=67','routing-wasm.js?v=67');Core=self.RailRouting;
+    importScripts('value-wire.js?v=67', 'bootstrap-wasm.js?v=68','routing-wasm.js?v=68','forecast-catalog.js?v=68');Core=self.RailRouting;Bootstrap=self.RailBootstrap;Catalog=self.RailForecastCatalog;
     send=(data,transfer)=>self.postMessage(data,transfer);
     listen=fn=>{self.onmessage=e=>fn(e.data);};
   }
@@ -18,6 +18,12 @@
   listen(async request=>{
     try{
       await Core.init();
+      if(request.kind==='session'){
+        const args=request.args||{};let result;
+        if(request.action==='create'){const forecast=Catalog.hydrate(args.forecast);result=Bootstrap.runtime('create',{world:args.world,saved:args.saved,start:args.start,warm:args.warm,catalog:Catalog.source(forecast).id});}
+        else result=Bootstrap.runtime(request.action,args);
+        send({id:request.id,result});return;
+      }
       if(!['engine_cycle','engine_continue','engine_loop','engine_step','simulation_step','runtime_query'].includes(request.name))
         throw Error('Unknown simulation worker operation');
       Core.pinRuntime(!!request.retainRuntime);

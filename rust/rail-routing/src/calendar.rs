@@ -83,9 +83,10 @@ pub(super) struct Calendar {
     mapping: Vec<f64>,
     line_offsets: Vec<usize>,
     run_offset: usize,
+    feedback_views:std::collections::HashMap<usize,crate::value::Value>,
 }
 impl Calendar {
-    fn read(v: &[f64], sampling_state: &mut Option<crate::simulation::Sampling>) -> Self {
+    pub(super) fn read(v: &[f64], sampling_state: &mut Option<crate::simulation::Sampling>) -> Self {
         let mut r = Read { v, at: 0 };
         assert_eq!(r.f(), 1.0);
         let token = r.f();
@@ -218,6 +219,7 @@ impl Calendar {
             mapping,
             line_offsets,
             run_offset,
+            feedback_views:std::collections::HashMap::new(),
         }
     }
     fn refresh(&mut self, now: f64) -> Vec<f64> {
@@ -323,9 +325,10 @@ impl Calendar {
         }
         let f = &prepared[4..4 + nf];
         let mut p = 2;
-        for &at in &self.line_offsets {
+        for (ix,&at) in self.line_offsets.iter().enumerate() {
             let start = at + 9 + int(self.feedback[at + 8]);
             self.feedback[start..start + 7].copy_from_slice(&f[p..p + 7]);
+            if f[p+7]!=0.0{use crate::editor_support::*;let mut scores=crate::value::Value::Object(vec![]);for(i,key)in ["crowding","waiting","speed","coverage","fare","reliability","hours"].iter().enumerate(){scores.set(key,n(f[p+8+i]));}self.feedback_views.insert(self.ids[ix],obj(&[("scores",scores),("observations",obj(&[("load",n(f[p+17])),("wait",n(f[p+18])),("loss",n(f[p+19])),("speed",n(f[p+20])),("covered",n(f[p+21])),("total",n(f[p+22]))])),("satisfaction",n(f[p+23])),("feedbackMinute",n(now))]));}
             if f[p + 7] != 0.0 {
                 self.feedback[start + 7] = f[p + 23];
                 self.feedback[start + 8] = now;
@@ -425,26 +428,39 @@ pub extern "C" fn engine_loop() -> *const f64 {
             settlement_state,
             ..
         } = &mut *c;
-        let nf = int(input[6]);
-        let nm = int(input[7]);
-        assert_eq!(input.len(), 8 + nf + nm);
-        if nm > 0 {
-            *calendar_state = Some(Calendar::read(&input[8 + nf..], sampling_state));
-        }
+        *output = run(input,calendar_state,cycle_state,cycle_bytes,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state);
+        output.as_ptr()
+    })
+}
+pub(super) fn run(
+    input:&[f64],calendar_state:&mut Option<Calendar>,cycle_state:&mut Option<crate::cycle::Cycle>,cycle_bytes:&[u8],
+    sampling_state:&mut Option<crate::simulation::Sampling>,feedback_cache:&mut crate::operations::CoverageCache,
+    simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<crate::queues::Queues>,settlement_state:&mut Option<crate::engine::Settlement>
+)->Vec<f64>{
+    let nf=int(input[6]);let nm=int(input[7]);assert_eq!(input.len(),8+nf+nm);
+    if nm>0{*calendar_state=Some(Calendar::read(&input[8+nf..],sampling_state));}
+    run_owned(Batch{token:input[0],time:input[1],remaining:input[2],max_steps:int(input[3]),budget:input[4],barrier:input[5],finance:&input[8..8+nf],trace:true},calendar_state,cycle_state,cycle_bytes,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state,&mut |_,_,_|false).wire
+}
+pub(super) struct Batch<'a>{pub token:f64,pub time:f64,pub remaining:f64,pub max_steps:usize,pub budget:f64,pub barrier:f64,pub finance:&'a[f64],pub trace:bool}
+pub(super) struct BatchResult{pub wire:Vec<f64>,pub definitions:Vec<(usize,usize)>,pub spawned:Vec<(usize,usize,usize)>}
+pub(super) fn run_owned(
+    request:Batch<'_>,calendar_state:&mut Option<Calendar>,cycle_state:&mut Option<crate::cycle::Cycle>,cycle_bytes:&[u8],sampling_state:&mut Option<crate::simulation::Sampling>,feedback_cache:&mut crate::operations::CoverageCache,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<crate::queues::Queues>,settlement_state:&mut Option<crate::engine::Settlement>,profiles:&mut impl FnMut(&mut crate::cycle::Cycle,&[usize],bool)->bool
+)->BatchResult{
         let cal = calendar_state.as_mut().expect("calendar missing");
-        assert_eq!(cal.token, input[0]);
-        let mut time = input[1];
-        let mut remaining = input[2];
-        let max = int(input[3]);
-        let budget = input[4];
-        let barrier = input[5];
-        let mut fin = input[8..8 + nf].to_vec();
+        assert_eq!(cal.token, request.token);
+        let mut time = request.time;
+        let mut remaining = request.remaining;
+        let max = request.max_steps;
+        let budget = request.budget;
+        let barrier = request.barrier;
+        let mut fin = request.finance.to_vec();
         let start = crate::engine::monotonic();
         let mut steps = 0;
         let mut reason = 0.0;
-        let mut chunks = vec![];
-        while remaining >= 0.1 && steps < max {
-            if time + 0.1 >= barrier - 1e-8 {
+        let mut chunks = vec![];let mut definitions=vec![];let mut spawned=vec![];
+        let mut quantum_left=remaining.min(0.1);
+        while remaining > 1e-8 && steps < max {
+            if if request.trace{time+quantum_left>=barrier-1e-8}else{time>=barrier-1e-8} {
                 reason = 1.0;
                 break;
             }
@@ -453,17 +469,22 @@ pub extern "C" fn engine_loop() -> *const f64 {
                 reason = 2.0;
                 break;
             }
-            if crate::operations::next(time, 0.1, &bank.loans) != 0.1 {
-                reason = 1.0;
-                break;
+            let dt=crate::operations::next(time,quantum_left,&bank.loans);
+            if dt<=1e-9 {
+                fin[3]=time;fin[4]=quantum_left;fin[5]=0.0;fin[6]=cal.carry;
+                let q=queue_state.as_mut().expect("queue missing");fin[7]=q.counter(6);fin[8]=q.counter(7);
+                let account=crate::engine::settle(&fin,settlement_state.as_mut().unwrap(),q);
+                if account[16]!=0.0{reason=2.0;break;}
+                if crate::operations::next(time,quantum_left,&settlement_state.as_ref().unwrap().loans)<=1e-9{reason=2.0;break;}
+                continue;
             }
-            let next = time + 0.1;
+            let next = time + dt;
             if queue_state.as_mut().unwrap().roll_day(next) {
                 fin[15] = 0.0;
             }
             // Day archiving can precede the next sampling gate. Let the host
             // reload its new statistics day before any native state is changed.
-            if queue_state
+            if next>=420.0 && queue_state
                 .as_mut()
                 .unwrap()
                 .finance_stats()
@@ -472,7 +493,7 @@ pub extern "C" fn engine_loop() -> *const f64 {
                 reason = 1.0;
                 break;
             }
-            let (carry, interval) = crate::operations::generation(cal.carry, 0.1);
+            let (carry, interval) = crate::operations::generation(cal.carry, dt);
             let view = cal.refresh(next);
             let (motion, order) = crate::simulation::continuation(simulation_state, next);
             let q = queue_state.as_mut().expect("queue missing");
@@ -485,7 +506,7 @@ pub extern "C" fn engine_loop() -> *const f64 {
                 );
             }
             if let Some(stats) = q.finance_stats() {
-                stats.advance_slot(next);
+                if next>=420.0{stats.advance_slot(next);}
             }
             let params = if view.is_empty() {
                 vec![]
@@ -565,8 +586,8 @@ pub extern "C" fn engine_loop() -> *const f64 {
             fin.truncate(16);
             fin[2] = 0.0;
             fin[3] = next;
-            fin[4] = 0.1;
-            fin[5] = 0.1;
+            fin[4] = quantum_left;
+            fin[5] = dt;
             fin[6] = carry;
             fin[7] = q.counter(6);
             fin[8] = q.counter(7);
@@ -627,52 +648,20 @@ pub extern "C" fn engine_loop() -> *const f64 {
                 &tail,
                 &statistics,
             ];
-            let mut packet = vec![
-                1.0,
-                cal.token,
-                cal.catalog,
-                cycle_state
-                    .as_ref()
-                    .unwrap()
-                    .count()
-                    .max(q.definition_count()) as f64,
-                cal.serial as f64,
-                cal.next as f64,
-                0.0,
-                0.0,
-                0.0,
-                ids.len() as f64,
-                prep.len() as f64,
-                fin.len() as f64,
-                templates.len() as f64,
-                rules.len() as f64,
-                cal.motion,
-                cal.sampling,
-                fin[1],
-            ];
-            packet.extend(parts.iter().map(|p| p.len() as f64));
-            packet.extend(ids);
-            packet.extend(templates);
-            packet.extend(rules);
-            packet.extend(prep);
-            packet.extend(&fin);
-            for p in parts {
-                packet.extend(p);
+            let state=cycle_state.as_mut().expect("cycle missing");
+            state.collect_keys(queue_state.as_mut().unwrap());
+            let mut result=crate::cycle::execute(state,cal.serial,cal.next,Some(cal.carry),cal.sparse,&cal.ids,&templates,&rules,&prep,&fin,&parts,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state);
+            let mut attempts=0;
+            while result[1]!=0.0&&attempts<4096{
+                let ids=result[11..11+int(result[3])].iter().map(|x|int(*x)).collect::<Vec<_>>();
+                if !profiles(state,&ids,result[2]!=0.0){break;}
+                result=crate::cycle::execute(state,cal.serial,cal.next,Some(cal.carry),cal.sparse,&cal.ids,&templates,&rules,&prep,&fin,&parts,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state);attempts+=1;
             }
-            let result = crate::cycle::run(
-                &packet,
-                cycle_bytes,
-                cycle_state,
-                sampling_state,
-                feedback_cache,
-                simulation_state,
-                queue_state,
-                settlement_state,
-            );
             if result[1] != 0.0 {
                 reason = 5.0;
                 break;
             }
+            let mut entry=11+int(result[3]);for _ in 0..int(result[4]){definitions.push((int(result[entry]),int(result[entry+1])));entry+=2;}for _ in 0..int(result[5]){spawned.push((int(result[entry]),int(result[entry+1]),int(result[entry+2])));entry+=3;}
             let p = 11 + int(result[3]) + int(result[4]) * 2 + int(result[5]) * 3;
             let prepared = &result[p..p + int(result[8])];
             cal.save_feedback(prepared, next);
@@ -700,9 +689,13 @@ pub extern "C" fn engine_loop() -> *const f64 {
             cal.serial = int(result[6]);
             cal.next = int(result[7]);
             cal.carry = carry;
+            let retired=crate::simulation::retire_finished(simulation_state);queue_state.as_mut().unwrap().retire_trains(&retired);
             time = next;
-            remaining -= 0.1;
-            steps += 1;
+            remaining -= dt;
+            quantum_left-=dt;
+            let complete_quantum=quantum_left<=1e-9;
+            if complete_quantum{steps+=1;quantum_left=remaining.min(0.1);}
+            if request.trace{
             chunks.extend_from_slice(&[
                 time,
                 carry,
@@ -713,6 +706,7 @@ pub extern "C" fn engine_loop() -> *const f64 {
             ]);
             chunks.extend(view);
             chunks.extend_from_slice(&result);
+            }
             let qp = p + int(result[8]);
             if result[qp + 1] != 0.0 {
                 reason = 3.0;
@@ -724,7 +718,7 @@ pub extern "C" fn engine_loop() -> *const f64 {
                 reason = 2.0;
                 break;
             }
-            if crate::engine::monotonic() - start >= budget {
+            if complete_quantum && crate::engine::monotonic() - start >= budget {
                 reason = 4.0;
                 break;
             }
@@ -734,11 +728,11 @@ pub extern "C" fn engine_loop() -> *const f64 {
         } else {
             vec![]
         };
-        *output = vec![1.0, steps as f64, remaining, reason, view.len() as f64];
+        let mut output = vec![1.0, steps as f64, remaining, reason, view.len() as f64];
         output.extend(chunks);
         output.extend(view);
-        output.as_ptr()
-    })
+        BatchResult{wire:output,definitions,spawned}
+
 }
 
 #[cfg(test)]
@@ -783,4 +777,14 @@ mod tests {
         assert_eq!(l.h(), 3.25);
         assert_eq!(l.dwell(), 0.6);
     }
+}
+
+impl Calendar{
+    pub(super) fn clock_view(&self)->(f64,f64,f64,f64,f64,usize,usize){(self.carry,self.remainder,self.rng,self.expected,self.feedback_minute,self.serial,self.next)}
+    pub(super) fn departures_view(&self,names:&[String])->crate::value::Value{use crate::editor_support::*;let mut out=crate::value::Value::Object(vec![]);for d in &self.departures{let run=&self.runs[d.run];let mut row=obj(&[("next",n(d.next)),("headway",n(d.h))]);if let Some(last)=d.last{row.set("lastRun",n(last));}out.set(&format!("{}|{}",names[run.id],d.dir),row);}out}
+    pub(super) fn fleets(&self)->Vec<(usize,f64)>{self.runs.iter().map(|r|(r.id,r.fleet)).collect()}
+}
+
+impl Calendar{
+    pub(super) fn project_feedback(&self,q:&mut crate::value::Value,names:&[String]){use crate::editor_support::*;for(i,&at)in self.line_offsets.iter().enumerate(){let start=at+9+self.feedback[at+8]as usize;let id=self.ids[i];let line=q.get_mut("lines").get_mut(&names[id]);for(k,key)in ["serviceDays","awareness","trust"].iter().enumerate(){line.set(key,n(self.feedback[start+k]));}if let Some(view)=self.feedback_views.get(&id){for(k,v)in view.entries(){line.set(k,v.clone());}}}}
 }

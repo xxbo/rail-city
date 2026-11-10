@@ -1176,6 +1176,7 @@ pub(super) fn run_patched(
         prefix,
         feedback,
         false,
+        false,
     )
 }
 pub(super) fn run_compact(
@@ -1184,7 +1185,7 @@ pub(super) fn run_compact(
     queue_state: &mut Option<Queues>,
     feedback: &[(usize, [f64; 4])],
 ) -> Vec<f64> {
-    execute(input, simulation_state, queue_state, 0, feedback, true)
+    execute(input, simulation_state, queue_state, 0, feedback, true, false)
 }
 fn execute(
     input: &[f64],
@@ -1193,7 +1194,14 @@ fn execute(
     prefix: usize,
     feedback: &[(usize, [f64; 4])],
     compact: bool,
+    initialize_only:bool,
 ) -> Vec<f64> {
+    execute_internal(input,None,simulation_state,queue_state,prefix,feedback,compact,initialize_only)
+}
+#[derive(Clone,Copy)]
+pub(super) struct Packet<'a>{pub header:&'a[f64],pub motion:&'a[f64],pub definitions:&'a[f64],pub limits:&'a[f64],pub trains:&'a[f64],pub snapshot:&'a[f64],pub tail:&'a[f64],pub statistics:&'a[f64]}
+pub(super) fn run_parts(packet:Packet<'_>,motion:&mut Option<crate::simulation::MotionState>,queues:&mut Option<Queues>,feedback:&[(usize,[f64;4])])->Vec<f64>{execute_internal(packet.header,Some(packet),motion,queues,0,feedback,true,false)}
+fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<Queues>,prefix:usize,feedback:&[(usize,[f64;4])],compact:bool,initialize_only:bool)->Vec<f64>{
     let mut r = Read { v: input, at: 0 };
     let protocol = r.f();
     assert!((1.0..=5.0).contains(&protocol));
@@ -1210,8 +1218,7 @@ fn execute(
     let rerouted = r.f();
     let reroute_amount = r.f();
     let nm = r.u();
-    let motion_input = &r.v[r.at..r.at + nm];
-    r.at += nm;
+    let motion_input = if let Some(p)=parts{p.motion}else{let data=&r.v[r.at..r.at+nm];r.at+=nm;data};
     if load {
         *queue_state = Some(Queues::new(token));
     }
@@ -1230,7 +1237,9 @@ fn execute(
     q.boarded_delta.clear();
     q.purpose_delta.clear();
     q.dirty = 0;
+    if let Some(p)=parts{r=Read{v:p.definitions,at:0};}
     q.read_defs(&mut r);
+    if let Some(p)=parts{r=Read{v:p.limits,at:0};}
     let nl = r.u();
     for _ in 0..nl {
         let id = r.u();
@@ -1238,10 +1247,10 @@ fn execute(
         let b = r.f();
         q.limits.insert(id, (a, b));
     }
+    if let Some(p)=parts{r=Read{v:p.trains,at:0};}
     q.read_trains(&mut r);
-    if load {
-        q.load(&mut r);
-    }
+    if load {if let Some(p)=parts{r=Read{v:p.snapshot,at:0};}q.load(&mut r);}
+    if let Some(p)=parts{r=Read{v:p.tail,at:0};}
     let norder = r.u();
     let order = (0..norder).map(|_| r.u()).collect::<Vec<_>>();
     let nop = r.u();
@@ -1260,6 +1269,7 @@ fn execute(
             row
         })
         .collect::<Vec<_>>();
+    if let Some(p)=parts{r=Read{v:p.statistics,at:0};}
     if q.stats_protocol {
         let mode = r.f();
         if mode < 0.0 {
@@ -1308,7 +1318,8 @@ fn execute(
             stats.set_feedback(*id, values);
         }
     }
-    assert_eq!(r.at, input.len());
+    assert_eq!(r.at,if let Some(p)=parts{p.statistics.len()}else{input.len()});
+    if initialize_only{return vec![];}
     let motion = if phase == 0 {
         crate::simulation::motion_packet(motion_input, simulation_state)
     } else {
@@ -1493,4 +1504,28 @@ mod tests {
 #[no_mangle]
 pub extern "C" fn native_reroute_count() -> usize {
     CORE.with(|c| c.borrow().queue_state.as_ref().map_or(0, |q| q.reroutes))
+}
+
+pub(super) fn install(input:&[f64],motion:&mut Option<crate::simulation::MotionState>,queues:&mut Option<Queues>){
+    execute(input,motion,queues,0,&[],false,true);
+}
+
+impl Queues{pub(super) fn retire_trains(&mut self,ids:&[usize]){for id in ids{self.trains.remove(id);}}}
+
+impl Queues{
+    pub(super) fn object_view(&self,names:&[String],ids:&std::collections::HashMap<usize,String>,full:bool)->crate::value::Value{
+        use crate::editor_support::*;use crate::value::Value as V;
+        let name=|id:usize|names.get(id).cloned().unwrap_or_default();let token=|t:Token|if t.stamp>=0{format!("{}:{}:{}",t.j,t.leg,t.stamp)}else{format!("{}:{}",t.j,t.leg)};
+        let mut result=obj(&[("minute",n(self.now))]);for(i,k)in ["generated","boarded","alighted","completed","cancelled","rejected","revenue","vehicleExpense"].iter().enumerate(){result.set(k,n(self.counters[i]));}
+        for(k,rows)in [("lineRevenue",&self.revenue),("lineBoarded",&self.boarded),("purposeCompleted",&self.purposes)]{let mut out=V::Object(vec![]);for(id,v)in rows.rows.iter().flatten(){let label=if k=="purposeCompleted"{["work","shopping","leisure"][*id].to_string()}else{name(*id)};out.set(&label,n(*v));}result.set(k,out);}
+        let mut queues=V::Object(vec![]);let mut wait=V::Object(vec![]);let mut outside=V::Object(vec![]);let mut outside_since=V::Object(vec![]);let mut stations=V::Object(vec![]);let(mut ni,mut no,mut nt,mut nb)=(0.0,0.0,0.0,0.0);
+        for key in &self.queue_order{let k=format!("{}|{}|{}",name(key.0),key.1,key.2);let q=&self.queues[key];let total=q.sum(|c|c.n);ni+=total;stations.set(&key.2.to_string(),n(stations.zero(&key.2.to_string())+total));let mut row=if full{V::Object(vec![])}else{obj(&[("total",n(total))])};if full{for(t,c)in q.rows.iter().flatten(){let tok=token(*t);row.set(&tok,n(c.n));if let Some(since)=c.since{wait.set(&format!("{}#{}",k,tok),n(since));}}}queues.set(&k,row);}
+        for(id,q)in &self.outside{let total=q.sum(|c|c.n);no+=total;let mut row=if full{V::Object(vec![])}else{obj(&[("total",n(total))])};if full{for(t,c)in q.rows.iter().flatten(){let tok=token(*t);row.set(&tok,n(c.n));if let Some(since)=c.since{outside_since.set(&format!("{}#{}",id,tok),n(since));}}}outside.set(&id.to_string(),row);}
+        let transfers=self.transfers.iter().map(|x|{nt+=x.n;stations.set(&x._station.to_string(),n(stations.zero(&x._station.to_string())+x.n));obj(&[("journey",n(x.j as f64)),("leg",n(x.leg as f64)),("amount",n(x.n)),("ready",n(x.ready)),("station",n(x._station as f64))])}).collect();
+        let trains=self.trains.iter().map(|(&uid,t)|{nb+=t.onboard;let mut passengers=V::Object(vec![]);if full{for(tok,v)in t.passengers.rows.iter().flatten(){passengers.set(&token(*tok),n(*v));}}obj(&[("uid",n(uid as f64)),("id",text(ids.get(&uid).map_or("",|s|s.as_str()))),("service",text(&name(t.service))),("parentLine",text(&name(t.parent))),("capacity",n(t.capacity)),("onboard",n(t.onboard)),("dir",n(t.dir as f64)),("loop",boolean(t.is_loop)),("stops",arr(t.stops.iter().map(|i|n(*i as f64)).collect())),("callStops",arr(t.stops.iter().filter(|id|t.calls.contains(*id)).map(|i|n(*i as f64)).collect())),("passengers",passengers)])}).collect();
+        result.set("trains",arr(trains));result.set("stationOccupancy",V::Object(self.occupancy.iter().map(|(id,v)|(id.to_string(),n(*v))).collect()));
+        if full{result.set("queues",queues);result.set("waitSince",wait);result.set("outside",outside);result.set("outsideSince",outside_since);result.set("transfers",arr(transfers));let mut definitions=vec![];for id in 0..self.defs.len(){let Some(j)=self.defs.get(&id)else{continue};let by_line=V::Object(j.byline.iter().map(|(id,v)|(name(*id),n(f64::from_bits(*v)))).collect());let legs=j.legs.iter().map(|l|obj(&[("service",text(&name(l.service))),("dir",n(l.dir as f64)),("from",n(l.from as f64)),("to",n(l.to as f64))])).collect();let mut row=obj(&[("id",n(id as f64)),("legs",arr(legs)),("daily",n(0.0)),("fare",n(j.fare)),("purpose",text(["work","shopping","leisure"][j.purpose])),("lineIds",arr(j.line_ids.iter().map(|id|text(&name(*id))).collect())),("byLine",by_line)]);if let Some(c)=&j.contract{row.set("from",n(c.from));row.set("to",n(c.to));row.set("back",boolean(c.back));row.set("hub",c.hub.map_or(V::Null,|i|text(&name(i))));row.set("externalKind",c.kind.map_or(V::Null,|i|text(&name(i))));}definitions.push(row);}result.set("defs",arr(definitions));}
+        else{result.set("nativeView",obj(&[("minute",n(self.now)),("summary",obj(&[("waiting",n(ni+no+nt)),("outside",n(no)),("transferring",n(nt)),("onboard",n(nb))])),("queues",queues),("outside",outside),("transfers",arr(transfers)),("stations",stations)]));}
+        result
+    }
 }

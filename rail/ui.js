@@ -247,7 +247,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=67') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=68') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -655,7 +655,7 @@
       toast('运营异常，请查看运行诊断；刷新可恢复上次成功存档。');
       on = false;
     }
-    if (on && s.economy?.blocked) M.settle(s);
+    if (on && s.economy?.blocked&&!M.nativeRuntime(traffic)) M.settle(s);
     if (on && s.economy?.blocked) {
       toast('资金不足或贷款到期未偿还，请先在资金面板处理。');
       on = false;
@@ -665,6 +665,7 @@
       if ($('undo')) $('undo').hidden = true;
     }
     playing = on;
+    M.runtimeIntent(traffic,{at:performance.now(),speed,playing,visible:!document.hidden,reset:true});
     lastFrame = 0;
     simulationClock.reset();
     $('play').textContent = on ? 'Ⅱ' : '▶ 开始运营';
@@ -1822,7 +1823,7 @@
       return;
     }
     if (b.dataset.repay) {
-      const r = M.repay(s, +b.dataset.repay);
+      const r = await M.repayAsync(s,traffic,+b.dataset.repay);
       undoState = null;
       save();
       renderAccount();
@@ -2193,7 +2194,7 @@
         render();
         break;
       case 'borrow-money': {
-        const r = M.borrow(s, +$('loan-amount').value);
+        const r = await M.borrowAsync(s,traffic,+$('loan-amount').value);
         undoState = null;
         save();
         renderAccount();
@@ -2611,6 +2612,7 @@
     renderConstructionPreview();
   });
   document.addEventListener('visibilitychange', () => {
+    M.runtimeIntent(traffic,{at:performance.now(),speed,playing,visible:!document.hidden});
     lastFrame = 0;
     simulationClock.reset();
     if (document.hidden) save();
@@ -2636,7 +2638,10 @@
       applyCamera();
       if (t === 1) cameraTween = null;
     }
-    if (playing && !calculating && lastFrame) {
+    if(M.nativeRuntime(traffic)){
+      const identity=traffic;
+      M.pulseAsync(s,traffic,{at:now,speed,budget:perf.budget,playing:playing&&!calculating,visible:!document.hidden}).then(result=>{if(identity!==traffic)return;computeMs=computeMs*.8+(result.clock?.ms||0)*.2;if(result.clock?.ok===false){setPlaying(false);toast('余额不足或贷款到期未偿还，运营已暂停。');}}).catch(error=>{if(identity!==traffic)return;runtimeFault=error.message;setPlaying(false);toast('运营计算异常，已暂停并保留上次存档。');});
+    }else     if (playing && !calculating && lastFrame) {
       try {
         const result = simulationClock.runAsync((now - lastFrame) / 1000, speed, perf.budget, (dt,options) => M.advanceBudgetAsync(
           s, traffic, dt,options), () => performance.now());
@@ -2746,7 +2751,7 @@
     }
     try {
       if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=67');
+        centerWorker = new Worker('operations-worker.js?v=68');
         centerForecastSent = null;
       }
       centerWorker.onerror = e => fail(e.message || '后台诊断不可用');

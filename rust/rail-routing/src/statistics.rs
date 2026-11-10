@@ -777,3 +777,14 @@ mod tests {
         assert!(missing.values[0].is_nan());
     }
 }
+
+impl Statistics{
+    pub(super) fn project_world(&mut self,q:&mut crate::value::Value,names:&[String]){
+        use crate::editor_support::*;use crate::value::Value as V;
+        let view=self.history_snapshot();q.set("current",view.get("current").clone());q.set("history",view.get("history").clone());
+        for(i,k)in ["totalCompleted","totalPassengerKm","bestDay","bestDayNumber","bestHour","bestHourMinute"].iter().enumerate(){q.get_mut("records").set(k,n(self.records[i]));}
+        q.set("hour",arr(self.hour.iter().map(|(minute,count)|obj(&[("minute",n(*minute)),("count",n(*count))])).collect()));
+        for(id,row)in &self.feedback{let line=q.get_mut("lines").get_mut(names.get(*id).map_or("",|s|s.as_str()));for(i,k)in ["attempted","lost","wait","boarded","bestDay"].iter().enumerate(){if row.present&(1<<i)!=0{line.set(k,n(row.values[i]));}}}
+        let _=V::Missing;
+    }
+}

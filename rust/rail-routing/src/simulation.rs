@@ -844,3 +844,20 @@ pub(super) fn timed_sample_rows(
         out
     }
 }
+
+// Structured seed path: install train state without advancing or emitting movement.
+pub(super) fn install_motion(token:f64,blocks:usize,releases:Vec<f64>,trains:Vec<(usize,usize,[f64;20],Vec<(f64,f64)>,Vec<bool>)>)->MotionState{
+    let mut delta=crate::numbers::Map::default();let mut order=vec![];
+    for(id,group,row,route,calls)in trains{order.push(id);let laps=if row[15].is_finite(){Some(row[15])}else{None};let segment=if row[16].is_finite(){Some(row[16] as usize)}else{None};delta.insert(id,DeltaTrain{group,laps,segment,row,route,calls});}
+    MotionState{token,rows:vec![],routes:vec![],calls:vec![],blocks,releases,delta,order}
+}
+
+pub(super) fn retire_finished(state:&mut Option<MotionState>)->Vec<usize>{if let Some(s)=state{let ids=s.order.iter().copied().filter(|id|s.delta[id].row[1]==3.0).collect::<Vec<_>>();for id in &ids{s.delta.remove(id);}s.order.retain(|id|!ids.contains(id));ids}else{vec![]}}
+
+pub(super) fn project_owned(state:&Option<MotionState>,runtime:&mut crate::value::Value,plan:&crate::value::Value,blocks:&[String]){
+    use crate::editor_support::*;use crate::value::Value as V;
+    let Some(s)=state else{return};let trains=runtime.get("trains").array().to_vec();let mut ordered=vec![];
+    for uid in &s.order{let Some(t)=s.delta.get(uid)else{continue};let Some(base)=trains.iter().find(|t|t.num("uid")==*uid as f64)else{continue};let mut view=base.clone();del(&mut view,"uid");let r=&t.row;view.set("status",text(match r[1]as i32{1=>"moving",3=>"finished",_=>"dwell"}));for(k,v)in [("index",r[2]),("progress",r[5]),("ready",r[8])]{view.set(k,n(v));}for(k,v)in [("departedAt",r[6]),("arriveAt",r[7])]{if v!=0.0{view.set(k,n(v));}else{del(&mut view,k);}}let line=plan.get("services").array().iter().find(|l|eq(l.get("id"),view.get("service")));if view.get("retiringRun").truth(){view.set("trackIds",view.get("retiringRun").get("trackIds").clone());}else if let Some(l)=line{view.set("trackIds",l.get("trackIds").clone());}if let Some(laps)=t.laps{view.set("laps",n(laps));}let segment=if let Some(i)=t.segment{let stops=view.get("stops").array();let track=if r[3]==1.0{i}else{i.saturating_sub(1)};let to=(i as i64+r[3]as i64).max(0)as usize;obj(&[("track",at(view.get("trackIds"),&n(track as f64)).clone()),("from",stops.get(i).cloned().unwrap_or(V::Missing)),("to",stops.get(to).cloned().unwrap_or(V::Missing))])}else{V::Null};view.set("segment",segment);ordered.push(view);}
+    runtime.set("trains",arr(ordered));runtime.set("blocks",V::Object(blocks.iter().enumerate().filter_map(|(i,k)|s.releases.get(i).map(|v|(k.clone(),n(*v)))).collect()));
+}
+pub(super) fn daily_changes(state:&mut Option<Sampling>,rows:&[(usize,f64)]){if let Some(t)=state.as_mut().and_then(|s|s.temporal.as_mut()){for(i,value)in rows{if let Some(v)=t.daily.get_mut(*i){*v=*value;}}}}

@@ -6,6 +6,8 @@ pub(super) struct Settlement {
     token: f64,
     pub(super) economy: Vec<f64>,
     pub(super) loans: Vec<Vec<f64>>,
+    pub(super) loan_views:Vec<crate::value::Value>,
+    pub(super) ledger:Vec<crate::value::Value>,
     statistics: bool,
     weights: Vec<(usize, f64)>,
 }
@@ -31,6 +33,7 @@ pub(super) fn read(frame: &[f64], state: &mut Option<Settlement>) {
             loans,
             statistics,
             weights,
+            loan_views:vec![],ledger:vec![],
         });
     } else {
         assert_eq!(frame.len(), 16);
@@ -83,12 +86,14 @@ pub(super) fn settle(
     state.carry = frame[6];
     let n = int(output[17]);
     let mut at = 18;
-    state.loans.clear();
+    state.loans.clear();let previous=std::mem::take(&mut state.loan_views);
     for _ in 0..n {
+        if !previous.is_empty(){let ix=output[at]as usize;let mut row=previous.get(ix).cloned().unwrap_or_default();for(i,key)in ["principal","interest","installment","nextDue"].iter().enumerate(){row.set(key,crate::value::Value::Number(output[at+1+i]));}state.loan_views.push(row);}
         state.loans.push(output[at..at + 5].to_vec());
         at += 5;
     }
     let payments = int(output[at]);
+    for bill in &output[at+1..at+1+payments]{use crate::editor_support::*;state.ledger.insert(0,obj(&[("minute",n(frame[3])),("type",text("每日偿还贷款本息")),("amount",n(-*bill))]));}state.ledger.truncate(80);
     at += 1 + payments;
     let allocations = int(output[at]);
     at += 1;

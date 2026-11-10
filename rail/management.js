@@ -11,6 +11,7 @@
     U = node ? require('./urban-growth') : root.RailUrban,
     C = node ? require('./city') : root.RailCity,
     RV = node ? require('./operations-review') : root.RailOperationsReview;
+  const Runtime=node?require('./runtime-wasm'):root.RailRuntime;
   const Engine = node ? require('./engine-wasm') : root.RailNativeEngine;
   const Native = node ? require('./operations-wasm') : root.RailNativeOperations;
   const INITIAL = 5e9,
@@ -84,6 +85,7 @@
   }
 
   function advance(s, rt, minutes) {
+    if(Runtime.has(rt))return Runtime.advance(s,rt,minutes,{full:true}).running;
     validInterval(minutes);
     init(s);
     return advanceInterval(s, rt, minutes);
@@ -91,6 +93,7 @@
 
   // Yield between complete legacy UI quanta, preserving loan-split and callback order.
   function advanceBudget(s, rt, minutes, options = {}) {
+    if(Runtime.has(rt))return Runtime.advance(s,rt,minutes,options);
     validInterval(minutes, 1e8);
     const now = options.now || (() => performance.now()),
       budget = options.budget ?? 6,
@@ -184,8 +187,9 @@
     return step.value;
   }
   const pending=new WeakMap(),errors=new WeakMap();
-  function whenIdle(rt) {return pending.get(rt)||Promise.resolve();}
+  function whenIdle(rt) {return Runtime.has(rt)?Runtime.idle(rt):pending.get(rt)||Promise.resolve();}
   function advanceBudgetAsync(s,rt,minutes,options={}) {
+    if(Runtime.has(rt))return Runtime.advanceAsync(s,rt,minutes,options);
     const task=whenIdle(rt).then(async()=>{
       validInterval(minutes,1e8);init(s);
       const now=options.now||(()=>performance.now()),start=now(),budget=options.budget??6,max=options.maxSteps??100;
@@ -225,8 +229,11 @@
     repay,
     settle,
     advance,
+    borrowAsync:(s,rt,amount)=>Runtime.has(rt)?Runtime.credit(rt,{creditAction:1,amount}).then(r=>r.error?{error:CREDIT_ERRORS[r.error]}:{}):Promise.resolve(borrow(s,amount)),
+    repayAsync:(s,rt,loanId)=>Runtime.has(rt)?Runtime.credit(rt,{creditAction:2,loanId}).then(r=>r.error?{error:CREDIT_ERRORS[r.error]}:{}):Promise.resolve(repay(s,loanId)),
+    pulseAsync:(s,rt,intent)=>Runtime.pulse(s,rt,intent),runtimeIntent:(rt,intent)=>Runtime.intent(rt,intent),nativeRuntime:rt=>Runtime.has(rt),
     advanceBudget,advanceBudgetAsync,whenIdle,
-    isBusy:rt=>pending.has(rt),lastError:rt=>errors.get(rt),
+    isBusy:rt=>Runtime.has(rt)?Runtime.isBusy(rt):pending.has(rt),lastError:rt=>errors.get(rt),
     signature,
     INITIAL,
     CREDIT,

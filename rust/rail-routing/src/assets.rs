@@ -108,7 +108,7 @@ fn record(e: &mut V, label: &str, amount: f64) {
     rows.insert(0, row);
     rows.truncate(80);
 }
-fn init(s: &mut V, cfg: &V) {
+pub(super) fn init(s: &mut V, cfg: &V) {
     if !s.get("economy").truth() {
         s.set(
             "economy",

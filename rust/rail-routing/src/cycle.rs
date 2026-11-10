@@ -227,6 +227,12 @@ pub(super) fn run(
         r.at += n;
     }
     assert_eq!(r.at, input.len());
+    execute(state,int(input[4]),int(input[5]),if input[0]==2.0{Some(input[29])}else{None},sparse,&ids,templates,rules,prep,finance,&parts,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state)
+}
+pub(super) fn execute(
+    state:&mut Cycle,serial:usize,next:usize,legacy_carry:Option<f64>,sparse:bool,ids:&[usize],templates:&[f64],rules:&[f64],prep:&[f64],finance:&[f64],parts:&[&[f64]],
+    sampling_state:&mut Option<crate::simulation::Sampling>,feedback_cache:&mut crate::operations::CoverageCache,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<crate::queues::Queues>,settlement_state:&mut Option<crate::engine::Settlement>
+)->Vec<f64>{
     assert!((2.0..=5.0).contains(&parts[0][0]));
     assert_eq!(parts[0][2], 0.0);
     let (prepared, minute) = if let Some(pending) = state.pending.take() {
@@ -279,8 +285,8 @@ pub(super) fn run(
             &requests,
             &[],
             &[],
-            int(input[4]),
-            int(input[5]),
+            serial,
+            next,
             &[],
             &[],
             &[],
@@ -325,8 +331,8 @@ pub(super) fn run(
         at: 0,
     };
     let nt = tr.u();
-    let mut serial = int(input[4]);
-    let mut next = int(input[5]);
+    let mut serial = serial;
+    let mut next = next;
     let mut spawned = vec![];
     let mut train_data = parts[4].to_vec();
     let mut new_motion = vec![];
@@ -375,21 +381,12 @@ pub(super) fn run(
     tail.extend(order);
     tail.extend_from_slice(&[0.0, if ns > 0 { sample[3] } else { 0.0 }]);
     tail.extend(arrivals);
-    let mut packet = vec![];
-    packet.extend_from_slice(&header);
-    packet.extend_from_slice(&motion);
-    packet.push(definitions[0]);
-    packet.extend_from_slice(&parts[2][1..]);
-    packet.extend_from_slice(&definitions[1..]);
-    drop(definitions);
-    for p in [parts[3], &train_data, parts[5], &tail, parts[7]] {
-        packet.extend_from_slice(p);
-    }
+    let mut all_definitions=vec![definitions[0]];all_definitions.extend_from_slice(&parts[2][1..]);all_definitions.extend_from_slice(&definitions[1..]);drop(definitions);
     let mut patch = vec![];
     let mut maturity = vec![];
     if nf > 0 {
         let mut p = 2;
-        for &id in &ids {
+        for &id in ids {
             maturity.push((id, feedback[p + 1], feedback[p + 2]));
             patch.push((
                 id,
@@ -407,7 +404,7 @@ pub(super) fn run(
     if !finance.is_empty() {
         crate::engine::read(finance, settlement_state);
     }
-    let mut queue = crate::queues::run_compact(&packet, simulation_state, queue_state, &patch);
+    let mut queue = crate::queues::run_parts(crate::queues::Packet{header:&header,motion:&motion,definitions:&all_definitions,limits:parts[3],trains:&train_data,snapshot:parts[5],tail:&tail,statistics:parts[7]},simulation_state,queue_state,&patch);
     if let Some(stats) = queue_state.as_mut().unwrap().finance_stats() {
         for (id, a, t) in maturity {
             stats.maturity(id, a, t);
@@ -425,8 +422,8 @@ pub(super) fn run(
     state.next = next;
     if !finance.is_empty() {
         state.carry = finance[6];
-    } else if input[0] == 2.0 {
-        state.carry = input[29];
+    } else if let Some(carry) = legacy_carry {
+        state.carry = carry;
     }
     if ns > 0 && parts[0][6] != 0.0 {
         state.arrival[0] += sample[0];
@@ -456,3 +453,12 @@ pub(super) fn run(
         &account,
     )
 }
+
+impl Cycle{
+    pub(super) fn owned(token:f64,catalog:f64,count:usize,next:usize,arrival:[f64;3],carry:f64,keys:Vec<(Rc<str>,usize)>)->Self{
+        Self{token,catalog,count,next,arrival,carry,loaded:true,keys:keys.into_iter().collect(),profiles:HashMap::new(),pending:None}
+    }
+    pub(super) fn install_profile(&mut self,index:usize,key:Rc<str>,service:f64,data:Vec<f64>){let lines=line_ids(&data);self.profiles.insert(index,Profile{key,service,id:None,data,lines});}
+}
+
+impl Cycle{pub(super) fn collect_keys(&mut self,q:&mut crate::queues::Queues){for(key,id)in q.take_keys(){self.keys.insert(key,id);self.count=self.count.max(id+1);}}}

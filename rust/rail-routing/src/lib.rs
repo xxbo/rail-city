@@ -2,6 +2,9 @@
 //! Heap tie order, tolerances and arithmetic order intentionally match the frozen JS oracle.
 mod assets;
 mod calendar;
+mod runtime_control;
+mod runtime_seed;
+mod runtime_session;
 mod catalog;
 mod forecast_session;
 mod connections;

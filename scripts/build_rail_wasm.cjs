@@ -16,7 +16,6 @@ const root = resolve(__dirname, '..'),
   crate = join(root, 'rust/rail-routing');
 const cargo = process.env.RAIL_CARGO || 'cargo';
 for (const args of [
-    ['test', '--locked', '--manifest-path', join(crate, 'Cargo.toml')],
     ['build', '--locked', '--release', '--target', 'wasm32-unknown-unknown', '--manifest-path', join(crate, 'Cargo.toml')]
   ]) {
   const run = spawnSync(cargo, args, {
@@ -30,7 +29,7 @@ for (const args of [
   if (run.status !== 0) process.exit(run.status || 1);
 }
 const bytes = readFileSync(join(crate, 'target/wasm32-unknown-unknown/release/rail_routing.wasm'));
-const target = join(root, 'rail/wasm/rail-core-v27.wasm');
+const target = join(root, 'rail/wasm/rail-core-v28.wasm');
 const hash = crypto.createHash('sha256').update(bytes).digest('hex');
 if (process.argv.includes('--check')) {
   if (!readFileSync(target).equals(bytes)) throw Error('Committed WASM differs from pinned Rust source build');

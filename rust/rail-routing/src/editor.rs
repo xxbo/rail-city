@@ -1391,7 +1391,7 @@ pub(super) fn query(s: &mut V, op: &str, args: &V, cfg: &V) -> Res<V> {
         _ => Err(error("未知的线网查询。")),
     }
 }
-fn graph(s: &V) -> Res<V> {
+pub(super) fn graph(s: &V) -> Res<V> {
     let op = expanded(s, minute(s))?;
     let mut adj = vec![vec![]; s.get("nodes").array().len()];
     for l in op.get("services").array() {
