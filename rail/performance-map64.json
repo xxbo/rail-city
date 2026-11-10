@@ -1,0 +1,2325 @@
+{
+  "unit": "P2-3 / MAP64",
+  "previous": "a207b9d900f174a371f809be34d4502f6c31023d",
+  "pureJavaScript": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+  "wasm": {
+    "bytes": 1535667,
+    "sha256": "cbd58a3de0f9c424ac21ac88024f5d6bb8479858dfeb6b830d92836e1a17567d"
+  },
+  "diagnostics": [
+    {
+      "baseline": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+      "lines": 10,
+      "stations": 25,
+      "profiles": 6000,
+      "method": "Two reversed rounds of independent processes; 5 warmups then 7x3 API calls; input copies outside timing; complete ordered JSON hashes equal; includes wire, native compute, formatting and output projection.",
+      "summary": [
+        {
+          "label": "all line forecasts",
+          "modes": {
+            "javascript": {
+              "medianMs": 5.8298045,
+              "retainedHeapMiB": 11.825077056884766,
+              "arrayBuffersMiB": 2.8316144943237305,
+              "peakRssMiB": 100.20703125
+            },
+            "previous-compact": {
+              "medianMs": 20.02697283333334,
+              "retainedHeapMiB": 12.361587524414062,
+              "arrayBuffersMiB": 2.881415367126465,
+              "peakRssMiB": 317.51171875
+            },
+            "current-raw": {
+              "medianMs": 6.848788500000003,
+              "retainedHeapMiB": 12.115734100341797,
+              "arrayBuffersMiB": 2.8935461044311523,
+              "peakRssMiB": 145.07421875
+            },
+            "current-compact": {
+              "medianMs": 1.7143941666666698,
+              "retainedHeapMiB": 12.220260620117188,
+              "arrayBuffersMiB": 2.9393224716186523,
+              "peakRssMiB": 114.828125
+            }
+          }
+        },
+        {
+          "label": "operations and metrics",
+          "modes": {
+            "javascript": {
+              "medianMs": 16.283828999999987,
+              "retainedHeapMiB": 12.19549560546875,
+              "arrayBuffersMiB": 2.8316144943237305,
+              "peakRssMiB": 100.20703125
+            },
+            "previous-compact": {
+              "medianMs": 41.83800900000002,
+              "retainedHeapMiB": 13.17108154296875,
+              "arrayBuffersMiB": 2.9496374130249023,
+              "peakRssMiB": 317.51171875
+            },
+            "current-raw": {
+              "medianMs": 7.7423189999999895,
+              "retainedHeapMiB": 12.301654815673828,
+              "arrayBuffersMiB": 2.8935461044311523,
+              "peakRssMiB": 145.07421875
+            },
+            "current-compact": {
+              "medianMs": 3.847446166666667,
+              "retainedHeapMiB": 12.362957000732422,
+              "arrayBuffersMiB": 2.9393224716186523,
+              "peakRssMiB": 114.828125
+            }
+          }
+        },
+        {
+          "label": "crowding alerts",
+          "modes": {
+            "javascript": {
+              "medianMs": 0.10060000000000476,
+              "retainedHeapMiB": 12.164325714111328,
+              "arrayBuffersMiB": 2.8316144943237305,
+              "peakRssMiB": 100.20703125
+            },
+            "previous-compact": {
+              "medianMs": 0.19314783333334162,
+              "retainedHeapMiB": 13.153419494628906,
+              "arrayBuffersMiB": 2.9496374130249023,
+              "peakRssMiB": 317.51171875
+            },
+            "current-raw": {
+              "medianMs": 0.4865266666666722,
+              "retainedHeapMiB": 12.183124542236328,
+              "arrayBuffersMiB": 2.8935461044311523,
+              "peakRssMiB": 145.07421875
+            },
+            "current-compact": {
+              "medianMs": 0.5642906666666647,
+              "retainedHeapMiB": 12.298721313476562,
+              "arrayBuffersMiB": 2.9393224716186523,
+              "peakRssMiB": 114.828125
+            }
+          }
+        },
+        {
+          "label": "actual observation sample",
+          "modes": {
+            "javascript": {
+              "medianMs": 0.03915066666667144,
+              "retainedHeapMiB": 12.555679321289062,
+              "arrayBuffersMiB": 2.8316144943237305,
+              "peakRssMiB": 100.20703125
+            },
+            "previous-compact": {
+              "medianMs": 0.03818100000000868,
+              "retainedHeapMiB": 13.544143676757812,
+              "arrayBuffersMiB": 2.9496374130249023,
+              "peakRssMiB": 317.51171875
+            },
+            "current-raw": {
+              "medianMs": 2.376768000000008,
+              "retainedHeapMiB": 12.674297332763672,
+              "arrayBuffersMiB": 2.8935461044311523,
+              "peakRssMiB": 145.07421875
+            },
+            "current-compact": {
+              "medianMs": 2.268461000000002,
+              "retainedHeapMiB": 12.737586975097656,
+              "arrayBuffersMiB": 2.9393224716186523,
+              "peakRssMiB": 114.828125
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "lines": 10,
+          "stations": 25,
+          "profiles": 6000,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                6.124675333333339,
+                6.5108890000000015,
+                5.542254000000004,
+                5.172446666666663,
+                5.386305333333344,
+                6.447916000000002,
+                5.672753999999998
+              ],
+              "medianMs": 5.672753999999998,
+              "hash": "d590042f392e65b4e543d214b051e467c75d71e9864d963ae3207dd443a237ae",
+              "heapMiB": 11.824600219726562,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                16.73901166666667,
+                14.73809266666666,
+                15.07566433333333,
+                17.812846999999994,
+                17.365123999999998,
+                21.244626666666665,
+                15.988964333333305
+              ],
+              "medianMs": 16.73901166666667,
+              "hash": "eaf11b610eab79c31831460fea4f4c8dabc5a4bda247e4df8b98502c41857ba0",
+              "heapMiB": 12.194992065429688,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.14902133333331827,
+                0.15922999999997955,
+                0.0907000000000077,
+                0.09050633333333735,
+                0.086009666666655,
+                0.10737200000001697,
+                0.09382799999999254
+              ],
+              "medianMs": 0.09382799999999254,
+              "hash": "ded392186dbab7c13b066f7123a2c64251109f30cda285e14dad0583961facea",
+              "heapMiB": 12.163818359375,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                0.05998033333332842,
+                0.03893533333333229,
+                0.02991833333332276,
+                0.029180666666661637,
+                0.028399333333330407,
+                0.03968000000001363,
+                0.049137333333343726
+              ],
+              "medianMs": 0.03893533333333229,
+              "hash": "d1e5456831ca51e235e031676c4fe4e9380a2625b3b4c834729519be3ddde38a",
+              "heapMiB": 12.555130004882812,
+              "arrayBuffersMiB": 2.8316144943237305
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 100.20703125,
+          "round": 0
+        },
+        {
+          "mode": "previous-compact",
+          "lines": 10,
+          "stations": 25,
+          "profiles": 6000,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                20.419596333333345,
+                26.142606333333333,
+                22.303108666666656,
+                21.48645433333333,
+                19.31488466666667,
+                21.62590799999998,
+                17.24152566666669
+              ],
+              "medianMs": 21.48645433333333,
+              "hash": "d590042f392e65b4e543d214b051e467c75d71e9864d963ae3207dd443a237ae",
+              "heapMiB": 12.361518859863281,
+              "arrayBuffersMiB": 2.881415367126465
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                40.3154533333333,
+                42.075933333333374,
+                50.07257933333335,
+                46.69726799999997,
+                38.963182999999994,
+                41.60008466666667,
+                45.07174266666667
+              ],
+              "medianMs": 42.075933333333374,
+              "hash": "eaf11b610eab79c31831460fea4f4c8dabc5a4bda247e4df8b98502c41857ba0",
+              "heapMiB": 13.172409057617188,
+              "arrayBuffersMiB": 2.9496374130249023
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.22706233333330297,
+                0.21363899999998162,
+                0.20589033333332432,
+                0.24904866666664324,
+                0.19335466666666434,
+                0.306949333333326,
+                0.11150133333338393
+              ],
+              "medianMs": 0.21363899999998162,
+              "hash": "ded392186dbab7c13b066f7123a2c64251109f30cda285e14dad0583961facea",
+              "heapMiB": 13.153770446777344,
+              "arrayBuffersMiB": 2.9496374130249023
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                0.12968900000002273,
+                0.06342233333339209,
+                0.032836333333307266,
+                0.03192466666670649,
+                0.0421003333333374,
+                0.029658000000002478,
+                0.04321166666666917
+              ],
+              "medianMs": 0.0421003333333374,
+              "hash": "d1e5456831ca51e235e031676c4fe4e9380a2625b3b4c834729519be3ddde38a",
+              "heapMiB": 13.544227600097656,
+              "arrayBuffersMiB": 2.9496374130249023
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 314.0078125,
+          "round": 0
+        },
+        {
+          "mode": "current-raw",
+          "lines": 10,
+          "stations": 25,
+          "profiles": 6000,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                7.852343,
+                7.060796333333333,
+                6.203520666666672,
+                7.407893000000001,
+                6.9306036666666655,
+                7.819189666666659,
+                5.011537333333327
+              ],
+              "medianMs": 7.060796333333333,
+              "hash": "d590042f392e65b4e543d214b051e467c75d71e9864d963ae3207dd443a237ae",
+              "heapMiB": 12.115806579589844,
+              "arrayBuffersMiB": 2.8935461044311523
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                11.024326000000011,
+                8.141745999999992,
+                8.200702999999995,
+                7.745141666666655,
+                6.956809666666648,
+                7.411488333333334,
+                7.107970999999982
+              ],
+              "medianMs": 7.745141666666655,
+              "hash": "eaf11b610eab79c31831460fea4f4c8dabc5a4bda247e4df8b98502c41857ba0",
+              "heapMiB": 12.301734924316406,
+              "arrayBuffersMiB": 2.8935461044311523
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.4278416666666847,
+                0.5687139999999999,
+                0.729252666666639,
+                0.73284799999999,
+                0.735054666666656,
+                0.495804000000021,
+                0.3860819999999876
+              ],
+              "medianMs": 0.5687139999999999,
+              "hash": "ded392186dbab7c13b066f7123a2c64251109f30cda285e14dad0583961facea",
+              "heapMiB": 12.183181762695312,
+              "arrayBuffersMiB": 2.8935461044311523
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                2.4787033333333284,
+                2.571963333333315,
+                2.062642333333315,
+                2.2748326666666876,
+                1.9469346666666827,
+                1.9805756666666714,
+                1.9494183333333315
+              ],
+              "medianMs": 2.062642333333315,
+              "hash": "d1e5456831ca51e235e031676c4fe4e9380a2625b3b4c834729519be3ddde38a",
+              "heapMiB": 12.673141479492188,
+              "arrayBuffersMiB": 2.8935461044311523
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 140.34765625,
+          "round": 0
+        },
+        {
+          "mode": "current-compact",
+          "lines": 10,
+          "stations": 25,
+          "profiles": 6000,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                2.4396906666666687,
+                1.5987930000000006,
+                1.6336960000000051,
+                1.8060089999999984,
+                1.7189513333333366,
+                1.7851210000000037,
+                1.7098370000000027
+              ],
+              "medianMs": 1.7189513333333366,
+              "hash": "d590042f392e65b4e543d214b051e467c75d71e9864d963ae3207dd443a237ae",
+              "heapMiB": 12.177337646484375,
+              "arrayBuffersMiB": 2.9393224716186523
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                4.731018333333338,
+                4.732810333333343,
+                4.350921999999987,
+                3.9497770000000023,
+                4.1832856666666585,
+                3.926588666666665,
+                3.0098633333333282
+              ],
+              "medianMs": 4.1832856666666585,
+              "hash": "eaf11b610eab79c31831460fea4f4c8dabc5a4bda247e4df8b98502c41857ba0",
+              "heapMiB": 12.36322021484375,
+              "arrayBuffersMiB": 2.9393224716186523
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.5513009999999857,
+                0.6976916666666663,
+                0.6383420000000039,
+                0.688858000000001,
+                0.5642606666666742,
+                0.5476753333333401,
+                0.5165353333333277
+              ],
+              "medianMs": 0.5642606666666742,
+              "hash": "ded392186dbab7c13b066f7123a2c64251109f30cda285e14dad0583961facea",
+              "heapMiB": 12.298599243164062,
+              "arrayBuffersMiB": 2.9393224716186523
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                2.593105666666664,
+                2.989876666666665,
+                2.1027363333333255,
+                2.0310983333333184,
+                3.080943999999988,
+                3.266102999999987,
+                2.1738599999999906
+              ],
+              "medianMs": 2.593105666666664,
+              "hash": "d1e5456831ca51e235e031676c4fe4e9380a2625b3b4c834729519be3ddde38a",
+              "heapMiB": 12.737510681152344,
+              "arrayBuffersMiB": 2.9393224716186523
+            }
+          ],
+          "traffic": {
+            "warm": {
+              "calls": 1,
+              "inputBytes": 28064,
+              "outputBytes": 54544
+            },
+            "cold": {
+              "calls": 1,
+              "inputBytes": 1603480,
+              "outputBytes": 54544
+            }
+          },
+          "peakRssMiB": 114.74609375,
+          "round": 0
+        },
+        {
+          "mode": "current-compact",
+          "lines": 10,
+          "stations": 25,
+          "profiles": 6000,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                1.7056509999999985,
+                1.857874,
+                1.8161576666666595,
+                1.7496303333333287,
+                1.2630506666666672,
+                1.4251883333333335,
+                1.4617733333333358
+              ],
+              "medianMs": 1.7056509999999985,
+              "hash": "d590042f392e65b4e543d214b051e467c75d71e9864d963ae3207dd443a237ae",
+              "heapMiB": 12.26318359375,
+              "arrayBuffersMiB": 2.9393224716186523
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                3.411859333333325,
+                3.768303666666668,
+                3.9981336666666607,
+                3.043086999999995,
+                3.389472666666658,
+                3.605585,
+                3.4036669999999845
+              ],
+              "medianMs": 3.411859333333325,
+              "hash": "eaf11b610eab79c31831460fea4f4c8dabc5a4bda247e4df8b98502c41857ba0",
+              "heapMiB": 12.362693786621094,
+              "arrayBuffersMiB": 2.9393224716186523
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.5265569999999874,
+                0.590547000000015,
+                0.5058523333333369,
+                0.4901656666666743,
+                0.5643206666666553,
+                0.7233570000000024,
+                0.7468423333333286
+              ],
+              "medianMs": 0.5643206666666553,
+              "hash": "ded392186dbab7c13b066f7123a2c64251109f30cda285e14dad0583961facea",
+              "heapMiB": 12.298843383789062,
+              "arrayBuffersMiB": 2.9393224716186523
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                2.342548000000003,
+                2.3519319999999957,
+                2.194374000000001,
+                1.9359183333333476,
+                2.0495196666666593,
+                3.281696666666676,
+                2.180333333333332
+              ],
+              "medianMs": 2.194374000000001,
+              "hash": "d1e5456831ca51e235e031676c4fe4e9380a2625b3b4c834729519be3ddde38a",
+              "heapMiB": 12.737663269042969,
+              "arrayBuffersMiB": 2.9393224716186523
+            }
+          ],
+          "traffic": {
+            "warm": {
+              "calls": 1,
+              "inputBytes": 28064,
+              "outputBytes": 54544
+            },
+            "cold": {
+              "calls": 1,
+              "inputBytes": 1603480,
+              "outputBytes": 54544
+            }
+          },
+          "peakRssMiB": 114.828125,
+          "round": 1
+        },
+        {
+          "mode": "current-raw",
+          "lines": 10,
+          "stations": 25,
+          "profiles": 6000,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                7.5009196666666655,
+                6.377790333333327,
+                5.450602999999991,
+                6.76697333333334,
+                5.8475343333333285,
+                7.275440333333336,
+                5.927204333333331
+              ],
+              "medianMs": 6.377790333333327,
+              "hash": "d590042f392e65b4e543d214b051e467c75d71e9864d963ae3207dd443a237ae",
+              "heapMiB": 12.11566162109375,
+              "arrayBuffersMiB": 2.8935461044311523
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                10.46478399999999,
+                11.323438333333343,
+                9.605732333333341,
+                6.9142459999999915,
+                6.395863999999999,
+                7.739496333333325,
+                7.249711000000009
+              ],
+              "medianMs": 7.739496333333325,
+              "hash": "eaf11b610eab79c31831460fea4f4c8dabc5a4bda247e4df8b98502c41857ba0",
+              "heapMiB": 12.30157470703125,
+              "arrayBuffersMiB": 2.8935461044311523
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.3966813333333145,
+                0.4772493333333235,
+                0.4335399999999936,
+                0.506510333333343,
+                0.525745666666694,
+                0.4499883333333325,
+                0.47187133333333503
+              ],
+              "medianMs": 0.47187133333333503,
+              "hash": "ded392186dbab7c13b066f7123a2c64251109f30cda285e14dad0583961facea",
+              "heapMiB": 12.183067321777344,
+              "arrayBuffersMiB": 2.8935461044311523
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                2.7395193333333054,
+                2.704269999999989,
+                2.17167333333335,
+                2.7031516666666753,
+                3.2276653333333343,
+                3.403072999999987,
+                1.8624406666666573
+              ],
+              "medianMs": 2.704269999999989,
+              "hash": "d1e5456831ca51e235e031676c4fe4e9380a2625b3b4c834729519be3ddde38a",
+              "heapMiB": 12.675453186035156,
+              "arrayBuffersMiB": 2.8935461044311523
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 145.07421875,
+          "round": 1
+        },
+        {
+          "mode": "previous-compact",
+          "lines": 10,
+          "stations": 25,
+          "profiles": 6000,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                19.02763166666666,
+                22.967463333333342,
+                20.87814766666666,
+                19.429857666666674,
+                16.96077566666666,
+                19.634349333333336,
+                17.269661666666668
+              ],
+              "medianMs": 19.429857666666674,
+              "hash": "d590042f392e65b4e543d214b051e467c75d71e9864d963ae3207dd443a237ae",
+              "heapMiB": 12.361656188964844,
+              "arrayBuffersMiB": 2.881415367126465
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                39.899252666666676,
+                40.09451200000001,
+                48.515224666666654,
+                40.21309899999998,
+                42.13432800000002,
+                37.45838999999993,
+                42.520600666666645
+              ],
+              "medianMs": 40.21309899999998,
+              "hash": "eaf11b610eab79c31831460fea4f4c8dabc5a4bda247e4df8b98502c41857ba0",
+              "heapMiB": 13.169754028320312,
+              "arrayBuffersMiB": 2.9496374130249023
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.17203266666660966,
+                0.23296800000002804,
+                0.17865933333329545,
+                0.11849166666668982,
+                0.1929410000000189,
+                0.16000466666666094,
+                0.10766866666669254
+              ],
+              "medianMs": 0.17203266666660966,
+              "hash": "ded392186dbab7c13b066f7123a2c64251109f30cda285e14dad0583961facea",
+              "heapMiB": 13.153068542480469,
+              "arrayBuffersMiB": 2.9496374130249023
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                0.05296999999995933,
+                0.06779899999999846,
+                0.03272933333331215,
+                0.03426166666667996,
+                0.025138000000045697,
+                0.024814333333324612,
+                0.04446033333329069
+              ],
+              "medianMs": 0.03426166666667996,
+              "hash": "d1e5456831ca51e235e031676c4fe4e9380a2625b3b4c834729519be3ddde38a",
+              "heapMiB": 13.544059753417969,
+              "arrayBuffersMiB": 2.9496374130249023
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 317.51171875,
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "lines": 10,
+          "stations": 25,
+          "profiles": 6000,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                6.8647943333333314,
+                5.841375333333332,
+                5.742529333333333,
+                5.591117666666662,
+                5.925852333333334,
+                6.084758333333336,
+                5.818233666666667
+              ],
+              "medianMs": 5.841375333333332,
+              "hash": "d590042f392e65b4e543d214b051e467c75d71e9864d963ae3207dd443a237ae",
+              "heapMiB": 11.825553894042969,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                18.108572666666685,
+                16.040689333333336,
+                15.997083000000012,
+                15.683136666666693,
+                15.096178666666674,
+                22.505724333333358,
+                16.526968666666637
+              ],
+              "medianMs": 16.040689333333336,
+              "hash": "eaf11b610eab79c31831460fea4f4c8dabc5a4bda247e4df8b98502c41857ba0",
+              "heapMiB": 12.195999145507812,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.15097066666665646,
+                0.17884633333331598,
+                0.11556099999999485,
+                0.07996399999998023,
+                0.08026433333331322,
+                0.19121466666664824,
+                0.08243100000000443
+              ],
+              "medianMs": 0.11556099999999485,
+              "hash": "ded392186dbab7c13b066f7123a2c64251109f30cda285e14dad0583961facea",
+              "heapMiB": 12.164833068847656,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                0.08396000000000943,
+                0.042010000000004766,
+                0.028249333333330167,
+                0.02944433333334473,
+                0.025398333333328083,
+                0.039366000000010594,
+                0.048683333333315204
+              ],
+              "medianMs": 0.039366000000010594,
+              "hash": "d1e5456831ca51e235e031676c4fe4e9380a2625b3b4c834729519be3ddde38a",
+              "heapMiB": 12.556228637695312,
+              "arrayBuffersMiB": 2.8316144943237305
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 97.8984375,
+          "round": 1
+        }
+      ]
+    },
+    {
+      "baseline": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+      "lines": 14,
+      "stations": 49,
+      "profiles": 24696,
+      "method": "Two reversed rounds of independent processes; 5 warmups then 7x3 API calls; input copies outside timing; complete ordered JSON hashes equal; includes wire, native compute, formatting and output projection.",
+      "summary": [
+        {
+          "label": "all line forecasts",
+          "modes": {
+            "javascript": {
+              "medianMs": 30.084847166666673,
+              "retainedHeapMiB": 25.285663604736328,
+              "arrayBuffersMiB": 11.57050609588623,
+              "peakRssMiB": 131.21875
+            },
+            "previous-compact": {
+              "medianMs": 69.61011450000001,
+              "retainedHeapMiB": 26.14797592163086,
+              "arrayBuffersMiB": 11.84580135345459,
+              "peakRssMiB": 398.23046875
+            },
+            "current-raw": {
+              "medianMs": 21.50817833333334,
+              "retainedHeapMiB": 25.53766632080078,
+              "arrayBuffersMiB": 11.632437705993652,
+              "peakRssMiB": 240.03515625
+            },
+            "current-compact": {
+              "medianMs": 4.371927833333331,
+              "retainedHeapMiB": 25.904983520507812,
+              "arrayBuffersMiB": 11.820853233337402,
+              "peakRssMiB": 181.4765625
+            }
+          }
+        },
+        {
+          "label": "operations and metrics",
+          "modes": {
+            "javascript": {
+              "medianMs": 87.51098849999998,
+              "retainedHeapMiB": 24.81710433959961,
+              "arrayBuffersMiB": 11.57050609588623,
+              "peakRssMiB": 131.21875
+            },
+            "previous-compact": {
+              "medianMs": 174.06799216666667,
+              "retainedHeapMiB": 24.725234985351562,
+              "arrayBuffersMiB": 11.837882041931152,
+              "peakRssMiB": 398.23046875
+            },
+            "current-raw": {
+              "medianMs": 25.621344499999964,
+              "retainedHeapMiB": 24.991313934326172,
+              "arrayBuffersMiB": 11.632437705993652,
+              "peakRssMiB": 240.03515625
+            },
+            "current-compact": {
+              "medianMs": 7.431276833333338,
+              "retainedHeapMiB": 25.365703582763672,
+              "arrayBuffersMiB": 11.820853233337402,
+              "peakRssMiB": 181.4765625
+            }
+          }
+        },
+        {
+          "label": "crowding alerts",
+          "modes": {
+            "javascript": {
+              "medianMs": 0.19742266666670122,
+              "retainedHeapMiB": 24.743587493896484,
+              "arrayBuffersMiB": 11.57050609588623,
+              "peakRssMiB": 131.21875
+            },
+            "previous-compact": {
+              "medianMs": 0.3234843333331507,
+              "retainedHeapMiB": 24.633148193359375,
+              "arrayBuffersMiB": 11.837882041931152,
+              "peakRssMiB": 398.23046875
+            },
+            "current-raw": {
+              "medianMs": 0.7210835000000012,
+              "retainedHeapMiB": 24.783733367919922,
+              "arrayBuffersMiB": 11.632437705993652,
+              "peakRssMiB": 240.03515625
+            },
+            "current-compact": {
+              "medianMs": 0.7693646666666798,
+              "retainedHeapMiB": 25.156963348388672,
+              "arrayBuffersMiB": 11.820853233337402,
+              "peakRssMiB": 181.4765625
+            }
+          }
+        },
+        {
+          "label": "actual observation sample",
+          "modes": {
+            "javascript": {
+              "medianMs": 0.05800733333330754,
+              "retainedHeapMiB": 25.209335327148438,
+              "arrayBuffersMiB": 11.57050609588623,
+              "peakRssMiB": 131.21875
+            },
+            "previous-compact": {
+              "medianMs": 0.04743499999995038,
+              "retainedHeapMiB": 25.124408721923828,
+              "arrayBuffersMiB": 11.837882041931152,
+              "peakRssMiB": 398.23046875
+            },
+            "current-raw": {
+              "medianMs": 3.0981135000000295,
+              "retainedHeapMiB": 25.421855926513672,
+              "arrayBuffersMiB": 11.632437705993652,
+              "peakRssMiB": 240.03515625
+            },
+            "current-compact": {
+              "medianMs": 3.111997833333324,
+              "retainedHeapMiB": 25.794113159179688,
+              "arrayBuffersMiB": 11.820853233337402,
+              "peakRssMiB": 181.4765625
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "lines": 14,
+          "stations": 49,
+          "profiles": 24696,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                30.084445,
+                30.085249333333348,
+                28.447006666666653,
+                28.09228866666668,
+                29.05057333333332,
+                27.54218933333334,
+                28.178862666666646
+              ],
+              "medianMs": 28.447006666666653,
+              "hash": "6bee1d07bdf6c2d298d29f79a23a993f32508f86188db214255fc673552b5433",
+              "heapMiB": 25.28620147705078,
+              "arrayBuffersMiB": 11.57050609588623
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                81.4602053333333,
+                83.04899166666662,
+                85.03463933333335,
+                76.54140999999997,
+                77.56896166666654,
+                80.47851066666665,
+                76.45835000000004
+              ],
+              "medianMs": 80.47851066666665,
+              "hash": "fcc039b43cb02e2801f2162c8b823d799c1d67349e9a840ad7ba1f01e09f9155",
+              "heapMiB": 24.81768798828125,
+              "arrayBuffersMiB": 11.57050609588623
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.2775883333333695,
+                0.1810129999998935,
+                0.1690080000000004,
+                0.19150533333337685,
+                0.21403233333330718,
+                0.14690800000001522,
+                0.15088399999998123
+              ],
+              "medianMs": 0.1810129999998935,
+              "hash": "7633bc4fe33e52e87585f91eaf6febd7136836f26b01941412cee3a30f1b400b",
+              "heapMiB": 24.744178771972656,
+              "arrayBuffersMiB": 11.57050609588623
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                0.05763666666674302,
+                0.0715379999999944,
+                0.0455453333333935,
+                0.04330533333328882,
+                0.05837799999987207,
+                0.040767999999995176,
+                0.03890866666673295
+              ],
+              "medianMs": 0.0455453333333935,
+              "hash": "335a0a2c84977ef905d3b3b0b82c9d0597fadd9bfd658d6bab192cb76abc763b",
+              "heapMiB": 25.209571838378906,
+              "arrayBuffersMiB": 11.57050609588623
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 131.21875,
+          "round": 0
+        },
+        {
+          "mode": "previous-compact",
+          "lines": 14,
+          "stations": 49,
+          "profiles": 24696,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                80.36069333333334,
+                71.66833833333335,
+                102.7097853333333,
+                65.67630700000002,
+                64.84913333333331,
+                80.38129766666664,
+                74.75900166666663
+              ],
+              "medianMs": 74.75900166666663,
+              "hash": "6bee1d07bdf6c2d298d29f79a23a993f32508f86188db214255fc673552b5433",
+              "heapMiB": 26.14922332763672,
+              "arrayBuffersMiB": 11.84580135345459
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                166.95523033333333,
+                175.01834799999992,
+                173.1176363333334,
+                170.08850366666653,
+                181.2412156666666,
+                206.87159733333343,
+                217.69579366666676
+              ],
+              "medianMs": 175.01834799999992,
+              "hash": "fcc039b43cb02e2801f2162c8b823d799c1d67349e9a840ad7ba1f01e09f9155",
+              "heapMiB": 24.723976135253906,
+              "arrayBuffersMiB": 11.837882041931152
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.48079133333339996,
+                0.4133130000000165,
+                0.31593633333310817,
+                0.29983833333335497,
+                0.2355253333331954,
+                0.40355500000017247,
+                0.6138383333333574
+              ],
+              "medianMs": 0.40355500000017247,
+              "hash": "7633bc4fe33e52e87585f91eaf6febd7136836f26b01941412cee3a30f1b400b",
+              "heapMiB": 24.63165283203125,
+              "arrayBuffersMiB": 11.837882041931152
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                0.11507666666663378,
+                0.054759333333398295,
+                0.04826633333323116,
+                0.03961299999991752,
+                0.06819300000006479,
+                0.059883666666488956,
+                0.042320666666758676
+              ],
+              "medianMs": 0.054759333333398295,
+              "hash": "335a0a2c84977ef905d3b3b0b82c9d0597fadd9bfd658d6bab192cb76abc763b",
+              "heapMiB": 25.09687042236328,
+              "arrayBuffersMiB": 11.837882041931152
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 395.41796875,
+          "round": 0
+        },
+        {
+          "mode": "current-raw",
+          "lines": 14,
+          "stations": 49,
+          "profiles": 24696,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                19.991181666666666,
+                22.607228333333353,
+                20.907783333333366,
+                21.272983666666658,
+                21.99747233333335,
+                22.33610300000002,
+                19.95509366666666
+              ],
+              "medianMs": 21.272983666666658,
+              "hash": "6bee1d07bdf6c2d298d29f79a23a993f32508f86188db214255fc673552b5433",
+              "heapMiB": 25.537445068359375,
+              "arrayBuffersMiB": 11.632437705993652
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                24.003776999999975,
+                28.37952299999999,
+                27.038792000000058,
+                25.434742333333286,
+                64.70779900000002,
+                31.537784999999985,
+                25.941584333333367
+              ],
+              "medianMs": 27.038792000000058,
+              "hash": "fcc039b43cb02e2801f2162c8b823d799c1d67349e9a840ad7ba1f01e09f9155",
+              "heapMiB": 24.991424560546875,
+              "arrayBuffersMiB": 11.632437705993652
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.7467789999999846,
+                0.8101576666666309,
+                0.685690333333317,
+                0.6733516666666522,
+                0.6662076666666508,
+                0.6508343333333263,
+                0.6296726666666927
+              ],
+              "medianMs": 0.6733516666666522,
+              "hash": "7633bc4fe33e52e87585f91eaf6febd7136836f26b01941412cee3a30f1b400b",
+              "heapMiB": 24.78386688232422,
+              "arrayBuffersMiB": 11.632437705993652
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                4.424140333333298,
+                3.755193999999998,
+                3.121121333333349,
+                2.638260333333316,
+                3.4637380000000726,
+                3.2900026666666995,
+                3.0548150000000382
+              ],
+              "medianMs": 3.2900026666666995,
+              "hash": "335a0a2c84977ef905d3b3b0b82c9d0597fadd9bfd658d6bab192cb76abc763b",
+              "heapMiB": 25.423233032226562,
+              "arrayBuffersMiB": 11.632437705993652
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 240.03515625,
+          "round": 0
+        },
+        {
+          "mode": "current-compact",
+          "lines": 14,
+          "stations": 49,
+          "profiles": 24696,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                5.633912333333342,
+                3.917585666666658,
+                3.9326246666666784,
+                4.525371666666653,
+                4.260188666666674,
+                4.1466706666666555,
+                3.8206390000000092
+              ],
+              "medianMs": 4.1466706666666555,
+              "hash": "6bee1d07bdf6c2d298d29f79a23a993f32508f86188db214255fc673552b5433",
+              "heapMiB": 25.9049072265625,
+              "arrayBuffersMiB": 11.820853233337402
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                8.601803333333331,
+                7.279376333333327,
+                8.950712333333323,
+                7.492855000000001,
+                7.479077333333332,
+                7.113549666666661,
+                7.145511333333313
+              ],
+              "medianMs": 7.479077333333332,
+              "hash": "fcc039b43cb02e2801f2162c8b823d799c1d67349e9a840ad7ba1f01e09f9155",
+              "heapMiB": 25.36559295654297,
+              "arrayBuffersMiB": 11.820853233337402
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.9448876666666971,
+                0.7317196666666632,
+                0.8401929999999993,
+                0.7711189999999988,
+                0.6955819999999827,
+                0.8966446666666646,
+                0.7344203333333326
+              ],
+              "medianMs": 0.7711189999999988,
+              "hash": "7633bc4fe33e52e87585f91eaf6febd7136836f26b01941412cee3a30f1b400b",
+              "heapMiB": 25.156883239746094,
+              "arrayBuffersMiB": 11.820853233337402
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                3.0854743333333468,
+                2.340878666666678,
+                3.120687333333308,
+                3.980556999999976,
+                4.239700999999968,
+                3.129206999999989,
+                2.71221166666669
+              ],
+              "medianMs": 3.120687333333308,
+              "hash": "335a0a2c84977ef905d3b3b0b82c9d0597fadd9bfd658d6bab192cb76abc763b",
+              "heapMiB": 25.79571533203125,
+              "arrayBuffersMiB": 11.820853233337402
+            }
+          ],
+          "traffic": {
+            "warm": {
+              "calls": 1,
+              "inputBytes": 42896,
+              "outputBytes": 89712
+            },
+            "cold": {
+              "calls": 1,
+              "inputBytes": 6755976,
+              "outputBytes": 89712
+            }
+          },
+          "peakRssMiB": 181.4765625,
+          "round": 0
+        },
+        {
+          "mode": "current-compact",
+          "lines": 14,
+          "stations": 49,
+          "profiles": 24696,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                4.483666999999987,
+                4.543201666666657,
+                5.682752666666677,
+                3.51188399999999,
+                4.670507000000005,
+                4.699016666666675,
+                3.32180066666668
+              ],
+              "medianMs": 4.543201666666657,
+              "hash": "6bee1d07bdf6c2d298d29f79a23a993f32508f86188db214255fc673552b5433",
+              "heapMiB": 25.905059814453125,
+              "arrayBuffersMiB": 11.820853233337402
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                7.292696333333329,
+                7.940506333333322,
+                7.183004333333334,
+                6.930517000000009,
+                9.207239333333328,
+                7.383476333333344,
+                7.6495243333333365
+              ],
+              "medianMs": 7.383476333333344,
+              "hash": "fcc039b43cb02e2801f2162c8b823d799c1d67349e9a840ad7ba1f01e09f9155",
+              "heapMiB": 25.365814208984375,
+              "arrayBuffersMiB": 11.820853233337402
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.6881236666666837,
+                0.852908999999992,
+                0.7171010000000327,
+                0.8526986666666593,
+                0.7690189999999953,
+                0.7697103333333644,
+                0.7598253333333483
+              ],
+              "medianMs": 0.7690189999999953,
+              "hash": "7633bc4fe33e52e87585f91eaf6febd7136836f26b01941412cee3a30f1b400b",
+              "heapMiB": 25.15704345703125,
+              "arrayBuffersMiB": 11.820853233337402
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                3.206062666666677,
+                2.378438666666663,
+                3.10330833333334,
+                4.000737333333329,
+                2.749224333333359,
+                2.5237676666666857,
+                4.0389816666667
+              ],
+              "medianMs": 3.10330833333334,
+              "hash": "335a0a2c84977ef905d3b3b0b82c9d0597fadd9bfd658d6bab192cb76abc763b",
+              "heapMiB": 25.792510986328125,
+              "arrayBuffersMiB": 11.820853233337402
+            }
+          ],
+          "traffic": {
+            "warm": {
+              "calls": 1,
+              "inputBytes": 42896,
+              "outputBytes": 89712
+            },
+            "cold": {
+              "calls": 1,
+              "inputBytes": 6755976,
+              "outputBytes": 89712
+            }
+          },
+          "peakRssMiB": 172.17578125,
+          "round": 1
+        },
+        {
+          "mode": "current-raw",
+          "lines": 14,
+          "stations": 49,
+          "profiles": 24696,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                22.285493333333324,
+                22.636177333333308,
+                20.531873333333312,
+                20.219893333333328,
+                20.86228466666667,
+                22.2994543333333,
+                21.74337300000002
+              ],
+              "medianMs": 21.74337300000002,
+              "hash": "6bee1d07bdf6c2d298d29f79a23a993f32508f86188db214255fc673552b5433",
+              "heapMiB": 25.537887573242188,
+              "arrayBuffersMiB": 11.632437705993652
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                25.281913666666696,
+                25.35584499999997,
+                25.80794666666664,
+                27.3937603333333,
+                25.032751333333334,
+                22.359221333333306,
+                23.650884999999942
+              ],
+              "medianMs": 25.281913666666696,
+              "hash": "fcc039b43cb02e2801f2162c8b823d799c1d67349e9a840ad7ba1f01e09f9155",
+              "heapMiB": 24.99120330810547,
+              "arrayBuffersMiB": 11.632437705993652
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.6678933333333438,
+                0.6953880000000178,
+                0.7757879999999963,
+                0.7623093333333296,
+                0.7591543333332993,
+                1.0001010000000103,
+                0.8937336666667003
+              ],
+              "medianMs": 0.7623093333333296,
+              "hash": "7633bc4fe33e52e87585f91eaf6febd7136836f26b01941412cee3a30f1b400b",
+              "heapMiB": 24.783599853515625,
+              "arrayBuffersMiB": 11.632437705993652
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                3.6257720000000213,
+                2.795620666666688,
+                2.407732666666637,
+                2.609129666666604,
+                3.0751056666667105,
+                2.5084543333333236,
+                3.1749543333333654
+              ],
+              "medianMs": 2.795620666666688,
+              "hash": "335a0a2c84977ef905d3b3b0b82c9d0597fadd9bfd658d6bab192cb76abc763b",
+              "heapMiB": 25.42047882080078,
+              "arrayBuffersMiB": 11.632437705993652
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 239.578125,
+          "round": 1
+        },
+        {
+          "mode": "previous-compact",
+          "lines": 14,
+          "stations": 49,
+          "profiles": 24696,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                70.44422166666668,
+                67.54215033333337,
+                69.35930633333335,
+                69.86092266666667,
+                66.5266863333333,
+                67.25040700000007,
+                67.35523833333332
+              ],
+              "medianMs": 67.54215033333337,
+              "hash": "6bee1d07bdf6c2d298d29f79a23a993f32508f86188db214255fc673552b5433",
+              "heapMiB": 26.146728515625,
+              "arrayBuffersMiB": 11.84580135345459
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                171.7339896666666,
+                172.5547736666666,
+                169.21424466666653,
+                170.71054033333348,
+                181.743383,
+                190.17800066666678,
+                183.55249833333315
+              ],
+              "medianMs": 172.5547736666666,
+              "hash": "fcc039b43cb02e2801f2162c8b823d799c1d67349e9a840ad7ba1f01e09f9155",
+              "heapMiB": 24.72649383544922,
+              "arrayBuffersMiB": 11.837882041931152
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.34074033333339077,
+                0.2629663333333762,
+                0.2257366666666106,
+                0.23593899999984083,
+                0.2572076666668484,
+                0.3310323333331932,
+                0.43142700000013673
+              ],
+              "medianMs": 0.2629663333333762,
+              "hash": "7633bc4fe33e52e87585f91eaf6febd7136836f26b01941412cee3a30f1b400b",
+              "heapMiB": 24.6346435546875,
+              "arrayBuffersMiB": 11.837882041931152
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                0.0524489999997968,
+                0.04339866666638651,
+                0.03714599999996911,
+                0.03741966666651327,
+                0.04874033333332287,
+                0.035984333333241615,
+                0.046603666666669596
+              ],
+              "medianMs": 0.04339866666638651,
+              "hash": "335a0a2c84977ef905d3b3b0b82c9d0597fadd9bfd658d6bab192cb76abc763b",
+              "heapMiB": 25.151947021484375,
+              "arrayBuffersMiB": 11.837882041931152
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 398.23046875,
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "lines": 14,
+          "stations": 49,
+          "profiles": 24696,
+          "rows": [
+            {
+              "label": "all line forecasts",
+              "windowsMs": [
+                29.81169166666666,
+                31.836290333333352,
+                31.613494666666686,
+                31.163305666666663,
+                32.47733966666666,
+                31.176586000000004,
+                33.18204199999999
+              ],
+              "medianMs": 31.613494666666686,
+              "hash": "6bee1d07bdf6c2d298d29f79a23a993f32508f86188db214255fc673552b5433",
+              "heapMiB": 25.285125732421875,
+              "arrayBuffersMiB": 11.57050609588623
+            },
+            {
+              "label": "operations and metrics",
+              "windowsMs": [
+                108.20682133333337,
+                89.98733766666662,
+                116.01144299999987,
+                94.77408333333324,
+                110.11501733333337,
+                93.54779899999994,
+                92.77947400000009
+              ],
+              "medianMs": 94.77408333333324,
+              "hash": "fcc039b43cb02e2801f2162c8b823d799c1d67349e9a840ad7ba1f01e09f9155",
+              "heapMiB": 24.81652069091797,
+              "arrayBuffersMiB": 11.57050609588623
+            },
+            {
+              "label": "crowding alerts",
+              "windowsMs": [
+                0.26544700000007043,
+                0.24755333333329568,
+                0.19780166666669174,
+                0.19704366666671072,
+                0.23472033333337095,
+                0.2609229999999722,
+                0.1747566666667808
+              ],
+              "medianMs": 0.23472033333337095,
+              "hash": "7633bc4fe33e52e87585f91eaf6febd7136836f26b01941412cee3a30f1b400b",
+              "heapMiB": 24.742996215820312,
+              "arrayBuffersMiB": 11.57050609588623
+            },
+            {
+              "label": "actual observation sample",
+              "windowsMs": [
+                0.10267133333324334,
+                0.08621999999998782,
+                0.04211366666656128,
+                0.08654366666663312,
+                0.072192333333381,
+                0.04116199999998571,
+                0.08565900000000208
+              ],
+              "medianMs": 0.08565900000000208,
+              "hash": "335a0a2c84977ef905d3b3b0b82c9d0597fadd9bfd658d6bab192cb76abc763b",
+              "heapMiB": 25.20909881591797,
+              "arrayBuffersMiB": 11.57050609588623
+            }
+          ],
+          "traffic": {},
+          "peakRssMiB": 129.3125,
+          "round": 1
+        }
+      ]
+    }
+  ],
+  "runtime": [
+    {
+      "baselineCommit": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+      "scope": "Continuous operating core only: shared serialized world/forecast; 30 warmup + 5 x 30 game minutes; unchanged .1-minute quantum; both Rust versions use compact DTOs; JS receives equivalent full flows; excludes forecast, routing benchmarks, construction, DOM/map rendering and FPS",
+      "method": "Eight independent processes; both Rust versions load compact forecasts, JS uses full forecasts; reversed order in round 2; exact complete state comparison, no excluded fields; forced GC outside timed batches",
+      "lines": 10,
+      "stations": 25,
+      "summary": [
+        {
+          "mode": "javascript",
+          "medianMs": 49.022954,
+          "medianCpuMs": 82.812,
+          "retainedHeapMiB": 18.6729736328125,
+          "eventLoopMaxMs": 75.13680399999998,
+          "peakRssMiB": 106.4296875,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "previous-worker",
+          "medianMs": 94.41352749999999,
+          "medianCpuMs": 132.64,
+          "retainedHeapMiB": 17.64948272705078,
+          "eventLoopMaxMs": 2.468617999999992,
+          "peakRssMiB": 176.51171875,
+          "wasmMiB": 8.125,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "rust-sync",
+          "medianMs": 103.66599500000001,
+          "medianCpuMs": 189.49,
+          "retainedHeapMiB": 17.176143646240234,
+          "eventLoopMaxMs": 113.36031000000003,
+          "peakRssMiB": 159.80859375,
+          "wasmMiB": 6.125,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "rust-worker",
+          "medianMs": 100.84580699999998,
+          "medianCpuMs": 151.8225,
+          "retainedHeapMiB": 17.774028778076172,
+          "eventLoopMaxMs": 3.757180000000062,
+          "peakRssMiB": 186.64453125,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            75.83745299999998,
+            49.346202000000005,
+            57.201622999999984,
+            41.56827800000008,
+            43.590535000000045
+          ],
+          "medianMs": 49.346202000000005,
+          "cpuMicros": [
+            188659,
+            86232,
+            79196,
+            58832,
+            92397
+          ],
+          "heapMiB": [
+            18.575637817382812,
+            18.670867919921875,
+            18.675079345703125,
+            18.7613525390625,
+            18.804718017578125
+          ],
+          "eventLoopMaxMs": [
+            75.13680399999998,
+            49.361752000000024,
+            57.13136399999996,
+            40.67132299999997,
+            42.75170800000001
+          ],
+          "peakRssMiB": 106.4296875,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            104.48857400000009,
+            99.59781800000007,
+            93.90290399999992,
+            99.14227100000005,
+            91.54153499999995
+          ],
+          "medianMs": 99.14227100000005,
+          "cpuMicros": [
+            169655,
+            136855,
+            124998,
+            155695,
+            111681
+          ],
+          "heapMiB": [
+            17.527999877929688,
+            17.635597229003906,
+            17.68023681640625,
+            17.650047302246094,
+            17.687515258789062
+          ],
+          "eventLoopMaxMs": [
+            2.468617999999992,
+            1.0170909999999367,
+            1.2132259999999633,
+            2.4596449999999095,
+            0.9870049999999537
+          ],
+          "peakRssMiB": 176.51171875,
+          "wasmMiB": 8.125,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            110.70004399999999,
+            110.62702300000001,
+            101.15201000000002,
+            89.66514599999994,
+            92.71954999999991
+          ],
+          "medianMs": 101.15201000000002,
+          "cpuMicros": [
+            205091,
+            202211,
+            185074,
+            138565,
+            113639
+          ],
+          "heapMiB": [
+            17.197097778320312,
+            17.129913330078125,
+            17.18256378173828,
+            17.17864227294922,
+            17.107345581054688
+          ],
+          "eventLoopMaxMs": [
+            109.93383599999999,
+            109.82557200000008,
+            100.31104999999991,
+            89.12988599999994,
+            91.82793400000003
+          ],
+          "peakRssMiB": 159.80859375,
+          "wasmMiB": 6.125,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            113.94977199999994,
+            99.24015000000009,
+            93.74658799999997,
+            105.69135300000005,
+            99.49078199999985
+          ],
+          "medianMs": 99.49078199999985,
+          "cpuMicros": [
+            196873,
+            149872,
+            153773,
+            163761,
+            126872
+          ],
+          "heapMiB": [
+            17.533660888671875,
+            17.772552490234375,
+            17.70726776123047,
+            17.848770141601562,
+            17.802467346191406
+          ],
+          "eventLoopMaxMs": [
+            2.272012000000018,
+            2.6756000000000313,
+            1.8397509999999784,
+            3.0601100000000088,
+            2.7626710000000685
+          ],
+          "peakRssMiB": 186.64453125,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            104.00791599999997,
+            102.2008320000001,
+            96.14407200000005,
+            102.726178,
+            88.48874599999999
+          ],
+          "medianMs": 102.2008320000001,
+          "cpuMicros": [
+            181228,
+            146565,
+            158611,
+            128484,
+            118135
+          ],
+          "heapMiB": [
+            17.5355224609375,
+            17.77550506591797,
+            17.70655059814453,
+            17.848487854003906,
+            17.80078887939453
+          ],
+          "eventLoopMaxMs": [
+            2.1012339999999767,
+            3.757180000000062,
+            1.9036370000000034,
+            2.530311999999981,
+            1.7382369999999128
+          ],
+          "peakRssMiB": 181.8828125,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            114.15448000000004,
+            107.70380599999999,
+            106.17998,
+            83.93257500000004,
+            91.600143
+          ],
+          "medianMs": 106.17998,
+          "cpuMicros": [
+            206868,
+            193906,
+            196667,
+            122476,
+            121377
+          ],
+          "heapMiB": [
+            17.17364501953125,
+            17.134521484375,
+            17.19556427001953,
+            17.19928741455078,
+            17.117225646972656
+          ],
+          "eventLoopMaxMs": [
+            113.36031000000003,
+            106.85654699999998,
+            105.57088899999997,
+            83.03422799999998,
+            90.72914800000001
+          ],
+          "peakRssMiB": 142.40625,
+          "wasmMiB": 6.125,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            96.768371,
+            94.92415100000005,
+            89.053902,
+            92.77357000000006,
+            88.1266250000001
+          ],
+          "medianMs": 92.77357000000006,
+          "cpuMicros": [
+            161929,
+            128425,
+            123206,
+            140581,
+            110135
+          ],
+          "heapMiB": [
+            17.528045654296875,
+            17.635765075683594,
+            17.67865753173828,
+            17.64891815185547,
+            17.70545196533203
+          ],
+          "eventLoopMaxMs": [
+            1.2574129999999286,
+            1.3890310000000454,
+            1.3505229999999528,
+            1.603083999999967,
+            0.9783219999999346
+          ],
+          "peakRssMiB": 175.6015625,
+          "wasmMiB": 8.125,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            57.93355500000001,
+            54.51103600000005,
+            48.69970599999999,
+            39.235791000000006,
+            34.475135999999964
+          ],
+          "medianMs": 48.69970599999999,
+          "cpuMicros": [
+            164953,
+            85457,
+            70988,
+            55556,
+            80167
+          ],
+          "heapMiB": [
+            18.5794677734375,
+            18.66571807861328,
+            18.665138244628906,
+            18.76091766357422,
+            18.806556701660156
+          ],
+          "eventLoopMaxMs": [
+            57.173145000000005,
+            54.257570999999984,
+            48.278418999999985,
+            38.34830099999999,
+            33.604420000000005
+          ],
+          "peakRssMiB": 101.12109375,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        }
+      ]
+    },
+    {
+      "baselineCommit": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+      "scope": "Continuous operating core only: shared serialized world/forecast; 30 warmup + 5 x 30 game minutes; unchanged .1-minute quantum; both Rust versions use compact DTOs; JS receives equivalent full flows; excludes forecast, routing benchmarks, construction, DOM/map rendering and FPS",
+      "method": "Eight independent processes; both Rust versions load compact forecasts, JS uses full forecasts; reversed order in round 2; exact complete state comparison, no excluded fields; forced GC outside timed batches",
+      "lines": 14,
+      "stations": 49,
+      "summary": [
+        {
+          "mode": "javascript",
+          "medianMs": 142.92257750000005,
+          "medianCpuMs": 173.539,
+          "retainedHeapMiB": 49.41355895996094,
+          "eventLoopMaxMs": 204.436958,
+          "peakRssMiB": 177.0625,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "previous-worker",
+          "medianMs": 156.9903935000001,
+          "medianCpuMs": 204.344,
+          "retainedHeapMiB": 37.465057373046875,
+          "eventLoopMaxMs": 3.423727999999983,
+          "peakRssMiB": 332.703125,
+          "wasmMiB": 24.8125,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "rust-sync",
+          "medianMs": 155.736493,
+          "medianCpuMs": 204.388,
+          "retainedHeapMiB": 37.23480987548828,
+          "eventLoopMaxMs": 182.36668999999995,
+          "peakRssMiB": 321.265625,
+          "wasmMiB": 19.9375,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "rust-worker",
+          "medianMs": 153.83408300000008,
+          "medianCpuMs": 208.4385,
+          "retainedHeapMiB": 37.551334381103516,
+          "eventLoopMaxMs": 20.254468999999972,
+          "peakRssMiB": 341.31640625,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            191.87668699999995,
+            164.1567550000001,
+            167.52748600000007,
+            122.54664500000013,
+            89.62030600000003
+          ],
+          "medianMs": 164.1567550000001,
+          "cpuMicros": [
+            381984,
+            214508,
+            194317,
+            157058,
+            110527
+          ],
+          "heapMiB": [
+            49.134971618652344,
+            49.295570373535156,
+            49.425262451171875,
+            49.41376495361328,
+            49.60931396484375
+          ],
+          "eventLoopMaxMs": [
+            191.16520200000002,
+            163.30195400000002,
+            167.65833099999998,
+            121.70176900000001,
+            88.74781800000005
+          ],
+          "peakRssMiB": 177.0625,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            166.04458,
+            178.84354299999995,
+            172.36466700000005,
+            163.48684500000013,
+            174.78079000000002
+          ],
+          "medianMs": 172.36466700000005,
+          "cpuMicros": [
+            238534,
+            200947,
+            229534,
+            217822,
+            226771
+          ],
+          "heapMiB": [
+            37.32368469238281,
+            37.38434600830078,
+            37.463951110839844,
+            37.47772216796875,
+            37.553077697753906
+          ],
+          "eventLoopMaxMs": [
+            2.1584199999999782,
+            3.2747640000000047,
+            1.8545930000000226,
+            3.423727999999983,
+            3.281073000000106
+          ],
+          "peakRssMiB": 332.703125,
+          "wasmMiB": 24.8125,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            183.118516,
+            173.36096900000007,
+            163.70117800000003,
+            138.9161590000001,
+            147.77180799999996
+          ],
+          "medianMs": 163.70117800000003,
+          "cpuMicros": [
+            299229,
+            271359,
+            212981,
+            173962,
+            185798
+          ],
+          "heapMiB": [
+            37.243743896484375,
+            37.46031951904297,
+            37.36259460449219,
+            37.22026824951172,
+            37.22587585449219
+          ],
+          "eventLoopMaxMs": [
+            182.36668999999995,
+            172.50241200000005,
+            162.8756910000002,
+            138.02253999999994,
+            146.89851900000008
+          ],
+          "peakRssMiB": 305.46875,
+          "wasmMiB": 19.9375,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            182.69468999999992,
+            167.53786200000013,
+            154.49012900000002,
+            153.17803700000013,
+            137.02744099999995
+          ],
+          "medianMs": 154.49012900000002,
+          "cpuMicros": [
+            272274,
+            225150,
+            204722,
+            202292,
+            178469
+          ],
+          "heapMiB": [
+            37.48725128173828,
+            37.446083068847656,
+            37.550682067871094,
+            37.56463623046875,
+            37.568580627441406
+          ],
+          "eventLoopMaxMs": [
+            20.254468999999972,
+            4.677346999999827,
+            3.5321210000001884,
+            4.621164000000135,
+            3.6749569999999494
+          ],
+          "peakRssMiB": 341.31640625,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            170.53757900000005,
+            152.35585700000001,
+            158.67871800000012,
+            141.17986599999995,
+            147.508421
+          ],
+          "medianMs": 152.35585700000001,
+          "cpuMicros": [
+            256012,
+            212155,
+            223151,
+            187412,
+            187434
+          ],
+          "heapMiB": [
+            37.45177459716797,
+            37.41089630126953,
+            37.55198669433594,
+            37.56494140625,
+            37.5684814453125
+          ],
+          "eventLoopMaxMs": [
+            5.356141000000093,
+            3.525761999999986,
+            3.6066839999998592,
+            3.6991429999998218,
+            3.5665429999999105
+          ],
+          "peakRssMiB": 332.83203125,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            168.449707,
+            165.676197,
+            146.27858800000013,
+            129.69526199999996,
+            112.80044599999997
+          ],
+          "medianMs": 146.27858800000013,
+          "cpuMicros": [
+            277112,
+            268095,
+            195795,
+            157321,
+            155866
+          ],
+          "heapMiB": [
+            37.13719177246094,
+            37.279502868652344,
+            37.32569885253906,
+            37.183624267578125,
+            37.19422912597656
+          ],
+          "eventLoopMaxMs": [
+            167.74982899999998,
+            164.81674800000008,
+            145.44202399999995,
+            128.8090940000002,
+            111.93955600000004
+          ],
+          "peakRssMiB": 321.265625,
+          "wasmMiB": 19.9375,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            146.20584800000006,
+            150.49394200000006,
+            136.935747,
+            127.77928399999996,
+            117.944119
+          ],
+          "medianMs": 136.935747,
+          "cpuMicros": [
+            207741,
+            179195,
+            173061,
+            170553,
+            151247
+          ],
+          "heapMiB": [
+            37.363746643066406,
+            37.42076873779297,
+            37.466163635253906,
+            37.48884582519531,
+            37.58164978027344
+          ],
+          "eventLoopMaxMs": [
+            1.2161499999999705,
+            2.175877000000014,
+            1.4068979999999556,
+            1.2717240000001766,
+            1.0640319999999974
+          ],
+          "peakRssMiB": 320.83203125,
+          "wasmMiB": 24.8125,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            205.19375100000002,
+            143.34882200000004,
+            142.49633300000005,
+            101.34275600000001,
+            80.93938100000014
+          ],
+          "medianMs": 142.49633300000005,
+          "cpuMicros": [
+            378631,
+            187721,
+            159357,
+            124055,
+            93540
+          ],
+          "heapMiB": [
+            49.1297607421875,
+            49.296775817871094,
+            49.423561096191406,
+            49.413352966308594,
+            49.612457275390625
+          ],
+          "eventLoopMaxMs": [
+            204.436958,
+            142.50201300000003,
+            142.45047099999988,
+            100.49522500000012,
+            80.102036
+          ],
+          "peakRssMiB": 174.69921875,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        }
+      ]
+    }
+  ]
+}

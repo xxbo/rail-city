@@ -45,7 +45,7 @@
     peakMemoryBytes = 0;
   const recycleLimit = () => recycleBytes === 0 ? 0 : Math.max(recycleBytes,
     simulationRecycleBytes);
-  const asset = node ? null : new URL('wasm/rail-core-v23.wasm?v=63',
+  const asset = node ? null : new URL('wasm/rail-core-v24.wasm?v=64',
     root.document?.currentScript?.src || root.location.href).href;
 
   function install(module) {
@@ -61,7 +61,7 @@
     });
     if (next.exports.routing_abi() !== ABI || next.exports.demand_abi?.() !== 1 || next.exports
       .world_abi?.() !== 1 || next.exports.simulation_abi?.() !== 1 || next.exports.queue_abi?.
-      () !== 1 || next.exports.statistics_abi?.() !== 1 || next.exports.operations_abi?.() !== 1 || next.exports.engine_abi?.() !== 1 || next.exports.engine_prepare_abi?.() !== 1 || next.exports.cycle_abi?.() !== 1 || next.exports.engine_continue_abi?.() !== 1 || next.exports.projection_abi?.() !== 1 || next.exports.calendar_abi?.() !== 1 || next.exports.runtime_query_abi?.() !== 1 || next.exports.history_abi?.() !== 1 || next.exports.assets_abi?.()!==1 || next.exports.transaction_abi?.()!==1 || next.exports.catalog_abi?.()!==1 || next.exports.service_abi?.()!==1 || next.exports.service_validate_abi?.()!==1 || next.exports.editor_abi?.()!==1 || next.exports.geometry_abi?.()!==1)
+      () !== 1 || next.exports.statistics_abi?.() !== 1 || next.exports.operations_abi?.() !== 1 || next.exports.engine_abi?.() !== 1 || next.exports.engine_prepare_abi?.() !== 1 || next.exports.cycle_abi?.() !== 1 || next.exports.engine_continue_abi?.() !== 1 || next.exports.projection_abi?.() !== 1 || next.exports.calendar_abi?.() !== 1 || next.exports.runtime_query_abi?.() !== 1 || next.exports.history_abi?.() !== 1 || next.exports.diagnostic_abi?.()!==1 || next.exports.assets_abi?.()!==1 || next.exports.transaction_abi?.()!==1 || next.exports.catalog_abi?.()!==1 || next.exports.service_abi?.()!==1 || next.exports.service_validate_abi?.()!==1 || next.exports.editor_abi?.()!==1 || next.exports.geometry_abi?.()!==1)
       throw Error('寻路WASM接口版本不匹配');
     compiled = module;
     instance = next;
@@ -282,7 +282,7 @@
   function kernel(name, values, read = null, context = null, bytes = null) {
     if (!['demand_ipf', 'demand_distribution', 'demand_mode', 'demand_strategy',
         'demand_capacity', 'world_run', 'world_policy', 'simulation_run', 'simulation_step',
-        'editor_config', 'editor_run', 'geometry_run', 'service_compile', 'service_validate', 'network_remove_line', 'catalog_summary', 'compact_run', 'catalog_run', 'transaction_run', 'statistics_run', 'history_run', 'operations_run', 'temporal_run', 'engine_step', 'engine_prepare', 'engine_cycle', 'engine_continue', 'engine_loop', 'runtime_query'
+        'diagnostic_run', 'editor_config', 'editor_run', 'geometry_run', 'service_compile', 'service_validate', 'network_remove_line', 'catalog_summary', 'compact_run', 'catalog_run', 'transaction_run', 'statistics_run', 'history_run', 'operations_run', 'temporal_run', 'engine_step', 'engine_prepare', 'engine_cycle', 'engine_continue', 'engine_loop', 'runtime_query'
       ].includes(name)) throw Error('未知需求核心操作');
     try {
       const wasm = exports();
@@ -337,7 +337,7 @@
       else if(name==='editor_config'||name==='editor_run')editorCalls++;
       else if(name==='geometry_run')geometryCalls++;
       else if(name==='service_compile'||name==='service_validate'||name==='network_remove_line')serviceCalls++;
-      else if(name==='transaction_run'||name==='compact_run')coldCalls++;
+      else if(name==='diagnostic_run'||name==='transaction_run'||name==='compact_run')coldCalls++;
       else if(name==='catalog_run'||name==='catalog_summary')catalogCalls++;
       else demandCalls++;
       peakMemoryBytes = Math.max(peakMemoryBytes, wasm.memory.buffer.byteLength);
@@ -416,6 +416,7 @@
     }
   }
   const api = {
+    diagnosticToken:()=>exports().diagnostic_token(),
     editorReady:()=>!!exports().editor_configured(),
     revisionGraph:plan=>{const X=node?require('./service-plan'):root.RailServicePlan,all={...plan,operatingPlan:true,services:plan.services.map(l=>({...l,dispatchCompiled:true,fleet:Math.max(1,l.fleet)}))},adj=X.network(all),g=GRAPH.get(adj)||prepare(all,adj),weights=plan.services.map(l=>[l.id,X.headway(plan,l),X.loopDwell(plan,l)]),byId=new Map(weights.map(row=>[row[0],row]));return {data:Array.from(g.data),prices:Array.from(prices(plan,g)),services:g.services,lines:g.lines,edges:g.edges.map(e=>({...e,headway:byId.get(e.service)[1],minutes:e.km/48*60+byId.get(e.service)[2]})),weights};},
 
@@ -505,7 +506,7 @@
     const fs = require('node:fs'),
       path = require('node:path');
     install(new WebAssembly.Module(fs.readFileSync(path.join(__dirname,
-      'wasm/rail-core-v23.wasm'))));
+      'wasm/rail-core-v24.wasm'))));
     module.exports = api;
   } else {
     root.RailRouting = api;
