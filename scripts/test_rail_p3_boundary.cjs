@@ -7,6 +7,8 @@ const audit=require('./audit_rail_p3.cjs');
  let count=0;for(const [file,row]of Object.entries(inventory.files)){assert(row.sha256&&row.owner&&row.phase,file);for(const f of row.functions){assert(f.owner&&f.phase&&f.sha256&&f.line<=f.end,file+' '+f.id);count++;}}
  assert(count>=1800);assert.equal(inventory.files['rail/passengers.js'].functions.find(f=>f.name==='compactDefinitions').phase,'P3-4');
  assert.equal(inventory.files['rail/ui.js'].functions.find(f=>f.name==='saveNow').phase,'P3-7');
+ assert.equal(inventory.files['rail/currency.js'].functions.find(f=>f.name==='fromCNY').phase,'P3-4');
+ assert.equal(inventory.files['rail/review-view.js'].role,'mixed');
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'rail-p3-boundary-'));
  try{
   fs.cpSync(path.join(audit.root,'rail'),path.join(temp,'rail'),{recursive:true});fs.mkdirSync(path.join(temp,'scripts'));

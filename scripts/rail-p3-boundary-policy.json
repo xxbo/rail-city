@@ -52,9 +52,26 @@
       "owner": "Interface, visual geometry and private display preferences"
     },
     "rail/currency.js": {
-      "role": "ui",
-      "phase": "UI",
-      "owner": "Interface, visual geometry and private display preferences"
+      "role": "mixed",
+      "phase": "P3-8",
+      "owner": "Rust command amount conversion and denomination config; presentation formatting stays UI",
+      "overrides": {
+        "format": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Currency label formatting"
+        },
+        "toCNY": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Display denomination conversion"
+        },
+        "fromCNY": {
+          "role": "domain",
+          "phase": "P3-4",
+          "owner": "Rust command monetary input conversion/rounding"
+        }
+      }
     },
     "rail/demand-kernels.js": {
       "role": "domain",
@@ -360,9 +377,9 @@
       "owner": "Rust world/configuration/terrain"
     },
     "rail/review-view.js": {
-      "role": "ui",
-      "phase": "UI",
-      "owner": "Interface, visual geometry and private display preferences"
+      "role": "mixed",
+      "phase": "P3-8",
+      "owner": "Separate sample-sufficiency decisions/domain queries from observation HTML; visual colors and precision remain UI"
     },
     "rail/ridership.js": {
       "role": "domain",
