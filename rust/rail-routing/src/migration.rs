@@ -238,7 +238,7 @@ impl Routing {
             ("to", j.get("to").clone()),
             (
                 "lineIds",
-                V::Array(fares.entries().iter().map(|(k, _)| text(k)).collect()),
+                V::Array((if self.graph.legacy{shares.entries()}else{fares.entries()}).iter().map(|(k, _)| text(k)).collect()),
             ),
             ("byLine", shares),
         ]);

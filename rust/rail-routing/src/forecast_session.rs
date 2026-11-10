@@ -177,6 +177,7 @@ impl ForecastOwner {
             if op=="accept"{if !accepted&&job.background{self.dirty=true;}return obj(&[("accepted",boolean(accepted))]);}
             self.jobs.remove(&id);if self.pending==Some(id){self.pending=None;}return obj(&[("dirty",boolean(self.dirty))]);
         }
+        if op=="attachLegacy"{let dto=crate::legacy_catalog::encode(input.get("state"),input.get("forecast"));let Some(c)=Catalog::load(&dto)else{return fault("INVALID_LEGACY_FORECAST")};let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);return out;}
         if op=="attach" {
             let Some(c)=Catalog::load(input.get("dto"))else{return fault("INVALID_FORECAST_CATALOG")};let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);return out;
         }
@@ -231,12 +232,12 @@ pub(super) fn snapshot(state:&V)->V {
     let q=state.get("ridership");result.set("ridership",if q.truth(){obj(&[("version",q.get("version").clone()),("model",q.get("model").clone()),("lines",q.get("lines").clone())])}else{V::Missing});result
 }
 
-fn graph_prices(state:&V,lines:&V)->V{
+pub(super) fn graph_prices(state:&V,lines:&V)->V{
     let mut values=vec![];let defaults=[180.0,210.0,260.0,300.0,330.0,400.0];
     for id in lines.array(){let source=state.get("services").array().iter().find(|s|eq(s.get("id"),id));for i in 0..6{let value=if let Some(source)=source{if source.get("fareBands").truth(){source.get("fareBands").array().get(i).map_or(f64::NAN,V::n)}else{defaults[i]}}else{defaults[i]};if !value.is_finite(){return fault("INVALID_ROUTING_NUMBER");}values.push(n(value));}}
     for c in state.get("companies").array(){let value=if matches!(c.get("fare"),V::Missing){0.0}else{c.num("fare")};if !value.is_finite(){return fault("INVALID_ROUTING_NUMBER");}values.push(n(value));}arr(values)
 }
-fn graph_frame(input:&V)->V{
+pub(super) fn graph_frame(input:&V)->V{
     fn intern(names:&mut Vec<V>,value:&V)->usize{if let Some(i)=names.iter().position(|n|same(n,value)){i}else{names.push(value.clone());names.len()-1}}
     let state=input.get("state");let adj=input.get("adjacency").array();let mut services=vec![text("")];let mut lines=vec![text("")];let mut groups=vec![];let mut edges=vec![];let mut records=vec![];let mut parts=vec![];
     for line in state.get("services").array(){intern(&mut lines,line.get("id"));}

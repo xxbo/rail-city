@@ -45,7 +45,7 @@
     peakMemoryBytes = 0;
   const recycleLimit = () => recycleBytes === 0 ? 0 : Math.max(recycleBytes,
     simulationRecycleBytes);
-  const asset = node ? null : new URL('wasm/rail-core-v30.wasm?v=70',
+  const asset = node ? null : new URL('wasm/rail-core-v31.wasm?v=71',
     root.document?.currentScript?.src || root.location.href).href;
 
   function install(module) {
@@ -59,7 +59,7 @@
         now:()=>kernelNow()
       }
     });
-    if (next.exports.runtime_session_abi?.() !== 3 || next.exports.forecast_session_abi?.() !== 1 || next.exports.bootstrap_abi?.() !== 1 || next.exports.session_abi?.() !== 1 || next.exports.routing_abi() !== ABI || next.exports.demand_abi?.() !== 1 || next.exports
+    if (next.exports.runtime_session_abi?.() !== 4 || next.exports.forecast_session_abi?.() !== 1 || next.exports.bootstrap_abi?.() !== 1 || next.exports.session_abi?.() !== 1 || next.exports.routing_abi() !== ABI || next.exports.demand_abi?.() !== 1 || next.exports
       .world_abi?.() !== 1 || next.exports.simulation_abi?.() !== 1 || next.exports.queue_abi?.
       () !== 1 || next.exports.statistics_abi?.() !== 1 || next.exports.operations_abi?.() !== 1 || next.exports.engine_abi?.() !== 1 || next.exports.engine_prepare_abi?.() !== 1 || next.exports.cycle_abi?.() !== 1 || next.exports.engine_continue_abi?.() !== 1 || next.exports.projection_abi?.() !== 1 || next.exports.calendar_abi?.() !== 1 || next.exports.runtime_query_abi?.() !== 1 || next.exports.history_abi?.() !== 1 || next.exports.diagnostic_abi?.()!==1 || next.exports.assets_abi?.()!==1 || next.exports.transaction_abi?.()!==1 || next.exports.catalog_abi?.()!==1 || next.exports.service_abi?.()!==1 || next.exports.service_validate_abi?.()!==1 || next.exports.editor_abi?.()!==1 || next.exports.geometry_abi?.()!==1)
       throw Error('寻路WASM接口版本不匹配');
@@ -453,7 +453,7 @@
     const fs = require('node:fs'),
       path = require('node:path');
     install(new WebAssembly.Module(fs.readFileSync(path.join(__dirname,
-      'wasm/rail-core-v30.wasm'))));
+      'wasm/rail-core-v31.wasm'))));
     module.exports = api;
   } else {
     root.RailRouting = api;

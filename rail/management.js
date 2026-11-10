@@ -1,19 +1,8 @@
 /* Save values use legacy accounting units; UI uses fixed CNY denomination; rates and costs are deliberately simplified game rules. */
 (function(root) {
   'use strict';
-  const node = typeof module !== 'undefined' && module.exports,
-    R = node ? require('./engine') : root.RailSim,
-    N = node ? require('./network') : root.RailNetwork,
-    P = node ? require('./passengers') : root.RailPassengers;
-  const Q = node ? require('./ridership') : root.RailRidership,
-    BAL = node ? require('./game-balance') : root.RailBalance;
-  const F = node ? require('./fleet') : root.RailFleet,
-    U = node ? require('./urban-growth') : root.RailUrban,
-    C = node ? require('./city') : root.RailCity,
-    RV = node ? require('./operations-review') : root.RailOperationsReview;
-  const Runtime=node?require('./runtime-wasm'):root.RailRuntime;
-  const Engine = node ? require('./engine-wasm') : root.RailNativeEngine;
-  const Native = node ? require('./operations-wasm') : root.RailNativeOperations;
+  const node=typeof module!=='undefined'&&module.exports,R=node?require('./engine'):root.RailSim,BAL=node?require('./game-balance'):root.RailBalance;
+  const Runtime=node?require('./runtime-wasm'):root.RailRuntime,Native=node?require('./operations-wasm'):root.RailNativeOperations;
   const INITIAL = 5e9,
     CREDIT = 3e9,
     MAX_LOAN = 1e9,
@@ -21,31 +10,15 @@
     TERM = 30;
 
   const Assets = node ? require('./assets-wasm') : root.RailAssets;
-  function init(s) {
-    Q.init(s);
-    if(!s.economy || s.economy.balanceVersion!==BAL.VERSION)Assets.mutate(s,'init');
-    return s;
-  }
+  function init(s){const out=R.compat('managementInit',s);R.sync(s,out.state);return s;}
   const validate = s => Assets.query(s,'validateEconomy');
   const quote = (before,after) => Assets.run(before,'quote',{}, {after:Assets.snapshot(after)}).result;
 
   // A descriptor lets the native core edit, validate, quote and pay in one call.
   const command = (kind,op,args={}) => ({kind,op,args});
-  function plan(s,operation,commit) {
-    if(typeof operation!=='function')return Assets.transaction(s,operation,commit);
-    const c=R.clone(s),result=operation(c);
-    if(result?.error)return result;
-    return Assets.transaction(s,null,commit,c,result);
-  }
+  function plan(s,operation,commit){if(!operation||typeof operation!=='object')throw TypeError('编辑操作须使用结构化命令。');return Assets.transaction(s,operation,commit);}
   const preview = (s,operation) => plan(s,operation,false);
-  function change(s,operation) {
-    init(s);
-    const p=plan(s,operation,true);
-    if(p.error)return p;
-    const c=p.after;
-    Object.assign(s,c);Q.sync(s,s.economy.minute);settle(s);
-    return {...p.result,quote:p};
-  }
+  function change(s,operation){if(!operation||typeof operation!=='object')throw TypeError('编辑操作须使用结构化命令。');const out=R.compat('assetChange',s,{command:operation});if(!out.result?.error)R.sync(s,out.state);return out.result;}
 
   function available(s) {
     init(s);
@@ -79,150 +52,17 @@
     }, 1).running;
   }
 
-  function validInterval(minutes, limit = 1440) {
-    if (!Number.isFinite(minutes) || minutes < 0 || minutes > limit) throw Error(
-      'Invalid management interval');
-  }
-
-  function advance(s, rt, minutes) {
-    if(Runtime.has(rt))return Runtime.advance(s,rt,minutes,{full:true}).running;
-    validInterval(minutes);
-    init(s);
-    return advanceInterval(s, rt, minutes);
-  }
-
-  // Yield between complete legacy UI quanta, preserving loan-split and callback order.
-  function advanceBudget(s, rt, minutes, options = {}) {
-    if(Runtime.has(rt))return Runtime.advance(s,rt,minutes,options);
-    validInterval(minutes, 1e8);
-    const now = options.now || (() => performance.now()),
-      budget = options.budget ?? 6,
-      maxSteps = options.maxSteps ?? 100;
-    if (!Number.isFinite(budget) || budget < 0 || !Number.isInteger(maxSteps) ||
-      maxSteps < 1 || maxSteps > 10000) throw Error('Invalid simulation budget');
-    const start = now();
-    init(s);
-    const trackFixed = s.tracks.reduce((value, track) => value + track.km * 2200, 0);
-    let remaining = minutes,
-      steps = 0,
-      running = true,
-      reason = 'complete';
-    while (remaining > 1e-8) {
-      if (options.shouldYield?.()) {
-        reason = 'interrupted';
-        break;
-      }
-      const dt = Math.min(.1, remaining);
-      running = advanceInterval(s, rt, dt, trackFixed);
-      remaining -= dt;
-      if (!running) {
-        reason = 'blocked';
-        break;
-      }
-      steps++;
-      if (remaining <= 1e-8) break;
-      if (steps >= maxSteps) {
-        reason = 'steps';
-        break;
-      }
-      if (now() - start >= budget) {
-        reason = 'time';
-        break;
-      }
-      if(!options.shouldYield&&(!options.now||options.nativeLoop===true)) {
-        const result=P.continueRun(rt,s,remaining,{maxSteps:maxSteps-steps,budget:Math.max(0,budget-(now()-start)),now});
-        if(result?.steps) {
-          remaining=result.remaining;steps+=result.steps;running=result.running;
-          if(!running){reason='blocked';break;}
-          if(remaining<=1e-8)break;
-          if(steps>=maxSteps){reason='steps';break;}
-          if(now()-start>=budget){reason='time';break;}
-        }
-      }
-    }
-    return {running, remaining, steps, consumed: minutes - remaining, reason};
-  }
-
-  function* interval(s, rt, minutes, trackFixed = s.tracks.reduce(
-    (value, track) => value + track.km * 2200, 0)) {
-    let frame = Engine.begin(s, rt, minutes);
-    if (!frame.running) return false;
-    while (frame.left > 1e-9) {
-      const {
-        dt,
-        target,
-        left
-      } = frame;
-      const job = {
-        world: s,
-        left,
-        dt,
-        trackFixed,
-        beforeRevenue: rt.revenue,
-        beforeExpense: rt.vehicleExpense
-      };
-      yield [rt,s,dt,target,frame.carry,frame.interval,job];
-      if (dt > 1e-9) frame = job.result;
-      else {
-        const active = s.services.reduce((v, l) => v + (l.fleetManaged ? F.planned(l, rt.minute) :
-          l.fleet), 0);
-        const owned = s.depot ? Object.values(s.depot.stock).reduce((a, b) => a + b, 0) : active;
-        frame = Native.accounts(s, rt, 2, left, dt, 0, 0, trackFixed, U.upkeep(s), active, owned,
-          Q.financeFrame(s, rt));
-      }
-      if (s.urban) U.advance(s, C.create(s.region), rt.minute);
-      if (s.operationsReview) RV.sample(s, rt);
-      if (!frame.running) return false;
-    }
-    return true;
-  }
-  function advanceInterval(...args) {
-    const generator=interval(...args);let step=generator.next();
-    while(!step.done){P.advanceTick(...step.value);step=generator.next();}
-    return step.value;
-  }
-  async function advanceIntervalAsync(...args) {
-    const generator=interval(...args);let step=generator.next();
-    while(!step.done){await P.advanceTickAsync(...step.value);step=generator.next();}
-    return step.value;
-  }
-  const pending=new WeakMap(),errors=new WeakMap();
-  function whenIdle(rt) {return Runtime.has(rt)?Runtime.idle(rt):pending.get(rt)||Promise.resolve();}
-  function advanceBudgetAsync(s,rt,minutes,options={}) {
-    if(Runtime.has(rt))return Runtime.advanceAsync(s,rt,minutes,options);
-    const task=whenIdle(rt).then(async()=>{
-      validInterval(minutes,1e8);init(s);
-      const now=options.now||(()=>performance.now()),start=now(),budget=options.budget??6,max=options.maxSteps??100;
-      if(!Number.isFinite(budget)||budget<0||!Number.isInteger(max)||max<1||max>10000)throw Error('Invalid simulation budget');
-      const trackFixed=s.tracks.reduce((n,t)=>n+t.km*2200,0);
-      let remaining=minutes,steps=0,running=true,reason='complete';
-      while(remaining>1e-8&&steps<max) {
-        if(options.shouldYield?.()){reason='interrupted';break;}
-        const batch=await P.continueAsync(rt,s,remaining,{maxSteps:max-steps,budget:Math.max(0,budget-(now()-start))});
-        if(batch?.steps) {remaining=batch.remaining;steps+=batch.steps;running=batch.running;}
-        else {
-          const dt=Math.min(.1,remaining);
-          running=await advanceIntervalAsync(s,rt,dt,trackFixed);
-          remaining-=dt;if(running)steps++;
-        }
-        if(!running){reason='blocked';break;}
-        if(remaining<=1e-8)break;
-        if(steps>=max){reason='steps';break;}
-        if(now()-start>=budget){reason='time';break;}
-      }
-      return {running,remaining,steps,consumed:minutes-remaining,reason};
-    });
-    const settled=task.then(()=>{},error=>{errors.set(rt,error);});pending.set(rt,settled);
-    settled.finally(()=>{if(pending.get(rt)===settled)pending.delete(rt);});
-    return task;
-  }
+  const advance=(s,rt,minutes)=>Runtime.advance(s,rt,minutes,{full:true}).running;
+  const advanceBudget=(s,rt,minutes,options={})=>Runtime.advance(s,rt,minutes,options);
+  const advanceBudgetAsync=(s,rt,minutes,options={})=>Runtime.advanceAsync(s,rt,minutes,options);
+  const whenIdle=rt=>Runtime.idle(rt);
   function signature(s) {return (node?require('./save-wasm'):root.RailSave).run('signature',{state:s});}
   const api = {
     command,
     forecastBeginAsync:(rt,blocked)=>Runtime.forecastBegin(rt,blocked),forecastFinishAsync:(rt,ticket,success)=>Runtime.forecastFinish(rt,ticket,success),
     invalidateForecastAsync:rt=>Runtime.forecastInvalidate(rt),diagnoseAsync:(rt,query)=>Runtime.diagnose(rt,query),observeAsync:(rt,id)=>Runtime.observe(rt,id),forecastQueryAsync:(rt,query,args)=>Runtime.forecastQuery(rt,query,args),
-    changeAsync:(s,rt,operation,undo=false)=>Runtime.has(rt)?Runtime.command(rt,operation,undo).then(out=>({...out.result,quote:out.quote,undoToken:out.undoToken})):Promise.resolve(change(s,operation)),
-    previewAsync:(s,rt,operation)=>Runtime.has(rt)?Runtime.preview(rt,operation):Promise.resolve(preview(s,operation)),
+    changeAsync:(s,rt,operation,undo=false)=>Runtime.command(rt,operation,undo).then(out=>({...out.result,quote:out.quote,undoToken:out.undoToken})),
+    previewAsync:(s,rt,operation)=>Runtime.preview(rt,operation),
     undoAsync:(rt,token)=>Runtime.undo(rt,token),replaceDemandAsync:(rt,forecast,revision,ticket)=>Runtime.replaceDemand(rt,forecast,revision,ticket),editRevision:rt=>Runtime.editRevision(rt),
     init,
     validate,
@@ -234,11 +74,11 @@
     repay,
     settle,
     advance,
-    borrowAsync:(s,rt,amount)=>Runtime.has(rt)?Runtime.credit(rt,{creditAction:1,amount}).then(r=>r.error?{error:CREDIT_ERRORS[r.error]}:{}):Promise.resolve(borrow(s,amount)),
-    repayAsync:(s,rt,loanId)=>Runtime.has(rt)?Runtime.credit(rt,{creditAction:2,loanId}).then(r=>r.error?{error:CREDIT_ERRORS[r.error]}:{}):Promise.resolve(repay(s,loanId)),
+    borrowAsync:(s,rt,amount)=>Runtime.credit(rt,{creditAction:1,amount}).then(r=>r.error?{error:CREDIT_ERRORS[r.error]}:{}),
+    repayAsync:(s,rt,loanId)=>Runtime.credit(rt,{creditAction:2,loanId}).then(r=>r.error?{error:CREDIT_ERRORS[r.error]}:{}),
     pulseAsync:(s,rt,intent)=>Runtime.pulse(s,rt,intent),runtimeIntent:(rt,intent)=>Runtime.intent(rt,intent),nativeRuntime:rt=>Runtime.has(rt),
     advanceBudget,advanceBudgetAsync,whenIdle,
-    isBusy:rt=>Runtime.has(rt)?Runtime.isBusy(rt):pending.has(rt),lastError:rt=>errors.get(rt),
+    isBusy:rt=>Runtime.isBusy(rt),lastError:()=>null,
     signature,
     INITIAL,
     CREDIT,

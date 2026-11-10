@@ -41,3 +41,15 @@ pub(super) fn next_phase(world:&V,minute:f64)->f64{
 pub(super) fn command(world:&V,command:&V)->V{
     let mut out=command.clone();if command.get("kind").text()=="facility"&&command.get("op").text()=="plan"{out.get_mut("args").set("land",boolean(crate::bootstrap::buildable(world,command.get("args").get("point"))));}out
 }
+
+pub(super) fn enable_automatic(world:&mut V,source:&V,places:&V)->bool{
+ if world.get("urban").get("facilityMode").text()=="automatic"{return false;}
+ if !world.get("urban").truth(){let u=crate::bootstrap::run(&obj(&[("op",text("urbanInit")),("state",world.clone())]));world.set("urban",u);}
+ let transfer=crate::assets::run(&obj(&[("op",text("municipalTransfer")),("state",world.clone()),("args",obj(&[]))]),&crate::bootstrap::config());crate::runtime_edit::apply(world,transfer.get("patch"));
+ let native=crate::bootstrap::city(world.get("region").text());let base=if matches!(source,V::Missing){&*native}else{source};let mut candidates=if !places.array().is_empty(){places.array().to_vec()}else{let mut rows=base.get("cells").array().iter().filter(|c|c.num("people")>100.0).cloned().collect::<Vec<_>>();rows.sort_by(|a,b|b.num("people").total_cmp(&a.num("people")));rows};let hubs=crate::bootstrap::hubs(world.get("region").text());
+ candidates.retain(|p|crate::bootstrap::buildable_input(world,p,source)&&!hubs.array().iter().any(|h|crate::legacy::distance(h,p)<0.25));let projected=arr(candidates.iter().map(|p|obj(&[("x",p.get("x").clone()),("y",p.get("y").clone()),("name",if p.get("name").truth(){p.get("name").clone()}else{text("城市片区")})])).collect());let anchors=crate::bootstrap::urban_call(11,world,vec![("places",projected)]);let u=world.get_mut("urban");u.set("autoCandidates",anchors);u.set("facilityMode",text("automatic"));u.set("revision",n(u.zero("revision")+1.0));let facilities=crate::bootstrap::urban_call(4,world,vec![]);for(k,v)in facilities.entries(){world.get_mut("urban").set(k,v.clone());}true
+}
+pub(super) fn enable_development(world:&mut V,source:&V,places:&V)->bool{
+ if !world.get("urban").truth()||world.get("urban").get("development").truth(){return false;}let filtered=arr(places.array().iter().filter(|p|crate::bootstrap::buildable_input(world,p,source)).cloned().collect());let d=crate::bootstrap::urban_call(10,world,vec![("region",world.get("region").clone()),("places",filtered)]);let u=world.get_mut("urban");u.set("development",d);u.set("revision",n(u.zero("revision")+1.0));true
+}
+pub(super) fn candidates(world:&V,source:&V)->V{let mut keys=world.get("urban").get("cells").entries().iter().map(|(k,_)|k.clone()).collect::<Vec<_>>();let mut seen=keys.iter().cloned().collect::<HashSet<_>>();for p in crate::bootstrap::urban_call(12,world,vec![]).array(){if crate::bootstrap::buildable_input(world,p,source){let key=format!("{}:{}",(p.num("x")/12.0).floor(),(p.num("y")/12.0).floor());if seen.insert(key.clone()){keys.push(key);}}}keys.truncate(24000);arr(keys.iter().map(|k|text(k)).collect())}

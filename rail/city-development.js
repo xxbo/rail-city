@@ -8,9 +8,7 @@
   const KINDS=new Proxy({}, {get:(_,key)=>(typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).settings().developmentKinds[key],ownKeys:()=>Object.keys((typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).settings().developmentKinds),getOwnPropertyDescriptor:()=>({enumerable:true,configurable:true})});
 
   const native=(op,s,extra={})=>(typeof module!=='undefined'&&module.exports?require('./transactions-wasm'):root.RailTransactions).run(op,{state:{urban:{lastMinute:s.urban.lastMinute,development:s.urban.development,totals:s.urban.totals}},...extra});
-  function enable(s, base, places, hubs, buildable) {
-    if(!s.urban||s.urban.development)return false;s.urban.development=native(10,s,{region:s.region,places:places.filter(buildable),hubs});s.urban.revision++;return true;
-  }
+  function enable(s,base,places){const node=typeof module!=='undefined'&&module.exports,R=node?require('./engine'):root.RailSim,B=node?require('./bootstrap-wasm'):root.RailBootstrap,out=R.compat('urbanEnableDevelopment',s,{...B.geo(base),places});R.sync(s,out.state);return out.result;}
 
   function valid(s) {return (typeof module!=='undefined'&&module.exports?require('./save-wasm'):root.RailSave).run('development',{state:s});}
 

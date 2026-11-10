@@ -7,9 +7,10 @@ pub(super) fn apply(world:&mut V,patch:&V){
     }}
 }
 pub(super) fn graph(plan:&V,owner:&mut ForecastOwner)->Result<V,String>{
-    let mut state=plan.clone();state.set("operatingPlan",boolean(true));for l in state.get_mut("services").array_mut(){l.set("fleet",n(l.num("fleet").max(1.0)));l.set("dispatchCompiled",boolean(true));}
-    let adjacency=crate::editor::graph(&state)?;
-    let mut graph=owner.handle(&obj(&[("action",text("graphFrame")),("state",state.clone()),("adjacency",adjacency)]));
+    let mut state=plan.clone();state.set("operatingPlan",boolean(true));for l in state.get_mut("services").array_mut(){if plan.num("routeModel")==9.0{l.set("fleet",n(l.num("fleet").max(1.0)));}l.set("dispatchCompiled",boolean(true));}
+    let legacy=state.num("routeModel")!=9.0;
+    let adjacency=if legacy{crate::legacy::graph(&state,&V::Missing)}else{crate::editor::graph(&state)?};
+    let mut graph=owner.handle(&obj(&[("action",text("graphFrame")),("state",state.clone()),("adjacency",adjacency),("legacy",boolean(legacy))]));
     if graph.get("error").truth(){return Err(graph.get("error").text().into());}
     let id=graph.get("id").clone();let prices=owner.handle(&obj(&[("action",text("graphPrices")),("id",id.clone()),("state",state)]));
     owner.handle(&obj(&[("action",text("release")),("id",id)]));

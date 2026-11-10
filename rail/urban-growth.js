@@ -33,24 +33,7 @@
 
   function init(s){if(!s.urban)s.urban=(node?require('./bootstrap-wasm'):root.RailBootstrap).run('urbanInit',{state:{economy:s.economy}});return s.urban;}
   // Automatic city destinations are deterministic game facilities, not a real POI inventory.
-  function enableAutomatic(s, base, places = []) {
-    const u = init(s);
-    if (u.facilityMode === 'automatic') return false;
-    assets().mutate(s,'municipalTransfer');
-    const anchors = [],
-      hubs = H.forRegion(s.region),
-      source = (places.length ? places : base.cells.filter(c => c.people > 100).sort((a, b) => b.people - a
-        .people)).filter(p => buildable(s, base, p) && !hubs.some(h => dist(h, p) < .25)).map(p => ({
-        x: p.x,
-        y: p.y,
-        name: p.name || '城市片区'
-      }));
-    u.autoCandidates=native(11,s,{places:source});
-    u.facilityMode = 'automatic';
-    u.revision++;
-    autoFacilities(s);
-    return true;
-  }
+  function enableAutomatic(s,base,places=[]){const R=node?require('./engine'):root.RailSim,B=node?require('./bootstrap-wasm'):root.RailBootstrap,out=R.compat('urbanEnableAutomatic',s,{...B.geo(base),places});R.sync(s,out.state);return out.result;}
 
   function autoFacilities(s) {
     if(!s.urban)return;const result=native(4,s);adopt(s.urban,result);
@@ -87,9 +70,7 @@
     init(s);return native(2,s,{point:p});
   }
   // Local neighbourhood queries use a bounded candidate grid. No whole-map population is seeded.
-  function candidates(s, base) {
-    const keys=new Set(Object.keys(s.urban.cells));for(const p of native(12,s))if(buildable(s,base,p))keys.add(Math.floor(p.x/SIZE)+':'+Math.floor(p.y/SIZE));return [...keys].slice(0,24000);
-  }
+  function candidates(s,base){const R=node?require('./engine'):root.RailSim,B=node?require('./bootstrap-wasm'):root.RailBootstrap;return R.compat('urbanCandidates',s,B.geo(base)).result;}
 
   function cityTransaction(s,base,op,minute){const T=node?require('./transactions-wasm'):root.RailTransactions,B=node?require('./bootstrap-wasm'):root.RailBootstrap;init(s);const geo=B.geo(base),result=T.run(op,{state:s,...(geo.base?{base:geo.base}:{}),minute});if(result.error)throw Error(result.error);adopt(s.urban,result.urban);cache.delete(s.urban);return result;}
   function step(s,base){return cityTransaction(s,base,17).growth;}

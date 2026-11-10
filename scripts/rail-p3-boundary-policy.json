@@ -26,26 +26,14 @@
       "owner": "No production imports or callers; historical compatibility helper pending fixture-only cleanup"
     },
     "rail/city-development.js": {
-      "role": "domain",
-      "phase": "P3-5",
-      "owner": "Rust development budgets, allocation and summary; startup compatibility enable adapter remains"
+      "role": "platform",
+      "phase": "P3-6 bridge",
+      "owner": "Rust budgets, allocation, initialization and development summaries"
     },
     "rail/city.js": {
-      "role": "domain",
-      "phase": "P3-6",
-      "owner": "Rust legacy rules; initialization P3-1",
-      "overrides": {
-        "create": {
-          "role": "platform",
-          "phase": "P3-1 bridge",
-          "owner": "Rust initialization/geography; compatibility view only"
-        },
-        "source": {
-          "role": "domain",
-          "phase": "P3-1",
-          "owner": "Rust city input initialization"
-        }
-      }
+      "role": "platform",
+      "phase": "P3-6 bridge",
+      "owner": "Rust legacy_city.rs plus modern native demand modules; Map/view decoding only"
     },
     "rail/connection-model.js": {
       "role": "domain",
@@ -132,26 +120,15 @@
       "owner": "Rust atomic edit and assets"
     },
     "rail/engine-wasm.js": {
-      "role": "domain",
-      "phase": "P3-3",
-      "owner": "Rust runtime/clock; edit lifecycle P3-4"
+      "role": "test-reference",
+      "phase": "P3-6 reference alias",
+      "owner": "Node-only frozen adapter in scripts/fixtures; excluded by publish_rail.cjs",
+      "bridgeDisposition": "No browser import or runtime implementation. Historical numeric/identity drivers are available only to reference tests."
     },
     "rail/engine.js": {
-      "role": "domain",
-      "phase": "P3-6",
-      "owner": "Rust legacy rules; initialization P3-1",
-      "overrides": {
-        "newGame": {
-          "role": "platform",
-          "phase": "P3-1 bridge",
-          "owner": "Rust initialization/geography; compatibility view only"
-        },
-        "upgrade": {
-          "role": "platform",
-          "phase": "P3-1 bridge",
-          "owner": "Rust initialization/geography; compatibility view only"
-        }
-      }
+      "role": "platform",
+      "phase": "P3-6 bridge",
+      "owner": "Rust legacy.rs; API forwarding and generic detached-view application"
     },
     "rail/fleet.js": {
       "role": "platform",
@@ -204,9 +181,9 @@
       "owner": "Rust save envelope/records/ordering/restore"
     },
     "rail/management.js": {
-      "role": "domain",
-      "phase": "P3-3",
-      "owner": "Rust RuntimeOwner for modern runs, edit transactions, city/observations and prediction scheduling; legacy adapters P3-6"
+      "role": "platform",
+      "phase": "P3-6 bridge",
+      "owner": "Rust RuntimeOwner for all continuous models; structured cold asset and credit transport"
     },
     "rail/map-detail.js": {
       "role": "ui",
@@ -255,96 +232,14 @@
       "bridgeDisposition": "Generated or minimal API forwarding; queues, fallback and retry policies move to Rust"
     },
     "rail/operations.js": {
-      "role": "domain",
-      "phase": "P3-6",
-      "owner": "Rust legacy operations and shared domain queries"
+      "role": "mixed",
+      "phase": "P3-6 bridge",
+      "owner": "Rust legacy_operations.rs for simulation; JS position/geometry code is display interpolation"
     },
     "rail/passengers.js": {
-      "role": "domain",
-      "phase": "P3-3",
-      "owner": "Rust RuntimeOwner for modern session runs; remaining legacy/edit adapters tracked by P3-4/P3-6",
-      "overrides": {
-        "reconcile": {
-          "role": "domain",
-          "phase": "P3-4",
-          "owner": "Rust journey/edit transactions"
-        },
-        "rebase": {
-          "role": "domain",
-          "phase": "P3-4",
-          "owner": "Rust journey/edit transactions"
-        },
-        "compactDefinitions": {
-          "role": "domain",
-          "phase": "P3-4",
-          "owner": "Rust journey/edit transactions"
-        },
-        "adoptMigration": {
-          "role": "domain",
-          "phase": "P3-4",
-          "owner": "Rust journey/edit transactions"
-        },
-        "reroute": {
-          "role": "domain",
-          "phase": "P3-4",
-          "owner": "Rust journey/edit transactions"
-        },
-        "routeKey": {
-          "role": "domain",
-          "phase": "P3-4",
-          "owner": "Rust journey/edit transactions"
-        },
-        "definitions": {
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust contract directory"
-        },
-        "validateCatalog": {
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust contract directory"
-        },
-        "installCatalog": {
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust contract directory"
-        },
-        "journeyKey": {
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust contract directory"
-        },
-        "materialize": {
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust contract directory"
-        },
-        "demandSummary": {
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust contract directory"
-        },
-        "restore": {
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust snapshot/restore"
-        },
-        "snapshot": {
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust snapshot/restore"
-        },
-        "legacyTick": {
-          "role": "domain",
-          "phase": "P3-6",
-          "owner": "Rust weighted compatibility"
-        },
-        "legacyWindows": {
-          "role": "domain",
-          "phase": "P3-6",
-          "owner": "Rust weighted compatibility"
-        }
-      }
+      "role": "platform",
+      "phase": "P3-6 bridge",
+      "owner": "Rust RuntimeOwner for all supported passenger models, cohorts and queries"
     },
     "rail/performance.js": {
       "role": "mixed",
@@ -375,14 +270,16 @@
       "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/preparation-wasm.js": {
-      "role": "domain",
-      "phase": "P3-3",
-      "owner": "Rust runtime/clock; edit lifecycle P3-4"
+      "role": "test-reference",
+      "phase": "P3-6 reference alias",
+      "owner": "Node-only frozen adapter in scripts/fixtures; excluded by publish_rail.cjs",
+      "bridgeDisposition": "No browser import or runtime implementation. Historical numeric/identity drivers are available only to reference tests."
     },
     "rail/queue-runtime.js": {
-      "role": "domain",
-      "phase": "P3-3",
-      "owner": "Rust RuntimeOwner for modern session runs; remaining legacy/edit adapters tracked by P3-4/P3-6"
+      "role": "test-reference",
+      "phase": "P3-6 reference alias",
+      "owner": "Node-only frozen adapter in scripts/fixtures; excluded by publish_rail.cjs",
+      "bridgeDisposition": "No browser import or runtime implementation. Historical numeric/identity drivers are available only to reference tests."
     },
     "rail/regions.js": {
       "role": "platform",
@@ -479,15 +376,16 @@
       "owner": "Interface, visual geometry and private display preferences"
     },
     "rail/simulation-client.js": {
-      "role": "platform",
-      "phase": "P3-8",
-      "owner": "Rust task/revision/timeout/worker ownership",
-      "bridgeDisposition": "Generated or minimal API forwarding; queues, fallback and retry policies move to Rust"
+      "role": "test-reference",
+      "phase": "P3-6 reference alias",
+      "owner": "Node-only frozen adapter in scripts/fixtures; excluded by publish_rail.cjs",
+      "bridgeDisposition": "No browser import or runtime implementation. Historical numeric/identity drivers are available only to reference tests."
     },
     "rail/simulation-wasm.js": {
-      "role": "domain",
-      "phase": "P3-3",
-      "owner": "Rust runtime/clock; edit lifecycle P3-4"
+      "role": "test-reference",
+      "phase": "P3-6 reference alias",
+      "owner": "Node-only frozen adapter in scripts/fixtures; excluded by publish_rail.cjs",
+      "bridgeDisposition": "No browser import or runtime implementation. Historical numeric/identity drivers are available only to reference tests."
     },
     "rail/simulation-worker.js": {
       "role": "platform",
@@ -651,26 +549,9 @@
       }
     },
     "rail/urban-growth.js": {
-      "role": "domain",
-      "phase": "P3-5",
-      "owner": "Rust atomic city step/advance, terrain and growth; legacy automatic-enable/candidate adapters retained for P3-6",
-      "overrides": {
-        "init": {
-          "role": "platform",
-          "phase": "P3-1 bridge",
-          "owner": "Rust initialization/geography; compatibility view only"
-        },
-        "terrain": {
-          "role": "platform",
-          "phase": "P3-1 bridge",
-          "owner": "Rust initialization/geography; compatibility view only"
-        },
-        "buildable": {
-          "role": "platform",
-          "phase": "P3-1 bridge",
-          "owner": "Rust initialization/geography; compatibility view only"
-        }
-      }
+      "role": "mixed",
+      "phase": "P3-6 bridge",
+      "owner": "Rust city/development initialization, growth, candidates and terrain; JS map markers only"
     },
     "rail/value-wire.js": {
       "role": "platform",

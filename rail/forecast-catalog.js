@@ -1,7 +1,7 @@
 /* P3-2 handle transport. Tables, indexes, mutations and view eviction live in Rust. */
 (function(root){'use strict';const node=typeof module!=='undefined'&&module.exports;
 const bootstrap=()=>node?require('./bootstrap-wasm'):root.RailBootstrap;
-const forecasts=new WeakMap(),catalogs=new WeakMap(),live=new WeakMap(),diagnosticTokens=new WeakMap(),dailyListeners=new WeakMap();
+const forecasts=new WeakMap(),catalogs=new WeakMap(),diagnosticTokens=new WeakMap(),dailyListeners=new WeakMap();
 const invoke=(action,args={})=>bootstrap().forecast(action,args);
 const released=typeof FinalizationRegistry==='function'?new FinalizationRegistry(id=>{try{invoke('release',{id});}catch{}}):null;
 function lease(descriptor){const handle=Object.freeze(descriptor);released?.register(handle,handle.id);return handle;}
@@ -30,8 +30,8 @@ function summary(base,state){const handle=forecasts.get(base);return handle?quer
 function connections(base,state){const handle=forecasts.get(base);return handle?query(handle,'connections',{services:state.services,stations:base.catchment.stations}):null;}
 function diagnostic(base){const handle=forecasts.get(base);if(!handle)return null;const frame=query(handle,'diagnostic');if(!diagnosticTokens.has(handle))diagnosticTokens.set(handle,(node?require('./routing-wasm'):root.RailRouting).allocateToken());return{token:diagnosticTokens.get(handle),meta:{graph:frame.graph,count:frame.count,compact:true,population:base.population,covered:base.catchment?.covered},data:Float64Array.from(frame.flowData)};}
 function sampling(catalog){return query(catalogs.get(catalog),'sampling');}
-function materialize(rt,journey){let entry=live.get(rt);if(!entry||entry.defs!==rt.defs||entry.length!==rt.defs.length){const id=invoke('liveBind',{definitions:rt.defs});entry={handle:lease({id}),defs:rt.defs,length:rt.defs.length};live.set(rt,entry);}const result=query(entry.handle,'materialize',{journey});if(result.created){rt.defs.push(result.definition);entry.length=rt.defs.length;}return rt.defs[result.index];}
-const api={onDaily,definitions,seal,key:journey=>invoke('journeyKey',{journey}),attach,attachOutput,transport,hydrate,select,profile,daily,setDaily,dailyPatch,totals,legs,page,summary,connections,diagnostic,sampling,materialize,
+function attachLegacy(base,state){const handle=invoke('attachLegacy',{state,forecast:{flows:base.flows}});bind(base,handle);return handle;}
+const api={attachLegacy,onDaily,definitions,seal,key:journey=>invoke('journeyKey',{journey}),attach,attachOutput,transport,hydrate,select,profile,daily,setDaily,dailyPatch,totals,legs,page,summary,connections,diagnostic,sampling,
  source:base=>forecasts.get(base),meta:catalog=>catalogs.get(catalog),status:base=>{const handle=forecasts.get(base);return handle?query(handle,'status'):null;}};
 if(node)module.exports=api;else root.RailForecastCatalog=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

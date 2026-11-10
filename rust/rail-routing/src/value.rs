@@ -94,6 +94,7 @@ impl Value {
             &[]
         }
     }
+    pub fn entries_mut(&mut self)->&mut Vec<(String,Value)>{if !matches!(self,Self::Object(_)){*self=Self::Object(vec![]);}if let Self::Object(rows)=self{rows}else{unreachable!()}}
     pub fn num(&self, k: &str) -> f64 {
         self.get(k).n()
     }

@@ -504,7 +504,7 @@ pub(super) fn duration(s: &V, l: &V) -> Result<f64, String> {
 }
 pub(super) fn planned(l: &V, minute: f64) -> f64 {
     if !l.get("fleetManaged").truth() {
-        return num(l.get("fleet"));
+        return l.zero("fleet");
     }
     let d = l.get("dispatch");
     if d.get("mode").text() == "auto" {
@@ -518,6 +518,7 @@ pub(super) fn planned(l: &V, minute: f64) -> f64 {
     }
 }
 pub(super) fn headway(s: &V, l: &V) -> Result<f64, String> {
+    if s.num("routeModel")!=9.0{return Ok(crate::legacy::headway(s,l));}
     let managed = l.get("fleetManaged").truth();
     let fleet = if managed && !l.get("dispatchCompiled").truth() {
         planned(l, minute(s))

@@ -5,7 +5,8 @@ function stage(source,target,provenance={}){
  if(fs.existsSync(target)&&fs.readdirSync(target).length)throw Error('Publication target must be empty');
  if(!fs.lstatSync(path.join(game,'index.html')).isFile())throw Error('Game entry missing');
  for(const entry of fs.readdirSync(game,{recursive:true}))if(fs.lstatSync(path.join(game,entry)).isSymbolicLink())throw Error('Game contains a symlink');
- fs.mkdirSync(target,{recursive:true});fs.cpSync(game,target,{recursive:true});
+ const referenceAdapters=new Set(['simulation-wasm.js','preparation-wasm.js','engine-wasm.js','simulation-client.js','queue-runtime.js']);
+ fs.mkdirSync(target,{recursive:true});fs.cpSync(game,target,{recursive:true,filter:entry=>!referenceAdapters.has(path.basename(entry))});
  fs.writeFileSync(path.join(target,'.nojekyll'),'');
  fs.writeFileSync(path.join(target,'deployment.json'),JSON.stringify({kind:'rail-city',...provenance},null,2)+'\n');
 }

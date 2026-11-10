@@ -1,6 +1,7 @@
 //! Persistent service calendar. Host boundaries are world/history revisions, not minutes or departures.
 use crate::{int, queues::Read, CORE};
 struct Run {
+    legacy:bool,
     id: usize,
     parent: usize,
     base: f64,
@@ -21,6 +22,7 @@ struct Run {
 }
 impl Run {
     fn h(&self) -> f64 {
+        if self.legacy{return self.h0;}
         let cycle = if self.is_loop {
             self.duration * self.dirs
         } else {
@@ -125,6 +127,7 @@ impl Calendar {
             let fleet = r.f();
             let fares = (0..r.u()).map(|_| r.u()).collect();
             runs.push(Run {
+                legacy:false,
                 id,
                 parent,
                 base,
@@ -174,6 +177,7 @@ impl Calendar {
         let ids = (0..r.u()).map(|_| r.u()).collect();
         let mapping = (0..r.u()).map(|_| r.f()).collect();
         let sparse = r.f() != 0.0;
+        let modern=if r.at<v.len(){r.f()!=0.0}else{true};for l in &mut runs{l.legacy=!modern;}
         assert_eq!(r.at, v.len());
         // Install daily/profile metadata without advancing demand or the random stream.
         sample[9] = 0.0;
@@ -535,7 +539,7 @@ pub(super) fn run_owned(
             } else {
                 (motion, order)
             };
-            let feedback = if interval != 0.0 {
+            let feedback = if interval != 0.0 && q.modern() {
                 q.prune_hour(next);
                 cal.feedback_frame(next, interval, q, &order)
             } else {
@@ -613,7 +617,7 @@ pub(super) fn run_owned(
                 0.0,
                 0.0,
                 next,
-                1.0,
+                q.modern()as u8 as f64,
                 if cal.integer { 1.0 } else { 0.0 },
                 cal.transfer,
                 if cal.integer && interval != 0.0 {
@@ -636,9 +640,9 @@ pub(super) fn run_owned(
                 cal.ids.iter().map(|&id| id as f64).collect::<Vec<_>>()
             };
             let statistics = if q.native_routes() {
-                vec![0.0, 0.0, 0.0]
+                vec![if q.has_statistics(){0.0}else{-1.0}, 0.0, 0.0]
             } else {
-                vec![0.0, 0.0]
+                vec![if q.has_statistics(){0.0}else{-1.0}, 0.0]
             };
             let zero = vec![0.0];
             let parts: [&[f64]; 8] = [
@@ -742,6 +746,7 @@ pub(super) fn run_owned(
 mod tests {
     fn run() -> super::Run {
         super::Run {
+            legacy:false,
             id: 0,
             parent: 0,
             base: 0.0,

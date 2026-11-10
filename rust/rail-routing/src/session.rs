@@ -135,6 +135,7 @@ pub struct SessionHost {
     forecasts: crate::forecast_session::ForecastOwner,
     runtimes:crate::runtime_session::RuntimeOwner,
     clocks:crate::runtime_control::Controls,
+    legacy_operations:crate::legacy_operations::Owner,
 }
 impl SessionHost {
     pub fn request_packed(&mut self, wire: &[f64], bytes: &[u8]) -> (Vec<f64>, Vec<u8>) {
@@ -155,6 +156,8 @@ impl SessionHost {
         if !matches!(input.get("protocolVersion"), V::Number(v) if *v == VERSION) {
             return error("UNSUPPORTED_PROTOCOL", 0, 0);
         }
+        if input.get("op").text()=="legacyOperations"{let result=self.legacy_operations.request(input);if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
+        if input.get("op").text()=="compat"{return envelope(true,0,0,crate::legacy::run(input));}
         if input.get("op").text()=="runtime"||input.get("op").text()=="clock"{
             let result=if input.get("op").text()=="runtime"{self.runtimes.request(input,&mut self.forecasts)}else{self.clocks.request(input)};
             if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,self.state.as_ref().map_or(0,|s|s.id),self.state.as_ref().map_or(0,|s|s.revision),result);

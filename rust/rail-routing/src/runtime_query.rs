@@ -1,0 +1,12 @@
+//! Read-only cohort projections. Identity interpretation stays beside the native runtime.
+use crate::{editor_support::*,value::Value as V};
+pub(super) fn query(world:&V,rt:&V,input:&V)->V{
+ if input.get("query").text()=="train"{let train=rt.get("trains").array().iter().find(|t|eq(t.get("id"),input.get("target")));let mut destinations=obj(&[]);if let Some(t)=train{for(token,count)in t.get("passengers").entries(){let id=token.split(':').next().and_then(|id|id.parse::<usize>().ok());if let Some(j)=id.and_then(|id|rt.get("defs").array().get(id)){crate::legacy::add(&mut destinations,&jsstring(j.get("to")),count.n());}}}return obj(&[("passengers",train.map_or(obj(&[]),|t|t.get("passengers").clone())),("destinations",destinations)]);}
+
+ let id=input.num("target");let mut lines=obj(&[]);let mut destinations=obj(&[]);let mut purposes=obj(&[("work",n(0.0)),("shopping",n(0.0)),("leisure",n(0.0))]);let mut waiting=0.0;
+ let mut cohort=|journey:usize,count:f64|{if let Some(j)=rt.get("defs").array().get(journey){crate::legacy::add(&mut destinations,&jsstring(j.get("to")),count);crate::legacy::add(&mut purposes,j.get("purpose").text(),count);}};
+ for(key,rows)in rt.get("queues").entries(){let parts=key.split('|').collect::<Vec<_>>();if parts.get(2).and_then(|v|v.parse::<f64>().ok())!=Some(id){continue;}for(token,count)in rows.entries(){waiting+=count.n();crate::legacy::add(&mut lines,parts[0],count.n());cohort(token.split(':').next().unwrap().parse().unwrap(),count.n());}}
+ let mut transferring=0.0;for t in rt.get("transfers").array(){if t.num("station")==id{transferring+=t.num("amount");waiting+=t.num("amount");cohort(t.num("journey")as usize,t.num("amount"));}}
+ let outside=rt.get("outside").get(&jsstring(&n(id))).entries().iter().map(|(_,v)|v.n()).sum();let limits=rt.get("stationLimits").get(&jsstring(&n(id)));let today=world.get("ridership").get("current").get("stations").get(&jsstring(&n(id)));
+ obj(&[("waiting",n(waiting)),("outside",n(outside)),("capacity",limits.get("capacity").clone()),("outsideCapacity",limits.get("outsideCapacity").clone()),("transferring",n(transferring)),("lines",lines),("destinations",destinations),("purposes",purposes),("today",if today.truth(){today.clone()}else{obj(&[("entered",n(0.0)),("boarded",n(0.0)),("alighted",n(0.0))])})])
+}

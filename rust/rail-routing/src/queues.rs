@@ -201,6 +201,8 @@ impl Queues {
             2.0
         }
     }
+    pub(super) fn modern(&self)->bool{self.modern}
+    pub(super) fn has_statistics(&self)->bool{self.stats.is_some()}
     pub(super) fn native_routes(&self) -> bool {
         self.native_routes
     }
@@ -1525,7 +1527,7 @@ impl Queues{
         let trains=self.trains.iter().map(|(&uid,t)|{nb+=t.onboard;let mut passengers=V::Object(vec![]);if full{for(tok,v)in t.passengers.rows.iter().flatten(){passengers.set(&token(*tok),n(*v));}}obj(&[("uid",n(uid as f64)),("id",text(ids.get(&uid).map_or("",|s|s.as_str()))),("service",text(&name(t.service))),("parentLine",text(&name(t.parent))),("capacity",n(t.capacity)),("onboard",n(t.onboard)),("dir",n(t.dir as f64)),("loop",boolean(t.is_loop)),("stops",arr(t.stops.iter().map(|i|n(*i as f64)).collect())),("callStops",arr(t.stops.iter().filter(|id|t.calls.contains(*id)).map(|i|n(*i as f64)).collect())),("passengers",passengers)])}).collect();
         result.set("trains",arr(trains));result.set("stationOccupancy",V::Object(self.occupancy.iter().map(|(id,v)|(id.to_string(),n(*v))).collect()));
         if full{result.set("queues",queues);result.set("waitSince",wait);result.set("outside",outside);result.set("outsideSince",outside_since);result.set("transfers",arr(transfers));let mut definitions=vec![];for id in 0..self.defs.len(){let Some(j)=self.defs.get(&id)else{continue};let by_line=V::Object(j.byline.iter().map(|(id,v)|(name(*id),n(f64::from_bits(*v)))).collect());let legs=j.legs.iter().map(|l|obj(&[("service",text(&name(l.service))),("dir",n(l.dir as f64)),("from",n(l.from as f64)),("to",n(l.to as f64))])).collect();let mut row=obj(&[("id",n(id as f64)),("legs",arr(legs)),("daily",n(0.0)),("fare",n(j.fare)),("purpose",text(["work","shopping","leisure"][j.purpose])),("lineIds",arr(j.line_ids.iter().map(|id|text(&name(*id))).collect())),("byLine",by_line)]);if let Some(c)=&j.contract{row.set("from",n(c.from));row.set("to",n(c.to));row.set("back",boolean(c.back));row.set("hub",c.hub.map_or(V::Null,|i|text(&name(i))));row.set("externalKind",c.kind.map_or(V::Null,|i|text(&name(i))));}definitions.push(row);}result.set("defs",arr(definitions));}
-        else{result.set("nativeView",obj(&[("minute",n(self.now)),("summary",obj(&[("waiting",n(ni+no+nt)),("outside",n(no)),("transferring",n(nt)),("onboard",n(nb))])),("queues",queues),("outside",outside),("transfers",arr(transfers)),("stations",stations)]));}
+        else{result.set("nativeView",obj(&[("minute",n(self.now)),("summary",obj(&[("waiting",n(ni+no+nt)),("inside",n(ni+nt)),("outside",n(no)),("transferring",n(nt)),("onboard",n(nb))])),("queues",queues),("outside",outside),("transfers",arr(transfers)),("stations",stations)]));}
         result
     }
 }

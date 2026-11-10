@@ -247,7 +247,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=70') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=71') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -2720,7 +2720,7 @@
     }
     try {
       if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=70');
+        centerWorker = new Worker('operations-worker.js?v=71');
         centerForecastSent = null;
       }
       centerWorker.onerror = e => fail(e.message || '后台诊断不可用');
@@ -3426,12 +3426,7 @@
         title = '列车已完成本次运行';
         body = '<p>本班列车已抵达终点并退出运营。</p>';
       } else {
-        const l = trainLine(t),
-          dest = {};
-        for (const [token, n] of Object.entries(nativeDetail||t.passengers)) {
-          const j = traffic.defs[+token.split(':')[0]];
-          if (j) dest[j.to] = (dest[j.to] || 0) + n;
-        }
+        const l=trainLine(t),dest=nativeDetail?.destinations||{};
         title = runName(t.service) + ' · ' + t.id + (t.loop ? ' · ' + X.directionName(s, l, t.dir) : '');
         body =
           `<div class="big-load" style="--crowd:${crowd(t.onboard/t.capacity)}"><strong>${Math.round(t.onboard/t.capacity*100)}%</strong><span>满载率 · ${num(t.onboard)} / ${t.capacity} 人</span></div><p>${l.stockSpec||l.cars+' 辆编组'} · ${t.status==='moving'?'行驶中':t.status==='signal'?'信号等待':'停站中'}</p><p>${esc(s.nodes[t.stops[t.index]].name)} → ${esc(s.nodes[t.stops[Math.min(t.stops.length-1,Math.max(0,t.index+t.dir))]].name)}</p><div class="section-title">车上乘客目的地</div>${Object.entries(dest).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([id,n])=>`<div class="detail-row"><span>${esc(s.nodes[id].name)}</span><b>${num(n)} 人</b></div>`).join('')||'<p>暂无乘客</p>'}<button data-line="${l.id}">查看线路</button>`;

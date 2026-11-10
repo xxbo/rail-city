@@ -101,3 +101,12 @@ editRevision仅标识编辑/目录提交；模拟步进使用运行revision，�
 | forecastQuery | id、query=summary/connections、可选stations | 当前接纳目录与满意度上的查询投影及来源修订 |
 
 城市和观察发布标记仅在对外含runtime的响应推进；内部审查/诊断读取不消耗标记。城市更新时返回worldPatch.urban与runtime.businessView.development，观察更新时返回worldPatch.operationsReview，避免普通pulse重复传送城市。预测脏状态随runtime.forecastStatus发布，JS计时器只唤醒任务请求。
+
+
+## P3-6兼容模型合同（源码，待验收）
+
+运行ABI为4。op=compat接收action、state和args，返回Rust计算的state/result；季度模型的建设、直通、图、预测和结算可由原生调用者连续驱动。op=legacyOperations提供独立create/restore/advance/snapshot/summary/command/close句柄，保存旧演示运行状态。
+
+普通预测通过forecast.attachLegacy在Rust内转换为目录。运行Seed依据routeModel及保存的arrivalMode选择现代/旧运行、整数/加权及是否安装统计生命周期；旧版本不强制整数化。runtime.command支持kind=legacy及build/through/setFare/setHeadway/step，和同一运行区的改签、检查点及撤销事务共用修订与回执。
+
+runtime.query接收query=station/train和target，从原生实际定义与token生成显示投影；setDaily将目录变更提交到同一所有者。既有手写JS身份materialize/liveBind驱动退出生产；原生内部接口继续保留兼容原型支持。
