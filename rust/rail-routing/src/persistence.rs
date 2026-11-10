@@ -11,7 +11,7 @@ pub(super) fn world_records(s:&V,previous:&V)->V{
     for(i,t)in tracks.iter().enumerate(){indices.insert(jsstring(t.get("id")),i);}
     let mut used=HashSet::new();let mut network=0.0;let mut longest=0.0_f64;
     for line in s.get("services").array(){let mut length=0.0;for id in line.get("trackIds").array(){if let Some(&index)=indices.get(&jsstring(id)){let km=tracks[index].zero("km");length+=km;if used.insert(index){network+=km;}}}longest=longest.max(length);}
-    merge(&[previous.clone(),s.get("ridership").get("records").clone(),obj(&[("bestNetworkKm",n(network)),("bestLineKm",n(longest)),("bestRevenue",n(s.get("economy").zero("revenue")))])
+    merge(&[previous.clone(),s.get("ridership").get("records").clone(),obj(&[("bestNetworkKm",n(network)),("bestLineKm",n(longest)),("bestRevenue",n(s.get("economy").zero("revenue")))])])
 }
 fn speed(v:&V)->V{if [1.0,3.0,6.0,12.0,24.0].contains(&v.n()){v.clone()}else{n(6.0)}}
 pub(super) fn pack(state:V,mut runtime:V,settings:&V)->V{
