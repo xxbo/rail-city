@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "stage": "P3-9-source-prepared",
+  "sourceBaseline": "96fb2aa5ae6df0193e5195dc121bdd4d56768803",
+  "executionStatus": "not-run",
+  "tasks": [
+    {"id":"wasm","command":["node","scripts/build_rail_wasm.cjs","--check"],"kind":"deterministic-artifact"},
+    {"id":"session","command":["node","scripts/build_rail_session_contract.cjs","--check"],"kind":"deterministic-artifact"},
+    {"id":"rust","command":["cargo","+1.99.1","test","--locked","--features","session-contract","--manifest-path","rust/rail-routing/Cargo.toml"],"kind":"native-contract"},
+    {"id":"regression","command":["node","scripts/run_rail_tests.cjs"],"kind":"compatibility-and-native-regression"},
+    {"id":"boundary","command":["node","scripts/audit_rail_release.cjs"],"kind":"production-function-boundary"},
+    {"id":"browser","command":["node","scripts/probe_rail_release.cjs"],"kind":"real-browser"}
+  ],
+  "requiredScenarios": [
+    "tokyo-start","gba-start","start-pause-speed","new-game","build-edit-undo","patterns-stock-credit",
+    "station-train-details","urban-review","cross-day-history","weighted-legacy","import-export-reload",
+    "cross-map-import","save-over-9MiB","invalid-save-atomicity","storage-conflict","worker-timeout-late-result",
+    "ui-copy-isolation","native-conservation","performance-dual-baseline"
+  ],
+  "performance": {
+    "jsBaseline":"498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+    "migrationBaseline":"bffdd8fbd22e2553a881533b540f878f6ea8fabc",
+    "requiredMetrics":["nativeCPU","coldTransactions","requestsPerGameMinute","bytesPerGameMinute","jsHeap","arrayBuffers","wasmMemory","peakRSS","browserLongTasks","browserInteractionLatency","browserFrameIntervals"],
+    "status":"not-measured",
+    "note":"Node timings and browser measurements remain separate; report negative gains and hotspots."
+  }
+}

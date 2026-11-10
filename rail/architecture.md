@@ -1,3 +1,13 @@
+# 当前职责与源码验收边界
+
+P3-8源码阶段。Rust持有冷会话、预测目录、实际运行队列/时钟、财务、城市与编辑事务；JSON及存档策略在 json_codec.rs / persistence.rs，Worker租约与超时在 platform.rs，只读面板在 view_model.rs。ui.js发送结构化命令并显示分离视图；RPC、Worker/Timer、文件/数据库和DOM原语由已登记宿主端口执行。
+
+发布仅复制 scripts/rail-public-assets.json 明列资源，目标 core-v33、会话 ABI6、fixture-v9。系统数学/外部熵/时间绑定见 scripts/rail-platform-bindings.json。历史参考模块在 scripts/fixtures，原生场景验收与参考模块回归分开。
+
+P3-9源码入口已准备，尚待编译、逐函数生产边界复核、全部回归、真实浏览器和双基线测量；[P3-8记录](rust-wasm-p3-8.md)与[P3-9准备](rust-wasm-p3-9.md)描述当前状态。下面是早期MAP38–44的历史维护记录，不能作为当前所有权或性能结论。
+
+---
+
 # 轨道都市代码维护指南（MAP38–44）
 
 这是分批重构的第一轮。保留无构建步骤的 GitHub Pages 发布方式、现有全局 API、游戏版本7、存档格式1和两个地图的独立存档键。没有更换框架、修改需求公式、计费规则、模拟步长或随机数顺序。

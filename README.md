@@ -27,13 +27,15 @@ Rust固定为 `rust/rail-routing/rust-toolchain.toml` 所指定的1.99.1，需�
 
 ## Rust迁移状态与基准
 
-P0、P1、P2-1～P2-4的计划内规则迁移完成；浏览器保留显示、文件/存储、通用编解码和身份投影。
+P0、P1、P2-1～P2-4已完成原范围验收。P3-2～P3-8已推进源码，Rust接管会话、预测、运行、编辑、城市、兼容模型、存档及Worker策略；P3-9统一验收入口已准备。当前源码尚待统一编译与运行验证，迁移结项和性能收益分别验收。
 
+- [P3-8 界面与平台收口源码](rail/rust-wasm-p3-8.md)
+- [P3-9 统一验收准备](rail/rust-wasm-p3-9.md)
 - [当前盘点](rail/core-rust-inventory.md)
 - [MAP65存档验收与双基线测量](rail/rust-wasm-map65.md)
 - [迁移审计](rail/rust-migration-audit.md)
 - [P3 完整Rust与纯界面JS计划](rail/rust-ui-only-plan.md)
-- [P3-1 Rust 初始化、世界与数据基础（当前）](rail/rust-wasm-p3-1.md)
+- [P3-1 Rust 初始化、世界与数据基础（历史验收）](rail/rust-wasm-p3-1.md)
 - [P3-0 行为基线、边界和会话基础](rail/rust-wasm-p3-0.md)
 - [P3 会话与平台绑定合同](rail/p3-session-contract.md)
 

@@ -25,16 +25,22 @@ jobs:
         run: cargo +1.99.1 test --locked --features session-contract --manifest-path rust/rail-routing/Cargo.toml
       - name: Verify simulation and standalone publication
         run: node scripts/run_rail_tests.cjs
+      - name: Verify current release function boundary
+        run: node scripts/audit_rail_release.cjs --output="$RUNNER_TEMP/rail-release-boundary.json"
       - name: Verify Rust session and game in Chromium
         run: |
           npm install --prefix "$RUNNER_TEMP/rail-p3-browser" --no-save --package-lock=false playwright@1.62.1
           "$RUNNER_TEMP/rail-p3-browser/node_modules/.bin/playwright" install --with-deps chromium
           NODE_PATH="$RUNNER_TEMP/rail-p3-browser/node_modules" node scripts/probe_rail_p3_browser.cjs "$RUNNER_TEMP/rail-p3-browser-results.json"
+          NODE_PATH="$RUNNER_TEMP/rail-p3-browser/node_modules" RAIL_ACCEPTANCE_SOURCE="$GITHUB_SHA" RAIL_BROWSER_EVIDENCE="$RUNNER_TEMP/rail-release-browser.json" node scripts/probe_rail_release.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: rail-p3-browser-verification
-          path: ${{ runner.temp }}/rail-p3-browser-results.json
+          path: |
+            ${{ runner.temp }}/rail-p3-browser-results.json
+            ${{ runner.temp }}/rail-release-browser.json
+            ${{ runner.temp }}/rail-release-boundary.json
           if-no-files-found: ignore
           retention-days: 14
       - name: Stage verified game
