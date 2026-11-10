@@ -5,6 +5,7 @@ mod calendar;
 mod runtime_control;
 mod runtime_seed;
 mod runtime_session;
+mod runtime_edit;
 mod catalog;
 mod forecast_session;
 mod connections;

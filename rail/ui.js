@@ -247,7 +247,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=68') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=69') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -271,7 +271,7 @@
   const restored=savedRuntime&&O.restore(s,forecast,savedRuntime),runtimePolicy=RailBootstrap.run('runtimePolicy',{state:{economy:s.economy},restored:!!restored,runtimeMinute:restored?.minute,migratedFacilities,hasSaved:!!savedRuntime,connectionModel:forecast.connectionModel});
   let traffic=runtimePolicy.reuse?restored:O.create(s,forecast,runtimePolicy.minute,runtimePolicy.warm);
   demandState.status='ready';demandState.updatedAt=traffic.minute;
-  if(runtimePolicy.rebase)O.rebase(traffic,s,forecast);
+  if(runtimePolicy.rebase)await M.replaceDemandAsync(traffic,forecast);
   delete forecast.preparedDefinitions;
   Q.updateSatisfaction(s, traffic);
   REVIEW.init(s, traffic);
@@ -676,24 +676,12 @@
   async function commit(action, message) {
     if (calculating) return false;
     await M.whenIdle(traffic);
-    await O.materializeAsync(traffic);
-    const paused = !playing,
-      before = paused ? R.clone(s) : null,
-      beforeTraffic = paused ? R.clone(O.snapshot(traffic)) : null,
-      reviewMark = REVIEW.prepare(s, traffic),
-      result = M.change(s, action);
-    if (result?.error) {
-      toast(result.error);
-      return false;
-    }
-    O.reconcile(traffic, s);
-    REVIEW.record(s, traffic, reviewMark);
+    const paused = !playing;
+    let result;
+    try {result=await M.changeAsync(s,traffic,action,paused);} catch(error){toast(error.message);return false;}
+    if(result?.error){toast(result.error);return false;}
     networkRevision++;
-    undoState = paused ? {
-      state: before,
-      runtime: beforeTraffic,
-      forecast
-    } : null;
+    undoState=paused&&result.undoToken?{token:result.undoToken,forecast}:null;
     centerAnalysis = null;
     centerRendered = null;
     deleteConfirm = false;
@@ -869,7 +857,7 @@
     forecastTimer = null;
     urbanJob = true;
     memoryAudit.record('demand-start', s, forecast, traffic, saveQueue);
-    const urbanRevision=s.urban.revision;
+    const urbanRevision=s.urban.revision,editRevision=M.editRevision(traffic);
     demandState.status = 'updating';
     $('calculation-status').hidden = false;
     $('calculation-status').textContent = '需求后台更新中' + (playing ? ' · 运营继续' : '');
@@ -877,11 +865,8 @@
       const next = await calculate(s,job.snapshot);
       await M.whenIdle(traffic);
       if(!RailBootstrap.forecast('accept',{ticket:job.ticket,stamp:forecastStamp(),busy:calculating}).accepted)return;
-      await O.materializeAsync(traffic);
-      if(!RailBootstrap.forecast('accept',{ticket:job.ticket,stamp:forecastStamp(),busy:calculating}).accepted)return;
-      O.rebase(traffic, s, next);
+      await M.replaceDemandAsync(traffic,next,editRevision);
       delete next.preparedDefinitions;
-      REVIEW.ready(s, traffic.minute);
       demandState.status = 'ready';
       demandState.error = '';
       demandState.updatedAt = traffic.minute;
@@ -2053,34 +2038,11 @@
         inspect('hubs', null);
         break;
       case 'save-line-identity': {
-        const name = $('line-name').value.trim(),
-          color = $('line-color').value,
-          r = N.configure(s, selected, {
-            name,
-            color
-          });
-        if (r.error) {
-          toast(r.error);
-          break;
-        }
-        await O.materializeAsync(traffic);
-        O.reconcile(traffic, s);
-        save();
-        render();
-        toast('线路名称与颜色已更新。');
+        await commit(M.command('network','configure',{id:selected,values:{name:$('line-name').value.trim(),color:$('line-color').value}}),'线路名称与颜色已更新。');
         break;
       }
       case 'save-station-name': {
-        const r = N.renameStation(s, inspection.id, $('station-name').value);
-        if (r.error) {
-          toast(r.error);
-          break;
-        }
-        await O.materializeAsync(traffic);
-        O.reconcile(traffic, s);
-        save();
-        render();
-        toast('站名已更新。');
+        await commit(M.command('network','renameStation',{id:inspection.id,name:$('station-name').value}),'站名已更新。');
         break;
       }
       case 'back-to-line':
@@ -2291,17 +2253,12 @@
         break;
       case 'undo':
         if (undoState) {
-          const restoredState=N.restore(undoState.state);
-          if(restoredState.error){toast(restoredState.error);break;}
+          try{await M.undoAsync(traffic,undoState.token);}catch(error){toast(error.message);break;}
           networkRevision++;
-          s = restoredState.state;
-          const rt = undoState.runtime;
-          forecast = undoState.forecast || forecast;
-          undoState = null;
-          mode = null;
-          draft = [];
-          O.dispose(traffic);
-          traffic = O.restore(s, forecast, rt) || O.create(s, forecast, s.economy.minute, false);
+          forecast=undoState.forecast||forecast;
+          undoState=null;
+          mode=null;
+          draft=[];
           scheduleForecast();
           save();
           render();
@@ -2751,7 +2708,7 @@
     }
     try {
       if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=68');
+        centerWorker = new Worker('operations-worker.js?v=69');
         centerForecastSent = null;
       }
       centerWorker.onerror = e => fail(e.message || '后台诊断不可用');

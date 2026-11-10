@@ -313,7 +313,7 @@ fn queue_key(k: &str) -> Option<usize> {
     }
     a[2].parse().ok()
 }
-fn limits(s: &V, id: usize, cfg: &V) -> (f64, f64) {
+pub(super) fn limits(s: &V, id: usize, cfg: &V) -> (f64, f64) {
     let ls = if s.get("baseLines").truth() {
         s.get("baseLines")
     } else {
@@ -347,7 +347,7 @@ fn limits(s: &V, id: usize, cfg: &V) -> (f64, f64) {
     (capacity, (capacity * 0.5).floor())
 }
 // Counts can be verified without a forecast, including historical files without saved definitions.
-fn mass(r: &V) -> bool {
+pub(super) fn mass(r: &V) -> bool {
     let mut onboard = 0.0;
     let mut waiting = 0.0;
     let mut ids = HashSet::new();

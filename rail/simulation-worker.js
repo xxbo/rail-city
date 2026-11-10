@@ -9,7 +9,7 @@
     send=(data,transfer)=>parentPort.postMessage(data,transfer);
     listen=fn=>parentPort.on('message',fn);
   }else{
-    importScripts('value-wire.js?v=67', 'bootstrap-wasm.js?v=68','routing-wasm.js?v=68','forecast-catalog.js?v=68');Core=self.RailRouting;Bootstrap=self.RailBootstrap;Catalog=self.RailForecastCatalog;
+    importScripts('value-wire.js?v=67', 'bootstrap-wasm.js?v=69','routing-wasm.js?v=69','forecast-catalog.js?v=69');Core=self.RailRouting;Bootstrap=self.RailBootstrap;Catalog=self.RailForecastCatalog;
     send=(data,transfer)=>self.postMessage(data,transfer);
     listen=fn=>{self.onmessage=e=>fn(e.data);};
   }
@@ -21,6 +21,7 @@
       if(request.kind==='session'){
         const args=request.args||{};let result;
         if(request.action==='create'){const forecast=Catalog.hydrate(args.forecast);result=Bootstrap.runtime('create',{world:args.world,saved:args.saved,start:args.start,warm:args.warm,catalog:Catalog.source(forecast).id});}
+        else if(request.action==='demand'){const {forecast:transport,...command}=args;const forecast=Catalog.hydrate(transport),catalog=Catalog.source(forecast).id;try{result=Bootstrap.runtime('demand',{...command,catalog});}finally{Bootstrap.forecast('release',{id:catalog});}}
         else result=Bootstrap.runtime(request.action,args);
         send({id:request.id,result});return;
       }

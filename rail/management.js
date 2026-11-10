@@ -219,6 +219,9 @@
   function signature(s) {return (node?require('./save-wasm'):root.RailSave).run('signature',{state:s});}
   const api = {
     command,
+    changeAsync:(s,rt,operation,undo=false)=>Runtime.has(rt)?Runtime.command(rt,operation,undo).then(out=>({...out.result,quote:out.quote,undoToken:out.undoToken})):Promise.resolve(change(s,operation)),
+    previewAsync:(s,rt,operation)=>Runtime.has(rt)?Runtime.preview(rt,operation):Promise.resolve(preview(s,operation)),
+    undoAsync:(rt,token)=>Runtime.undo(rt,token),replaceDemandAsync:(rt,forecast,revision)=>Runtime.replaceDemand(rt,forecast,revision),editRevision:rt=>Runtime.editRevision(rt),
     init,
     validate,
     quote,

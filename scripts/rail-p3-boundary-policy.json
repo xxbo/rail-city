@@ -206,7 +206,7 @@
     "rail/management.js": {
       "role": "domain",
       "phase": "P3-3",
-      "owner": "Rust RuntimeOwner for modern session runs; remaining legacy/edit adapters tracked by P3-4/P3-6"
+      "owner": "Rust RuntimeOwner for modern runs and atomic structured edits; callback and legacy adapters remain P3-6"
     },
     "rail/map-detail.js": {
       "role": "ui",
@@ -701,9 +701,9 @@
     },
     "rail/runtime-wasm.js": {
       "role": "platform",
-      "phase": "P3-3 bridge",
+      "phase": "P3-4 bridge",
       "owner": "Rust RuntimeOwner and clock; detached view and RPC transport",
-      "bridgeDisposition": "Forwards snapshots, intents and native commands; projects committed views. Existing city/review cold transactions remain P3-5 boundaries; Worker transport lifecycle policies finish in P3-8."
+      "bridgeDisposition": "Serial RPC and detached committed-view projection. Commands, quotation, payment, rerouting, active identity remapping and undo ownership are Rust session transactions. City/review scheduling remains P3-5; persistence P3-7; transport lifecycle P3-8."
     }
   }
 }

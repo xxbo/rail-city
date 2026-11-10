@@ -409,6 +409,7 @@
   }
 
   function reconcile(rt, s, m = null) {
+    if(Runtime.has(rt))throw Error('原生运行会话请提交结构化编辑命令。');
     if(!QUEUES.canSnapshot(rt))throw Error('线网变更前需等待 materializeAsync');QUEUES.invalidate(rt);
     const prediction=m?validateCatalog(m.preparedDefinitions||definitions(s,m)):null,
       fresh=prediction===rt.defs?prediction.map(j=>({...j})):prediction,previous=rt.plan,plan=X.expand(s);
@@ -431,7 +432,8 @@
   }
 
   function rebase(rt, s, m) {
-    const result=reconcile(rt,s,m);if(Runtime.has(rt)&&m)Runtime.rebind(rt,s,m);return result;
+    if(Runtime.has(rt))return Runtime.replaceDemand(rt,m);
+    return reconcile(rt,s,m);
   }
   const api = {
     advanceTick: (rt, s, dt, target, carry, interval, settlement=null) => {

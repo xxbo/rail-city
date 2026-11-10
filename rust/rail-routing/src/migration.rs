@@ -347,7 +347,7 @@ pub(super) fn compact(rt: &mut V) {
         rt.set("definitionOrder", V::Array(definition_order));
     }
 }
-fn leg_valid(plan: &V, dirs: &V, e: &V) -> bool {
+pub(super) fn leg_valid(plan: &V, dirs: &V, e: &V) -> bool {
     let Some(l) = plan
         .get("services")
         .array()

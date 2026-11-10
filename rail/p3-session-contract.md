@@ -68,3 +68,19 @@ node scripts/run_rail_tests.cjs
 ## P3-1 大字符串传输
 
 初始化与会话生产调用使用packed双通道：结构f64 + UTF-16LE字节字符串表；旧有序值协议保持用于冻结夹具。Rust检查偏移、长度、标签、80层深度、200万值节点、1200万结构数值及128MiB字符串字节限额，保留缺省、非有限数、负零、BOM和属性顺序。9MB扩展字段完整往返有专项验证。JSON编解码与数据库实际I/O目前仍由宿主转发，策略继续迁入P3-7。随机选择入口与消耗记录由Rust持有，底层熵原语仍为host Math.random，数学/熵导入最终收口在P3-8。
+
+
+## P3-4运行事务扩展（源码，待统一验收）
+
+初始化冷会话接口保持上述协议；活动运行使用 `op:runtime` 的独立arena句柄，详见 [P3-4记录](rust-wasm-p3-4.md)。此层ABI推进至2，协议包号仍为1。
+
+| action | 输入 | 提交结果 |
+| --- | --- | --- |
+| command | id、commandId、expectedEditRevision、结构化command、undo | 候选编辑/付款/改签/迁移一次提交；result、quote、undoToken及批准视图 |
+| preview | id、expectedEditRevision、command | 权威财务报价；实际运行状态保持原值 |
+| demand | id、commandId、expectedEditRevision、catalog | 切换目录并迁移既有出行；迟到修订拒绝 |
+| undo | id、commandId、expectedEditRevision、undoToken | 恢复一个原生检查点；游戏时刻变化后拒绝旧撤销 |
+
+editRevision仅标识编辑/目录提交；模拟步进使用运行revision，持续pulse不使后台预测因时间前进而失效。成功命令保留128条有序请求回执；重试先查询回执，再检查修订。同号异参拒绝。回执重放携带当前批准视图，避免旧视图覆盖新状态；规则拒绝返回错误，下一请求可用新编号重试。
+
+运行区的完整值物化只在Rust内部候选构造、重映射及撤销检查点使用，编辑事务返回运行摘要；既有存档快照接口仍开放供P3-7接管。Worker启动交接使用创建结果。对外手写JS桥接负责消息及显示投影。

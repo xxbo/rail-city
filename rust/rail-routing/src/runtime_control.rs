@@ -3,7 +3,7 @@
 use crate::{editor_support::*, value::Value as V};
 use std::collections::HashMap;
 const EPS:f64=1e-8;
-#[derive(Default)]
+#[derive(Default,Clone)]
 pub(super) struct Clock {
     epoch:u64, serial:u64, pending:f64, active:Option<(u64,u64,f64)>,
     last_at:Option<f64>, playing:bool, visible:bool, running:bool, elapsed_ms:f64,fault:Option<V>,
