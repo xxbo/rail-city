@@ -1,0 +1,2139 @@
+{
+  "unit": "P2-4 / MAP65",
+  "previous": "e7f8da45f1ad7ab04537e340da1b9df316dde033",
+  "pureJavaScript": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+  "wasm": {
+    "bytes": 1634578,
+    "sha256": "e9f8b39f6a1a751ff3a52f20cb05b54514a0a256d6bb6ef9e872e0ace415bfa5"
+  },
+  "saves": [
+    {
+      "lines": 10,
+      "stations": 25,
+      "profiles": 6000,
+      "savedDefinitions": 6000,
+      "jsonBytes": 1689400,
+      "method": "Two reversed rounds; independent processes; 3 warmups, 5x2 complete calls; all valid ordered JSON output hashes equal. Current acceptance additionally checks runtime mass and associations.",
+      "summary": [
+        {
+          "label": "network signature",
+          "modes": {
+            "javascript": {
+              "medianMs": 0.028122249999995574,
+              "retainedHeapMiB": 19.408981323242188,
+              "arrayBuffersMiB": 2.8316144943237305,
+              "peakRssMiB": 239.55859375,
+              "wasmMiB": 0
+            },
+            "previous-compact": {
+              "medianMs": 0.03409899999999766,
+              "retainedHeapMiB": 19.177780151367188,
+              "arrayBuffersMiB": 2.878371238708496,
+              "peakRssMiB": 316.16015625,
+              "wasmMiB": 1.375
+            },
+            "current-raw": {
+              "medianMs": 1.1997180000000043,
+              "retainedHeapMiB": 19.563213348388672,
+              "arrayBuffersMiB": 2.8945226669311523,
+              "peakRssMiB": 416.8671875,
+              "wasmMiB": 6.6875
+            },
+            "current-compact": {
+              "medianMs": 0.9661540000000031,
+              "retainedHeapMiB": 19.66910171508789,
+              "arrayBuffersMiB": 2.9402990341186523,
+              "peakRssMiB": 315.26171875,
+              "wasmMiB": 4.6875
+            }
+          }
+        },
+        {
+          "label": "file acceptance",
+          "modes": {
+            "javascript": {
+              "medianMs": 84.97146125,
+              "retainedHeapMiB": 25.682254791259766,
+              "arrayBuffersMiB": 2.8316144943237305,
+              "peakRssMiB": 239.55859375,
+              "wasmMiB": 0
+            },
+            "previous-compact": {
+              "medianMs": 84.06286950000003,
+              "retainedHeapMiB": 26.138404846191406,
+              "arrayBuffersMiB": 2.9402990341186523,
+              "peakRssMiB": 316.16015625,
+              "wasmMiB": 1.375
+            },
+            "current-raw": {
+              "medianMs": 96.27883175,
+              "retainedHeapMiB": 25.987228393554688,
+              "arrayBuffersMiB": 2.8945226669311523,
+              "peakRssMiB": 416.8671875,
+              "wasmMiB": 6.6875
+            },
+            "current-compact": {
+              "medianMs": 95.58258675000002,
+              "retainedHeapMiB": 26.092742919921875,
+              "arrayBuffersMiB": 2.9402990341186523,
+              "peakRssMiB": 315.26171875,
+              "wasmMiB": 4.6875
+            }
+          }
+        },
+        {
+          "label": "runtime restore",
+          "modes": {
+            "javascript": {
+              "medianMs": 8.36410374999997,
+              "retainedHeapMiB": 20.84485626220703,
+              "arrayBuffersMiB": 2.8316144943237305,
+              "peakRssMiB": 239.55859375,
+              "wasmMiB": 0
+            },
+            "previous-compact": {
+              "medianMs": 16.397320750000006,
+              "retainedHeapMiB": 21.785823822021484,
+              "arrayBuffersMiB": 2.944319725036621,
+              "peakRssMiB": 316.16015625,
+              "wasmMiB": 1.375
+            },
+            "current-raw": {
+              "medianMs": 173.19457750000004,
+              "retainedHeapMiB": 21.90021514892578,
+              "arrayBuffersMiB": 2.898543357849121,
+              "peakRssMiB": 416.8671875,
+              "wasmMiB": 6.6875
+            },
+            "current-compact": {
+              "medianMs": 13.012681249999957,
+              "retainedHeapMiB": 21.21603012084961,
+              "arrayBuffersMiB": 2.944319725036621,
+              "peakRssMiB": 315.26171875,
+              "wasmMiB": 4.6875
+            }
+          }
+        },
+        {
+          "label": "import and restore",
+          "modes": {
+            "javascript": {
+              "medianMs": 97.11182624999998,
+              "retainedHeapMiB": 29.057209014892578,
+              "arrayBuffersMiB": 2.8316144943237305,
+              "peakRssMiB": 239.55859375,
+              "wasmMiB": 0
+            },
+            "previous-compact": {
+              "medianMs": 103.6385815000001,
+              "retainedHeapMiB": 30.514480590820312,
+              "arrayBuffersMiB": 2.9480504989624023,
+              "peakRssMiB": 316.16015625,
+              "wasmMiB": 1.375
+            },
+            "current-raw": {
+              "medianMs": 279.4903287499999,
+              "retainedHeapMiB": 30.57958221435547,
+              "arrayBuffersMiB": 2.9022741317749023,
+              "peakRssMiB": 416.8671875,
+              "wasmMiB": 6.6875
+            },
+            "current-compact": {
+              "medianMs": 108.99489375000007,
+              "retainedHeapMiB": 29.399078369140625,
+              "arrayBuffersMiB": 2.9480504989624023,
+              "peakRssMiB": 315.26171875,
+              "wasmMiB": 4.6875
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.024156499999989478,
+                0.02331999999999823,
+                0.024621999999993704,
+                0.028797999999994772,
+                0.0364799999999974
+              ],
+              "medianMs": 0.024621999999993704,
+              "hash": "576880fe5203586f2abfeb4400da952a7f4a79583842a9e60e391a59d5f44fce",
+              "heapMiB": 19.40911102294922,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                81.1498445,
+                87.22101650000002,
+                85.926695,
+                84.01622750000001,
+                87.72702100000004
+              ],
+              "medianMs": 85.926695,
+              "hash": "54f68ef901559650ced905aea61b6078809f5cb8e8f1db548efc8abd02d7c388",
+              "heapMiB": 25.682418823242188,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                8.340773000000013,
+                8.655277500000011,
+                7.928821999999968,
+                7.970489999999927,
+                7.347791499999971
+              ],
+              "medianMs": 7.970489999999927,
+              "hash": "dd57642cc70eebfd21b89e43978f7fba30b1ef06a316a93902ebb283f8479617",
+              "heapMiB": 20.8448486328125,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                101.49248399999999,
+                95.34661499999993,
+                97.36522799999989,
+                101.7669679999999,
+                94.80631849999986
+              ],
+              "medianMs": 97.36522799999989,
+              "hash": "9458bbf2a330a28a75fbb9c9357f229b8cb89d3fb04026e1ba2567494d0a13eb",
+              "heapMiB": 29.057052612304688,
+              "arrayBuffersMiB": 2.8316144943237305
+            }
+          ],
+          "peakRssMiB": 238.5546875,
+          "wasmMiB": 0,
+          "round": 0
+        },
+        {
+          "mode": "previous-compact",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.027982499999993138,
+                0.04286000000000456,
+                0.02646449999998879,
+                0.0329799999999949,
+                0.054156499999990615
+              ],
+              "medianMs": 0.0329799999999949,
+              "hash": "576880fe5203586f2abfeb4400da952a7f4a79583842a9e60e391a59d5f44fce",
+              "heapMiB": 19.179168701171875,
+              "arrayBuffersMiB": 2.878371238708496
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                84.1766685,
+                90.46788750000002,
+                89.3462965,
+                83.94907050000006,
+                80.98773600000004
+              ],
+              "medianMs": 84.1766685,
+              "hash": "54f68ef901559650ced905aea61b6078809f5cb8e8f1db548efc8abd02d7c388",
+              "heapMiB": 26.136558532714844,
+              "arrayBuffersMiB": 2.9402990341186523
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                16.213060499999983,
+                19.965116999999964,
+                15.004539000000022,
+                16.58158100000003,
+                17.236343499999975
+              ],
+              "medianMs": 16.58158100000003,
+              "hash": "dd57642cc70eebfd21b89e43978f7fba30b1ef06a316a93902ebb283f8479617",
+              "heapMiB": 21.785858154296875,
+              "arrayBuffersMiB": 2.944319725036621
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                112.74344650000012,
+                102.91723900000011,
+                104.35992400000009,
+                99.2886645000001,
+                101.16317000000004
+              ],
+              "medianMs": 102.91723900000011,
+              "hash": "9458bbf2a330a28a75fbb9c9357f229b8cb89d3fb04026e1ba2567494d0a13eb",
+              "heapMiB": 30.51251983642578,
+              "arrayBuffersMiB": 2.9480504989624023
+            }
+          ],
+          "peakRssMiB": 312.8984375,
+          "wasmMiB": 1.375,
+          "round": 0
+        },
+        {
+          "mode": "current-raw",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                1.2358280000000121,
+                0.8428810000000055,
+                0.9960619999999949,
+                0.827177000000006,
+                1.5336670000000083
+              ],
+              "medianMs": 0.9960619999999949,
+              "hash": "576880fe5203586f2abfeb4400da952a7f4a79583842a9e60e391a59d5f44fce",
+              "heapMiB": 19.563316345214844,
+              "arrayBuffersMiB": 2.8945226669311523
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                93.50901649999997,
+                91.29144350000001,
+                95.26927,
+                97.28839349999998,
+                97.408455
+              ],
+              "medianMs": 95.26927,
+              "hash": "54f68ef901559650ced905aea61b6078809f5cb8e8f1db548efc8abd02d7c388",
+              "heapMiB": 25.986892700195312,
+              "arrayBuffersMiB": 2.8945226669311523
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                179.26315750000003,
+                180.21341350000012,
+                171.3306725,
+                173.9695075000002,
+                181.1430519999999
+              ],
+              "medianMs": 179.26315750000003,
+              "hash": "dd57642cc70eebfd21b89e43978f7fba30b1ef06a316a93902ebb283f8479617",
+              "heapMiB": 21.90027618408203,
+              "arrayBuffersMiB": 2.898543357849121
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                265.86084549999987,
+                280.62996650000014,
+                283.07182999999986,
+                281.95063400000026,
+                278.35069099999964
+              ],
+              "medianMs": 280.62996650000014,
+              "hash": "9458bbf2a330a28a75fbb9c9357f229b8cb89d3fb04026e1ba2567494d0a13eb",
+              "heapMiB": 30.579574584960938,
+              "arrayBuffersMiB": 2.9022741317749023
+            }
+          ],
+          "peakRssMiB": 416.859375,
+          "wasmMiB": 6.6875,
+          "round": 0
+        },
+        {
+          "mode": "current-compact",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                1.0482560000000092,
+                1.0064974999999947,
+                1.0189165000000031,
+                1.0984160000000003,
+                0.8941779999999966
+              ],
+              "medianMs": 1.0189165000000031,
+              "hash": "576880fe5203586f2abfeb4400da952a7f4a79583842a9e60e391a59d5f44fce",
+              "heapMiB": 19.66736602783203,
+              "arrayBuffersMiB": 2.9402990341186523
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                91.44454000000002,
+                95.82837,
+                96.75996899999996,
+                90.60149849999993,
+                93.39557450000007
+              ],
+              "medianMs": 93.39557450000007,
+              "hash": "54f68ef901559650ced905aea61b6078809f5cb8e8f1db548efc8abd02d7c388",
+              "heapMiB": 26.09185028076172,
+              "arrayBuffersMiB": 2.9402990341186523
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                12.980995000000007,
+                13.524258499999974,
+                10.683097000000089,
+                13.80931099999998,
+                11.117406500000016
+              ],
+              "medianMs": 12.980995000000007,
+              "hash": "dd57642cc70eebfd21b89e43978f7fba30b1ef06a316a93902ebb283f8479617",
+              "heapMiB": 21.215599060058594,
+              "arrayBuffersMiB": 2.944319725036621
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                109.4789565000001,
+                105.99075149999999,
+                109.29325100000005,
+                117.59600450000016,
+                109.87603249999984
+              ],
+              "medianMs": 109.4789565000001,
+              "hash": "9458bbf2a330a28a75fbb9c9357f229b8cb89d3fb04026e1ba2567494d0a13eb",
+              "heapMiB": 29.39861297607422,
+              "arrayBuffersMiB": 2.9480504989624023
+            }
+          ],
+          "peakRssMiB": 311.01171875,
+          "wasmMiB": 4.6875,
+          "round": 0
+        },
+        {
+          "mode": "current-compact",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.8262009999999975,
+                0.7856194999999957,
+                0.930467500000006,
+                0.9004774999999938,
+                1.0018405000000001
+              ],
+              "medianMs": 0.9004774999999938,
+              "hash": "576880fe5203586f2abfeb4400da952a7f4a79583842a9e60e391a59d5f44fce",
+              "heapMiB": 19.67083740234375,
+              "arrayBuffersMiB": 2.9402990341186523
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                108.00307599999996,
+                95.33680350000003,
+                109.90026650000004,
+                102.11899900000003,
+                90.769452
+              ],
+              "medianMs": 102.11899900000003,
+              "hash": "54f68ef901559650ced905aea61b6078809f5cb8e8f1db548efc8abd02d7c388",
+              "heapMiB": 26.09363555908203,
+              "arrayBuffersMiB": 2.9402990341186523
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                13.044367499999908,
+                15.196957500000053,
+                11.60772200000008,
+                13.69760199999996,
+                10.951311999999916
+              ],
+              "medianMs": 13.044367499999908,
+              "hash": "dd57642cc70eebfd21b89e43978f7fba30b1ef06a316a93902ebb283f8479617",
+              "heapMiB": 21.216461181640625,
+              "arrayBuffersMiB": 2.944319725036621
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                104.88291649999996,
+                108.6965365000001,
+                110.94640449999997,
+                105.15703550000012,
+                105.10299850000001
+              ],
+              "medianMs": 105.15703550000012,
+              "hash": "9458bbf2a330a28a75fbb9c9357f229b8cb89d3fb04026e1ba2567494d0a13eb",
+              "heapMiB": 29.39954376220703,
+              "arrayBuffersMiB": 2.9480504989624023
+            }
+          ],
+          "peakRssMiB": 315.26171875,
+          "wasmMiB": 4.6875,
+          "round": 1
+        },
+        {
+          "mode": "current-raw",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                1.360323500000007,
+                1.308549499999998,
+                1.238978000000003,
+                1.0808364999999895,
+                1.1636079999999964
+              ],
+              "medianMs": 1.238978000000003,
+              "hash": "576880fe5203586f2abfeb4400da952a7f4a79583842a9e60e391a59d5f44fce",
+              "heapMiB": 19.5631103515625,
+              "arrayBuffersMiB": 2.8945226669311523
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                90.05417249999999,
+                98.25450999999998,
+                103.646434,
+                95.01378849999992,
+                101.76221449999991
+              ],
+              "medianMs": 98.25450999999998,
+              "hash": "54f68ef901559650ced905aea61b6078809f5cb8e8f1db548efc8abd02d7c388",
+              "heapMiB": 25.987564086914062,
+              "arrayBuffersMiB": 2.8945226669311523
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                169.77912149999997,
+                167.137745,
+                166.0474815,
+                172.41964749999988,
+                174.01784199999997
+              ],
+              "medianMs": 169.77912149999997,
+              "hash": "dd57642cc70eebfd21b89e43978f7fba30b1ef06a316a93902ebb283f8479617",
+              "heapMiB": 21.90015411376953,
+              "arrayBuffersMiB": 2.898543357849121
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                275.71839100000034,
+                266.64054599999963,
+                281.33510149999984,
+                313.05809550000004,
+                277.0095805000001
+              ],
+              "medianMs": 277.0095805000001,
+              "hash": "9458bbf2a330a28a75fbb9c9357f229b8cb89d3fb04026e1ba2567494d0a13eb",
+              "heapMiB": 30.57958984375,
+              "arrayBuffersMiB": 2.9022741317749023
+            }
+          ],
+          "peakRssMiB": 416.8671875,
+          "wasmMiB": 6.6875,
+          "round": 1
+        },
+        {
+          "mode": "previous-compact",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.022052999999999656,
+                0.021813000000008742,
+                0.03704050000000336,
+                0.041907999999992285,
+                0.035218000000000416
+              ],
+              "medianMs": 0.035218000000000416,
+              "hash": "576880fe5203586f2abfeb4400da952a7f4a79583842a9e60e391a59d5f44fce",
+              "heapMiB": 19.1763916015625,
+              "arrayBuffersMiB": 2.878371238708496
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                76.5546535,
+                76.4866715,
+                78.80879149999998,
+                90.8036545,
+                85.35230000000001
+              ],
+              "medianMs": 78.80879149999998,
+              "hash": "54f68ef901559650ced905aea61b6078809f5cb8e8f1db548efc8abd02d7c388",
+              "heapMiB": 26.14025115966797,
+              "arrayBuffersMiB": 2.9402990341186523
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                14.593660999999997,
+                18.374341000000072,
+                14.27594149999993,
+                18.17897149999999,
+                14.315206499999931
+              ],
+              "medianMs": 14.593660999999997,
+              "hash": "dd57642cc70eebfd21b89e43978f7fba30b1ef06a316a93902ebb283f8479617",
+              "heapMiB": 21.785789489746094,
+              "arrayBuffersMiB": 2.944319725036621
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                95.57320399999992,
+                100.31909400000006,
+                107.46811649999995,
+                110.47580100000005,
+                113.85731850000002
+              ],
+              "medianMs": 107.46811649999995,
+              "hash": "9458bbf2a330a28a75fbb9c9357f229b8cb89d3fb04026e1ba2567494d0a13eb",
+              "heapMiB": 30.516441345214844,
+              "arrayBuffersMiB": 2.9480504989624023
+            }
+          ],
+          "peakRssMiB": 316.16015625,
+          "wasmMiB": 1.375,
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.04094700000000273,
+                0.02360050000000058,
+                0.027446499999996377,
+                0.05886350000000107,
+                0.033190000000004716
+              ],
+              "medianMs": 0.033190000000004716,
+              "hash": "576880fe5203586f2abfeb4400da952a7f4a79583842a9e60e391a59d5f44fce",
+              "heapMiB": 19.408851623535156,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                80.414581,
+                85.97719749999999,
+                90.8467885,
+                83.998174,
+                76.79758850000007
+              ],
+              "medianMs": 83.998174,
+              "hash": "54f68ef901559650ced905aea61b6078809f5cb8e8f1db548efc8abd02d7c388",
+              "heapMiB": 25.682090759277344,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                9.40899950000005,
+                8.387434499999927,
+                7.94037800000001,
+                8.705659500000024,
+                8.62275950000003
+              ],
+              "medianMs": 8.62275950000003,
+              "hash": "dd57642cc70eebfd21b89e43978f7fba30b1ef06a316a93902ebb283f8479617",
+              "heapMiB": 20.844863891601562,
+              "arrayBuffersMiB": 2.8316144943237305
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                86.01559299999997,
+                96.85842450000007,
+                98.13230500000009,
+                105.44197949999989,
+                96.52797299999997
+              ],
+              "medianMs": 96.85842450000007,
+              "hash": "9458bbf2a330a28a75fbb9c9357f229b8cb89d3fb04026e1ba2567494d0a13eb",
+              "heapMiB": 29.05736541748047,
+              "arrayBuffersMiB": 2.8316144943237305
+            }
+          ],
+          "peakRssMiB": 239.55859375,
+          "wasmMiB": 0,
+          "round": 1
+        }
+      ]
+    },
+    {
+      "lines": 14,
+      "stations": 49,
+      "profiles": 24696,
+      "savedDefinitions": 24696,
+      "jsonBytes": 6994151,
+      "method": "Two reversed rounds; independent processes; 3 warmups, 5x2 complete calls; all valid ordered JSON output hashes equal. Current acceptance additionally checks runtime mass and associations.",
+      "summary": [
+        {
+          "label": "network signature",
+          "modes": {
+            "javascript": {
+              "medianMs": 0.044412000000008334,
+              "retainedHeapMiB": 55.853126525878906,
+              "arrayBuffersMiB": 47.48949146270752,
+              "peakRssMiB": 852.671875,
+              "wasmMiB": 0
+            },
+            "previous-compact": {
+              "medianMs": 0.0416652499999941,
+              "retainedHeapMiB": 56.45072555541992,
+              "arrayBuffersMiB": 47.678887367248535,
+              "peakRssMiB": 916.80859375,
+              "wasmMiB": 1.5
+            },
+            "current-raw": {
+              "medianMs": 1.1826172499999927,
+              "retainedHeapMiB": 56.64109420776367,
+              "arrayBuffersMiB": 47.55239963531494,
+              "peakRssMiB": 993.64453125,
+              "wasmMiB": 14.6875
+            },
+            "current-compact": {
+              "medianMs": 1.2868147499999907,
+              "retainedHeapMiB": 57.07497787475586,
+              "arrayBuffersMiB": 47.74081516265869,
+              "peakRssMiB": 953.828125,
+              "wasmMiB": 14.6875
+            }
+          }
+        },
+        {
+          "label": "file acceptance",
+          "modes": {
+            "javascript": {
+              "medianMs": 363.72845199999983,
+              "retainedHeapMiB": 80.23712539672852,
+              "arrayBuffersMiB": 47.48949146270752,
+              "peakRssMiB": 852.671875,
+              "wasmMiB": 0
+            },
+            "previous-compact": {
+              "medianMs": 348.44501750000006,
+              "retainedHeapMiB": 80.99829864501953,
+              "arrayBuffersMiB": 47.74081516265869,
+              "peakRssMiB": 916.80859375,
+              "wasmMiB": 1.5
+            },
+            "current-raw": {
+              "medianMs": 398.3482062500001,
+              "retainedHeapMiB": 80.56136322021484,
+              "arrayBuffersMiB": 47.55239963531494,
+              "peakRssMiB": 993.64453125,
+              "wasmMiB": 14.6875
+            },
+            "current-compact": {
+              "medianMs": 392.5097545000001,
+              "retainedHeapMiB": 80.9506950378418,
+              "arrayBuffersMiB": 47.74081516265869,
+              "peakRssMiB": 953.828125,
+              "wasmMiB": 14.6875
+            }
+          }
+        },
+        {
+          "label": "runtime restore",
+          "modes": {
+            "javascript": {
+              "medianMs": 54.44627700000001,
+              "retainedHeapMiB": 60.28961944580078,
+              "arrayBuffersMiB": 47.48949146270752,
+              "peakRssMiB": 852.671875,
+              "wasmMiB": 0
+            },
+            "previous-compact": {
+              "medianMs": 81.83411899999987,
+              "retainedHeapMiB": 62.01951599121094,
+              "arrayBuffersMiB": 47.74758243560791,
+              "peakRssMiB": 916.80859375,
+              "wasmMiB": 1.5
+            },
+            "current-raw": {
+              "medianMs": 791.5670507499999,
+              "retainedHeapMiB": 63.681427001953125,
+              "arrayBuffersMiB": 47.55916690826416,
+              "peakRssMiB": 993.64453125,
+              "wasmMiB": 14.6875
+            },
+            "current-compact": {
+              "medianMs": 47.022289999999884,
+              "retainedHeapMiB": 60.79427719116211,
+              "arrayBuffersMiB": 47.74758243560791,
+              "peakRssMiB": 953.828125,
+              "wasmMiB": 14.6875
+            }
+          }
+        },
+        {
+          "label": "import and restore",
+          "modes": {
+            "javascript": {
+              "medianMs": 414.94119024999964,
+              "retainedHeapMiB": 93.14582824707031,
+              "arrayBuffersMiB": 47.48949146270752,
+              "peakRssMiB": 852.671875,
+              "wasmMiB": 0
+            },
+            "previous-compact": {
+              "medianMs": 449.3073595000001,
+              "retainedHeapMiB": 95.85932159423828,
+              "arrayBuffersMiB": 47.75405979156494,
+              "peakRssMiB": 916.80859375,
+              "wasmMiB": 1.5
+            },
+            "current-raw": {
+              "medianMs": 1194.2261870000002,
+              "retainedHeapMiB": 97.87940216064453,
+              "arrayBuffersMiB": 47.56564426422119,
+              "peakRssMiB": 993.64453125,
+              "wasmMiB": 14.6875
+            },
+            "current-compact": {
+              "medianMs": 448.51046299999985,
+              "retainedHeapMiB": 93.01185989379883,
+              "arrayBuffersMiB": 47.75405979156494,
+              "peakRssMiB": 953.828125,
+              "wasmMiB": 14.6875
+            }
+          }
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.039635000000004084,
+                0.062053499999990436,
+                0.06298950000001469,
+                0.05957999999998265,
+                0.03564900000000648
+              ],
+              "medianMs": 0.05957999999998265,
+              "hash": "f5e4bea17ce17c4d147fcb6035602fc3b17125a70294b27e5d598ed0579b9b7c",
+              "heapMiB": 55.852882385253906,
+              "arrayBuffersMiB": 47.48949146270752
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                420.27463549999993,
+                360.8834599999998,
+                376.9860000000001,
+                396.3071870000001,
+                456.93089299999974
+              ],
+              "medianMs": 396.3071870000001,
+              "hash": "60ed735a802fc8da0f3461f7c7235c00f5b958da8ed8dd139a3a9502b78ad422",
+              "heapMiB": 80.23705291748047,
+              "arrayBuffersMiB": 47.48949146270752
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                56.83831900000041,
+                54.60321000000022,
+                65.42746249999982,
+                51.03661850000026,
+                56.135163999999804
+              ],
+              "medianMs": 56.135163999999804,
+              "hash": "de84db2a7750abb579d93225deb77e7673141ede186265f87f434c9fa5b45ccd",
+              "heapMiB": 60.29473876953125,
+              "arrayBuffersMiB": 47.48949146270752
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                465.45177100000046,
+                424.5433855000001,
+                415.69979499999954,
+                475.7550620000002,
+                414.18258549999973
+              ],
+              "medianMs": 424.5433855000001,
+              "hash": "ed7d18f8ff9d7a6614859a6feedb7ada1615ab1e323d18e4f973ed02f7f69914",
+              "heapMiB": 93.82296752929688,
+              "arrayBuffersMiB": 47.48949146270752
+            }
+          ],
+          "peakRssMiB": 830.1875,
+          "wasmMiB": 0,
+          "round": 0
+        },
+        {
+          "mode": "previous-compact",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.040486000000015565,
+                0.06369100000000572,
+                0.040135499999991,
+                0.0547574999999938,
+                0.04239899999998897
+              ],
+              "medianMs": 0.04239899999998897,
+              "hash": "f5e4bea17ce17c4d147fcb6035602fc3b17125a70294b27e5d598ed0579b9b7c",
+              "heapMiB": 56.450767517089844,
+              "arrayBuffersMiB": 47.678887367248535
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                359.98961999999995,
+                335.5789225000001,
+                352.5670885000002,
+                363.5001075,
+                393.3025090000001
+              ],
+              "medianMs": 359.98961999999995,
+              "hash": "60ed735a802fc8da0f3461f7c7235c00f5b958da8ed8dd139a3a9502b78ad422",
+              "heapMiB": 80.99832916259766,
+              "arrayBuffersMiB": 47.74081516265869
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                83.50289299999986,
+                80.16534499999989,
+                120.84955449999961,
+                87.39444649999996,
+                85.31665499999963
+              ],
+              "medianMs": 85.31665499999963,
+              "hash": "de84db2a7750abb579d93225deb77e7673141ede186265f87f434c9fa5b45ccd",
+              "heapMiB": 62.01945495605469,
+              "arrayBuffersMiB": 47.74758243560791
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                459.1739609999995,
+                441.9400104999995,
+                535.3974214999998,
+                454.7502519999998,
+                504.74735750000036
+              ],
+              "medianMs": 459.1739609999995,
+              "hash": "ed7d18f8ff9d7a6614859a6feedb7ada1615ab1e323d18e4f973ed02f7f69914",
+              "heapMiB": 95.85929107666016,
+              "arrayBuffersMiB": 47.75405979156494
+            }
+          ],
+          "peakRssMiB": 916.80859375,
+          "wasmMiB": 1.5,
+          "round": 0
+        },
+        {
+          "mode": "current-raw",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                1.1797929999999894,
+                1.185441499999996,
+                1.1314254999999775,
+                1.3501349999999945,
+                1.0625069999999823
+              ],
+              "medianMs": 1.1797929999999894,
+              "hash": "f5e4bea17ce17c4d147fcb6035602fc3b17125a70294b27e5d598ed0579b9b7c",
+              "heapMiB": 56.640838623046875,
+              "arrayBuffersMiB": 47.55239963531494
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                401.04767049999987,
+                364.3801719999999,
+                361.6571489999999,
+                419.7078869999998,
+                395.6487420000003
+              ],
+              "medianMs": 395.6487420000003,
+              "hash": "60ed735a802fc8da0f3461f7c7235c00f5b958da8ed8dd139a3a9502b78ad422",
+              "heapMiB": 80.56136322021484,
+              "arrayBuffersMiB": 47.55239963531494
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                754.4521405,
+                809.7384190000002,
+                767.2269655,
+                787.2993020000004,
+                761.8038044999994
+              ],
+              "medianMs": 767.2269655,
+              "hash": "de84db2a7750abb579d93225deb77e7673141ede186265f87f434c9fa5b45ccd",
+              "heapMiB": 63.681739807128906,
+              "arrayBuffersMiB": 47.55916690826416
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                1134.4925089999997,
+                1234.7608570000011,
+                1201.608929,
+                1280.5647640000007,
+                1140.550849000001
+              ],
+              "medianMs": 1201.608929,
+              "hash": "ed7d18f8ff9d7a6614859a6feedb7ada1615ab1e323d18e4f973ed02f7f69914",
+              "heapMiB": 97.87242889404297,
+              "arrayBuffersMiB": 47.56564426422119
+            }
+          ],
+          "peakRssMiB": 972.8984375,
+          "wasmMiB": 14.6875,
+          "round": 0
+        },
+        {
+          "mode": "current-compact",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                1.6398969999999906,
+                1.5823455000000024,
+                1.945116999999982,
+                1.3911019999999894,
+                1.2543555000000026
+              ],
+              "medianMs": 1.5823455000000024,
+              "hash": "f5e4bea17ce17c4d147fcb6035602fc3b17125a70294b27e5d598ed0579b9b7c",
+              "heapMiB": 57.032920837402344,
+              "arrayBuffersMiB": 47.74081516265869
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                433.29968799999995,
+                392.0190130000001,
+                397.7291500000001,
+                384.6158535000004,
+                371.8731329999996
+              ],
+              "medianMs": 392.0190130000001,
+              "hash": "60ed735a802fc8da0f3461f7c7235c00f5b958da8ed8dd139a3a9502b78ad422",
+              "heapMiB": 80.95057678222656,
+              "arrayBuffersMiB": 47.74081516265869
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                48.917737999999645,
+                46.828117499999735,
+                53.18403899999976,
+                47.263929499999904,
+                46.068287500000224
+              ],
+              "medianMs": 47.263929499999904,
+              "hash": "de84db2a7750abb579d93225deb77e7673141ede186265f87f434c9fa5b45ccd",
+              "heapMiB": 60.794219970703125,
+              "arrayBuffersMiB": 47.74758243560791
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                428.82761400000027,
+                430.342721,
+                518.1773410000005,
+                417.17504200000076,
+                431.52001349999955
+              ],
+              "medianMs": 430.342721,
+              "hash": "ed7d18f8ff9d7a6614859a6feedb7ada1615ab1e323d18e4f973ed02f7f69914",
+              "heapMiB": 93.01177978515625,
+              "arrayBuffersMiB": 47.75405979156494
+            }
+          ],
+          "peakRssMiB": 953.828125,
+          "wasmMiB": 14.6875,
+          "round": 0
+        },
+        {
+          "mode": "current-compact",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                1.256078500000001,
+                1.3175509999999804,
+                1.1765734999999893,
+                1.1341344999999876,
+                1.115916999999996
+              ],
+              "medianMs": 1.1765734999999893,
+              "hash": "f5e4bea17ce17c4d147fcb6035602fc3b17125a70294b27e5d598ed0579b9b7c",
+              "heapMiB": 57.117034912109375,
+              "arrayBuffersMiB": 47.74081516265869
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                414.30356099999995,
+                383.4021015000001,
+                370.2043664999999,
+                406.2424675000002,
+                393.0004960000001
+              ],
+              "medianMs": 393.0004960000001,
+              "hash": "60ed735a802fc8da0f3461f7c7235c00f5b958da8ed8dd139a3a9502b78ad422",
+              "heapMiB": 80.95081329345703,
+              "arrayBuffersMiB": 47.74081516265869
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                47.216462500000034,
+                45.288255500000105,
+                47.59680100000014,
+                46.19923400000016,
+                44.11255850000043
+              ],
+              "medianMs": 46.19923400000016,
+              "hash": "de84db2a7750abb579d93225deb77e7673141ede186265f87f434c9fa5b45ccd",
+              "heapMiB": 60.794334411621094,
+              "arrayBuffersMiB": 47.74758243560791
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                445.6281654999998,
+                480.66604199999983,
+                518.2386510000006,
+                451.3927604999999,
+                468.38031649999994
+              ],
+              "medianMs": 468.38031649999994,
+              "hash": "ed7d18f8ff9d7a6614859a6feedb7ada1615ab1e323d18e4f973ed02f7f69914",
+              "heapMiB": 93.0119400024414,
+              "arrayBuffersMiB": 47.75405979156494
+            }
+          ],
+          "peakRssMiB": 945.75390625,
+          "wasmMiB": 14.6875,
+          "round": 1
+        },
+        {
+          "mode": "current-raw",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                1.2482864999999777,
+                1.355052999999998,
+                1.2551625000000115,
+                1.066632999999996,
+                0.9359309999999823
+              ],
+              "medianMs": 1.2482864999999777,
+              "hash": "f5e4bea17ce17c4d147fcb6035602fc3b17125a70294b27e5d598ed0579b9b7c",
+              "heapMiB": 56.64134979248047,
+              "arrayBuffersMiB": 47.55239963531494
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                417.8481035000001,
+                386.42543,
+                376.27550899999983,
+                424.2004740000002,
+                404.58691499999986
+              ],
+              "medianMs": 404.58691499999986,
+              "hash": "60ed735a802fc8da0f3461f7c7235c00f5b958da8ed8dd139a3a9502b78ad422",
+              "heapMiB": 80.56136322021484,
+              "arrayBuffersMiB": 47.55239963531494
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                789.3776619999999,
+                800.0938284999993,
+                809.5604940000003,
+                802.7115869999998,
+                793.7564394999999
+              ],
+              "medianMs": 800.0938284999993,
+              "hash": "de84db2a7750abb579d93225deb77e7673141ede186265f87f434c9fa5b45ccd",
+              "heapMiB": 63.681114196777344,
+              "arrayBuffersMiB": 47.55916690826416
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                1205.2749170000006,
+                1264.0131195000013,
+                1152.6908045,
+                1186.8434450000004,
+                1145.1800360000016
+              ],
+              "medianMs": 1186.8434450000004,
+              "hash": "ed7d18f8ff9d7a6614859a6feedb7ada1615ab1e323d18e4f973ed02f7f69914",
+              "heapMiB": 97.8863754272461,
+              "arrayBuffersMiB": 47.56564426422119
+            }
+          ],
+          "peakRssMiB": 993.64453125,
+          "wasmMiB": 14.6875,
+          "round": 1
+        },
+        {
+          "mode": "previous-compact",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.04003499999998894,
+                0.05119199999998614,
+                0.0394745000000114,
+                0.05178849999998647,
+                0.04093149999999923
+              ],
+              "medianMs": 0.04093149999999923,
+              "hash": "f5e4bea17ce17c4d147fcb6035602fc3b17125a70294b27e5d598ed0579b9b7c",
+              "heapMiB": 56.45068359375,
+              "arrayBuffersMiB": 47.678887367248535
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                344.32294649999994,
+                337.3154784999999,
+                335.09985949999987,
+                334.99666550000006,
+                353.19054099999994
+              ],
+              "medianMs": 337.3154784999999,
+              "hash": "60ed735a802fc8da0f3461f7c7235c00f5b958da8ed8dd139a3a9502b78ad422",
+              "heapMiB": 80.9982681274414,
+              "arrayBuffersMiB": 47.74081516265869
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                68.35699999999997,
+                66.82524150000017,
+                86.69438649999984,
+                68.65689750000001,
+                66.37640899999997
+              ],
+              "medianMs": 68.35699999999997,
+              "hash": "de84db2a7750abb579d93225deb77e7673141ede186265f87f434c9fa5b45ccd",
+              "heapMiB": 62.01957702636719,
+              "arrayBuffersMiB": 47.74758243560791
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                383.57044099999985,
+                395.5125700000003,
+                467.5091389999998,
+                410.27600150000035,
+                443.86446700000033
+              ],
+              "medianMs": 410.27600150000035,
+              "hash": "ed7d18f8ff9d7a6614859a6feedb7ada1615ab1e323d18e4f973ed02f7f69914",
+              "heapMiB": 95.8593521118164,
+              "arrayBuffersMiB": 47.75405979156494
+            }
+          ],
+          "peakRssMiB": 916.05078125,
+          "wasmMiB": 1.5,
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "rows": [
+            {
+              "label": "network signature",
+              "windowsMs": [
+                0.03963949999999272,
+                0.04803250000000503,
+                0.04079150000001164,
+                0.05324499999997556,
+                0.035694000000006554
+              ],
+              "medianMs": 0.04079150000001164,
+              "hash": "f5e4bea17ce17c4d147fcb6035602fc3b17125a70294b27e5d598ed0579b9b7c",
+              "heapMiB": 55.853370666503906,
+              "arrayBuffersMiB": 47.48949146270752
+            },
+            {
+              "label": "file acceptance",
+              "windowsMs": [
+                366.5734439999999,
+                325.05445699999996,
+                322.8129809999998,
+                347.7965835,
+                353.5794394999998
+              ],
+              "medianMs": 347.7965835,
+              "hash": "60ed735a802fc8da0f3461f7c7235c00f5b958da8ed8dd139a3a9502b78ad422",
+              "heapMiB": 80.23719787597656,
+              "arrayBuffersMiB": 47.48949146270752
+            },
+            {
+              "label": "runtime restore",
+              "windowsMs": [
+                51.492353000000094,
+                47.60539300000028,
+                54.2893439999998,
+                54.28649200000018,
+                67.58514250000007
+              ],
+              "medianMs": 54.28649200000018,
+              "hash": "de84db2a7750abb579d93225deb77e7673141ede186265f87f434c9fa5b45ccd",
+              "heapMiB": 60.28450012207031,
+              "arrayBuffersMiB": 47.48949146270752
+            },
+            {
+              "label": "import and restore",
+              "windowsMs": [
+                409.7749614999998,
+                373.0208210000005,
+                379.6073630000001,
+                429.4527420000004,
+                398.8579040000004
+              ],
+              "medianMs": 398.8579040000004,
+              "hash": "ed7d18f8ff9d7a6614859a6feedb7ada1615ab1e323d18e4f973ed02f7f69914",
+              "heapMiB": 92.46868896484375,
+              "arrayBuffersMiB": 47.48949146270752
+            }
+          ],
+          "peakRssMiB": 852.671875,
+          "wasmMiB": 0,
+          "round": 1
+        }
+      ]
+    }
+  ],
+  "runtime": [
+    {
+      "baselineCommit": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+      "scope": "Continuous operating core only: shared serialized world/forecast; 30 warmup + 5 x 30 game minutes; unchanged .1-minute quantum; both Rust versions use compact DTOs; JS receives equivalent full flows; excludes forecast, routing benchmarks, construction, DOM/map rendering and FPS",
+      "method": "Eight independent processes; both Rust versions load compact forecasts, JS uses full forecasts; reversed order in round 2; exact complete state comparison, no excluded fields; forced GC outside timed batches",
+      "lines": 10,
+      "stations": 25,
+      "summary": [
+        {
+          "mode": "javascript",
+          "medianMs": 45.96956000000003,
+          "medianCpuMs": 74.974,
+          "retainedHeapMiB": 18.664630889892578,
+          "eventLoopMaxMs": 65.15551799999997,
+          "peakRssMiB": 106.26953125,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "previous-worker",
+          "medianMs": 98.11683400000004,
+          "medianCpuMs": 155.2375,
+          "retainedHeapMiB": 17.766990661621094,
+          "eventLoopMaxMs": 5.827376999999956,
+          "peakRssMiB": 200.05078125,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "rust-sync",
+          "medianMs": 98.82415299999997,
+          "medianCpuMs": 157.2375,
+          "retainedHeapMiB": 17.186614990234375,
+          "eventLoopMaxMs": 106.88334300000002,
+          "peakRssMiB": 150.1484375,
+          "wasmMiB": 6.125,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "rust-worker",
+          "medianMs": 93.20460200000002,
+          "medianCpuMs": 145.717,
+          "retainedHeapMiB": 17.741287231445312,
+          "eventLoopMaxMs": 9.364193,
+          "peakRssMiB": 200.484375,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            48.212616000000025,
+            41.73718500000001,
+            43.726504000000034,
+            37.065448,
+            37.97815800000001
+          ],
+          "medianMs": 41.73718500000001,
+          "cpuMicros": [
+            123613,
+            73690,
+            70169,
+            67270,
+            76258
+          ],
+          "heapMiB": [
+            18.57384490966797,
+            18.656951904296875,
+            18.656753540039062,
+            18.763839721679688,
+            18.82886505126953
+          ],
+          "eventLoopMaxMs": [
+            47.42576700000001,
+            41.358812,
+            43.343233,
+            36.170636,
+            37.134675000000016
+          ],
+          "peakRssMiB": 105.8515625,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            112.58603799999997,
+            105.63827500000002,
+            96.30496600000004,
+            107.39172299999996,
+            94.06094800000005
+          ],
+          "medianMs": 105.63827500000002,
+          "cpuMicros": [
+            196183,
+            150002,
+            159039,
+            161336,
+            119199
+          ],
+          "heapMiB": [
+            17.526817321777344,
+            17.766754150390625,
+            17.696815490722656,
+            17.826828002929688,
+            17.770645141601562
+          ],
+          "eventLoopMaxMs": [
+            2.918627000000015,
+            3.9793010000000777,
+            2.1937339999999494,
+            2.9146519999999327,
+            2.7828419999999596
+          ],
+          "peakRssMiB": 183.37109375,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            107.67075299999999,
+            103.69657300000006,
+            100.48533199999997,
+            97.16297399999996,
+            82.93244300000003
+          ],
+          "medianMs": 100.48533199999997,
+          "cpuMicros": [
+            194995,
+            159345,
+            183899,
+            153052,
+            108381
+          ],
+          "heapMiB": [
+            17.182106018066406,
+            17.225936889648438,
+            17.187294006347656,
+            17.27826690673828,
+            17.10259246826172
+          ],
+          "eventLoopMaxMs": [
+            106.88334300000002,
+            102.84263299999998,
+            99.647197,
+            96.26200299999994,
+            82.04177800000002
+          ],
+          "peakRssMiB": 150.1484375,
+          "wasmMiB": 6.125,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            96.21023800000006,
+            93.03797600000007,
+            92.37671399999999,
+            105.91240299999993,
+            95.18129699999997
+          ],
+          "medianMs": 95.18129699999997,
+          "cpuMicros": [
+            159467,
+            133827,
+            151560,
+            154801,
+            119795
+          ],
+          "heapMiB": [
+            17.539146423339844,
+            17.76141357421875,
+            17.691001892089844,
+            17.830703735351562,
+            17.765350341796875
+          ],
+          "eventLoopMaxMs": [
+            1.7900559999999928,
+            2.460606999999982,
+            3.0014119999999593,
+            3.8597750000000133,
+            2.124500000000012
+          ],
+          "peakRssMiB": 200.484375,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            93.37122799999997,
+            91.6036150000001,
+            92.27943200000004,
+            134.241717,
+            83.37866599999995
+          ],
+          "medianMs": 92.27943200000004,
+          "cpuMicros": [
+            170130,
+            139372,
+            139874,
+            160767,
+            109347
+          ],
+          "heapMiB": [
+            17.520423889160156,
+            17.649208068847656,
+            17.802047729492188,
+            17.721160888671875,
+            17.892799377441406
+          ],
+          "eventLoopMaxMs": [
+            1.255330000000015,
+            2.6683799999999565,
+            2.753877999999986,
+            9.364193,
+            2.272373000000016
+          ],
+          "peakRssMiB": 172.5234375,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            102.16294999999997,
+            107.48164300000008,
+            86.23115499999994,
+            78.45083799999998,
+            79.815154
+          ],
+          "medianMs": 86.23115499999994,
+          "cpuMicros": [
+            186289,
+            177072,
+            155130,
+            121303,
+            103260
+          ],
+          "heapMiB": [
+            17.159568786621094,
+            17.22576141357422,
+            17.185935974121094,
+            17.156837463378906,
+            17.303482055664062
+          ],
+          "eventLoopMaxMs": [
+            101.364194,
+            106.70097399999997,
+            85.38511700000004,
+            77.87888299999997,
+            78.91924999999992
+          ],
+          "peakRssMiB": 147.453125,
+          "wasmMiB": 6.125,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            98.69937400000003,
+            95.87771199999997,
+            95.749774,
+            110.61295299999995,
+            97.53429400000005
+          ],
+          "medianMs": 97.53429400000005,
+          "cpuMicros": [
+            162618,
+            132159,
+            151436,
+            170790,
+            125380
+          ],
+          "heapMiB": [
+            17.54810333251953,
+            17.767227172851562,
+            17.696395874023438,
+            17.840164184570312,
+            17.794906616210938
+          ],
+          "eventLoopMaxMs": [
+            1.9753449999999475,
+            2.6631219999999303,
+            2.1803039999999783,
+            5.827376999999956,
+            2.553457000000094
+          ],
+          "peakRssMiB": 200.05078125,
+          "wasmMiB": 8.625,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            65.93299200000001,
+            53.298812999999996,
+            50.452072000000044,
+            36.026906999999994,
+            49.69281200000006
+          ],
+          "medianMs": 50.452072000000044,
+          "cpuMicros": [
+            162690,
+            92996,
+            55882,
+            50231,
+            92013
+          ],
+          "heapMiB": [
+            18.57599639892578,
+            18.66741180419922,
+            18.661849975585938,
+            18.764480590820312,
+            18.806907653808594
+          ],
+          "eventLoopMaxMs": [
+            65.15551799999997,
+            52.894001,
+            49.607245000000034,
+            35.12405299999995,
+            48.80323899999996
+          ],
+          "peakRssMiB": 106.26953125,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        }
+      ]
+    },
+    {
+      "baselineCommit": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+      "scope": "Continuous operating core only: shared serialized world/forecast; 30 warmup + 5 x 30 game minutes; unchanged .1-minute quantum; both Rust versions use compact DTOs; JS receives equivalent full flows; excludes forecast, routing benchmarks, construction, DOM/map rendering and FPS",
+      "method": "Eight independent processes; both Rust versions load compact forecasts, JS uses full forecasts; reversed order in round 2; exact complete state comparison, no excluded fields; forced GC outside timed batches",
+      "lines": 14,
+      "stations": 49,
+      "summary": [
+        {
+          "mode": "javascript",
+          "medianMs": 144.38300449999997,
+          "medianCpuMs": 169.271,
+          "retainedHeapMiB": 49.416664123535156,
+          "eventLoopMaxMs": 154.10082699999998,
+          "peakRssMiB": 176.41015625,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "previous-worker",
+          "medianMs": 144.41441650000002,
+          "medianCpuMs": 196.1675,
+          "retainedHeapMiB": 37.543277740478516,
+          "eventLoopMaxMs": 5.158029999999826,
+          "peakRssMiB": 334.46875,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "rust-sync",
+          "medianMs": 164.69309799999996,
+          "medianCpuMs": 215.5525,
+          "retainedHeapMiB": 37.17971420288086,
+          "eventLoopMaxMs": 200.387202,
+          "peakRssMiB": 304.5390625,
+          "wasmMiB": 19.9375,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "rust-worker",
+          "medianMs": 156.47835899999995,
+          "medianCpuMs": 212.168,
+          "retainedHeapMiB": 37.536766052246094,
+          "eventLoopMaxMs": 5.148383000000194,
+          "peakRssMiB": 340.73046875,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            154.88638400000002,
+            153.98050899999998,
+            145.68734799999993,
+            99.42106600000011,
+            75.62068
+          ],
+          "medianMs": 145.68734799999993,
+          "cpuMicros": [
+            287535,
+            241592,
+            172188,
+            123608,
+            89610
+          ],
+          "heapMiB": [
+            49.12335205078125,
+            49.29315948486328,
+            49.42771911621094,
+            49.41712188720703,
+            49.61627960205078
+          ],
+          "eventLoopMaxMs": [
+            154.10082699999998,
+            153.12503700000002,
+            145.57586700000002,
+            98.5943380000001,
+            74.73306899999989
+          ],
+          "peakRssMiB": 176.41015625,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            159.22295199999996,
+            154.90115800000012,
+            148.1854370000001,
+            136.50595599999997,
+            133.731534
+          ],
+          "medianMs": 148.1854370000001,
+          "cpuMicros": [
+            236751,
+            206909,
+            200721,
+            185993,
+            174632
+          ],
+          "heapMiB": [
+            37.47821807861328,
+            37.4366455078125,
+            37.54205322265625,
+            37.55479431152344,
+            37.548622131347656
+          ],
+          "eventLoopMaxMs": [
+            3.197736000000077,
+            4.359406999999919,
+            5.158029999999826,
+            3.1120370000001003,
+            3.8042900000000373
+          ],
+          "peakRssMiB": 322.3984375,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            200.981491,
+            185.45412899999985,
+            177.6721809999999,
+            151.71401500000002,
+            116.48892799999999
+          ],
+          "medianMs": 177.6721809999999,
+          "cpuMicros": [
+            316768,
+            286387,
+            239361,
+            191744,
+            151347
+          ],
+          "heapMiB": [
+            37.1209716796875,
+            37.41178894042969,
+            37.30555725097656,
+            37.16759490966797,
+            37.17583465576172
+          ],
+          "eventLoopMaxMs": [
+            200.387202,
+            184.595372,
+            176.856178,
+            150.8261849999999,
+            115.60111699999993
+          ],
+          "peakRssMiB": 304.5390625,
+          "wasmMiB": 19.9375,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            160.96625900000004,
+            148.2926359999999,
+            145.0865819999999,
+            135.32289500000002,
+            139.490096
+          ],
+          "medianMs": 145.0865819999999,
+          "cpuMicros": [
+            237123,
+            200413,
+            193613,
+            180269,
+            187176
+          ],
+          "heapMiB": [
+            37.473609924316406,
+            37.431312561035156,
+            37.53618621826172,
+            37.548927307128906,
+            37.5419921875
+          ],
+          "eventLoopMaxMs": [
+            2.767358999999942,
+            3.7438609999999244,
+            3.374864000000116,
+            2.9627530000000206,
+            3.1620539999998982
+          ],
+          "peakRssMiB": 340.73046875,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            183.2362700000001,
+            169.23926500000016,
+            161.701233,
+            151.99045899999987,
+            169.049215
+          ],
+          "medianMs": 169.049215,
+          "cpuMicros": [
+            264176,
+            237141,
+            234782,
+            199645,
+            223923
+          ],
+          "heapMiB": [
+            37.438011169433594,
+            37.397666931152344,
+            37.53734588623047,
+            37.54975891113281,
+            37.554412841796875
+          ],
+          "eventLoopMaxMs": [
+            3.9476080000000593,
+            4.615378999999848,
+            4.54134299999987,
+            3.6897590000000946,
+            5.148383000000194
+          ],
+          "peakRssMiB": 331.05859375,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            187.1056030000001,
+            179.6516210000001,
+            139.76847599999996,
+            125.75753600000007,
+            115.21113800000012
+          ],
+          "medianMs": 139.76847599999996,
+          "cpuMicros": [
+            296245,
+            280894,
+            189458,
+            152802,
+            158016
+          ],
+          "heapMiB": [
+            37.12376403808594,
+            37.423065185546875,
+            37.313636779785156,
+            37.16578674316406,
+            37.18359375
+          ],
+          "eventLoopMaxMs": [
+            186.37048100000004,
+            178.7854830000001,
+            138.93323499999997,
+            124.89695699999993,
+            114.40090299999997
+          ],
+          "peakRssMiB": 302.83203125,
+          "wasmMiB": 19.9375,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            155.26438900000005,
+            153.11685699999998,
+            139.2080669999998,
+            135.71237199999996,
+            140.64339599999994
+          ],
+          "medianMs": 140.64339599999994,
+          "cpuMicros": [
+            221101,
+            201001,
+            191614,
+            181375,
+            176493
+          ],
+          "heapMiB": [
+            37.48004913330078,
+            37.438926696777344,
+            37.54450225830078,
+            37.558143615722656,
+            37.54963684082031
+          ],
+          "eventLoopMaxMs": [
+            2.5584929999999986,
+            4.2075700000000325,
+            3.141343000000006,
+            3.902939999999944,
+            3.660966000000144
+          ],
+          "peakRssMiB": 334.46875,
+          "wasmMiB": 25.5,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            148.412666,
+            143.078661,
+            147.12186600000007,
+            108.77966700000002,
+            80.63957000000005
+          ],
+          "medianMs": 143.078661,
+          "cpuMicros": [
+            280138,
+            234300,
+            166354,
+            128765,
+            91252
+          ],
+          "heapMiB": [
+            49.117584228515625,
+            49.29657745361328,
+            49.426856994628906,
+            49.41620635986328,
+            49.61528015136719
+          ],
+          "eventLoopMaxMs": [
+            147.63144700000004,
+            142.211632,
+            146.29882300000008,
+            107.88537599999995,
+            79.75208900000007
+          ],
+          "peakRssMiB": 173,
+          "wasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        }
+      ]
+    }
+  ]
+}

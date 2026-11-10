@@ -166,7 +166,7 @@ fn init(s: &mut V, cfg: &V) {
         }
     }
 }
-fn economy_valid(s: &V) -> bool {
+pub(super) fn economy_valid(s: &V) -> bool {
     let e = s.get("economy");
     let positive = |v: &V| finite(v) && v.n() >= 0.0;
     if !e.truth()

@@ -784,7 +784,7 @@ fn view(e: &V) -> V {
 fn positive(v: &V) -> bool {
     finite(v) && v.n() >= 0.0
 }
-fn valid(s: &V) -> bool {
+pub(super) fn valid(s: &V) -> bool {
     let r = s.get("operationsReview");
     if matches!(r, V::Missing) {
         return true;

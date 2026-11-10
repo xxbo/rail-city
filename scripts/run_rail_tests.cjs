@@ -22,5 +22,5 @@ for (const file of readdirSync(join(root, 'rail')).filter(file => file.endsWith(
   run(['--check', join('rail', file)]);
 }
 const suites = readdirSync(__dirname).filter(file => /^test_rail.*\.cjs$/.test(file)).sort();
-for (const file of suites) run([join('scripts', file)]);
+for (const file of suites) { console.log('Running '+file); const start=performance.now(); run([join('scripts',file)]); console.log('Passed '+file+' in '+((performance.now()-start)/1000).toFixed(2)+'s'); }
 console.log(`Rail checks passed: syntax + ${suites.length} regression suites.`);
