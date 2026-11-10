@@ -1,6 +1,6 @@
 # P3：完整 Rust 核心与纯界面 JS 迁移计划
 
-状态：P3-0、P3-1已验收；P3-2～P3-8已推进源码，P3-9统一验收入口已准备；所有执行验收待进行，尚未结项。P3-4实施记录见 [rust-wasm-p3-4.md](rust-wasm-p3-4.md)。P3-5实施记录见 [rust-wasm-p3-5.md](rust-wasm-p3-5.md)。P3-6实施记录见 [rust-wasm-p3-6.md](rust-wasm-p3-6.md)。P3-7实施记录见 [rust-wasm-p3-7.md](rust-wasm-p3-7.md)。[P3-8源码记录](rust-wasm-p3-8.md)、[P3-9验收准备](rust-wasm-p3-9.md)。制定日期：2026-11-10（北京时间）。
+状态：P3-0、P3-1已验收；P3-2～P3-8已推进源码，P3-9统一验收入口已准备；编译与Rust单测57/57通过，Node自动回归21/90通过，浏览器与性能待验收，尚未结项。P3-4实施记录见 [rust-wasm-p3-4.md](rust-wasm-p3-4.md)。P3-5实施记录见 [rust-wasm-p3-5.md](rust-wasm-p3-5.md)。P3-6实施记录见 [rust-wasm-p3-6.md](rust-wasm-p3-6.md)。P3-7实施记录见 [rust-wasm-p3-7.md](rust-wasm-p3-7.md)。[P3-8源码记录](rust-wasm-p3-8.md)、[P3-9验收准备](rust-wasm-p3-9.md)。制定日期：2026-11-10（北京时间）。
 审计代码基线：`bffdd8fbd22e2553a881533b540f878f6ea8fabc`（MAP65 / P2-4）。
 本计划承接 P0～P2；旧阶段的验收指其约定的规则范围，不能据此判定整个非界面运行层已迁移。
 
