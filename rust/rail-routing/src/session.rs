@@ -136,6 +136,7 @@ pub struct SessionHost {
     runtimes:crate::runtime_session::RuntimeOwner,
     clocks:crate::runtime_control::Controls,
     persistence:crate::persistence::Owner,
+    platform:crate::platform::Owner,
     legacy_operations:crate::legacy_operations::Owner,
 }
 impl SessionHost {
@@ -157,6 +158,7 @@ impl SessionHost {
         if !matches!(input.get("protocolVersion"), V::Number(v) if *v == VERSION) {
             return error("UNSUPPORTED_PROTOCOL", 0, 0);
         }
+        if input.get("op").text()=="platform"||input.get("op").text()=="viewModel"{let result=if input.get("op").text()=="platform"{self.platform.request(input)}else{crate::view_model::query(input)};if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
         if input.get("op").text()=="persistence"{let result=self.persistence.request(input);if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
         if input.get("op").text()=="legacyOperations"{let result=self.legacy_operations.request(input);if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
         if input.get("op").text()=="compat"{return envelope(true,0,0,crate::legacy::run(input));}

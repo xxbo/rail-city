@@ -45,12 +45,12 @@
     peakMemoryBytes = 0;
   const recycleLimit = () => recycleBytes === 0 ? 0 : Math.max(recycleBytes,
     simulationRecycleBytes);
-  const asset = node ? null : new URL('wasm/rail-core-v32.wasm?v=72',
+  const asset = node ? null : new URL('wasm/rail-core-v33.wasm?v=73',
     root.document?.currentScript?.src || root.location.href).href;
 
   function install(module) {
     const next = new WebAssembly.Instance(module, {
-      rail_host:{json_utf8:(pointer,length,target,capacity)=>{const Wire=node?require('./value-wire'):root.RailValueWire,value=Wire.decode(new Float64Array(instance.exports.memory.buffer,pointer,length)).value,bytes=new TextEncoder().encode(JSON.stringify(value));if(capacity){if(capacity<bytes.length)throw Error('JSON codec buffer is too small');new Uint8Array(instance.exports.memory.buffer,target,bytes.length).set(bytes);}return bytes.length;}},
+
       rail_math: {
         cos:Math.cos,exp: Math.exp,
         log: Math.log,
@@ -59,7 +59,7 @@
         now:()=>kernelNow()
       }
     });
-    if (next.exports.runtime_session_abi?.() !== 5 || next.exports.forecast_session_abi?.() !== 1 || next.exports.bootstrap_abi?.() !== 1 || next.exports.session_abi?.() !== 1 || next.exports.routing_abi() !== ABI || next.exports.demand_abi?.() !== 1 || next.exports
+    if (next.exports.runtime_session_abi?.() !== 6 || next.exports.forecast_session_abi?.() !== 1 || next.exports.bootstrap_abi?.() !== 1 || next.exports.session_abi?.() !== 1 || next.exports.routing_abi() !== ABI || next.exports.demand_abi?.() !== 1 || next.exports
       .world_abi?.() !== 1 || next.exports.simulation_abi?.() !== 1 || next.exports.queue_abi?.
       () !== 1 || next.exports.statistics_abi?.() !== 1 || next.exports.operations_abi?.() !== 1 || next.exports.engine_abi?.() !== 1 || next.exports.engine_prepare_abi?.() !== 1 || next.exports.cycle_abi?.() !== 1 || next.exports.engine_continue_abi?.() !== 1 || next.exports.projection_abi?.() !== 1 || next.exports.calendar_abi?.() !== 1 || next.exports.runtime_query_abi?.() !== 1 || next.exports.history_abi?.() !== 1 || next.exports.diagnostic_abi?.()!==1 || next.exports.assets_abi?.()!==1 || next.exports.transaction_abi?.()!==1 || next.exports.catalog_abi?.()!==1 || next.exports.service_abi?.()!==1 || next.exports.service_validate_abi?.()!==1 || next.exports.editor_abi?.()!==1 || next.exports.geometry_abi?.()!==1)
       throw Error('寻路WASM接口版本不匹配');
@@ -364,7 +364,7 @@
 
     createWorkspace:()=>{
       let e;const Wire=node?require('./value-wire'):root.RailValueWire;
-      const module=new WebAssembly.Instance(compiled,{rail_math:{cos:Math.cos,exp:Math.exp,log:Math.log,hypot:Math.hypot,sin:Math.sin,acos:Math.acos,atan2:Math.atan2,random:()=>Math.random(),log1p:Math.log1p,pow:Math.pow,now:()=>performance.now()},rail_host:{json_utf8:(p,n,t,c)=>{const bytes=new TextEncoder().encode(JSON.stringify(Wire.decode(new Float64Array(e.memory.buffer,p,n)).value));if(c)new Uint8Array(e.memory.buffer,t,bytes.length).set(bytes);return bytes.length;}}});e=module.exports;
+      const module=new WebAssembly.Instance(compiled,{rail_math:{cos:Math.cos,exp:Math.exp,log:Math.log,hypot:Math.hypot,sin:Math.sin,acos:Math.acos,atan2:Math.atan2,random:()=>Math.random(),log1p:Math.log1p,pow:Math.pow,now:()=>performance.now()}});e=module.exports;
       return {kernel:(name,values,bytes)=>{if(!['bootstrap_run','session_contract','bootstrap_packed','session_packed','forecast_numeric'].includes(name))throw Error('Unknown initialization operation');const p=e.input_resize(values.length);new Float64Array(e.memory.buffer,p,values.length).set(values);if(bytes){const b=e.cycle_bytes_resize(bytes.length);new Uint8Array(e.memory.buffer,b,bytes.length).set(bytes);}const at=e[name](),out=new Float64Array(e.memory.buffer,at,e.output_len()).slice();const result=bytes?{values:out,bytes:new Uint8Array(e.memory.buffer,e.bootstrap_bytes_ptr(),e.bootstrap_bytes_len()).slice()}:out;e.output_clear();return result;},memoryBytes:()=>e.memory.buffer.byteLength};
     },
     catalogViewToken:()=>exports().catalog_view_token(),
@@ -453,7 +453,7 @@
     const fs = require('node:fs'),
       path = require('node:path');
     install(new WebAssembly.Module(fs.readFileSync(path.join(__dirname,
-      'wasm/rail-core-v32.wasm'))));
+      'wasm/rail-core-v33.wasm'))));
     module.exports = api;
   } else {
     root.RailRouting = api;

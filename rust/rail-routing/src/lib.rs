@@ -3,6 +3,8 @@
 mod assets;
 mod json_codec;
 mod persistence;
+mod platform;
+mod view_model;
 mod calendar;
 mod runtime_control;
 mod runtime_seed;

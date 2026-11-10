@@ -99,11 +99,6 @@ impl Context {
         (next, payload)
     }
 }
-#[cfg(target_arch = "wasm32")]
-#[link(wasm_import_module = "rail_host")]
-extern "C" {
-    fn json_utf8(input: *const f64, len: usize, output: *mut u8, capacity: usize) -> usize;
-}
 pub(super) fn key(j: &V) -> Rc<str> {
     let fields = [
         "legs",
@@ -117,20 +112,5 @@ pub(super) fn key(j: &V) -> Rc<str> {
         "byLine",
     ];
     let value = V::Array(fields.iter().map(|k| j.get(k).clone()).collect());
-    #[cfg(target_arch = "wasm32")]
-    unsafe {
-        let data = crate::value::write(&value);
-        let n = json_utf8(data.as_ptr(), data.len(), std::ptr::null_mut(), 0);
-        let mut bytes = vec![0; n];
-        assert_eq!(
-            json_utf8(data.as_ptr(), data.len(), bytes.as_mut_ptr(), n),
-            n
-        );
-        Rc::from(std::str::from_utf8(&bytes).unwrap())
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = value;
-        panic!("JSON codec is provided by the WASM host")
-    }
+    Rc::from(crate::diagnostics::json(&value))
 }

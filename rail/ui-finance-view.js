@@ -1,9 +1,9 @@
 /* Presentation only: explicit state inputs; no DOM, storage or simulation writes. */
 (function(root) {
   'use strict';
+  const VM=typeof module!=='undefined'&&module.exports?require('./view-model'):root.RailViewModel;
 
   function create({
-    M,
     num,
     money,
     clock,
@@ -19,7 +19,7 @@
     }
 
     function live(s) {
-      const e = s.economy;
+      const e = s.economy, model=VM.query('finance',{state:{economy:e}});
       return {
         fields: {
           'account-cash': money(e.cash),
@@ -29,11 +29,11 @@
           'actual-operating': money(e.operating),
           'actual-interest': money(e.interestPaid),
           'actual-arrears': money(e.arrears),
-          'finance-principal': money(e.loans.reduce((v, l) => v + l.principal, 0)),
+          'finance-principal': money(model.principal),
           'finance-repaid': money(e.principalPaid)
         },
-        loans: e.loans.map(l =>
-          `<div class="loan-card"><b>贷款 ${l.id} · 剩余 ${money(l.principal)}</b><span>已计利息 ${money(l.interest)} · 下次应还约 ${money(Math.min(l.principal,l.installment)+l.interest+l.principal*M.RATE*Math.max(0,l.nextDue-e.minute)/1440)}</span><span>${Math.max(0,(l.nextDue-e.minute)/1440).toFixed(2)} 天后扣款</span><button data-repay="${l.id}">提前结清 ${money(l.principal+l.interest)}</button></div>`
+        loans: model.loans.map(l =>
+          `<div class="loan-card"><b>贷款 ${l.id} · 剩余 ${money(l.principal)}</b><span>已计利息 ${money(l.interest)} · 下次应还约 ${money(l.nextPayment)}</span><span>${l.days.toFixed(2)} 天后扣款</span><button data-repay="${l.id}">提前结清 ${money(l.payoff)}</button></div>`
         ).join('') || '<p class="station-note">暂无贷款</p>',
         ledger: e.ledger.slice(0, 12).map(x =>
           `<div class="detail-row"><span>第 ${Math.floor((x.minute-420)/1440)+1} 天 ${clock(x.minute)}<br>${esc(x.type)}</span><b>${x.amount>=0?'+':'−'}${money(Math.abs(x.amount))}</b></div>`

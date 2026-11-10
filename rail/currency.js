@@ -2,8 +2,8 @@
 (function(root) {
   'use strict';
   const SCALE = .05;
-  const toCNY = n => Math.round(n * SCALE * 100) / 100,
-    fromCNY = n => Math.round(n / SCALE);
+  const model=(kind,value)=>(typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).viewModel(kind,{value});
+  const toCNY = n => model('currencyTo',n),fromCNY = n => model('currencyFrom',n);
 
   function format(n) {
     const v = toCNY(n),

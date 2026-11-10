@@ -1,10 +1,10 @@
 /* Pure HTML views. Selection, events, DOM patching and persistence stay in ui.js. */
 (function(root) {
   'use strict';
+  const VM=typeof module!=='undefined'&&module.exports?require('./view-model'):root.RailViewModel;
 
   function create({
     REVIEW,
-    Q,
     currency,
     clock,
     money,
@@ -12,7 +12,7 @@
     esc
   }) {
     function reviewTime(minute) {
-      return '第 ' + Q.day(minute) + ' 天 ' + clock(minute);
+      return '第 ' + VM.query('day',{minute}) + ' 天 ' + clock(minute);
     }
 
     function reviewPlan(p) {

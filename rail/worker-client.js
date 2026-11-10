@@ -1,124 +1,40 @@
-/* Shared request lifecycle for stateless worker RPC. No game state is owned here. */
-(function(root) {
-  'use strict';
-
-  function create(options) {
-    const schedule = options.setTimer || setTimeout;
-    const cancel = options.clearTimer || clearTimeout;
-    const jobs = new Map();
-    let worker = null;
-    let nextId = 0;
-    let disposed = false;
-
-    function remove(id) {
-      const job = jobs.get(id);
-      if (job) {
-        cancel(job.timer);
-        jobs.delete(id);
-      }
-      return job;
-    }
-
-    function stop(error, source = worker) {
-      // A late callback from a terminated worker must not cancel its replacement.
-      if (source !== worker) return;
-      if (worker) {
-        worker.onmessage = worker.onerror = worker.onmessageerror = null;
-        worker.terminate();
-      }
-      worker = null;
-      for (const id of [...jobs.keys()]) remove(id).reject(error);
-      if (options.onFault) options.onFault(error);
-    }
-
-    function start() {
-      if (disposed) throw Error('后台任务客户端已关闭。');
-      if (worker) return worker;
-      const current = options.createWorker();
-      if (!current) return null;
-      worker = current;
-      current.onmessage = ({
-        data: message
-      }) => {
-        if (current !== worker) return;
-        const job = remove(message?.id);
-        if (!job) return;
-        if (message.error) job.reject(Error(message.error));
-        else job.resolve(message);
-      };
-      current.onerror = event => stop(Error(event.message || options.errorMessage), current);
-      current.onmessageerror = () => stop(Error(options.errorMessage), current);
-      return current;
-    }
-
-    function request(payload) {
-      if (disposed) return Promise.reject(Error('后台任务客户端已关闭。'));
-      let current;
-      try {
-        current = start();
-      } catch (error) {
-        if (!options.fallbackOnStartFailure || !options.fallback) return Promise.reject(error);
-      }
-      if (!current) {
-        if (!options.fallback) return Promise.reject(Error(options.errorMessage));
-        // Yield before a synchronous fallback so loading/status UI can paint.
-        return new Promise((resolve, reject) => {
-          const id = ++nextId;
-          const timer = schedule(() => {
-            const job = remove(id);
-            if (!job) return;
-            try {
-              job.resolve(options.fallback(payload));
-            } catch (error) {
-              job.reject(error);
-            }
-          }, 0);
-          jobs.set(id, {
-            resolve,
-            reject,
-            timer
-          });
-        });
-      }
-      return new Promise((resolve, reject) => {
-        const id = ++nextId;
-        const timer = schedule(() => stop(Error(options.timeoutMessage), current), options.timeout);
-        jobs.set(id, {
-          resolve,
-          reject,
-          timer
-        });
-        try {
-          current.postMessage({
-            ...payload,
-            id
-          });
-        } catch (error) {
-          // DataCloneError affects this request only; always release its timeout.
-          remove(id).reject(error);
-        }
-      });
-    }
-
-    return {
-      request,
-      start,
-      get active() {
-        return !!worker;
-      },
-      get pending() {
-        return jobs.size;
-      },
-      dispose() {
-        disposed = true;
-        stop(Error('后台任务客户端已关闭。'));
-      }
-    };
+/* Platform handles and Promise correlation for Rust-owned Worker leases. */
+(function(root){'use strict';const node=typeof module!=='undefined'&&module.exports;
+function create(options){
+ const B=()=>node?require('./bootstrap-wasm'):root.RailBootstrap;
+ const id=B().platform('create',{timeout:options.timeout||30000,stateful:!!options.stateful});
+ const call=(action,args={})=>B().platform(action,{id,...args});
+ const schedule=options.setTimer||setTimeout,cancel=options.clearTimer||clearTimeout;
+ const jobs=new Map();let worker=null,epoch;
+ function remove(ticket){const job=jobs.get(ticket);if(job){cancel(job.timer);jobs.delete(ticket);}return job;}
+ function stop(action,error,sourceEpoch=epoch,ticket){
+  const effect=call(action,{epoch:sourceEpoch,ticket});if(!effect.accepted)return;
+  if(effect.terminate&&worker){worker.onmessage=worker.onerror=worker.onmessageerror=null;worker.terminate();worker=null;}
+  const reason=effect.unknownCommit?Error('后台会话响应中断，提交结果待确认；请从已保存进度恢复。'):error;
+  for(const ticket of effect.reject)remove(ticket)?.reject(reason);
+  options.onFault?.(reason);
+ }
+ function start(){
+  const next=call('open');if(worker)return worker;
+  epoch=next;
+  try{worker=options.createWorker();if(!worker)throw Error(options.errorMessage||'后台线程尚未开放。');}
+  catch(error){stop('fault',error,next);throw error;}
+  const current=worker,sourceEpoch=epoch;
+  const receive=message=>{if(!call('settle',{epoch:sourceEpoch,ticket:message?.id}))return;const job=remove(message.id);if(!job)return;if(message.error)job.reject(Error(message.error));else job.resolve(message);};
+  if(typeof current.on==='function'){
+   current.on('message',receive);current.on('error',error=>stop('fault',error,sourceEpoch));
+   current.on('exit',code=>stop('fault',Error('后台线程退出：'+code),sourceEpoch));
+  }else{
+   current.onmessage=event=>receive(event.data);
+   current.onerror=event=>stop('fault',Error(event.message||options.errorMessage),sourceEpoch);
+   current.onmessageerror=()=>stop('fault',Error(options.errorMessage||'后台消息损坏。'),sourceEpoch);
   }
-
-  const api = {
-    create
-  };
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  else root.RailWorkerClient = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+  return current;
+ }
+ function request(payload){let current,job;try{current=start();job=call('request');}catch(error){return Promise.reject(error);}
+  return new Promise((resolve,reject)=>{const timer=schedule(()=>stop('timeout',Error(options.timeoutMessage||'后台任务超时。'),job.epoch,job.ticket),job.timeout);jobs.set(job.ticket,{resolve,reject,timer});try{current.postMessage({...payload,id:job.ticket});}catch(error){if(call('settle',{epoch:job.epoch,ticket:job.ticket}))remove(job.ticket)?.reject(error);}});
+ }
+ return {request,start,offer:()=>call('offer'),get active(){return call('status').active;},get pending(){return call('status').pending;},dispose(){stop('dispose',Error('后台客户端已关闭。'));}};
+}
+const api={create};if(node)module.exports=api;else root.RailWorkerClient=api;
+})(typeof globalThis!=='undefined'?globalThis:this);

@@ -1,9 +1,9 @@
 /* Presentation only: explicit state inputs; no DOM, storage or simulation writes. */
 (function(root) {
   'use strict';
+  const VM=typeof module!=='undefined'&&module.exports?require('./view-model'):root.RailViewModel;
 
   function create({
-    Q,
     num,
     esc
   }) {
@@ -12,38 +12,16 @@
     }
 
     function model(s, traffic, stationQuery, stationSort, counts) {
-      const linesByStation = new Map();
-      for (const line of s.services)
-        for (const id of new Set(line.stops)) {
-          if (!linesByStation.has(id)) linesByStation.set(id, []);
-          linesByStation.get(id).push(line.name);
-        }
-      const ids = [...linesByStation.keys()];
-      const all = ids.map(id => ({
-        id,
-        name: s.nodes[id].name,
-        waiting: counts[id] || 0,
-        capacity: Q.limits(s, id).capacity,
-        outside: Object.values(traffic.outside?.[id] || {}).reduce((v, n) => v + n, 0),
-        lines: linesByStation.get(id).join('、')
-      }));
+      const native=VM.query('stations',{state:{nodes:s.nodes,services:s.services},runtime:{outside:traffic.nativeView?.outside||traffic.outside},counts}), all=native.rows;
       const query = stationQuery.toLocaleLowerCase();
       const rows = all.filter(r => !query || (r.name + r.lines).toLocaleLowerCase().includes(query));
       rows.sort(stationSort === 'name' ? (a, b) => a.name.localeCompare(b.name, 'zh-CN') : (a, b) => b
         .waiting - a.waiting || a.id - b.id);
-      let busiest = null;
-      for (const row of all)
-        if (!busiest || row.waiting > busiest.waiting) busiest = row;
-      return {
-        count: ids.length,
-        waiting: all.reduce((sum, r) => sum + r.waiting, 0),
-        busiest,
-        rows
-      };
+      return {...native,rows};
     }
 
     function row(r, today, entry) {
-      const crowded = r.waiting / r.capacity > .85 || r.outside > 0;
+      const crowded = r.crowded;
       return `<tr data-station-row="${r.id}"><td><button data-station="${r.id}">${esc(r.name)}</button></td><td>${esc(r.lines)}</td><td data-wait-cell="${r.id}" class="${crowded?'crowded':''}"><b>${num(r.waiting)} / ${num(r.capacity)}</b><small class="queue-outside">站外 ${num(r.outside)} 人</small><small class="queue-outside">今日进站 ${num(today.entered)} · 上车 ${num(today.boarded)}</small><small class="queue-outside">预测进站 ${num(entry)} / 日</small></td><td><button data-station="${r.id}">查看 / 定位</button></td></tr>`;
     }
 

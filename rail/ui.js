@@ -28,7 +28,6 @@
     drawnTrainMarkers = 0;
   const PERF = RailPerformance;
   let interfacePrefs = PERF.settings();
-  const simulationClock = PERF.createClock();
   let lastDots = 0,
     lastPerf = 0,
     computeMs = 0,
@@ -231,19 +230,13 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=72') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=73') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
     onFault: error => {
       demandState.error = error.message;
-    },
-    fallbackOnStartFailure: true,
-    fallback: ({
-      state
-    }) => ({
-      result: C.evaluate(state,{compact:true})
-    })
+    }
   });
 
   function calculate(state,snapshot) {
@@ -251,13 +244,14 @@
       state: snapshot || RailDemandSnapshot.capture(state)
     }).then(message => RailForecastCatalog.hydrate(message.result));
   }
-  let forecast = await calculate(s).catch(() => C.evaluate(s,{compact:true}));
+  let forecast;
+  try{forecast=await calculate(s);}catch(error){const loading=$('game-loading');loading.replaceChildren();const title=document.createElement('b'),detail=document.createElement('span'),retry=document.createElement('button');title.textContent='需求线程启动失败';detail.textContent=error.message;retry.textContent='重新加载';retry.onclick=()=>location.reload();loading.append(title,detail,retry);return;}
   const restored=savedRuntime&&O.restore(s,forecast,savedRuntime),runtimePolicy=RailBootstrap.run('runtimePolicy',{state:{economy:s.economy},restored:!!restored,runtimeMinute:restored?.minute,migratedFacilities,hasSaved:!!savedRuntime,connectionModel:forecast.connectionModel});
   let traffic=runtimePolicy.reuse?restored:O.create(s,forecast,runtimePolicy.minute,runtimePolicy.warm);
   demandState.status='ready';demandState.updatedAt=traffic.minute;
   if(runtimePolicy.rebase)await M.replaceDemandAsync(traffic,forecast);
   delete forecast.preparedDefinitions;
-  if(!M.nativeRuntime(traffic)){Q.updateSatisfaction(s,traffic);REVIEW.init(s,traffic);REVIEW.ready(s,traffic.minute);}
+
   let urbanForecastRevision = s.urban.revision;
   let cityCells = C.world(s).cells.map(c => ({
     ...c,
@@ -630,7 +624,6 @@
     playing = on;
     M.runtimeIntent(traffic,{at:performance.now(),speed,playing,visible:!document.hidden,reset:true});
     lastFrame = 0;
-    simulationClock.reset();
     $('play').textContent = on ? 'Ⅱ' : '▶ 开始运营';
     document.body.classList.toggle('simulation-paused', !on);
     $('play').setAttribute('aria-label', on ? '暂停运行' : '开始运行');
@@ -2537,7 +2530,6 @@
   document.addEventListener('visibilitychange', () => {
     M.runtimeIntent(traffic,{at:performance.now(),speed,playing,visible:!document.hidden});
     lastFrame = 0;
-    simulationClock.reset();
     if (document.hidden) save();
   });
   window.addEventListener('pagehide', save);
@@ -2561,24 +2553,8 @@
       applyCamera();
       if (t === 1) cameraTween = null;
     }
-    if(M.nativeRuntime(traffic)){
-      const identity=traffic;
-      M.pulseAsync(s,traffic,{at:now,speed,budget:perf.budget,playing:playing&&!calculating,visible:!document.hidden}).then(result=>{if(identity!==traffic)return;computeMs=computeMs*.8+(result.clock?.ms||0)*.2;if(result.clock?.ok===false){setPlaying(false);toast('余额不足或贷款到期未偿还，运营已暂停。');}}).catch(error=>{if(identity!==traffic)return;runtimeFault=error.message;setPlaying(false);toast('运营计算异常，已暂停并保留上次存档。');});
-    }else     if (playing && !calculating && lastFrame) {
-      try {
-        const result = simulationClock.runAsync((now - lastFrame) / 1000, speed, perf.budget, (dt,options) => M.advanceBudgetAsync(
-          s, traffic, dt,options), () => performance.now());
-        computeMs = computeMs * .8 + result.ms * .2;
-        if (!result.ok) {
-          setPlaying(false);
-          toast('余额不足或贷款到期未偿还，运营已暂停。');
-        }
-      } catch (error) {
-        runtimeFault = error.message;
-        setPlaying(false);
-        toast('运营计算异常，已暂停并保留上次存档。请查看管理 → 运行诊断。');
-      }
-    }
+    const identity=traffic;
+    if(!runtimeFault)M.pulseAsync(s,traffic,{at:now,speed,budget:perf.budget,playing:playing&&!calculating,visible:!document.hidden}).then(result=>{if(identity!==traffic)return;computeMs=computeMs*.8+(result.clock?.ms||0)*.2;if(result.clock?.ok===false){setPlaying(false);toast('余额不足或贷款到期未偿还，运营已暂停。');}}).catch(error=>{if(identity!==traffic)return;runtimeFault=error.message;setPlaying(false);toast('运营计算异常，已暂停并保留上次存档。');});
     if (playing && now - lastDots >= 1000 / (lodLevel === 'full' ? perf.fps : Math.min(perf.fps, 12))) {
       const at = performance.now();
       renderDots();
@@ -2602,7 +2578,7 @@
           paint: paintMs,
           trains: traffic.trains.length,
           stations: new Set(s.services.flatMap(l => l.stops)).size,
-          pending: simulationClock.pending
+          pending: traffic.nativeClock?.pending||0
         }
       }));
       lastPerf = now;
@@ -2615,127 +2591,22 @@
     const f = region === 'gba' ? display(B.project(22.95, 113.55, region)) : cfg.focus;
     flyTo(f.x, f.y, region === 'gba' ? 2.3 : innerWidth < 650 ? 12 : 8, 540);
   }
-  let centerWorker = null,
-    centerJob = null,
-    centerJobId = 0,
-    centerForecastSent = null,
-    centerVersion = 0,
-    lastCenterWall = -Infinity,
-    centerRendered = null,
-    centerError = '';
-
-  function releaseCenterWorker() {
-    if (centerJob) clearTimeout(centerJob.timer);
-    centerJob = null;
-    if (centerWorker) {
-      centerWorker.onmessage = centerWorker.onerror = null;
-      centerWorker.terminate();
-      centerWorker = null;
-    }
-    centerForecastSent = null;
+  let centerJob=null,centerRendered=null,centerError='';
+  const centerPoll=RailBootstrap.platform('create',{timeout:45000});
+  function releaseCenterWorker(){centerJob=null;}
+  function centerRows(force=false){
+    const stale=!centerAnalysis||centerAnalysis.state!==s||centerAnalysis.forecast!==forecast;
+    if(RailBootstrap.platform('poll',{id:centerPoll,at:performance.now(),busy:!!centerJob,force,stale,failed:!!centerError}))requestCenter();
+    return centerAnalysis?.state===s&&centerAnalysis.forecast===forecast?centerAnalysis.rows:[];
   }
-
-  function centerRows(force = false) {
-    const now = performance.now(),
-      stale = !centerAnalysis || centerAnalysis.state !== s || centerAnalysis.forecast !== forecast;
-    if (!centerJob && (force || stale && !centerError || now - lastCenterWall >= 10000)) requestCenter();
-    return centerAnalysis?.state === s && centerAnalysis.forecast === forecast ? centerAnalysis.rows : [];
-  }
-
-  function requestCenter() {
-    const id = ++centerJobId,
-      state = s,
-      prediction = forecast,
-      revision = networkRevision,
-      atMinute = traffic.minute;
-    centerJob = {
-      id,
-      state,
-      prediction,
-      revision
-    };
-    lastCenterWall = performance.now();
-    centerError = '';
-
-    function fail(message) {
-      if (centerJob?.id !== id) return;
-      clearTimeout(centerJob.timer);
-      centerJob = null;
-      centerError = message;
-      centerForecastSent = null;
-      if (centerWorker) {
-        centerWorker.terminate();
-        centerWorker = null;
-      }
-      if (overview) renderOverview(false, true);
-    }
-    if(M.nativeRuntime(traffic)){
-      const identity=traffic;
-      M.diagnoseAsync(traffic).then(result=>{
-        if(centerJob?.id!==id||identity!==traffic)return;
-        centerJob=null;
-        if(result.editRevision!==M.editRevision(traffic)||result.cityRevision!==s.urban.revision){if(overview)requestCenter();return;}
-        centerAnalysis={state:s,forecast,minute:result.minute,revision:result.revision,rows:OC.project(s,result.bundle.rows),metrics:result.bundle.metrics,ms:result.ms};
-        if(overview&&!utilityPanel&&!centerReview&&!document.activeElement?.matches('#overview-panel input,#overview-panel select'))renderOverview(true);
-      }).catch(error=>fail(error.message));
-      return;
-    }
-    try {
-      if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=72');
-        centerForecastSent = null;
-      }
-      centerWorker.onerror = e => fail(e.message || '后台诊断不可用');
-      centerWorker.onmessage = ({
-        data: m
-      }) => {
-        if (centerJob?.id !== m.id) return;
-        clearTimeout(centerJob.timer);
-        if (m.error) {
-          fail(m.error);
-          return;
-        }
-        centerJob = null;
-        if (state !== s || prediction !== forecast || revision !== networkRevision) {
-          if (overview) requestCenter();
-          return;
-        }
-        centerAnalysis = {
-          state,
-          forecast: prediction,
-          minute: atMinute,
-          rows: m.rows,
-          metrics: m.metrics,
-          ms: m.ms
-        };
-        if (overview && !utilityPanel && !centerReview && !document.activeElement?.matches(
-            '#overview-panel input,#overview-panel select')) renderOverview(true);
-      };
-      const snapshot = RailDiagnosticSnapshot.capture(s, traffic);
-      const slim = snapshot.state;
-      const runtime = snapshot.runtime;
-      const changed = centerForecastSent !== forecast;
-      if (changed) centerVersion++;
-      centerWorker.postMessage({
-        id,
-        version: centerVersion,
-        state: slim,
-        runtime,
-        ...(changed ? {
-          forecast: {
-            ...RailForecastCatalog.transport(forecast),
-            population: forecast.population,
-            catchment: {
-              covered: forecast.catchment?.covered || 0
-            }
-          }
-        } : {})
-      });
-      centerForecastSent = forecast;
-      centerJob.timer = setTimeout(() => fail('后台诊断超时，请重试；列车和乘客继续运行。'), 45000);
-    } catch (e) {
-      fail(e.message);
-    }
+  function requestCenter(){
+    const identity=traffic,job=M.diagnoseAsync(identity);centerJob=job;centerError='';
+    job.then(result=>{
+      if(centerJob!==job||identity!==traffic)return;centerJob=null;
+      if(result.editRevision!==M.editRevision(traffic)||result.cityRevision!==s.urban.revision){if(overview)requestCenter();return;}
+      centerAnalysis={state:s,forecast,minute:result.minute,revision:result.revision,rows:OC.project(s,result.bundle.rows),metrics:result.bundle.metrics,ms:result.ms};
+      if(overview&&!utilityPanel&&!centerReview&&!document.activeElement?.matches('#overview-panel input,#overview-panel select'))renderOverview(true);
+    }).catch(error=>{if(centerJob!==job)return;centerJob=null;centerError=error.message;if(overview)renderOverview(false,true);});
   }
 
   function patchCenterPanel(panel, markup) {
@@ -2967,7 +2838,7 @@
       s.services.length ? '尚未建设线路' : !open.length ? '非运营时段' : !available.length ? '运营线路未投放列车' : !d
       .activeProfiles ? '暂无可达出行需求' : demandState.status === 'updating' ? '后台更新中' : '客流模型运行中';
     return memoryDiagnostics() +
-      `<div class="record-hero"><span>浏览器本机模拟 · ${demandClient.active?'Worker 后台计算':'主线程备用计算'}</span><strong style="font-size:24px">${label}</strong><div>第 ${Q.day(traffic.minute)} 天 · ${clock(traffic.minute)}</div></div>${!open.length&&s.services.length?`<p class="metrics-notice">当前没有线路处于运营时段。最近开行：${esc(nextOpening.name)} · ${clock(nextOpening.open)}（${nextOpening.wait} 游戏分钟后）${traffic.trains.length?'；末班列车仍在完成本次运行。':'；收班后列车、候车和车上人数归零属于正常情况。'}</p>`:''}${runtimeFault||demandState.error?`<p class="save-error">${esc(runtimeFault||demandState.error)}</p>`:''}<div class="section-title">需求与运行</div>${[['预测出行组合（非人数）',num(d.profiles)],['有需求的出行组合',num(d.activeProfiles)],['基础日需求',num(d.daily)+' 人次 / 日'],['已实际使用的出行组合',num(d.storedProfiles)],['运营时段内线路',open.length+' / '+s.services.length],['已投放车辆的运营线路',available.length],['在线列车',traffic.trains.length],['本局累计尝试出行',num(traffic.generated)],['本局累计上车（含换乘）',num(traffic.boarded)],['本局累计完成出行',num(traffic.completed)],['此刻候车 / 车上',num(O.summary(traffic).waiting)+' / '+num(O.summary(traffic).onboard)],['最近预测更新（非乘客刷新）',demandState.updatedAt===null?'—':clock(demandState.updatedAt)]].map(([k,v])=>`<div class="detail-row"><span>${k}</span><b>${v}</b></div>`).join('')}<div class="section-title">分线运营时间</div>${s.services.map(l=>`<button data-line="${esc(l.id)}" class="detail-row insight-link"><span>${esc(l.name)} · ${clock(l.open)}—${l.close===1440?'24:00':clock(l.close)}</span><b>${RailOperations.isOpen(l,traffic.minute)?F.planned(l,traffic.minute)>0?'运营中':'未投放列车':'已收班 / 未开行'}</b></button>`).join('')}<button id="retry-demand" class="insight-link">重新计算客流</button><p class="station-note">客流在本机浏览器计算，没有独立客流服务器。非运营时段、停运或暂停时，候车与车上人数可能正常归零；游戏日07:00切换，今日累计会重置。需求档案采用按实际到达创建的方式保存，不因预测超过6万条清零。重算失败会保留上次需求；已受旧版错误影响的存档刷新后会重新接入当前需求，历史缺失数据不补造。运营计算若抛出异常会暂停，避免自动覆盖上次成功存档。</p>`;
+      `<div class="record-hero"><span>浏览器本机模拟 · ${demandClient.active?'Worker 后台计算':'后台计算已暂停'}</span><strong style="font-size:24px">${label}</strong><div>第 ${Q.day(traffic.minute)} 天 · ${clock(traffic.minute)}</div></div>${!open.length&&s.services.length?`<p class="metrics-notice">当前没有线路处于运营时段。最近开行：${esc(nextOpening.name)} · ${clock(nextOpening.open)}（${nextOpening.wait} 游戏分钟后）${traffic.trains.length?'；末班列车仍在完成本次运行。':'；收班后列车、候车和车上人数归零属于正常情况。'}</p>`:''}${runtimeFault||demandState.error?`<p class="save-error">${esc(runtimeFault||demandState.error)}</p>`:''}<div class="section-title">需求与运行</div>${[['预测出行组合（非人数）',num(d.profiles)],['有需求的出行组合',num(d.activeProfiles)],['基础日需求',num(d.daily)+' 人次 / 日'],['已实际使用的出行组合',num(d.storedProfiles)],['运营时段内线路',open.length+' / '+s.services.length],['已投放车辆的运营线路',available.length],['在线列车',traffic.trains.length],['本局累计尝试出行',num(traffic.generated)],['本局累计上车（含换乘）',num(traffic.boarded)],['本局累计完成出行',num(traffic.completed)],['此刻候车 / 车上',num(O.summary(traffic).waiting)+' / '+num(O.summary(traffic).onboard)],['最近预测更新（非乘客刷新）',demandState.updatedAt===null?'—':clock(demandState.updatedAt)]].map(([k,v])=>`<div class="detail-row"><span>${k}</span><b>${v}</b></div>`).join('')}<div class="section-title">分线运营时间</div>${s.services.map(l=>`<button data-line="${esc(l.id)}" class="detail-row insight-link"><span>${esc(l.name)} · ${clock(l.open)}—${l.close===1440?'24:00':clock(l.close)}</span><b>${RailOperations.isOpen(l,traffic.minute)?F.planned(l,traffic.minute)>0?'运营中':'未投放列车':'已收班 / 未开行'}</b></button>`).join('')}<button id="retry-demand" class="insight-link">重新计算客流</button><p class="station-note">客流在本机浏览器计算，没有独立客流服务器。非运营时段、停运或暂停时，候车与车上人数可能正常归零；游戏日07:00切换，今日累计会重置。需求档案采用按实际到达创建的方式保存，不因预测超过6万条清零。重算失败会保留上次需求；已受旧版错误影响的存档刷新后会重新接入当前需求，历史缺失数据不补造。运营计算若抛出异常会暂停，避免自动覆盖上次成功存档。</p>`;
   }
 
   function dailyContent() {
@@ -3546,7 +3417,7 @@
     try {
     prepared=RailBootstrap.prepareStart({region});
     nextState=prepared.state;nextForecast=C.evaluate(nextState,{compact:true});
-    nextTraffic=O.create(nextState,nextForecast);if(!M.nativeRuntime(nextTraffic)){REVIEW.init(nextState,nextTraffic);Q.updateSatisfaction(nextState,nextTraffic);}
+    nextTraffic=O.create(nextState,nextForecast);
     RailBootstrap.commitStart(prepared.token);
     } catch(error){if(prepared)try{RailBootstrap.cancelStart(prepared.token);}catch{}if(nextTraffic)O.dispose(nextTraffic);setPlaying(wasPlaying);toast('新游戏准备失败，当前进度已保留：'+error.message);return;}
     const fresh=prepared;

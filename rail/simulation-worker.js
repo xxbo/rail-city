@@ -9,7 +9,7 @@
     send=(data,transfer)=>parentPort.postMessage(data,transfer);
     listen=fn=>parentPort.on('message',fn);
   }else{
-    importScripts('value-wire.js?v=67', 'bootstrap-wasm.js?v=72','routing-wasm.js?v=72','forecast-catalog.js?v=72');Core=self.RailRouting;Bootstrap=self.RailBootstrap;Catalog=self.RailForecastCatalog;
+    importScripts('value-wire.js?v=67', 'bootstrap-wasm.js?v=73','routing-wasm.js?v=73','forecast-catalog.js?v=73');Core=self.RailRouting;Bootstrap=self.RailBootstrap;Catalog=self.RailForecastCatalog;
     send=(data,transfer)=>self.postMessage(data,transfer);
     listen=fn=>{self.onmessage=e=>fn(e.data);};
   }

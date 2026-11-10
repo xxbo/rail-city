@@ -1,9 +1,9 @@
 /* Presentation only: explicit state inputs; no DOM, storage or simulation writes. */
 (function(root) {
   'use strict';
+  const VM=typeof module!=='undefined'&&module.exports?require('./view-model'):root.RailViewModel;
 
   function create({
-    Q,
     X,
     F,
     OC,
@@ -27,13 +27,8 @@
     }
 
     function satisfaction(s, rows) {
-      const scored = rows.filter(r => r.satisfaction !== null),
-        total = scored.reduce((v, r) => v + Math.max(0, r.stats.riders), 0),
-        weight = r => total ? Math.max(0, r.stats.riders) / total : 1 / Math.max(1, scored.length),
-        average = scored.reduce((v, r) => v + r.satisfaction * weight(r), 0),
-        scores = Object.fromEntries(Object.keys(Q.WEIGHTS).map(k => [k, scored.reduce((v, r) => v + (Q.line(
-          s, r.id).scores?.[k] ?? r.satisfaction) * weight(r), 0)]));
-      return `<section class="center-satisfaction"><div class="section-title">乘客满意度总览<small>${total?'按预测客流加权':'按线路平均'}</small></div><div class="satisfaction-network"><strong>${scored.length?(average*100).toFixed(1):'—'}<small> / 100</small></strong><span>${scored.filter(r=>r.satisfaction<.6).length} 条低于60分 · ${scored.filter(r=>r.satisfaction>=.85).length} 条达到85分</span></div><details class="console-details"><summary>全网评分构成</summary><div class="satisfaction-overview-factors">${Object.entries(Q.LABELS).map(([k,label])=>`<span>${label}<b>${scored.length?Math.round(scores[k]*100):'—'}</b></span>`).join('')}</div></details></section>`;
+      const model=VM.query('center',{state:{ridership:{model:s.ridership?.model,lines:s.ridership?.lines}},rows}), {total,average,scores}=model;
+      return `<section class="center-satisfaction"><div class="section-title">乘客满意度总览<small>${total?'按预测客流加权':'按线路平均'}</small></div><div class="satisfaction-network"><strong>${model.count?(average*100).toFixed(1):'—'}<small> / 100</small></strong><span>${model.low} 条低于60分 · ${model.high} 条达到85分</span></div><details class="console-details"><summary>全网评分构成</summary><div class="satisfaction-overview-factors">${Object.entries(VM.labels).map(([k,label])=>`<span>${label}<b>${model.count?Math.round(scores[k]*100):'—'}</b></span>`).join('')}</div></details></section>`;
     }
 
     function reviewContent(rows, centerReview) {

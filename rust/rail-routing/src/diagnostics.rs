@@ -64,28 +64,10 @@ pub(super) fn patterns(l: &V) -> V {
         ])])
     }
 }
-#[cfg(target_arch = "wasm32")]
-#[link(wasm_import_module = "rail_host")]
-extern "C" {
-    fn json_utf8(input: *const f64, len: usize, output: *mut u8, capacity: usize) -> usize;
+pub(super) fn json(v:&V)->String{
+    crate::json_codec::encode(v).expect("native diagnostic JSON exceeds codec limits")
 }
-pub(super) fn json(v: &V) -> String {
-    #[cfg(target_arch = "wasm32")]
-    unsafe {
-        let data = value::write(v);
-        let len = json_utf8(data.as_ptr(), data.len(), std::ptr::null_mut(), 0);
-        let mut bytes = vec![0; len];
-        assert_eq!(
-            json_utf8(data.as_ptr(), data.len(), bytes.as_mut_ptr(), len),
-            len
-        );
-        return String::from_utf8(bytes).unwrap();
-    }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        format!("{v:?}")
-    }
-}
+
 fn sig(l: &V) -> V {
     text(&json(&arr(["dispatch", "patterns", "stops", "trackIds"]
         .iter()

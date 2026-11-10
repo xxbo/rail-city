@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "stage": "P3-8-source",
+  "imports": {
+    "rail_math": {
+      "cos": "system IEEE-754 primitive; bootstrap and native geometry",
+      "exp": "system IEEE-754 primitive; native demand/temporal kernels",
+      "log": "system IEEE-754 primitive; native demand kernels",
+      "hypot": "system IEEE-754 primitive; native geometry",
+      "sin": "system IEEE-754 primitive; native geometry",
+      "acos": "system IEEE-754 primitive; native geometry",
+      "atan2": "system IEEE-754 primitive; native geometry",
+      "log1p": "system IEEE-754 primitive; native demand kernels",
+      "pow": "system IEEE-754 primitive; native demand kernels",
+      "random": "external entropy primitive; draws and model RNG transitions are selected and owned in Rust",
+      "now": "monotonic observation for native work budgets, never game-time advancement"
+    }
+  },
+  "ports": {
+    "Worker": "create/terminate/postMessage/event forwarding; leases, request identities, invalidation and unknown commit policy in platform.rs",
+    "Timer": "schedule/cancel a native-selected timeout and report ticket/epoch",
+    "IndexedDB": "transaction and compare-and-write primitives; persistence policy in persistence.rs",
+    "Storage": "read/set/compare-and-remove primitives; serialization and cleanup authorization in Rust",
+    "File": "choose/read/download bytes; format and bounds in Rust",
+    "DOM": "layout, text, locale formatting, presentation filters, screen geometry and interpolation"
+  },
+  "mathReplacement": "Keep system primitives for current floating-point parity. Replacing implementations requires independent deterministic comparison before adoption.",
+  "hostJson": "Removed from current Rust diagnostic/signature path; no rail_host.json_utf8 import in current source. Frozen artifacts retain their historical ABI."
+}

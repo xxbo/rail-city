@@ -250,4 +250,4 @@ impl RuntimeOwner{
     }
 }
 #[no_mangle]
-pub extern "C" fn runtime_session_abi()->u32{5}
+pub extern "C" fn runtime_session_abi()->u32{6}

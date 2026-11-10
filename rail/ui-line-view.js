@@ -1,11 +1,11 @@
 /* Presentation only: explicit state inputs; no DOM, storage or simulation writes. */
 (function(root) {
   'use strict';
+  const VM=typeof module!=='undefined'&&module.exports?require('./view-model'):root.RailViewModel;
 
   function create({
     F,
     X,
-    Q,
     V,
     currency,
     num,
@@ -100,10 +100,10 @@
     }
 
     function cultivationCard(s, l) {
-      const r = Q.line(s, l.id),
+      const r = VM.query('line',{state:{ridership:{model:s.ridership?.model,lines:{[l.id]:s.ridership?.lines[l.id]}}},target:l.id}),
         scores = r.scores || {},
         observed = r.observations || {};
-      return `<section class="cultivation-card satisfaction-card"><div><b>乘客满意度</b><strong>${((r.satisfaction??.7)*100).toFixed(1)}<small> / 100</small></strong></div><div class="cultivation-track"><i style="width:${(r.satisfaction??.7)*100}%"></i></div><p>客流系数 ×${r.factor.toFixed(2)} · 本线单日最高 ${num(r.bestDay||0)} 人次</p><details class="console-details satisfaction-breakdown"><summary>查看评分构成</summary><div class="satisfaction-factors">${Object.entries(Q.WEIGHTS).map(([k,w])=>`<div><span>${Q.LABELS[k]}<small> ${Math.round(w*100)}%</small></span><i><b style="width:${(scores[k]??.7)*100}%"></b></i><strong>${Math.round((scores[k]??.7)*100)}</strong></div>`).join('')}</div></details><small>按当前计划与实际运营估算，非真实问卷。候车约 ${(observed.wait||0).toFixed(1)} 分钟 · 平均车载 ${Math.round((observed.load||0)*100)}% · 拒入 ${Math.round((observed.loss||0)*100)}%。满意度在运营中平滑变化，影响到站客流；不再按开通天数自动增长。</small></section>`;
+      return `<section class="cultivation-card satisfaction-card"><div><b>乘客满意度</b><strong>${((r.satisfaction??.7)*100).toFixed(1)}<small> / 100</small></strong></div><div class="cultivation-track"><i style="width:${(r.satisfaction??.7)*100}%"></i></div><p>客流系数 ×${r.factor.toFixed(2)} · 本线单日最高 ${num(r.bestDay||0)} 人次</p><details class="console-details satisfaction-breakdown"><summary>查看评分构成</summary><div class="satisfaction-factors">${Object.entries(r.weights).map(([k,w])=>`<div><span>${VM.labels[k]}<small> ${Math.round(w*100)}%</small></span><i><b style="width:${(scores[k]??.7)*100}%"></b></i><strong>${Math.round((scores[k]??.7)*100)}</strong></div>`).join('')}</div></details><small>按当前计划与实际运营估算，非真实问卷。候车约 ${(observed.wait||0).toFixed(1)} 分钟 · 平均车载 ${Math.round((observed.load||0)*100)}% · 拒入 ${Math.round((observed.loss||0)*100)}%。满意度在运营中平滑变化，影响到站客流；不再按开通天数自动增长。</small></section>`;
     }
 
     function content({
