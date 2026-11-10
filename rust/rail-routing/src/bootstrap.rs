@@ -813,7 +813,7 @@ fn terrain_custom(base: &V, p: &V) -> V {
     }
     best
 }
-fn buildable_input(s: &V, p: &V, base: &V) -> bool {
+pub(super) fn buildable_input(s: &V, p: &V, base: &V) -> bool {
     if !finite(p.get("x"))
         || !finite(p.get("y"))
         || p.num("x") < 25.0
@@ -1096,7 +1096,7 @@ fn asset_mutate(s: &mut V, op: &str) {
     );
     apply(s, &out);
 }
-fn urban_call(op: usize, s: &V, extra: Vec<(&'static str, V)>) -> V {
+pub(super) fn urban_call(op: usize, s: &V, extra: Vec<(&'static str, V)>) -> V {
     let mut v = obj(&[
         ("state", s.clone()),
         ("types", raw().get("facilityTypes").clone()),

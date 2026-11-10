@@ -660,6 +660,17 @@ fn compact_city(mut view: V, u: &V) -> V {
     }
     view
 }
+pub(super) fn development_summary(s:&V)->V{
+    let u=s.get("urban");let d=u.get("development");if !d.truth(){return V::Null;}
+    let stations=stations(s);let mut projects=vec![];
+    for p in d.get("projects").array(){let mut row=p.clone();let day=((u.num("lastMinute")-d.num("started"))/1440.0).max(0.0);let age=day-p.num("startDay");let released=release(u,p);
+        let mut near=stations.iter().map(|s|object([("id",s.get("id").clone()),("name",s.get("name").clone()),("walk",n(dist(s,p)*1.25)),("service",s.get("service").clone())])).collect::<Vec<_>>();near.sort_by(|a,b|a.num("walk").total_cmp(&b.num("walk")));let nearest=near.first().cloned().unwrap_or(V::Null);let served=near.iter().any(|s|s.num("walk")<=0.8&&s.num("service")==1.0);
+        let mut population=0.0;let mut jobs=0.0;for(_,cell)in u.get("cells").entries(){if dist(cell,p)<=p.num("radius"){population+=cell.num("r");jobs+=cell.num("c")+cell.num("i");}}
+        let walk=if nearest.get("walk").truth(){nearest.num("walk")}else{0.0};for(k,v)in [("day",n(day)),("age",n(age)),("release",n(released)),("label",text(if age<0.0{"筹备中"}else if age<6.0{"启动建设"}else if age<18.0{"持续建设"}else{"成熟片区"})),("until",n((-age).ceil().max(0.0))),("nearest",nearest),("served",V::Bool(served)),("population",n(population)),("jobs",n(jobs)),("priority",n(released*if served{0.15}else{1.0}/(1.0+walk/6.0)))]{row.set(k,v);}projects.push(row);
+    }
+    projects.sort_by(|a,b|b.num("priority").total_cmp(&a.num("priority")).then_with(||a.num("startDay").total_cmp(&b.num("startDay"))));let budget=budgets(u);
+    object([("projects",V::Array(projects)),("daily",V::Object(USES.iter().enumerate().map(|(i,k)|(k.to_string(),n(budget[i]))).collect())),("last",d.get("last").clone()),("started",d.get("started").clone())])
+}
 pub(super) fn run(op: usize, v: &V) -> V {
     let s = v.get("state");
     let mut u = s.get("urban").clone();
@@ -1040,6 +1051,16 @@ pub(super) fn run(op: usize, v: &V) -> V {
                 ("priority", n(priority)),
             ])
         }
+        16 => development_summary(s),
+        17 | 18 => {
+            if op==18&&!v.num("minute").is_finite(){return object([("error",text("INVALID_URBAN_TIME"))]);}
+            let mut world=s.clone();let mut growth=0.0;let mut changed=false;
+            if !world.get("urban").num("lastMinute").is_finite(){return object([("error",text("INVALID_URBAN_CLOCK"))]);}
+            loop{if op==18&&(!world.get("urban").truth()||v.num("minute")-world.get("urban").num("lastMinute")<360.0-1e-7){break;}
+                match crate::runtime_business::city_step(&mut world,v.get("base")){Ok(value)=>{growth+=value;changed=true;},Err(error)=>return object([("error",text(error))])}if op==17{break;}
+            }
+            object([("urban",world.get("urban").clone()),("growth",n(growth)),("changed",V::Bool(changed))])
+        },
         _ => panic!("unknown urban transaction"),
     }
 }

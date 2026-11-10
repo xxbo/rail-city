@@ -219,9 +219,11 @@
   function signature(s) {return (node?require('./save-wasm'):root.RailSave).run('signature',{state:s});}
   const api = {
     command,
+    forecastBeginAsync:(rt,blocked)=>Runtime.forecastBegin(rt,blocked),forecastFinishAsync:(rt,ticket,success)=>Runtime.forecastFinish(rt,ticket,success),
+    invalidateForecastAsync:rt=>Runtime.forecastInvalidate(rt),diagnoseAsync:(rt,query)=>Runtime.diagnose(rt,query),observeAsync:(rt,id)=>Runtime.observe(rt,id),forecastQueryAsync:(rt,query,args)=>Runtime.forecastQuery(rt,query,args),
     changeAsync:(s,rt,operation,undo=false)=>Runtime.has(rt)?Runtime.command(rt,operation,undo).then(out=>({...out.result,quote:out.quote,undoToken:out.undoToken})):Promise.resolve(change(s,operation)),
     previewAsync:(s,rt,operation)=>Runtime.has(rt)?Runtime.preview(rt,operation):Promise.resolve(preview(s,operation)),
-    undoAsync:(rt,token)=>Runtime.undo(rt,token),replaceDemandAsync:(rt,forecast,revision)=>Runtime.replaceDemand(rt,forecast,revision),editRevision:rt=>Runtime.editRevision(rt),
+    undoAsync:(rt,token)=>Runtime.undo(rt,token),replaceDemandAsync:(rt,forecast,revision,ticket)=>Runtime.replaceDemand(rt,forecast,revision,ticket),editRevision:rt=>Runtime.editRevision(rt),
     init,
     validate,
     quote,

@@ -337,6 +337,9 @@ impl Calendar {
             p += 8 + if f[p + 7] != 0.0 { 16 } else { 0 };
         }
     }
+    pub(super) fn refresh_feedback(&mut self,now:f64,q:&crate::queues::Queues,order:&[usize],cache:&mut crate::operations::CoverageCache){
+        let frame=self.feedback_frame(now,0.0,q,order);let result=crate::operations::run_cached(&frame,cache);let mut prepared=vec![1.0,result.len()as f64,0.0,0.0];prepared.extend(result);self.save_feedback(&prepared,now);
+    }
     fn dispatch_frame(&self, now: f64, q: &crate::queues::Queues, order: &[usize]) -> Vec<f64> {
         if !self
             .departures
@@ -482,15 +485,15 @@ pub(super) fn run_owned(
             if queue_state.as_mut().unwrap().roll_day(next) {
                 fin[15] = 0.0;
             }
-            // Day archiving can precede the next sampling gate. Let the host
-            // reload its new statistics day before any native state is changed.
+            // Legacy traced callers may reload statistics. Owned runtimes archive
+            // days in roll_day; an invalid owned slot is an invariant failure.
             if next>=420.0 && queue_state
                 .as_mut()
                 .unwrap()
                 .finance_stats()
                 .map_or(false, |stats| !stats.can_advance_slot(next))
             {
-                reason = 1.0;
+                reason = if request.trace{1.0}else{6.0};
                 break;
             }
             let (carry, interval) = crate::operations::generation(cal.carry, dt);

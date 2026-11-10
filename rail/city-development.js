@@ -34,52 +34,7 @@
   function allocate(s, before, updates) {
     const v=native(9,s,{before,updates});for(const [key,c]of Object.entries(v.updates))Object.assign(updates[key],c);s.urban.development.last=v.last;return v.added;
   }
-  const summaryCache = new WeakMap();
-
-  function summary(s, stations) {
-    const u = s.urban,
-      d = u?.development;
-    if (!d) return null;
-    const key = stations.map(n => n.id + ':' + n.name + ':' + n.x + ':' + n.y + ':' + n.service).join(','),
-      cached = summaryCache.get(u);
-    if (cached?.revision === u.revision && cached.key === key) return cached.value;
-    const cells = Object.values(u.cells),
-      projects = d.projects.map(p => {
-        const stage = phase(s, p),
-          near = stations.map(n => ({
-            id: n.id,
-            name: n.name,
-            walk: distance(n, p) * 1.25,
-            service: n.service
-          })).sort((a, b) => a.walk - b.walk),
-          nearest = near[0],
-          served = near.some(n => n.walk <= .8 && n.service === 1),
-          nearby = cells.filter(c => distance(c, p) <= p.radius),
-          population = nearby.reduce((a, c) => a + c.r, 0),
-          jobs = nearby.reduce((a, c) => a + c.c + c.i, 0);
-        return {
-          ...p,
-          ...stage,
-          nearest,
-          served,
-          population,
-          jobs,
-          priority: stage.release * (served ? .15 : 1) / (1 + (nearest?.walk || 0) / 6)
-        };
-      }).sort((a, b) => b.priority - a.priority || a.startDay - b.startDay),
-      value = {
-        projects,
-        daily: budgets(s),
-        last: d.last,
-        started: d.started
-      };
-    summaryCache.set(u, {
-      revision: u.revision,
-      key,
-      value
-    });
-    return value;
-  }
+  function summary(s){return (typeof module!=='undefined'&&module.exports?require('./transactions-wasm'):root.RailTransactions).run(16,{state:{urban:s.urban,services:s.services,nodes:s.nodes}});}
   const api = {
     VERSION,
     KINDS,

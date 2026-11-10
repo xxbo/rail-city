@@ -28,7 +28,7 @@
     "rail/city-development.js": {
       "role": "domain",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust development budgets, allocation and summary; startup compatibility enable adapter remains"
     },
     "rail/city.js": {
       "role": "domain",
@@ -206,7 +206,7 @@
     "rail/management.js": {
       "role": "domain",
       "phase": "P3-3",
-      "owner": "Rust RuntimeOwner for modern runs and atomic structured edits; callback and legacy adapters remain P3-6"
+      "owner": "Rust RuntimeOwner for modern runs, edit transactions, city/observations and prediction scheduling; legacy adapters P3-6"
     },
     "rail/map-detail.js": {
       "role": "ui",
@@ -241,7 +241,7 @@
     "rail/operations-review.js": {
       "role": "domain",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust review lifecycle; default UI observe and due sampling use RuntimeOwner, cold compatibility adapter remains"
     },
     "rail/operations-wasm.js": {
       "role": "domain",
@@ -653,7 +653,7 @@
     "rail/urban-growth.js": {
       "role": "domain",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation",
+      "owner": "Rust atomic city step/advance, terrain and growth; legacy automatic-enable/candidate adapters retained for P3-6",
       "overrides": {
         "init": {
           "role": "platform",
@@ -701,9 +701,9 @@
     },
     "rail/runtime-wasm.js": {
       "role": "platform",
-      "phase": "P3-4 bridge",
+      "phase": "P3-5 bridge",
       "owner": "Rust RuntimeOwner and clock; detached view and RPC transport",
-      "bridgeDisposition": "Serial RPC and detached committed-view projection. Commands, quotation, payment, rerouting, active identity remapping and undo ownership are Rust session transactions. City/review scheduling remains P3-5; persistence P3-7; transport lifecycle P3-8."
+      "bridgeDisposition": "Serialized native commands/queries, Worker messages and detached view application. Rust owns city/observation deadlines, growth, land decisions, forecast jobs and acceptance, diagnostics and statistics. Persistence remains P3-7; lifecycle policies P3-8."
     }
   }
 }

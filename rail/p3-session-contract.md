@@ -84,3 +84,20 @@ node scripts/run_rail_tests.cjs
 editRevision仅标识编辑/目录提交；模拟步进使用运行revision，持续pulse不使后台预测因时间前进而失效。成功命令保留128条有序请求回执；重试先查询回执，再检查修订。同号异参拒绝。回执重放携带当前批准视图，避免旧视图覆盖新状态；规则拒绝返回错误，下一请求可用新编号重试。
 
 运行区的完整值物化只在Rust内部候选构造、重映射及撤销检查点使用，编辑事务返回运行摘要；既有存档快照接口仍开放供P3-7接管。Worker启动交接使用创建结果。对外手写JS桥接负责消息及显示投影。
+
+
+## P3-5业务调度与只读投影（源码，待验收）
+
+运行ABI为3。pulse/advance在Rust内部消化城市与观察到期边界，`syncBoundary`宿主写回入口退出默认路径。批次保留平台预算及财务暂停语义。
+
+| action | 请求 | 响应 |
+| --- | --- | --- |
+| forecastInvalidate | id | 标记当前预测需要更新，供手动重算 |
+| forecastBegin | id、blocked | Rust判断是否需要任务；返回ticket、expectedEditRevision与原生快照 |
+| demand | 原P3-4字段及forecastTicket、forecastView | 校验编辑/城市/阶段凭据，接受目录及其展示元数据 |
+| forecastFinish | id、ticket、success | 结束对应任务；失败保持dirty，旧ticket不清除新任务 |
+| observe | id、eventId | 使用权威世界及实际运行数据创建观察，返回批准的观察投影 |
+| diagnose | id、可选query=alerts | 同一arena中的诊断/报警与来源revision、editRevision、cityRevision、minute |
+| forecastQuery | id、query=summary/connections、可选stations | 当前接纳目录与满意度上的查询投影及来源修订 |
+
+城市和观察发布标记仅在对外含runtime的响应推进；内部审查/诊断读取不消耗标记。城市更新时返回worldPatch.urban与runtime.businessView.development，观察更新时返回worldPatch.operationsReview，避免普通pulse重复传送城市。预测脏状态随runtime.forecastStatus发布，JS计时器只唤醒任务请求。

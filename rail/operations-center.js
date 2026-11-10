@@ -17,5 +17,5 @@ function project(s,rows){return rows.map(r=>{const suggestions=r.suggestions.map
 function analyze(s,f,rt){return project(s,native().run(s,'analyze',{},rt,f));}
 function bundle(s,f,rt){const out=native().run(s,'diagnose',{},rt,f);return {rows:project(s,out.rows),metrics:out.metrics};}
 const signature=l=>native().run({},'signature',{line:l}),resize=(patterns,total)=>native().run({},'resize',{patterns,total}),dispatchValues=(line,offPeak,peak)=>native().run({},'dispatch',{line,offPeak,peak}),capacity=(s,line,minute,prepared)=>new Map(native().run(s,'capacity',{line,minute,prepared})),peakRatio=(d,c,share)=>native().run({},'ratio',{demand:[...d],capacity:[...c],share}),preview=(s,row)=>native().run(s,'preview',{row});
-const api={analyze,bundle,preview,signature,dispatchValues,resize,capacity,peakRatio,PEAK:.18,OFF:.06,TARGET:.8};if(node)module.exports=api;else root.RailOperationsCenter=api;
+const api={project,analyze,bundle,preview,signature,dispatchValues,resize,capacity,peakRatio,PEAK:.18,OFF:.06,TARGET:.8};if(node)module.exports=api;else root.RailOperationsCenter=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

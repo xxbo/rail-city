@@ -28,7 +28,7 @@ struct Catalog {
     graph: Rc<V>, hubs: Rc<V>, effective: bool,
     flows: Vec<f64>, contracts: Vec<f64>, fp: Vec<usize>, cp: Vec<usize>,
     revision: u64, changed: BTreeMap<usize,u64>,
-    views: VecDeque<(bool,usize,Rc<V>)>, summary: Option<(Vec<u64>,Rc<V>)>,
+    views: VecDeque<(bool,usize,Rc<V>)>, summary: Option<(Vec<u64>,Rc<V>)>, diagnostics:Option<Vec<crate::diagnostics::Flow>>,
 }
 impl Catalog {
     fn load(dto: &V) -> Option<Self> {
@@ -56,7 +56,7 @@ impl Catalog {
             if p+2>end{return None;} let shares=cursor(&contracts,p)?;p=p.checked_add(2)?.checked_add(shares.checked_mul(2)?)?;
             if p!=end{return None;}
         }
-        Some(Self {graph:Rc::new(graph.clone()),hubs:Rc::new(dto.get("hubs").clone()),effective:dto.get("effective").truth(),flows,contracts,fp,cp,revision:0,changed:BTreeMap::new(),views:VecDeque::new(),summary:None})
+        Some(Self {graph:Rc::new(graph.clone()),hubs:Rc::new(dto.get("hubs").clone()),effective:dto.get("effective").truth(),flows,contracts,fp,cp,revision:0,changed:BTreeMap::new(),views:VecDeque::new(),summary:None,diagnostics:None})
     }
     fn count(&self)->usize{self.fp.len()}
     fn descriptor(&self,id:u64)->V{obj(&[("id",n(id as f64)),("count",n(self.count() as f64)),("revision",n(self.revision as f64))])}
@@ -123,6 +123,13 @@ pub(super) struct ForecastOwner {
     service_cache:VecDeque<(Vec<u64>,Vec<f64>)>,
 }
 impl ForecastOwner {
+    pub(super) fn diagnose(&mut self,id:u64,input:&V)->V{
+        if input.get("op").text()=="alerts"{return crate::diagnostics::query_owned(input,&V::Missing,&[]);}
+        let Some(c)=self.catalogs.get_mut(&id)else{return fault("FORECAST_EXPIRED")};
+        let meta=obj(&[("graph",(*c.graph).clone()),("count",n(c.count()as f64)),("compact",boolean(true))]);
+        if c.diagnostics.is_none(){c.diagnostics=Some(crate::diagnostics::decode_owned(&meta,&c.flows));}
+        crate::diagnostics::query_owned(input,&meta,c.diagnostics.as_ref().unwrap())
+    }
     pub(super) fn retain(&mut self,id:u64)->Result<(),String>{if !self.catalogs.contains_key(&id){return Err("FORECAST_EXPIRED".into());}*self.pins.entry(id).or_default()+=1;Ok(())}
     pub(super) fn release_owned(&mut self,id:u64){if let Some(count)=self.pins.get_mut(&id){*count=count.saturating_sub(1);if *count==0{self.pins.remove(&id);if self.deferred_release.remove(&id){self.catalogs.remove(&id);}}}}
     fn next(&mut self)->Option<u64>{if self.serial>=MAX_SAFE{None}else{self.serial+=1;Some(self.serial)}}
@@ -186,7 +193,7 @@ impl ForecastOwner {
         if op=="select" {
             let Some(source)=self.catalogs.get(&id)else{return fault("FORECAST_EXPIRED")};let mut flows=vec![];let mut contracts=vec![input.get("indices").array().len() as f64];
             for ix in input.get("indices").array(){let Some(i)=unsigned(ix).filter(|i|*i<source.count())else{return fault("INVALID_CATALOG_INDEX")};let a=source.fp[i];let b=source.fp.get(i+1).copied().unwrap_or(source.flows.len());flows.extend_from_slice(&source.flows[a..b]);let a=source.cp[i];let size=source.contracts[a-1] as usize;contracts.push(size as f64);contracts.extend_from_slice(&source.contracts[a..a+size]);}
-            let c=Catalog{graph:source.graph.clone(),hubs:source.hubs.clone(),effective:source.effective,fp:offsets(&flows,contracts[0] as usize,false).unwrap(),cp:offsets(&contracts,contracts[0] as usize,true).unwrap(),flows,contracts,revision:0,changed:BTreeMap::new(),views:VecDeque::new(),summary:None};
+            let c=Catalog{graph:source.graph.clone(),hubs:source.hubs.clone(),effective:source.effective,fp:offsets(&flows,contracts[0] as usize,false).unwrap(),cp:offsets(&contracts,contracts[0] as usize,true).unwrap(),flows,contracts,revision:0,changed:BTreeMap::new(),views:VecDeque::new(),summary:None,diagnostics:None};
             let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);return out;
         }
         let Some(c)=self.catalogs.get_mut(&id)else{return fault("FORECAST_EXPIRED")};
@@ -218,7 +225,7 @@ impl ForecastOwner {
         if compile{let key=frame.iter().map(|n|n.to_bits()).collect::<Vec<_>>();let data=if let Some(i)=self.service_cache.iter().position(|(k,_)|*k==key){let item=self.service_cache.remove(i).unwrap();let data=item.1.clone();self.service_cache.push_front(item);data}else{let data=crate::services::run(&frame);self.service_cache.push_front((key,data.clone()));self.service_cache.truncate(2);data};out.set("data",numeric(&data));}out
     }
 }
-fn snapshot(state:&V)->V {
+pub(super) fn snapshot(state:&V)->V {
     let mut result=state.clone();for k in ["ridership","economy","operationsReview","log"]{del(&mut result,k);}
     let e=state.get("economy");result.set("economy",if e.truth(){obj(&[("minute",e.get("minute").clone())])}else{V::Missing});
     let q=state.get("ridership");result.set("ridership",if q.truth(){obj(&[("version",q.get("version").clone()),("model",q.get("model").clone()),("lines",q.get("lines").clone())])}else{V::Missing});result

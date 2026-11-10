@@ -247,7 +247,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=69') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=70') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -273,9 +273,7 @@
   demandState.status='ready';demandState.updatedAt=traffic.minute;
   if(runtimePolicy.rebase)await M.replaceDemandAsync(traffic,forecast);
   delete forecast.preparedDefinitions;
-  Q.updateSatisfaction(s, traffic);
-  REVIEW.init(s, traffic);
-  REVIEW.ready(s, traffic.minute);
+  if(!M.nativeRuntime(traffic)){Q.updateSatisfaction(s,traffic);REVIEW.init(s,traffic);REVIEW.ready(s,traffic.minute);}
   let urbanForecastRevision = s.urban.revision;
   let cityCells = C.world(s).cells.map(c => ({
     ...c,
@@ -701,12 +699,7 @@
     return result || true;
   }
 
-  function forecastStamp(){return {network:networkRevision,city:s.urban.revision,demand:s.urban.step};}
-  function scheduleForecast() {
-    RailBootstrap.forecast('invalidate',{stamp:forecastStamp()});
-    if (forecastTimer) clearTimeout(forecastTimer);
-    forecastTimer = setTimeout(refreshUrbanDemand, 120);
-  }
+  function scheduleForecast(){if(!forecastTimer&&!urbanJob)forecastTimer=setTimeout(refreshUrbanDemand,120);}
 
   function setPane(id, visible) {
     const el = $(id);
@@ -852,20 +845,21 @@
     urbanDrawRevision = s.urban.revision;
   }
   async function refreshUrbanDemand() {
-    const job=RailBootstrap.forecast('begin',{background:true,state:s,stamp:forecastStamp()});
-    if(job.busy)return;
-    forecastTimer = null;
-    urbanJob = true;
+    forecastTimer=null;
+    const identity=traffic;let job,submitted=false;urbanJob=true;
+    try{job=await M.forecastBeginAsync(identity,calculating||importing);}catch(error){urbanJob=false;demandState.status="error";demandState.error=error.message;return;}
+    if(!job.needed||identity!==traffic){urbanJob=false;return;}
     memoryAudit.record('demand-start', s, forecast, traffic, saveQueue);
-    const urbanRevision=s.urban.revision,editRevision=M.editRevision(traffic);
+    const urbanRevision=s.urban.revision;
     demandState.status = 'updating';
     $('calculation-status').hidden = false;
     $('calculation-status').textContent = '需求后台更新中' + (playing ? ' · 运营继续' : '');
     try {
       const next = await calculate(s,job.snapshot);
       await M.whenIdle(traffic);
-      if(!RailBootstrap.forecast('accept',{ticket:job.ticket,stamp:forecastStamp(),busy:calculating}).accepted)return;
-      await M.replaceDemandAsync(traffic,next,editRevision);
+      if(identity!==traffic)return;
+      await M.replaceDemandAsync(traffic,next,job.expectedEditRevision,job.ticket);
+      submitted=true;
       delete next.preparedDefinitions;
       demandState.status = 'ready';
       demandState.error = '';
@@ -875,7 +869,6 @@
       urbanForecastRevision = urbanRevision;
       centerAnalysis = null;
       centerRendered = null;
-      Q.updateSatisfaction(s, traffic);
       save();
       if (overview && !document.activeElement?.matches('#overview-panel input,#overview-panel select'))
         renderOverview();
@@ -883,6 +876,8 @@
         renderPanel();
       updateHUD();
     } catch (error) {
+      if(identity!==traffic)return;
+      if(['FORECAST_JOB_STALE','EDIT_REVISION_CONFLICT'].includes(error.message)){demandState.status='updating';return;}
       demandState.status = 'error';
       demandState.error = error.message;
       console.warn('Demand update', error);
@@ -892,7 +887,7 @@
         scheduleForecast();
       }, 10000);
     } finally {
-      const completion=RailBootstrap.forecast('finish',{ticket:job.ticket,stamp:forecastStamp()});
+      let completion={dirty:false};if(identity===traffic)try{completion=await M.forecastFinishAsync(identity,job.ticket,submitted);}catch(error){demandState.status="error";demandState.error=error.message;}
       urbanJob = false;
       if (!calculating) $('calculation-status').hidden = true;
       if (completion.dirty) scheduleForecast();
@@ -945,12 +940,12 @@
 
   function urbanContent() {
     const t = C.world(s).totals,
-      d = U.developmentSummary(s);
+      d = (M.nativeRuntime(traffic)?traffic.businessView?.development:U.developmentSummary(s));
     return `<div class="urban-hero development-hero"><span>城市建设总览</span><strong>${num(t.people)}<small>居民</small></strong><p>${num(t.jobs)} 岗位 · ${s.urban.facilities.length} 处市政目的地</p></div><div class="development-tabs" role="tablist" aria-label="城市建设分类"><button role="tab" tabindex="${urbanTab==='development'?0:-1}" aria-selected="${urbanTab==='development'}" data-urban-tab="development">发展机会</button><button role="tab" tabindex="${urbanTab==='facilities'?0:-1}" aria-selected="${urbanTab==='facilities'}" data-urban-tab="facilities">市政接驳</button></div>${urbanTab==='facilities'?facilityListContent():d?`<div class="section-title">区域开发新增上限<small>全图共享 · 游戏参数</small></div><div class="development-budget"><span>居民<b>+${num(d.daily.r)}</b></span><span>商业岗位<b>+${num(d.daily.c)}</b></span><span>产业岗位<b>+${num(d.daily.i)}</b></span></div>${d.last?`<p class="development-recent">上一建设轮 · 新增 ${num(d.last.added.r)} 居民 / ${num(d.last.added.c+d.last.added.i)} 岗位</p>`:''}<div class="section-title">近期发展机会<small>启动与未接驳片区优先</small></div><div class="development-list">${d.projects.slice(0,6).map(developmentCard).join('')}</div><details class="development-more"><summary>其余 ${Math.max(0,d.projects.length-6)} 个片区</summary><div class="development-list">${d.projects.slice(6).map(developmentCard).join('')}</div></details><details class="map-source"><summary>城市增长规则</summary><p>每6个游戏小时建设一次，新增人口和岗位由全图共享上限分配，未使用额度不囤积。片区分阶段启动，开发方向、市政和轨道条件决定增长位置；有上限不代表一定用满；学校、医院等系统设施的固定岗位另行计入。已有城区保留，新增车站不再各自无限吸引人口。地点借用本地地名，方向、时间和参数均为游戏模拟，不是真实规划公告。</p></details>`:'<p>此存档尚未建立发展机会。</p>'}`;
   }
 
   function developmentContent(id) {
-    const d = U.developmentSummary(s),
+    const d = (M.nativeRuntime(traffic)?traffic.businessView?.development:U.developmentSummary(s)),
       p = d?.projects.find(p => p.id === id);
     if (!p) return '<button id="back-to-urban">返回城市总览</button>';
     const k = U.developmentKinds[p.kind];
@@ -1029,8 +1024,14 @@
     return `<p class="station-note">站内候车 ≥85% 或出现站外排队时报警；≥95% 为严重。线路最高满载 ≥90% 且有候车，或理论疏散时间 ≥10 分钟时报警。疏散时间按当前双向运力粗估，不是实际等待时间。</p>${alarms.map(a=>`<button class="alarm-card ${a.level}" ${a.type==='station'?`data-alert-station="${a.id}"`:`data-line="${a.id}"`}><span>${a.level==='critical'?'严重':'预警'} · ${a.type==='station'?'车站':'线路'}</span><b>${esc(a.name)}</b><small>${esc(a.message)}</small></button>`).join('')||'<div class="alarm-empty">当前没有客流超载报警</div>'}<p class="station-note">客流恢复后自动解除，不弹窗、不暂停运营。</p>`;
   }
 
-  function updateAlarms() {
-    alarms = A.evaluate(s, traffic);
+  let alarmRequest=null;
+  function updateAlarms(){
+    if(M.nativeRuntime(traffic)){
+      if(!alarmRequest){const identity=traffic;alarmRequest=M.diagnoseAsync(traffic,'alerts').then(result=>{if(identity===traffic&&result.editRevision===M.editRevision(traffic)){alarms=A.project(result.bundle);paintAlarms();}}).catch(error=>console.warn('Alert query',error)).finally(()=>{alarmRequest=null;});}
+    }else{alarms=A.evaluate(s,traffic);}
+    paintAlarms();
+  }
+  function paintAlarms() {
     const b = $('alarms-toggle');
     b.classList.toggle('alarm-active', alarms.length > 0);
     htmlIfChanged(b, '客流报警' + (alarms.length ? ' <span>' + alarms.length + '</span>' : ''));
@@ -1377,7 +1378,7 @@
       renderMap();
       drawDensity();
     }
-    if (s.urban.revision !== urbanForecastRevision && !calculating && !urbanJob && !forecastTimer)
+    if (traffic.forecastStatus?.dirty && !traffic.forecastStatus.busy && !calculating && !urbanJob && !forecastTimer)
       scheduleForecast();
     updateAlarms();
     if (traffic.minute - lastForecastRefresh >= 60 && !mode && !dispatchDirty && !document.activeElement
@@ -1633,7 +1634,7 @@
     if (calculating) return;
     if (mode === 'plan') {
       const p = V.resolve(s, point);
-      const result = await commit(M.command('facility','plan',{kind:facilityKind,point:p,land:U.buildable(s,C.create(region),p)}),
+      const result = await commit(M.command('facility','plan',{kind:facilityKind,point:p}),
         '市政设施已建成，周边开发倾向已更新。');
       if (result) {
         mode = null;
@@ -1700,8 +1701,7 @@
       return;
     }
     if (b.dataset.reviewObserve) {
-      REVIEW.observe(s, traffic, b.dataset.reviewObserve);
-      if (demandState.status === 'ready') REVIEW.ready(s, traffic.minute);
+      await M.observeAsync(traffic,b.dataset.reviewObserve);
       save();
       renderActivity();
       return;
@@ -1916,6 +1916,7 @@
         inspect('diagnostics', null);
         break;
       case 'retry-demand':
+        await M.invalidateForecastAsync(traffic);
         scheduleForecast();
         toast('已安排后台重算，现有列车与乘客保留。');
         break;
@@ -2706,9 +2707,20 @@
       }
       if (overview) renderOverview(false, true);
     }
+    if(M.nativeRuntime(traffic)){
+      const identity=traffic;
+      M.diagnoseAsync(traffic).then(result=>{
+        if(centerJob?.id!==id||identity!==traffic)return;
+        centerJob=null;
+        if(result.editRevision!==M.editRevision(traffic)||result.cityRevision!==s.urban.revision){if(overview)requestCenter();return;}
+        centerAnalysis={state:s,forecast,minute:result.minute,revision:result.revision,rows:OC.project(s,result.bundle.rows),metrics:result.bundle.metrics,ms:result.ms};
+        if(overview&&!utilityPanel&&!centerReview&&!document.activeElement?.matches('#overview-panel input,#overview-panel select'))renderOverview(true);
+      }).catch(error=>fail(error.message));
+      return;
+    }
     try {
       if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=69');
+        centerWorker = new Worker('operations-worker.js?v=70');
         centerForecastSent = null;
       }
       centerWorker.onerror = e => fail(e.message || '后台诊断不可用');
@@ -2926,7 +2938,16 @@
 
   let stationForecastCache = null;
 
+  let stationForecastRequest=null;
   function stationForecast(id) {
+    if(M.nativeRuntime(traffic)){
+      const hour=Math.floor(traffic.minute/60),revision=M.editRevision(traffic),city=s.urban.revision;
+      if(!stationForecastRequest&&(!stationForecastCache||stationForecastCache.revision!==revision||stationForecastCache.city!==city||stationForecastCache.hour!==hour)){
+        const identity=traffic;stationForecastRequest=M.forecastQueryAsync(traffic,'summary').then(result=>{if(identity!==traffic||result.editRevision!==M.editRevision(traffic)||result.cityRevision!==s.urban.revision)return;stationForecastCache={revision:result.editRevision,city:result.cityRevision,hour,entries:result.projection.entries};if(inspection?.type==='station')renderActivity();}).catch(error=>console.warn('Station forecast',error)).finally(()=>{stationForecastRequest=null;});
+      }
+      return stationForecastCache?.entries[id]||{entry:0,exit:0};
+    }
+
     const hour = Math.floor(traffic.minute / 60);
     if (!stationForecastCache || stationForecastCache.forecast !== forecast || stationForecastCache
       .hour !== hour) {
@@ -3605,7 +3626,7 @@
     try {
     prepared=RailBootstrap.prepareStart({region});
     nextState=prepared.state;nextForecast=C.evaluate(nextState,{compact:true});
-    nextTraffic=O.create(nextState,nextForecast);REVIEW.init(nextState,nextTraffic);Q.updateSatisfaction(nextState,nextTraffic);
+    nextTraffic=O.create(nextState,nextForecast);if(!M.nativeRuntime(nextTraffic)){REVIEW.init(nextState,nextTraffic);Q.updateSatisfaction(nextState,nextTraffic);}
     RailBootstrap.commitStart(prepared.token);
     } catch(error){if(prepared)try{RailBootstrap.cancelStart(prepared.token);}catch{}if(nextTraffic)O.dispose(nextTraffic);setPlaying(wasPlaying);toast('新游戏准备失败，当前进度已保留：'+error.message);return;}
     const fresh=prepared;

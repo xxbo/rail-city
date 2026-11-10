@@ -91,24 +91,9 @@
     const keys=new Set(Object.keys(s.urban.cells));for(const p of native(12,s))if(buildable(s,base,p))keys.add(Math.floor(p.x/SIZE)+':'+Math.floor(p.y/SIZE));return [...keys].slice(0,24000);
   }
 
-  function step(s, base) {
-    init(s);const first=native(0,s);adopt(s.urban,first.urban);
-    const keys=new Set(Object.keys(s.urban.cells));
-    for(const p of first.points)if(buildable(s,base,p))keys.add(Math.floor(p.x/SIZE)+':'+Math.floor(p.y/SIZE));
-    const result=native(1,s,{keys:[...keys].slice(0,24000),metadata:base.metadata});
-    adopt(s.urban,result.urban);cache.set(s.urban,{revision:s.urban.revision,city:cityProjection(s,result.city)});return result.growth;
-  }
-
-  function advance(s, base, minute) {
-    if (!s.urban) return false;
-    const u = s.urban;
-    let changed = false;
-    while (minute - u.lastMinute >= STEP - 1e-7) {
-      step(s, base);
-      changed = true;
-    }
-    return changed;
-  }
+  function cityTransaction(s,base,op,minute){const T=node?require('./transactions-wasm'):root.RailTransactions,B=node?require('./bootstrap-wasm'):root.RailBootstrap;init(s);const geo=B.geo(base),result=T.run(op,{state:s,...(geo.base?{base:geo.base}:{}),minute});if(result.error)throw Error(result.error);adopt(s.urban,result.urban);cache.delete(s.urban);return result;}
+  function step(s,base){return cityTransaction(s,base,17).growth;}
+  function advance(s,base,minute){if(!s.urban)return false;return cityTransaction(s,base,18,minute).changed;}
 
   function city(s, base) {
     if(!s.urban)return base;const prior=cache.get(s.urban);if(prior?.revision===s.urban.revision)return prior.city;

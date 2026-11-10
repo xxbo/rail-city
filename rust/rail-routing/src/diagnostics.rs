@@ -1334,6 +1334,8 @@ impl From<f64> for V {
         V::Number(v)
     }
 }
+pub(super) fn decode_owned(meta:&V,data:&[f64])->Vec<Flow>{let mut decoded=vec![];flows(meta,data,|f|decoded.push(f));decoded}
+pub(super) fn query_owned(input:&V,meta:&V,data:&[Flow])->V{run(input,meta,data,&crate::bootstrap::config())}
 #[no_mangle]
 pub extern "C" fn diagnostic_abi() -> u32 {
     1

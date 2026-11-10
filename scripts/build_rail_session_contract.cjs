@@ -4,6 +4,6 @@ const root=path.resolve(__dirname,'..'),crate=path.join(root,'rust/rail-routing'
 for(const args of [['build','--locked','--release','--target','wasm32-unknown-unknown']]){
  const r=spawnSync(cargo,[...args,'--manifest-path',path.join(crate,'Cargo.toml')],{cwd:crate,stdio:'inherit',env:{...process.env,CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS:'-C link-arg=--max-memory=268435456'}});if(r.status!==0)process.exit(r.status||1);
 }
-const bytes=fs.readFileSync(path.join(crate,'target/wasm32-unknown-unknown/release/rail_routing.wasm')),target=path.join(__dirname,'fixtures/rail-session-contract-v5.wasm');
+const bytes=fs.readFileSync(path.join(crate,'target/wasm32-unknown-unknown/release/rail_routing.wasm')),target=path.join(__dirname,'fixtures/rail-session-contract-v6.wasm');
 if(process.argv.includes('--check')){if(!fs.readFileSync(target).equals(bytes))throw Error('Session prototype is not the pinned source build');}else fs.writeFileSync(target,bytes);
 console.log(JSON.stringify({scope:'P3-3 runtime/session ABI; previous artifacts preserved',bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')}));
