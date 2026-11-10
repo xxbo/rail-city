@@ -1,6 +1,8 @@
 //! Deterministic metro routing and demand kernels with versioned f64-array ABIs.
 //! Heap tie order, tolerances and arithmetic order intentionally match the frozen JS oracle.
 mod assets;
+mod json_codec;
+mod persistence;
 mod calendar;
 mod runtime_control;
 mod runtime_seed;

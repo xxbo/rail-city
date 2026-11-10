@@ -45,123 +45,43 @@
           tx.onabort = () => reject(tx.error || Error('存档读取中断。'));
         });
       },
-      async put(key, value) {
+      async put(key, value, expected) {
         const db = await open();
         return new Promise((resolve, reject) => {
           const tx = db.transaction('saves', 'readwrite');
-          tx.objectStore('saves').put(value, key);
+          const store=tx.objectStore('saves'), read=store.get(key);
+          let conflict=false;
+          read.onsuccess=()=>{if(expected!==undefined&&(read.result?.text??null)!==expected){conflict=true;tx.abort();}else store.put(value,key);};
           tx.oncomplete = () => resolve();
           tx.onerror = () => reject(tx.error || Error('存档写入失败。'));
-          tx.onabort = () => reject(tx.error || Error('存档写入已中止，旧存档保留。'));
+          tx.onabort = () => reject(Error(conflict?'COMMIT_CONFLICT':(tx.error?.message||'COMMIT_ABORTED')));
         });
       }
     };
   }
 
-  function create(adapter, legacy, serialize = value => JSON.stringify(value)) {
-    let tail = Promise.resolve();
-    async function read(key) {
-      await tail.catch(() => {});
-      let old = null;
-      try {
-        old = legacy?.getItem(key);
-      } catch {}
-      try {
-        const record = await adapter.get(key);
-        if (record) {
-          if (typeof record.text !== 'string') throw Error('本地数据库存档格式无效。');
-          return {
-            text: record.text,
-            source: 'indexeddb',
-            bytes: record.bytes,
-            savedAt: record.savedAt
-          };
-        }
-        return old ? {
-          text: old,
-          source: 'legacy'
-        } : null;
-      } catch (error) {
-        if (old) return {
-          text: old,
-          source: 'legacy',
-          error
-        };
-        throw error;
-      }
-    }
-
-    function write(key, value, legacyText = null) {
-      let prepared;
-      try {
-        prepared = typeof value === 'string' ? value : serialize(value);
-      } catch (error) {
-        return Promise.reject(error);
-      }
-      const ready = Promise.resolve(prepared).then(text => {
-        if (typeof text !== 'string') throw Error('存档内容无效。');
-        return {
-          text,
-          bytes: new Blob([text]).size,
-          savedAt: Date.now()
-        };
-      });
-      // Attach a rejection handler immediately, even if an earlier database write is pending.
-      ready.catch(() => {});
-      const task = tail.catch(() => {}).then(async () => {
-        const record = await ready;
-        await adapter.put(key, record);
-        if (legacyText !== null) try {
-          if (legacy?.getItem(key) === legacyText) legacy.removeItem(key);
-        } catch {}
-        return {
-          source: 'indexeddb',
-          bytes: record.bytes,
-          savedAt: record.savedAt
-        };
-      });
-      tail = task;
-      return task;
-    }
-
-    return {
-      read,
-      write,
-      flush: () => tail
-    };
+  const native=(action,args)=>(typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).persistence(action,args);
+  function create(adapter,legacy){
+    let queue;
+    const writes=()=>queue||(queue=(typeof module!=='undefined'&&module.exports?require('./save-queue'):root.RailSaveQueue).create({coalesce:false}));
+    const legacyRead=key=>{try{return legacy?.getItem(key)??null;}catch{return null;}};
+    async function read(key){await writes().flush();let record,failed=false;try{record=await adapter.get(key);native('storageObserved',{key,text:record?.text??null});}catch{failed=true;}return native('read',{record,legacy:legacyRead(key),failed});}
+    function writeRecord(key,record,legacyText=null){return writes().request(async()=>{
+      if(!native('storageExpected',{key}).known){const old=await adapter.get(key);native('storageObserved',{key,text:old?.text??null});}
+      await adapter.put(key,record,native('storageExpected',{key}).text);native('storageObserved',{key,text:record.text});
+      const result=native('committed',{record:{bytes:record.bytes,savedAt:record.savedAt},legacy:legacyText,currentLegacy:legacyRead(key)});
+      if(result.cleanup)try{legacy.removeItem(key);}catch{}
+      return result;
+    });}
+    function write(key,value,legacyText=null){const record=native('prepareWrite',{value,at:Date.now()});return writeRecord(key,record,legacyText);}
+    function records(key,value,state,checkpoint){const result=native('records',{raw:legacyRead(key),value,state,checkpoint});return result;}
+    function persistRecords(key,value,state){const result=records(key,value,state);try{legacy?.setItem(key,result.text);}catch{}return result.value;}
+    return {read,write,writeRecord,records,persistRecords,flush:()=>writes().flush()};
   }
-
-  function workerSerializer() {
-    const Client = typeof module !== 'undefined' && module.exports ? require('./worker-client') : root
-      .RailWorkerClient;
-    const client = Client.create({
-      createWorker: () => typeof root.Worker === 'function' ? new root.Worker('save-worker.js?v=38') :
-        null,
-      timeout: 30000,
-      timeoutMessage: '后台存档超时，旧存档保留。',
-      errorMessage: '后台存档编码失败，旧存档保留。',
-      fallback: ({
-        value
-      }) => ({
-        text: JSON.stringify(value)
-      })
-    });
-    // Preserve synchronous capture when Workers are unavailable: state may mutate
-    // before the database queue reaches this checkpoint.
-    return value => typeof root.Worker !== 'function' ? JSON.stringify(value) :
-      client.request({
-        value
-      }).then(message => message.text);
-  }
-  const node = typeof module !== 'undefined' && module.exports;
-  let legacy = null;
-  try {
-    legacy = root.localStorage;
-  } catch {}
-  const api = create(indexedAdapter(root.indexedDB), legacy, node ? undefined : workerSerializer());
-  api.create = create;
-  api.indexedAdapter = indexedAdapter;
-  api.workerSerializer = workerSerializer;
-  if (node) module.exports = api;
-  else root.RailSaveStore = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+  function workerSerializer(){return value=>Promise.resolve(native('encode',{value}).text);}
+  const node=typeof module!=='undefined'&&module.exports;
+  let legacy=null;try{legacy=root.localStorage;}catch{}
+  const api=create(indexedAdapter(root.indexedDB),legacy);
+  Object.assign(api,{create,indexedAdapter,workerSerializer});
+  if(node)module.exports=api;else root.RailSaveStore=api;
+})(typeof globalThis!=='undefined'?globalThis:this);

@@ -1,75 +1,13 @@
-/* Bound automatic checkpoint work before snapshotting or encoding large game state. */
-(function(root) {
-  'use strict';
-
-  function create() {
-    let active = null,
-      pending = null,
-      started = 0,
-      coalesced = 0,
-      completed = 0,
-      failed = 0;
-
-    function start(factory, waiting = null) {
-      started++;
-      const task = Promise.resolve().then(factory);
-      active = task;
-      if (waiting) task.then(waiting.resolve, waiting.reject);
-
-      function finish(ok) {
-        if (ok) completed++;
-        else failed++;
-        if (active !== task) return;
-        active = null;
-        const next = pending;
-        pending = null;
-        if (next) start(next.factory, next);
-      }
-      task.then(() => finish(true), () => finish(false));
-      return task;
-    }
-
-    function request(factory) {
-      if (typeof factory !== 'function') return Promise.reject(Error('Invalid save factory'));
-      if (!active) return start(factory);
-      coalesced++;
-      if (pending) {
-        pending.factory = factory;
-        return pending.promise;
-      }
-      let resolve, reject;
-      const promise = new Promise((yes, no) => {
-        resolve = yes;
-        reject = no;
-      });
-      pending = {
-        factory,
-        promise,
-        resolve,
-        reject
-      };
-      return promise;
-    }
-    return {
-      request,
-      async flush() {
-        while (active || pending) await (pending?.promise || active).catch(() => {});
-      },
-      stats() {
-        return {
-          active: !!active,
-          pending: !!pending,
-          started,
-          coalesced,
-          completed,
-          failed
-        };
-      }
-    };
-  }
-  const api = {
-    create
-  };
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  else root.RailSaveQueue = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+/* Promise transport for the Rust save scheduler. Native tickets select active,
+   pending and coalesced captures; JS only invokes the selected IO callback. */
+(function(root){'use strict';const node=typeof module!=='undefined'&&module.exports;
+const native=(action,args)=> (node?require('./bootstrap-wasm'):root.RailBootstrap).persistence(action,args);
+function create(options={}){
+  let id;const tasks=new Map(),queue=()=>id??(id=native('queueCreate',options));
+  function start(ticket){const task=tasks.get(ticket);Promise.resolve().then(task.factory).then(value=>finish(ticket,true,value),error=>finish(ticket,false,error));}
+  function finish(ticket,success,value){const task=tasks.get(ticket);tasks.delete(ticket);const next=native('queueFinish',{id:queue(),ticket,success,checkpoint:success?value:undefined}).next;if(success)task.resolve(value);else task.reject(value);if(next)start(next);}
+  function request(factory){const result=native('queueRequest',{id:queue()});let task=tasks.get(result.ticket);if(task){task.factory=factory;return task.promise;}task={factory};task.promise=new Promise((resolve,reject)=>{task.resolve=resolve;task.reject=reject;});tasks.set(result.ticket,task);if(result.start)start(result.ticket);return task.promise;}
+  return {request,async flush(){while(tasks.size)await Promise.allSettled([...tasks.values()].map(task=>task.promise));},stats:()=>native('queueStats',{id:queue()}),observe:at=>native('queueObserve',{id:queue(),at}),last:()=>native('queueLast',{id:queue()})};
+}
+const api={create};if(node)module.exports=api;else root.RailSaveQueue=api;
+})(typeof globalThis!=='undefined'?globalThis:this);

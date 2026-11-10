@@ -41,14 +41,12 @@
   });
   const saveQueue = RailSaveQueue.create(),
     memoryAudit = RailMemoryAudit.create();
-  const DB = RailSaveStore,
-    LS = RailLocalSave;
+  const DB = RailSaveStore;
   let runtimeFault = '',
     storageReadBlocked = false,
     legacySaveText = null,
     saveStatus = '尚未保存',
-    saveMeta = null,
-    lastSaveError = 0;
+    saveMeta = null;
   let insertIndex = null,
     pendingImport = null,
     importError = '',
@@ -163,17 +161,11 @@
     lastDensityPaint = 0,
     densityPaintTimer = null;
   const RECORD_KEY = cfg.recordsKey;
-  let personalRecords = {};
-  try {
-    const raw = JSON.parse(localStorage.getItem(RECORD_KEY) || '{}');
-    for (const k of Q.RECORD_FIELDS)
-      if (Number.isFinite(raw[k]) && raw[k] >= 0) personalRecords[k] = raw[k];
-  } catch {}
+  let personalRecords = DB.records(RECORD_KEY).value;
   let unlocked = new Set(Q.awards(personalRecords).filter(a => a.unlocked).map(a => a.id));
 
   function syncRecords() {
-    personalRecords = Q.mergeRecords(Q.mergeRecords(personalRecords, s.ridership?.records), INS.records(
-      s));
+    personalRecords = RailBootstrap.persistence('mergeRecords',{values:[personalRecords,traffic.personalRecords]});
     const added = [];
     for (const a of Q.awards(personalRecords))
       if (a.unlocked && !unlocked.has(a.id)) {
@@ -184,14 +176,7 @@
   }
 
   function persistRecords() {
-    try {
-      const other = JSON.parse(localStorage.getItem(RECORD_KEY) || '{}') || {},
-        safe = {};
-      for (const k of Q.RECORD_FIELDS)
-        if (Number.isFinite(other[k]) && other[k] >= 0) safe[k] = other[k];
-      personalRecords = Q.mergeRecords(personalRecords, safe);
-      localStorage.setItem(RECORD_KEY, JSON.stringify(personalRecords));
-    } catch {}
+    personalRecords=DB.persistRecords(RECORD_KEY,personalRecords);
   }
 
   let stationMenu = false,
@@ -201,7 +186,6 @@
     inspection = null,
     density = 'off',
     savedRuntime = null,
-    lastSave = 0,
     pauseBeforeDialog = false,
     utilityPanel = null,
     stationLine = null,
@@ -234,7 +218,7 @@
   if(stored?.source==='indexeddb'){saveMeta=stored;saveStatus='已从本地数据库恢复';}
   const startup=RailBootstrap.start({region,stored:RailBootstrap.decode(stored?.text),legacy6:RailBootstrap.decode(legacy6),legacy4:RailBootstrap.decode(legacy4),readError:readError||!!stored?.error});
   s=startup.state;playing=startup.playing;speed=startup.speed;savedRuntime=startup.runtime;
-  personalRecords=Q.mergeRecords(personalRecords,startup.records);
+  personalRecords=DB.records(RECORD_KEY,startup.records,s).value;
   storageReadBlocked=startup.blocked;storageOK=!startup.blocked;if(startup.status)saveStatus=startup.status;
   const migratedUrban=startup.migratedUrban,migratedFacilities=startup.migratedFacilities;
   unlocked = new Set(Q.awards(personalRecords).filter(a => a.unlocked).map(a => a.id));
@@ -247,7 +231,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=71') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=72') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -335,32 +319,14 @@
   }
   async function saveNow() {
     await M.whenIdle(traffic);
-    if(runtimeFault||M.lastError(traffic))return false;
-    if (runtimeFault) {
-      saveStatus = '运营异常，已暂停覆盖上次存档';
-      return false;
-    }
-    if (calculating || importing) return false;
-    if (storageReadBlocked) {
-      saveStatus = '读取受阻，请导入文件恢复或刷新重试';
-      return false;
-    }
+    if(!RailBootstrap.persistence('canSave',{fault:runtimeFault||M.lastError(traffic),blocked:storageReadBlocked,busy:calculating||importing||!!pendingImport}))return false;
     syncRecords();
-    persistRecords();
     try {
       memoryAudit.record('save-start', s, forecast, traffic, saveQueue);
-      const payload = {
-        gameVersion: 7,
-        runtimeVersion: 1,
-        playing,
-        speed,
-        personalRecords,
-        state: s,
-        runtime: await O.snapshotAsync(traffic),
-        signature: M.signature(s)
-      };
+      const payload=await RailRuntime.checkpoint(traffic,{playing,speed,personalRecords});
       saveStatus = '正在写入本地数据库…';
-      saveMeta = await DB.write(KEY, payload, legacySaveText);
+      saveMeta = await DB.writeRecord(KEY, payload, legacySaveText);
+      personalRecords=payload.personalRecords;persistRecords();
       memoryAudit.record('save-end', s, forecast, traffic, saveQueue);
       legacySaveText = null;
       storageOK = true;
@@ -370,9 +336,8 @@
     } catch (error) {
       storageOK = false;
       saveStatus = '保存失败，当前进度仍在内存';
-      if (Date.now() - lastSaveError > 30000) {
+      if (RailBootstrap.persistence('errorNotice',{at:Date.now()})) {
         toast('本地数据库保存失败，请先导出存档文件保留当前进度。');
-        lastSaveError = Date.now();
       }
       if (inspection?.type === 'saves') renderActivity();
       return false;
@@ -2620,10 +2585,7 @@
       paintMs = paintMs * .8 + (performance.now() - at) * .2;
       lastDots = now;
     }
-    if (now - lastSave > 10000) {
-      save();
-      lastSave = now;
-    }
+    if (saveQueue.observe(now)) save();
     lastFrame = now;
     if (now - lastHUD > perf.hud) {
       updateHUD();
@@ -2720,7 +2682,7 @@
     }
     try {
       if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=71');
+        centerWorker = new Worker('operations-worker.js?v=72');
         centerForecastSent = null;
       }
       centerWorker.onerror = e => fail(e.message || '后台诊断不可用');
@@ -3181,14 +3143,8 @@
   async function downloadLocalSave() {
     await M.whenIdle(traffic);
     syncRecords();
-    const data = LS.pack(s, await O.snapshotAsync(traffic), {
-        playing,
-        speed,
-        personalRecords
-      }),
-      url = URL.createObjectURL(new Blob([JSON.stringify(data)], {
-        type: 'application/json'
-      })),
+    const data=await RailRuntime.checkpoint(traffic,{playing,speed,personalRecords,exportedAt:new Date().toISOString()}),
+      url = URL.createObjectURL(new Blob([data.text], {type:'application/json'})),
       a = document.createElement('a');
     a.href = url;
     a.download = 'rail-' + region + '-' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
@@ -3199,80 +3155,47 @@
     toast('存档已生成，请查看浏览器下载。');
   }
   async function readLocalSave(file) {
-    if (!file) return;
-    importError = '';
-    pendingImport = null;
-    try {
-      if (file.size > LS.MAX_BYTES) throw Error('文件超过64MB。');
-      const next = LS.parse(await file.text());
-      if (!pendingImport) importResume = playing;
-      pendingImport = next;
-      setPlaying(false);
-    } catch (error) {
-      importError = error.message;
-    }
+    if(!file)return;
+    importError='';
+    if(!pendingImport)importResume=playing;
+    setPlaying(false);
+    try{
+      RailBootstrap.persistence('fileSize',{bytes:file.size});
+      if(pendingImport)await RailRuntime.cancelImport(traffic,pendingImport.token);
+      pendingImport=null;
+      await saveQueue.flush();
+      pendingImport=await RailRuntime.previewImport(traffic,await file.text());
+    }catch(error){importError=RailLocalSave.errorMessage(error);}
     renderActivity();
   }
-
-  function cancelLocalImport() {
-    pendingImport = null;
-    importError = '';
-    setPlaying(importResume);
-    renderActivity();
+  async function cancelLocalImport() {
+    try{if(pendingImport)await RailRuntime.cancelImport(traffic,pendingImport.token);}catch(error){importError=RailLocalSave.errorMessage(error);renderActivity();return;}
+    pendingImport=null;importError='';setPlaying(importResume);renderActivity();
   }
   async function applyLocalSave() {
-    if (!pendingImport || calculating) return;
-    const c = pendingImport;
-    calculating = true;
-    await M.whenIdle(traffic);
-    $('calculation-status').textContent = '正在校验并恢复存档…';
-    $('calculation-status').hidden = false;
-    try {
-      const next = await calculate(c.state);
-      if (c.runtime) {
-        const rt = O.restore(c.state, next, c.runtime);
-        if (!rt || Math.abs(rt.minute - c.state.economy.minute) > .01) throw Error(
-          '列车或乘客运行数据校验失败，当前进度未改变。');
-      }
-      const target = B.get(c.region);
-      let restoredRecords = Q.mergeRecords(c.personalRecords, c.region === region ? personalRecords :
-        {});
-      try {
-        const previous = await DB.read(target.saveKey);
-        if (previous?.text) restoredRecords = Q.mergeRecords(restoredRecords, LS.records(JSON.parse(
-          previous.text).personalRecords));
-      } catch {}
-      const payload = {
-        gameVersion: 7,
-        state: c.state,
-        runtime: c.runtime,
-        signature: c.signature,
-        runtimeVersion: 1,
-        speed: c.speed,
-        playing: false,
-        personalRecords: restoredRecords
-      };
-      try {
-        await saveQueue.flush();
-        await DB.write(target.saveKey, payload);
-      } catch {
-        throw Error('本地数据库写入失败，原进度未替换；请检查浏览器站点存储权限或磁盘空间。');
-      }
-      try {
-        const old = JSON.parse(localStorage.getItem(target.recordsKey) || '{}');
-        localStorage.setItem(target.recordsKey, JSON.stringify(Q.mergeRecords(LS.records(old), c
-          .personalRecords)));
-      } catch {}
-      importing = true;
-      const url = new URL(location.href);
-      url.searchParams.set('map', c.region);
-      url.searchParams.set('v', UI_VERSION);
-      location.assign(url.href);
-    } catch (error) {
-      importError = error.message;
-      calculating = false;
-      $('calculation-status').hidden = true;
-      renderActivity();
+    if(!pendingImport||calculating||importing)return;
+    const c=pendingImport,identity=traffic;
+    calculating=true;
+    $('calculation-status').textContent='正在校验并恢复存档…';
+    $('calculation-status').hidden=false;
+    let prepared,committed=false;
+    try{
+      await saveQueue.flush();
+      await M.whenIdle(identity);
+      const next=await calculate(c.state),target=B.get(c.region);
+      const previous=await DB.read(target.saveKey);
+      // The worker validates the retained candidate and freezes its origin
+      // before returning bytes. UI copies never become the restore authority.
+      prepared=await RailRuntime.prepareImport(identity,c.token,next,{previous:previous?.text,recordsRaw:DB.records(target.recordsKey).text,personalRecords});
+      await DB.writeRecord(prepared.saveKey,prepared,previous?.source==='legacy'?previous.text:null);
+      committed=true;
+      DB.persistRecords(prepared.recordsKey,prepared.personalRecords);
+      await RailRuntime.commitImport(identity,c.token).catch(()=>{});
+      importing=true;
+      const url=new URL(location.href);url.searchParams.set('map',c.region);url.searchParams.set('v',UI_VERSION);location.assign(url.href);
+    }catch(error){
+      if(!committed&&prepared)try{await RailRuntime.cancelImport(identity,c.token);}catch{}
+      importError=RailLocalSave.errorMessage(error);calculating=false;$('calculation-status').hidden=true;renderActivity();
     }
   }
 
@@ -3617,6 +3540,8 @@
   async function startNewGame() {
     const wasPlaying=playing;let prepared,nextTraffic,nextState,nextForecast;
     setPlaying(false);
+    await saveQueue.flush();
+    await DB.flush();
     await M.whenIdle(traffic);
     try {
     prepared=RailBootstrap.prepareStart({region});

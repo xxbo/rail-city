@@ -213,8 +213,18 @@ pub(super) fn signature(s: &V) -> V {
     text(&format!(
         "transit-city-v19|{}|{}",
         jsstring(s.get("region")),
-        crate::diagnostics::json(&data)
+        crate::json_codec::encode(&data).unwrap_or_else(|_| "invalid-save-signature".into())
     ))
+}
+// Historical JS encoders may choose exponential notation for the same f64.
+// Compare the ordered signature payload after native JSON decoding.
+fn signature_matches(saved:&V,s:&V)->bool{
+    let expected=signature(s);if eq(saved,&expected){return true;}
+    let prefix=format!("transit-city-v19|{}|",jsstring(s.get("region")));
+    let (Some(a),Some(b))=(saved.text().strip_prefix(&prefix),expected.text().strip_prefix(&prefix))else{return false;};
+    match (crate::json_codec::parse(a),crate::json_codec::parse(b)){
+        (Ok(a),Ok(b))=>match(crate::json_codec::encode(&a),crate::json_codec::encode(&b)){(Ok(a),Ok(b))=>a==b,_=>false},_=>false
+    }
 }
 fn numbers(v: &V, depth: usize, budget: &mut usize) -> u32 {
     *budget += 1;
@@ -720,7 +730,7 @@ fn accept(v: &V, cfg: &V, structure: &V) -> u32 {
         return 7;
     }
     if v.get("runtime").truth() {
-        if !eq(v.get("signature"), &signature(s)) {
+        if !signature_matches(v.get("signature"), s) {
             return 8;
         }
         if !header(s, v.get("runtime")) {
@@ -995,9 +1005,10 @@ fn checkpoint(v: &V, region: &V, cfg: &V) -> V {
     };
     let s = if kind > 0.0 { v.get("state") } else { v };
     let version = kind != 7.0 || !has(v, "runtimeVersion") || eq(v.get("runtimeVersion"), &n(1.0));
-    let valid = version && E::validate(s, cfg) && eq(s.get("region"), region);
+    let format = !has(v,"format") || v.get("format").text()=="rail-local-save" && v.num("formatVersion")==1.0;
+    let valid = version && format && E::validate(s, cfg) && eq(s.get("region"), region);
     let use_runtime =
-        valid && kind == 7.0 && v.get("runtime").truth() && eq(v.get("signature"), &signature(s));
+        valid && kind == 7.0 && v.get("runtime").truth() && signature_matches(v.get("signature"), s);
     let runtime_ok = !use_runtime || header(s, v.get("runtime"));
     obj(&[
         ("valid", boolean(valid && runtime_ok)),
@@ -1016,7 +1027,7 @@ pub(super) fn run(v: &V, cfg: &V) -> V {
         "catalogValid" => boolean(
             array(v.get("value"))
                 && v.get("value").array().iter().all(|j| {
-                    positive(at(j, &n(0.0))) && positive(at(j, &n(1.0))) && at(j, &n(2.0)).n() > 0.0
+                    positive(field(j, "daily", 0)) && positive(field(j, "fare", 1)) && if object(j){!legs(j).array().is_empty()}else{at(j, &n(2.0)).n() > 0.0}
                 }),
         ),
         "signature" => signature(s),

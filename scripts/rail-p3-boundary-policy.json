@@ -16,9 +16,9 @@
     },
     "rail/bootstrap-wasm.js": {
       "role": "platform",
-      "phase": "P3-2 bridge",
-      "owner": "Rust initialization/session/forecast transport",
-      "bridgeDisposition": "Only input marshalling, immutable-view caching and ABI forwarding. Initialization and data/model decisions execute in bootstrap.rs."
+      "phase": "P3-7 bridge",
+      "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+      "bridgeDisposition": "No game JSON parsing/encoding, envelope construction, migration, coalescing or cleanup policy in JavaScript. Platform transaction/CAS, Promise correlation and file/DOM calls remain for P3-8 binding consolidation."
     },
     "rail/bounded-cache.js": {
       "role": "domain",
@@ -176,9 +176,10 @@
       "owner": "Rust city/statistics/observation"
     },
     "rail/local-save.js": {
-      "role": "domain",
-      "phase": "P3-7",
-      "owner": "Rust save envelope/records/ordering/restore"
+      "role": "platform",
+      "phase": "P3-7 bridge",
+      "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+      "bridgeDisposition": "No game JSON parsing/encoding, envelope construction, migration, coalescing or cleanup policy in JavaScript. Platform transaction/CAS, Promise correlation and file/DOM calls remain for P3-8 binding consolidation."
     },
     "rail/management.js": {
       "role": "platform",
@@ -327,26 +328,28 @@
       }
     },
     "rail/save-queue.js": {
-      "role": "domain",
-      "phase": "P3-7",
-      "owner": "Rust save envelope/records/ordering/restore"
+      "role": "platform",
+      "phase": "P3-7 bridge",
+      "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+      "bridgeDisposition": "No game JSON parsing/encoding, envelope construction, migration, coalescing or cleanup policy in JavaScript. Platform transaction/CAS, Promise correlation and file/DOM calls remain for P3-8 binding consolidation."
     },
     "rail/save-store.js": {
       "role": "platform",
-      "phase": "P3-7",
-      "owner": "Rust persistence adapter",
-      "bridgeDisposition": "IndexedDB/Storage/Blob event forwarding only; cleanup, ordering and failures move to Rust"
+      "phase": "P3-7 bridge",
+      "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+      "bridgeDisposition": "No game JSON parsing/encoding, envelope construction, migration, coalescing or cleanup policy in JavaScript. Platform transaction/CAS, Promise correlation and file/DOM calls remain for P3-8 binding consolidation."
     },
     "rail/save-wasm.js": {
-      "role": "domain",
-      "phase": "P3-7",
-      "owner": "Rust save envelope/records/ordering/restore"
+      "role": "platform",
+      "phase": "P3-7 bridge",
+      "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+      "bridgeDisposition": "No game JSON parsing/encoding, envelope construction, migration, coalescing or cleanup policy in JavaScript. Platform transaction/CAS, Promise correlation and file/DOM calls remain for P3-8 binding consolidation."
     },
     "rail/save-worker.js": {
       "role": "platform",
-      "phase": "P3-7",
-      "owner": "Rust persistence adapter",
-      "bridgeDisposition": "IndexedDB/Storage/Blob event forwarding only; cleanup, ordering and failures move to Rust"
+      "phase": "P3-7 bridge",
+      "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+      "bridgeDisposition": "No game JSON parsing/encoding, envelope construction, migration, coalescing or cleanup policy in JavaScript. Platform transaction/CAS, Promise correlation and file/DOM calls remain for P3-8 binding consolidation."
     },
     "rail/service-plan.js": {
       "role": "domain",
@@ -582,9 +585,9 @@
     },
     "rail/runtime-wasm.js": {
       "role": "platform",
-      "phase": "P3-5 bridge",
-      "owner": "Rust RuntimeOwner and clock; detached view and RPC transport",
-      "bridgeDisposition": "Serialized native commands/queries, Worker messages and detached view application. Rust owns city/observation deadlines, growth, land decisions, forecast jobs and acceptance, diagnostics and statistics. Persistence remains P3-7; lifecycle policies P3-8."
+      "phase": "P3-7 bridge",
+      "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+      "bridgeDisposition": "No game JSON parsing/encoding, envelope construction, migration, coalescing or cleanup policy in JavaScript. Platform transaction/CAS, Promise correlation and file/DOM calls remain for P3-8 binding consolidation."
     }
   }
 }

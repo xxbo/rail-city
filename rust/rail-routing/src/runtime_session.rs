@@ -8,6 +8,7 @@ struct Arena{
 }
 struct Checkpoint{token:u64,world:V,saved:V,catalog:u64}
 struct Runtime{
+    record_lengths:Option<V>,persistence_epoch:u64,import_serial:u64,pending_import:Option<(u64,u64,V)>,import_fence:bool,
     seed:Seed,arena:Arena,token:f64,finance:Vec<f64>,clock:crate::runtime_control::Clock,
     train_ids:HashMap<usize,String>,actual_daily:HashMap<usize,f64>,revision:u64,daily_revision:usize,edit_revision:u64,command_serial:u64,receipts:VecDeque<(u64,String,V)>,undo:Option<Checkpoint>,forecast_work:crate::runtime_business::ForecastWork,published_city:Option<u64>,published_review:Option<u64>,
 }
@@ -26,7 +27,7 @@ impl Runtime{
         let keys=seed.definitions.iter().enumerate().map(|(i,j)|(key(j),i)).collect();arena.cycle=Some(crate::cycle::Cycle::owned(token,catalog as f64,seed.definitions.len(),seed.runtime.num("nextId")as usize,[seed.runtime.zero("expectedGenerated"),seed.runtime.zero("arrivalRemainder"),seed.runtime.num("rngState")],seed.runtime.zero("demandCarry"),keys));
         let mut finance=seed.finance(token);crate::engine::read(&finance,&mut arena.bank);arena.bank.as_mut().unwrap().loan_views=seed.world.get("economy").get("loans").array().to_vec();arena.bank.as_mut().unwrap().ledger=seed.world.get("economy").get("ledger").array().to_vec();finance.truncate(16);finance[2]=0.0;
         let train_ids=seed.runtime.get("trains").array().iter().enumerate().map(|(i,t)|(i+1,t.get("id").text().to_string())).collect();let actual_daily=seed.definitions.iter().enumerate().map(|(i,j)|(i,j.num("daily"))).collect();
-        let mut runtime=Self{seed,arena,token,finance,clock:crate::runtime_control::Clock::new(),train_ids,actual_daily,revision:0,daily_revision:0,edit_revision:v.get("saved").zero("nativeEditRevision")as u64,command_serial:v.get("saved").zero("nativeCommandSerial")as u64,receipts:VecDeque::new(),undo:None,forecast_work:crate::runtime_business::ForecastWork::default(),published_city:None,published_review:None};
+        let mut runtime=Self{record_lengths:None,persistence_epoch:0,import_serial:0,pending_import:None,import_fence:false,seed,arena,token,finance,clock:crate::runtime_control::Clock::new(),train_ids,actual_daily,revision:0,daily_revision:0,edit_revision:v.get("saved").zero("nativeEditRevision")as u64,command_serial:v.get("saved").zero("nativeCommandSerial")as u64,receipts:VecDeque::new(),undo:None,forecast_work:crate::runtime_business::ForecastWork::default(),published_city:None,published_review:None};
         if warm{
             // Warm passenger queues without charging a second set of startup accounts.
             let economy=runtime.seed.world.get("economy").clone();let operating=runtime.seed.world.get("ridership").get("current").zero("operating");
@@ -103,14 +104,41 @@ impl Runtime{
         for train in runtime.get_mut("trains").array_mut(){let uid=train.num("uid")as usize;if let Some(id)=self.train_ids.get(&uid){if let Some(old)=self.seed.runtime.get("trains").array().iter().find(|t|t.get("id").text()==id){for key in ["retiringRun","retiringKey"]{if has(old,key){train.set(key,old.get(key).clone());}}}}}
         if full{for row in runtime.get_mut("defs").array_mut(){row.set("daily",n(self.actual_daily.get(&(row.num("id")as usize)).copied().unwrap_or(0.0)));}}
         crate::simulation::project_owned(&self.arena.motion,&mut runtime,&self.seed.plan,&self.seed.blocks);runtime.set("plan",self.seed.plan.clone());runtime.set("storedProfiles",n(self.actual_daily.len()as f64));runtime.set("forecastStatus",self.forecast_work.status(&self.seed.world,self.edit_revision));runtime.set("nativeEditRevision",n(self.edit_revision as f64));runtime.set("nativeCommandSerial",n(self.command_serial as f64));
+        if self.record_lengths.is_none(){self.record_lengths=Some(crate::persistence::world_records(&self.seed.world,&V::Missing));}
+        let records=crate::persistence::merge(&[self.seed.runtime.get("personalRecords").clone(),self.record_lengths.as_ref().unwrap().clone(),self.seed.world.get("ridership").get("records").clone(),obj(&[("bestRevenue",self.seed.world.get("economy").get("revenue").clone())])]);
+        self.seed.runtime.set("personalRecords",records.clone());runtime.set("personalRecords",records);
         obj(&[("editRevision",n(self.edit_revision as f64)),("revision",n(self.revision as f64)),("worldPatch",obj(&[("economy",self.seed.world.get("economy").clone()),("ridership",self.seed.world.get("ridership").clone())])),("runtime",runtime)])
+    }
+    fn checkpoint(&mut self,settings:&V,at:&V)->Result<V,String>{
+        let saved=self.view(true).get("runtime").clone();
+        let value=crate::persistence::pack(self.seed.world.clone(),saved,settings);
+        let mut out=crate::persistence::encoded(&value,at)?;
+        out.set("personalRecords",value.get("personalRecords").clone());out.set("revision",n(self.revision as f64));out.set("editRevision",n(self.edit_revision as f64));Ok(out)
+    }
+    fn preview_import(&mut self,v:&V)->Result<V,String>{
+        let value=crate::persistence::parse(v.get("text").text())?;self.import_serial+=1;
+        let preview=obj(&[("state",value.get("state").clone()),("region",value.get("region").clone()),("speed",value.get("speed").clone()),("runtime",boolean(value.get("runtime").truth())),("token",n(self.import_serial as f64))]);
+        self.pending_import=Some((self.import_serial,self.persistence_epoch,value));Ok(obj(&[("preview",preview)]))
+    }
+    fn prepare_import(&mut self,v:&V,forecasts:&mut crate::forecast_session::ForecastOwner)->Result<V,String>{
+        let Some((token,epoch,value))=&self.pending_import else{return Err("RESTORE_NO_PREVIEW".into());};
+        if v.num("token")!=*token as f64||*epoch!=self.persistence_epoch{return Err("RESTORE_STALE_PREVIEW".into());}
+        let value=value.clone();let world=value.get("state").clone();let catalog=v.num("catalog")as u64;
+        let mut candidate=Self::new(&obj(&[("world",world.clone()),("saved",value.get("runtime").clone()),("catalog",n(catalog as f64)),("start",world.get("economy").get("minute").clone()),("warm",boolean(false))]),self.token as u64,forecasts).map_err(|e|format!("RESTORE_{}",e))?;
+        let old=crate::json_codec::parse(v.get("previous").text()).unwrap_or(V::Missing);
+        let raw=crate::json_codec::parse(v.get("recordsRaw").text()).unwrap_or(V::Missing);
+        let records=crate::persistence::merge(&[value.get("personalRecords").clone(),old.get("personalRecords").clone(),raw,if eq(world.get("region"),self.seed.world.get("region")){v.get("personalRecords").clone()}else{V::Missing}]);
+        let mut settings=value.clone();settings.set("personalRecords",records);settings.set("playing",boolean(false));
+        let encoded=candidate.checkpoint(&settings,v.get("at"));forecasts.release_owned(candidate.seed.catalog);
+        let mut out=encoded?;let region=world.get("region").text().to_string();let regions=crate::bootstrap::regions();let cfg=regions.get(&region);
+        out.set("saveKey",cfg.get("saveKey").clone());out.set("recordsKey",cfg.get("recordsKey").clone());out.set("token",v.get("token").clone());self.import_fence=true;Ok(out)
     }
     fn transaction_view(&mut self,receipt:&V)->V{let mut out=self.view(false);out.set("worldPatch",self.seed.world.clone());for(k,v)in receipt.entries(){out.set(k,v.clone());}out}
     fn candidate(&mut self,world:V,saved:V,catalog:u64,forecasts:&mut crate::forecast_session::ForecastOwner)->Result<Self,String>{
         Self::new(&obj(&[("world",world),("saved",saved),("catalog",n(catalog as f64)),("start",n(self.seed.runtime.num("minute"))),("warm",boolean(false))]),self.token as u64,forecasts)
     }
     fn replace(&mut self,mut next:Self,forecasts:&mut crate::forecast_session::ForecastOwner){
-        next.clock=self.clock.clone();next.revision=self.revision+1;next.edit_revision=self.edit_revision+1;next.command_serial=self.command_serial;next.receipts=std::mem::take(&mut self.receipts);next.undo=self.undo.take();next.forecast_work=std::mem::take(&mut self.forecast_work);
+        next.persistence_epoch=self.persistence_epoch;next.import_serial=self.import_serial;next.pending_import=self.pending_import.take();next.import_fence=self.import_fence;next.clock=self.clock.clone();next.revision=self.revision+1;next.edit_revision=self.edit_revision+1;next.command_serial=self.command_serial;next.receipts=std::mem::take(&mut self.receipts);next.undo=self.undo.take();next.forecast_work=std::mem::take(&mut self.forecast_work);
         forecasts.release_owned(self.seed.catalog);*self=next;
     }
     fn edit(&mut self,v:&V,forecasts:&mut crate::forecast_session::ForecastOwner)->Result<V,String>{
@@ -184,7 +212,17 @@ impl RuntimeOwner{
             let id=v.num("id");if !id.is_finite()||id<1.0||id.fract()!=0.0{return Err("INVALID_RUNTIME_HANDLE".into());}let id=id as u64;
             if action=="close"{if let Some(runtime)=self.arenas.remove(&id){forecasts.release_owned(runtime.seed.catalog);if let Some(undo)=runtime.undo{forecasts.release_owned(undo.catalog);}}return Ok(V::Null);}
             let runtime=self.arenas.get_mut(&id).ok_or("RUNTIME_EXPIRED")?;
+            if runtime.import_fence{
+                if action=="pulse"{let mut out=runtime.view(false);out.set("clock",runtime.clock.status());return Ok(out);}
+                if !matches!(action,"importCancel"|"importCommitted"|"query"|"snapshot"|"view"|"diagnose"|"forecastQuery"|"intent"|"resetClock"){return Err("RESTORE_COMMIT_PENDING".into());}
+            }
+            if matches!(action,"command"|"demand"|"undo"|"setDaily"|"observe"|"syncBank"|"credit"|"daily"|"advanceAll"|"advance"){runtime.persistence_epoch+=1;}
+            if action=="pulse"&&v.get("playing").truth(){runtime.persistence_epoch+=1;}
             let mut out=match action{
+                "checkpoint"=>runtime.checkpoint(v.get("settings"),v.get("at")),
+                "previewImport"=>runtime.preview_import(v),
+                "prepareImport"=>runtime.prepare_import(v,forecasts),
+                "importCancel"|"importCommitted"=>{if let Some((token,_,_))=&runtime.pending_import{if v.num("token")!=*token as f64{return Err("RESTORE_TOKEN_MISMATCH".into());}}runtime.pending_import=None;runtime.import_fence=action=="importCommitted";Ok(V::Null)},
                 "command"|"preview"|"demand"|"undo"=>runtime.edit(v,forecasts),
                 "intent"=>{if v.get("reset").truth(){runtime.clock.reset();}runtime.clock.observe(v).map_err(str::to_string)?;Ok(runtime.clock.status())},
                 "snapshot"=>Ok(runtime.view(true)),"view"=>Ok(runtime.view(false)),
@@ -212,4 +250,4 @@ impl RuntimeOwner{
     }
 }
 #[no_mangle]
-pub extern "C" fn runtime_session_abi()->u32{4}
+pub extern "C" fn runtime_session_abi()->u32{5}
