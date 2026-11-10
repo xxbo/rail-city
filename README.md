@@ -32,5 +32,8 @@ P0、P1、P2-1～P2-4的计划内规则迁移完成；浏览器保留显示、�
 - [当前盘点](rail/core-rust-inventory.md)
 - [MAP65存档验收与双基线测量](rail/rust-wasm-map65.md)
 - [迁移审计](rail/rust-migration-audit.md)
+- [P3 完整Rust与纯界面JS计划](rail/rust-ui-only-plan.md)
+- [P3-0 行为基线、边界和会话基础](rail/rust-wasm-p3-0.md)
+- [P3 会话与平台绑定合同](rail/p3-session-contract.md)
 
 纯JS固定提交 `498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa` 保留于迁移前历史，性能脚本继续支持 `RAIL_JS_BASELINE` 与 `RAIL_PREVIOUS_ROOT` 指向独立干净工作树。分仓保持模拟规则与存档格式；P2-4统一存档/恢复/版本验收与旧加权规则，收益和冷事务开销见MAP65实测。当前文件边界见 [分仓复核](rail/repository-boundary.md)。

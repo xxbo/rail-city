@@ -551,3 +551,7 @@ mod tests {
 }
 
 mod save;
+
+// Experimental P3-0 exports; production source line locations above remain fixed.
+#[cfg(feature = "session-contract")]
+pub mod session;

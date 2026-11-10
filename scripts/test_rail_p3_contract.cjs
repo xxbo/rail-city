@@ -1,0 +1,39 @@
+/* Exercise real opt-in Rust WASM against complete frozen MAP65 states. */
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const {create}=require('./fixtures/rail-session-bridge.cjs'),Wire=require('../rail/value-wire'),oracle=require('./fixtures/rail-p3-map65-oracle.json');
+const exact=(a,b)=>{assert.deepEqual(a,b);assert.equal(JSON.stringify(a),JSON.stringify(b));};
+let checks=0;function check(value){assert(value);checks++;}
+check(crypto.createHash('sha256').update(fs.readFileSync(path.join(__dirname,'fixtures/rail-p3-map65-session.wire'))).digest('hex')===oracle.wireSha256);
+for(const c of oracle.cold){
+ const bridge=create(),send=x=>bridge.request({protocolVersion:1,...x});
+ const open=send({op:'open',world:c.initial,config:oracle.config});check(open.ok);check(open.sessionId===1&&open.revision===0);
+ const request=x=>send({sessionId:1,...x}),query=()=>request({op:'query',view:'snapshot'}).result;
+ exact(query(),c.initial);
+ const preview=request({op:'preview',expectedRevision:0,command:c.command});check(preview.ok);exact(query(),c.initial);exact(preview.result.quote,c.quote);
+ const cmd={op:'dispatch',commandId:1,expectedRevision:0,command:c.command},done=request(cmd);check(done.ok&&done.revision===1);exact(query(),c.after);exact(done.result.value,c.result);exact(done.result.quote,c.quote);
+ // A lost response can be resolved without executing the purchase again.
+ const replay=request(cmd);check(replay.ok&&replay.replayed&&replay.revision===1);exact(query(),c.after);
+ const receipt=request({op:'query',view:'receipt',commandId:1});check(receipt.ok&&receipt.replayed);exact(receipt.result,done.result);
+ const reused=request({...cmd,command:{...c.command,args:{spec:'6B',count:3}}});check(reused.error.code==='COMMAND_ID_REUSED');exact(query(),c.after);
+ const conflict=request({...cmd,commandId:2});check(conflict.error.code==='REVISION_CONFLICT');exact(query(),c.after);
+ const fail=request({...cmd,commandId:3,expectedRevision:1,command:{kind:'fleet',op:'purchase',args:{spec:'invalid',count:2}}});check(fail.error.code==='COMMAND_REJECTED');exact(query(),c.after);
+ const badId=request({...cmd,commandId:NaN});check(badId.error.code==='INVALID_COMMAND_ID');
+ const huge=request({...cmd,commandId:4,extra:'x'.repeat(5000)});check(huge.error.code==='COMMAND_TOO_LARGE');exact(query(),c.after);
+ const unsupported=request({...cmd,commandId:4,expectedRevision:1,command:{kind:'runtime',op:'advance',args:{minutes:1}}});check(unsupported.error.code==='COMMAND_NOT_SUPPORTED_YET');exact(query(),c.after);
+ const view=query();view.depot.stock['6B']=999;exact(query(),c.after);
+ check(request({op:'query',view:'unknown'}).error.code==='UNKNOWN_VIEW');
+ // Failed replacement preserves the existing session.
+ check(!send({op:'open',world:{},config:oracle.config}).ok);exact(query(),c.after);
+ check(send({op:'open',world:c.initial,config:oracle.config,runtime:{minute:420}}).error.code==='RUNTIME_NOT_SUPPORTED_YET');exact(query(),c.after);
+ for(const wire of [[],[NaN],[0,7,1],[0,4],[0,6,1e9],[0,1,0]]){const result=Wire.decode(bridge.wire(wire)).value;check(result.error.code==='INVALID_WIRE');exact(query(),c.after);}
+ // Even an evicted ID is never executed a second time. Rejected receipts are bounded too.
+ for(let id=5;id<140;id++)check(request({...cmd,commandId:id,expectedRevision:1,command:{kind:'invalid'}}).error.code==='COMMAND_NOT_SUPPORTED_YET');
+ check(request(cmd).error.code==='COMMAND_EXPIRED');exact(query(),c.after);
+ const high=request({op:'query',view:'status'});check(high.result.highWater===139&&high.result.receiptLimit===128);
+ check(send({op:'open',world:c.initial,config:oracle.config}).sessionId===2);
+ check(request({op:'query',view:'snapshot'}).error.code==='SESSION_MISMATCH');
+ check(send({op:'close',sessionId:2}).ok);check(send({op:'query',sessionId:2,view:'snapshot'}).error.code==='NO_SESSION');
+}
+// Baseline runtime remains unchanged; future ownership migration must preserve these full states.
+const {runtimeTrace}=require('./freeze_rail_p3.cjs');exact(runtimeTrace(path.resolve(__dirname,'..')),oracle.runtime);
+console.log(`P3-0 contract: ${checks} guards plus complete ordered cold-world and four MAP65 runtime traces passed; real Rust WASM, no JS business fallback.`);
