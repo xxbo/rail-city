@@ -1,0 +1,47 @@
+name: Rail City automated tests
+on:
+  workflow_dispatch:
+  push:
+    branches: ['tests/**']
+permissions:
+  contents: read
+concurrency:
+  group: rail-tests-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install pinned compiler
+        run: rustup toolchain install 1.99.1 --profile minimal --target wasm32-unknown-unknown
+      - name: Build current test artifacts
+        run: |
+          node scripts/build_rail_wasm.cjs
+          node scripts/build_rail_session_contract.cjs
+      - name: Run Rust unit tests
+        id: rust
+        continue-on-error: true
+        run: cargo +1.99.1 test --locked --features session-contract --manifest-path rust/rail-routing/Cargo.toml
+      - name: Run all Node regression suites
+        id: node
+        continue-on-error: true
+        run: node scripts/run_rail_tests.cjs --continue --report="$RUNNER_TEMP/rail-node-tests.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rail-automated-test-results
+          path: |
+            ${{ runner.temp }}/rail-node-tests.json
+            rail/wasm/rail-core-v33.wasm
+            scripts/fixtures/rail-session-contract-v9.wasm
+          if-no-files-found: warn
+      - name: Require both suites to pass
+        if: always()
+        run: |
+          test '${{ steps.rust.outcome }}' = success
+          test '${{ steps.node.outcome }}' = success
