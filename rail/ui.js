@@ -75,12 +75,8 @@
     A = RailAlerts;
   const BAL = RailBalance,
     B = RailRegions;
-  let region = 'tokyo';
-  try {
-    const selectedMap = new URLSearchParams(location.search).get('map');
-    region = ['tokyo', 'gba'].includes(selectedMap) ? selectedMap : localStorage.getItem(
-      'guanchao-rail-last-map') === 'gba' ? 'gba' : 'tokyo';
-  } catch {}
+  let selectedMap,lastMap;try{selectedMap=new URLSearchParams(location.search).get('map');lastMap=localStorage.getItem('guanchao-rail-last-map');}catch{}
+  const region=RailBootstrap.run('selectRegion',{selected:selectedMap,last:lastMap});
   const cfg = B.get(region),
     HubList = RailHubs.forRegion(region);
   StreetMap.setRegion(region);
@@ -212,7 +208,7 @@
     hoverPoint = null,
     placementPulse = null;
   let KEY = KEY_TOKYO,
-    s = N.emptyWorld(region),
+    s = null,
     overview = false,
     sort = 'default',
     selected = null,
@@ -232,62 +228,16 @@
     lastHUD = 0,
     toastTimer, storageOK = true,
     focusTimer, cameraTween = null;
-  try {
-    const stored = await DB.read(KEY);
-    if (stored?.source === 'legacy') legacySaveText = stored.text;
-    if (stored?.error) {
-      storageReadBlocked = true;
-      storageOK = false;
-      saveStatus = '数据库读取受阻，保留旧存档';
-    }
-    if (stored?.source === 'indexeddb') {
-      saveMeta = stored;
-      saveStatus = '已从本地数据库恢复';
-    }
-    const raw = stored?.text || (region === 'tokyo' ? (localStorage.getItem('guanchao-rail-game-v6') ||
-      localStorage.getItem('guanchao-rail-map-v4')) : null);
-    if (raw) {
-      const v = JSON.parse(raw), accepted=RailSave.run('checkpoint',{value:v,region}),
-        state = accepted.kind ? v.state : v;
-      if (accepted.valid) {
-        s = accepted.kind === 7 ? state : N.removePreset(state);
-        if (accepted.kind === 7) {
-          personalRecords = Q.mergeRecords(personalRecords, accepted.records);
-          if (typeof v.playing === 'boolean') playing = v.playing;
-          if ([1, 3, 6, 12, 24].includes(v.speed)) speed = v.speed;
-          if (accepted.useRuntime) savedRuntime = v.runtime;
-        }
-      } else {
-        storageOK = false;
-        storageReadBlocked = true;
-        saveStatus = '存档版本或运行数据校验失败，已禁止自动覆盖';
-      }
-    }
-  } catch {
-    storageOK = false;
-    storageReadBlocked = true;
-    saveStatus = '本地数据库读取失败，已禁止自动覆盖';
-  }
+  let stored,readError=false,legacy6,legacy4;
+  try{stored=await DB.read(KEY);legacy6=localStorage.getItem('guanchao-rail-game-v6');legacy4=localStorage.getItem('guanchao-rail-map-v4');}catch{readError=true;}
+  if(stored?.source==='legacy')legacySaveText=stored.text;
+  if(stored?.source==='indexeddb'){saveMeta=stored;saveStatus='已从本地数据库恢复';}
+  const startup=RailBootstrap.start({region,stored:RailBootstrap.decode(stored?.text),legacy6:RailBootstrap.decode(legacy6),legacy4:RailBootstrap.decode(legacy4),readError:readError||!!stored?.error});
+  s=startup.state;playing=startup.playing;speed=startup.speed;savedRuntime=startup.runtime;
+  personalRecords=Q.mergeRecords(personalRecords,startup.records);
+  storageReadBlocked=startup.blocked;storageOK=!startup.blocked;if(startup.status)saveStatus=startup.status;
+  const migratedUrban=startup.migratedUrban,migratedFacilities=startup.migratedFacilities;
   unlocked = new Set(Q.awards(personalRecords).filter(a => a.unlocked).map(a => a.id));
-  N.upgrade(s);
-  M.init(s);
-  const migratedUrban = !s.urban;
-  U.init(s);
-  if (!U.validate(s)) {
-    delete s.urban;
-    U.init(s);
-    storageOK = false;
-    storageReadBlocked = true;
-  }
-  if (!M.validate(s)) {
-    delete s.economy;
-    M.init(s);
-    storageOK = false;
-    storageReadBlocked = true;
-  }
-  const migratedFacilities = U.enableAutomatic(s, C.create(region), RailPlaceNames.places(region));
-  U.enableDevelopment(s, C.create(region), RailPlaceNames.places(region));
-  Q.enableSatisfaction(s);
   let calculating = false,
     networkRevision = 0,
     forecastPending = false,
@@ -299,7 +249,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=65') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=66') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -319,15 +269,11 @@
       state: RailDemandSnapshot.capture(state)
     }).then(message => RailForecastCatalog.hydrate(message.result));
   }
-  let forecast = await calculate(s).catch(() => C.evaluate(s,{compact:true})),
-    traffic = savedRuntime && O.restore(s, forecast, savedRuntime) || O.create(s, forecast, s.economy
-      .minute, s.economy.minute === 420);
-  demandState.status = 'ready';
-  demandState.updatedAt = traffic.minute;
-  if (Math.abs(traffic.minute - s.economy.minute) > .01) traffic = O.create(s, forecast, s.economy.minute,
-    false);
-  if (migratedFacilities || savedRuntime && forecast.connectionModel === 36) O.rebase(traffic, s,
-    forecast);
+  let forecast = await calculate(s).catch(() => C.evaluate(s,{compact:true}));
+  const restored=savedRuntime&&O.restore(s,forecast,savedRuntime),runtimePolicy=RailBootstrap.run('runtimePolicy',{state:{economy:s.economy},restored:!!restored,runtimeMinute:restored?.minute,migratedFacilities,hasSaved:!!savedRuntime,connectionModel:forecast.connectionModel});
+  let traffic=runtimePolicy.reuse?restored:O.create(s,forecast,runtimePolicy.minute,runtimePolicy.warm);
+  demandState.status='ready';demandState.updatedAt=traffic.minute;
+  if(runtimePolicy.rebase)O.rebase(traffic,s,forecast);
   delete forecast.preparedDefinitions;
   Q.updateSatisfaction(s, traffic);
   REVIEW.init(s, traffic);
@@ -1722,7 +1668,7 @@
       point = snapPoint(point);
       if (!Number.isInteger(point)) point = {
         ...point,
-        nameSeed: point.nameSeed ?? Math.random()
+        nameSeed: point.nameSeed ?? RailBootstrap.run('random')
       };
     }
     if (mode === 'add') {
@@ -2809,7 +2755,7 @@
     }
     try {
       if (!centerWorker) {
-        centerWorker = new Worker('operations-worker.js?v=65');
+        centerWorker = new Worker('operations-worker.js?v=66');
         centerForecastSent = null;
       }
       centerWorker.onerror = e => fail(e.message || '后台诊断不可用');
@@ -3700,28 +3646,27 @@
   });
 
   async function startNewGame() {
+    const wasPlaying=playing;let prepared,nextTraffic,nextState,nextForecast;
     setPlaying(false);
     await M.whenIdle(traffic);
+    try {
+    prepared=RailBootstrap.prepareStart({region});
+    nextState=prepared.state;nextForecast=C.evaluate(nextState);
+    nextTraffic=O.create(nextState,nextForecast);REVIEW.init(nextState,nextTraffic);Q.updateSatisfaction(nextState,nextTraffic);
+    RailBootstrap.commitStart(prepared.token);
+    } catch(error){if(prepared)try{RailBootstrap.cancelStart(prepared.token);}catch{}if(nextTraffic)O.dispose(nextTraffic);setPlaying(wasPlaying);toast('新游戏准备失败，当前进度已保留：'+error.message);return;}
+    const fresh=prepared;
+    syncRecords();persistRecords();
     O.dispose(traffic);
     runtimeFault = '';
     networkRevision++;
     storageReadBlocked = false;
-    syncRecords();
-    persistRecords();
     utilityPanel = null;
     hoverPoint = null;
-    s = M.init(N.upgrade(N.emptyWorld(region)));
-    U.init(s);
-    U.enableAutomatic(s, C.create(region), RailPlaceNames.places(region));
-    U.enableDevelopment(s, C.create(region), RailPlaceNames.places(region));
-    Q.enableSatisfaction(s);
+    s=nextState;forecast=nextForecast;traffic=nextTraffic;
     urbanDrawRevision = -1;
     densityField = null;
     urbanForecastRevision = s.urban.revision;
-    forecast = C.evaluate(s);
-    traffic = O.create(s, forecast);
-    REVIEW.init(s, traffic);
-    Q.updateSatisfaction(s, traffic);
     refreshUrbanMap();
     selected = null;
     overview = false;
@@ -3734,12 +3679,12 @@
     density = 'off';
     stationQuery = '';
     stationSort = 'waiting';
-    speed = 6;
-    $('speed').value = '6';
+    speed = fresh.speed;
+    $('speed').value = String(fresh.speed);
     $('density-toggle').checked = false;
     render();
     resetCamera();
-    setPlaying(true);
+    setPlaying(fresh.playing);
     save();
     toast('新游戏已开始，初始余额 2.5 亿元。');
   }

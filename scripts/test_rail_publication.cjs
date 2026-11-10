@@ -7,7 +7,7 @@ try{
  stage(root,out,provenance);
  assert.equal(hash(path.join(out,'index.html')),hash(path.join(root,'rail/index.html')));
  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(out,'deployment.json'))),{kind:'rail-city',...provenance});
- for(const name of ['simulation-worker.js','demand-worker.js','operations-worker.js','wasm/rail-core-v25.wasm'])assert.equal(hash(path.join(out,name)),hash(path.join(root,'rail',name)));
+ for(const name of ['simulation-worker.js','demand-worker.js','operations-worker.js','wasm/rail-core-v26.wasm'])assert.equal(hash(path.join(out,name)),hash(path.join(root,'rail',name)));
  const html=fs.readFileSync(path.join(out,'index.html'),'utf8');
  for(const [,src]of html.matchAll(/(?:src|href)="([^"#]+)"/g))if(!/^(https?:|data:|#)/.test(src)){
   const url=new URL(src,'https://xxbo.github.io/rail-city/');assert(url.pathname.startsWith('/rail-city/'));assert(fs.existsSync(path.join(out,url.pathname.slice('/rail-city/'.length))),src);

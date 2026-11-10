@@ -4,24 +4,26 @@
 // Test harness only. The bridge forwards values; command semantics live in WASM.
 async function bridge(asset){let e;const W=RailValueWire;
  const loaded=await WebAssembly.instantiate(await (await fetch(asset)).arrayBuffer(),{
-  rail_math:{exp:Math.exp,log:Math.log,hypot:Math.hypot,sin:Math.sin,acos:Math.acos,atan2:Math.atan2,random:Math.random,log1p:Math.log1p,pow:Math.pow,now:()=>performance.now()},
+  rail_math:{cos:Math.cos,exp:Math.exp,log:Math.log,hypot:Math.hypot,sin:Math.sin,acos:Math.acos,atan2:Math.atan2,random:Math.random,log1p:Math.log1p,pow:Math.pow,now:()=>performance.now()},
   rail_host:{json_utf8:(p,n,t,c)=>{const b=new TextEncoder().encode(JSON.stringify(W.decode(new Float64Array(e.memory.buffer,p,n)).value));if(c)new Uint8Array(e.memory.buffer,t,b.length).set(b);return b.length;}}
  });e=loaded.instance.exports;
  const wire=input=>{const p=e.input_resize(input.length);new Float64Array(e.memory.buffer,p,input.length).set(input);const out=e.session_contract(),v=new Float64Array(e.memory.buffer,out,e.output_len()).slice();e.output_clear();return v;};
  return {wire,request:v=>W.decode(wire(W.encode(v))).value};
 }
-async function run(){const oracle=await(await fetch('rail-p3-map65-oracle.json')).json(),asset=new URL('rail-session-contract-v1.wasm',location.href).href,main=await bridge(asset),initial=oracle.worlds[1];
+async function run(){const oracle=await(await fetch('rail-p3-map65-oracle.json')).json(),bootstrapOracle=await(await fetch('rail-p31-map65-oracle.json')).json(),asset=new URL('rail-session-contract-v2.wasm',location.href).href,main=await bridge(asset),initial=oracle.worlds[1];
  const open={protocolVersion:1,op:'open',world:initial,config:oracle.config};
  const opened=main.request(open);if(!opened.ok)throw Error('Main-thread Rust open failed');
  const purchase={protocolVersion:1,sessionId:1,op:'dispatch',expectedRevision:0,commandId:1,command:oracle.cold[1].command};
  const outcome=main.request(purchase);if(!outcome.ok)throw Error('Main-thread Rust command failed');
  const query={protocolVersion:1,sessionId:1,op:'query',view:'snapshot'},saved=main.request(query).result;
  if(JSON.stringify(saved)!==JSON.stringify(oracle.cold[1].after))throw Error('Main-thread full state mismatch');
+ for(const region of ['tokyo','gba']){const expected=bootstrapOracle.cases.find(c=>c.input.region===region&&!c.input.stored).expected.state,result=main.request({protocolVersion:1,op:'start',region});if(!result.ok||JSON.stringify(result.result.state)!==JSON.stringify(expected))throw Error('Native new-session startup mismatch: '+region);}
  const workerURL=URL.createObjectURL(new Blob([`importScripts(${JSON.stringify(new URL('../../rail/value-wire.js',location.href).href)});const init=(${bridge.toString()})(${JSON.stringify(asset)});onmessage=async e=>{try{const b=await init,result=b.wire(e.data);postMessage(result,[result.buffer]);}catch(error){postMessage({error:error.message});}};`],{type:'text/javascript'})),worker=new Worker(workerURL);
  const rpc=v=>new Promise((resolve,reject)=>{worker.onmessage=e=>{if(e.data.error)reject(Error(e.data.error));else resolve(RailValueWire.decode(e.data).value);};worker.onerror=e=>reject(Error(e.message));const frame=Float64Array.from(RailValueWire.encode(v));worker.postMessage(frame,[frame.buffer]);if(frame.byteLength!==0)reject(Error('Buffer was not transferred'));});
  try{if(!(await rpc(open)).ok)throw Error('Worker Rust open');if(!(await rpc(purchase)).ok)throw Error('Worker Rust command');
   const duplicate=await rpc(purchase);if(!duplicate.replayed||duplicate.revision!==1)throw Error('Worker duplicate purchase');
   const snapshot=await rpc(query);if(JSON.stringify(snapshot.result)!==JSON.stringify(saved))throw Error('Worker full snapshot mismatch');
+  const native=await rpc({protocolVersion:1,op:'start',region:'gba'}),expected=bootstrapOracle.cases.find(c=>c.input.region==='gba'&&!c.input.stored).expected.state;if(!native.ok||JSON.stringify(native.result.state)!==JSON.stringify(expected))throw Error('Worker native startup mismatch');
  }finally{worker.terminate();URL.revokeObjectURL(workerURL);}
  // Verify actual browser APIs and byte roundtrips for the selected raw-ABI binding route.
  // Persistence policy is deliberately still P3-7, not implemented by this probe.
@@ -34,7 +36,7 @@ async function run(){const oracle=await(await fetch('rail-p3-map65-oracle.json')
   if(read!==text)throw Error('IndexedDB roundtrip');
   if(!main.request({...open,world:JSON.parse(read)}).ok)throw Error('Rust open after browser byte roundtrip');
  }finally{db?.close();await new Promise((resolve,reject)=>{const r=indexedDB.deleteDatabase(key);r.onsuccess=resolve;r.onerror=()=>reject(r.error);});}
- return{mainRust:true,workerRust:true,transferable:true,idempotent:true,fullStateEqual:true,file:true,storage:true,indexedDB:true,binding:'raw ordered-value ABI, prototype only'};
+ return{mainRust:true,workerRust:true,nativeStartup:true,workerNativeStartup:true,transferable:true,idempotent:true,fullStateEqual:true,file:true,storage:true,indexedDB:true,binding:'Rust initialization/session ABI; compact production string channel'};
 }
 window.result=run().then(result=>{const pre=document.createElement('pre');pre.id='results';pre.textContent=JSON.stringify(result,null,2);document.body.appendChild(pre);return result;},error=>{const pre=document.createElement('pre');pre.id='results';pre.textContent='FAILED: '+error.stack;document.body.appendChild(pre);throw error;});
 </script>

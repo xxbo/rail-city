@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "sourceCommit": "bffdd8fbd22e2553a881533b540f878f6ea8fabc",
+  "description": "Raw rows, observations, polygons and immutable configuration. Model derivation executes in Rust.",
+  "files": {
+    "bootstrap-v1.wire": {
+      "bytes": 149728,
+      "sha256": "86372be14c6494baac8cd1ef22b25d7959045a2e0f7970dddee4fedd07557a56"
+    },
+    "tokyo-population-v1.bin": {
+      "bytes": 162225,
+      "sha256": "6b19b3c187848dc67963fb99b91b9c2ea197c4dfcc1ebf42e72dd72a06ecced8"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+/* Explicit, pinned one-time raw-data extraction. Production never evaluates these sources. */
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),crypto=require('node:crypto'),{createRequire}=require('node:module'),{execFileSync}=require('node:child_process');
+const base=process.env.RAIL_P3_BASELINE;if(!base)throw Error('RAIL_P3_BASELINE must point to clean MAP65');
+assert.equal(execFileSync('git',['-C',base,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),'bffdd8fbd22e2553a881533b540f878f6ea8fabc');
+const req=createRequire(path.join(base,'rail/index.js')),load=n=>req('./'+n);
+function expose(file,expression){const source=fs.readFileSync(path.join(base,'rail',file+'.js'),'utf8'),context={module:{exports:{}},require:createRequire(path.join(base,'rail',file+'.js')),console,globalThis:null};context.globalThis=context;vm.runInNewContext(source.replace('  const api = {',`  globalThis.extracted=${expression};\n  const api = {`),context);assert(context.extracted,file);return context.extracted;}
+const R=load('engine'),U=load('urban-growth'),G=load('gba-data'),H=load('hubs'),B=load('regions'),T=load('tokyo-data'),Wire=load('value-wire');
+const strip=h=>Object.fromEntries(Object.entries(h).filter(([k])=>!['x','y'].includes(k)));
+const raw={schema:1,seedRows:expose('engine','seed'),companies:R.newGame().companies,tokyo:expose('tokyo','({rows,routes,world})'),gba:{cities:G.cities,estuary:G.estuary,islandPolys:G.islandPolys,populationSource:G.populationSource,metadata:G.create().metadata,hubs:G.hubs.map(strip)},tokyoHubs:H.list.map(strip),hubAccess:expose('hubs','ACCESS'),placeRows:expose('place-names','rows'),regions:B.all,balance:load('game-balance'),facilityTypes:U.TYPES,developmentKinds:load('city-development').KINDS,tokyoMetadata:Object.fromEntries(Object.entries(T).filter(([k])=>k!=='raw'))};
+const dir=path.join(__dirname,'../rust/rail-routing/data');fs.mkdirSync(dir,{recursive:true});
+const wire=Wire.encode(raw),bytes=Buffer.alloc(wire.length*8);wire.forEach((v,i)=>bytes.writeDoubleLE(v,i*8));fs.writeFileSync(path.join(dir,'bootstrap-v1.wire'),bytes);fs.writeFileSync(path.join(dir,'tokyo-population-v1.bin'),T.raw);
+fs.writeFileSync(path.join(dir,'sources-v1.json'),JSON.stringify({schema:1,sourceCommit:'bffdd8fbd22e2553a881533b540f878f6ea8fabc',description:'Raw rows, observations, polygons and immutable configuration. Model derivation executes in Rust.',files:Object.fromEntries(['bootstrap-v1.wire','tokyo-population-v1.bin'].map(f=>[f,{bytes:fs.statSync(path.join(dir,f)).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(dir,f))).digest('hex')}]))},null,2)+'\n');
+console.log('Extracted versioned raw configuration and Tokyo source bytes.');

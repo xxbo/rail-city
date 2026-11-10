@@ -130,8 +130,17 @@ struct State {
 pub struct SessionHost {
     next_id: u64,
     state: Option<State>,
+    next_prepared: u64,
+    pending: Option<(u64, u64, u64, V)>,
 }
 impl SessionHost {
+    pub fn request_packed(&mut self, wire: &[f64], bytes: &[u8]) -> (Vec<f64>, Vec<u8>) {
+        let out = match value::read_packed(wire, bytes) {
+            Some(input) => self.handle(&input),
+            None => error("INVALID_WIRE", 0, 0),
+        };
+        value::write_packed(&out)
+    }
     pub fn request(&mut self, wire: &[f64]) -> Vec<f64> {
         if !valid_wire(wire) {
             return value::write(&error("INVALID_WIRE", 0, 0));
@@ -142,6 +151,60 @@ impl SessionHost {
     fn handle(&mut self, input: &V) -> V {
         if !matches!(input.get("protocolVersion"), V::Number(v) if *v == VERSION) {
             return error("UNSUPPORTED_PROTOCOL", 0, 0);
+        }
+        if input.get("op").text() == "prepare_start" {
+            if self.next_prepared as f64 >= MAX_SAFE {
+                return error("PREPARED_LIMIT", 0, 0);
+            }
+            let startup = crate::bootstrap::startup(input);
+            let world = startup.get("state");
+            let cfg = crate::bootstrap::config();
+            if !editor::validate_world(world, &cfg) || !assets::economy_valid(world) {
+                return error("INVALID_CHECKPOINT", 0, 0);
+            }
+            self.next_prepared += 1;
+            let (sid, rev) = self.state.as_ref().map_or((0, 0), |s| (s.id, s.revision));
+            self.pending = Some((self.next_prepared, sid, rev, startup.clone()));
+            let mut result = startup;
+            result.set("token", n(self.next_prepared as f64));
+            return envelope(true, sid, rev, result);
+        }
+        if ["commit_start", "cancel_start"].contains(&input.get("op").text()) {
+            let Some((token, sid, rev, _)) = self.pending.as_ref() else {
+                return error("NO_PREPARED_SESSION", 0, 0);
+            };
+            if id(input.get("token")) != Some(*token)
+                || self.state.as_ref().map_or((0, 0), |s| (s.id, s.revision)) != (*sid, *rev)
+            {
+                return error("PREPARED_SESSION_EXPIRED", *sid, *rev);
+            }
+            let (_, sid, rev, startup) = self.pending.take().unwrap();
+            if input.get("op").text() == "cancel_start" {
+                return envelope(true, sid, rev, V::Null);
+            }
+            let mut out = self.handle(&obj(&[
+                ("protocolVersion", n(1.0)),
+                ("op", text("open")),
+                ("world", startup.get("state").clone()),
+                ("config", (*crate::bootstrap::config()).clone()),
+            ]));
+            if out.get("ok").truth() {
+                out.set("result", startup);
+            }
+            return out;
+        }
+        if input.get("op").text() == "start" {
+            let startup = crate::bootstrap::startup(input);
+            let mut response = self.handle(&obj(&[
+                ("protocolVersion", n(1.0)),
+                ("op", text("open")),
+                ("world", startup.get("state").clone()),
+                ("config", (*crate::bootstrap::config()).clone()),
+            ]));
+            if response.get("ok").truth() {
+                response.set("result", startup);
+            }
+            return response;
         }
         if input.get("op").text() == "open" {
             let w = input.get("world");
@@ -161,6 +224,7 @@ impl SessionHost {
                 return error("SESSION_LIMIT", 0, 0);
             }
             self.next_id += 1;
+            self.pending = None;
             self.state = Some(State {
                 id: self.next_id,
                 revision: 0,
@@ -446,4 +510,19 @@ mod tests {
         );
         assert_eq!(state.get("result").get("depot").get("stock").num("6B"), 1.0);
     }
+}
+
+#[no_mangle]
+pub extern "C" fn session_packed() -> *const f64 {
+    let (input, bytes) = CORE.with(|c| {
+        let c = c.borrow();
+        (c.input.clone(), c.cycle_bytes.clone())
+    });
+    let (v, b) = HOST.with(|h| h.borrow_mut().request_packed(&input, &bytes));
+    CORE.with(|c| {
+        let mut c = c.borrow_mut();
+        c.output = v;
+        c.cycle_bytes = b;
+        c.output.as_ptr()
+    })
 }

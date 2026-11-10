@@ -14,6 +14,12 @@
       "phase": "P3-4",
       "owner": "Rust atomic edit and assets"
     },
+    "rail/bootstrap-wasm.js": {
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust-owned initialization/session transport; view caching to be consolidated in P3-2",
+      "bridgeDisposition": "Only input marshalling, immutable-view caching and ABI forwarding. Initialization and data/model decisions execute in bootstrap.rs."
+    },
     "rail/bounded-cache.js": {
       "role": "domain",
       "phase": "P3-2",
@@ -30,9 +36,9 @@
       "owner": "Rust legacy rules; initialization P3-1",
       "overrides": {
         "create": {
-          "role": "domain",
-          "phase": "P3-1",
-          "owner": "Rust city input initialization"
+          "role": "platform",
+          "phase": "P3-1 bridge",
+          "owner": "Rust initialization/geography; compatibility view only"
         },
         "source": {
           "role": "domain",
@@ -135,26 +141,22 @@
       "owner": "Rust legacy rules; initialization P3-1",
       "overrides": {
         "newGame": {
-          "role": "domain",
-          "phase": "P3-1",
-          "owner": "Rust world initialization/version"
-        },
-        "addSeed": {
-          "role": "domain",
-          "phase": "P3-1",
-          "owner": "Rust world initialization/version"
+          "role": "platform",
+          "phase": "P3-1 bridge",
+          "owner": "Rust initialization/geography; compatibility view only"
         },
         "upgrade": {
-          "role": "domain",
-          "phase": "P3-1",
-          "owner": "Rust world initialization/version"
+          "role": "platform",
+          "phase": "P3-1 bridge",
+          "owner": "Rust initialization/geography; compatibility view only"
         }
       }
     },
     "rail/fleet.js": {
-      "role": "domain",
-      "phase": "P3-1",
-      "owner": "Rust world/configuration/terrain"
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust configuration/geography initialization; compatibility view accessor",
+      "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/flow-history.js": {
       "role": "domain",
@@ -167,14 +169,16 @@
       "owner": "Rust graph/forecast/directory/cache"
     },
     "rail/game-balance.js": {
-      "role": "domain",
-      "phase": "P3-1",
-      "owner": "Rust world/configuration/terrain"
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust configuration/geography initialization; compatibility view accessor",
+      "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/gba-data.js": {
-      "role": "domain",
-      "phase": "P3-1",
-      "owner": "Rust world/configuration/terrain"
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust configuration/geography initialization; compatibility view accessor",
+      "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/history-wasm.js": {
       "role": "domain",
@@ -182,9 +186,10 @@
       "owner": "Rust city/statistics/observation"
     },
     "rail/hubs.js": {
-      "role": "domain",
-      "phase": "P3-1",
-      "owner": "Rust world/configuration/terrain"
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust configuration/geography initialization; compatibility view accessor",
+      "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/insights.js": {
       "role": "domain",
@@ -357,9 +362,10 @@
       }
     },
     "rail/place-names.js": {
-      "role": "domain",
-      "phase": "P3-1",
-      "owner": "Rust world/configuration/terrain"
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust configuration/geography initialization; compatibility view accessor",
+      "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/preparation-wasm.js": {
       "role": "domain",
@@ -372,9 +378,10 @@
       "owner": "Rust runtime/clock; edit lifecycle P3-4"
     },
     "rail/regions.js": {
-      "role": "domain",
-      "phase": "P3-1",
-      "owner": "Rust world/configuration/terrain"
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust configuration/geography initialization; compatibility view accessor",
+      "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/review-view.js": {
       "role": "mixed",
@@ -468,14 +475,16 @@
       "owner": "Rust runtime/clock; edit lifecycle P3-4"
     },
     "rail/tokyo-data.js": {
-      "role": "data",
-      "phase": "P3-1",
-      "owner": "Static raw data asset; Rust decode and derivation"
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust configuration/geography initialization; compatibility view accessor",
+      "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/tokyo.js": {
-      "role": "domain",
-      "phase": "P3-1",
-      "owner": "Rust world/configuration/terrain"
+      "role": "platform",
+      "phase": "P3-1 bridge",
+      "owner": "Rust configuration/geography initialization; compatibility view accessor",
+      "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/transactions-wasm.js": {
       "role": "platform",
@@ -579,9 +588,9 @@
           "owner": "Rust atomic commands/session replacement"
         },
         "startNewGame": {
-          "role": "domain",
-          "phase": "P3-4",
-          "owner": "Rust atomic commands/session replacement"
+          "role": "mixed",
+          "phase": "P3-8",
+          "owner": "New world built by Rust session; remaining UI reset/runtime wiring is scheduled in P3-3/P3-8"
         },
         "setPlaying": {
           "role": "domain",
@@ -608,7 +617,24 @@
     "rail/urban-growth.js": {
       "role": "domain",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "overrides": {
+        "init": {
+          "role": "platform",
+          "phase": "P3-1 bridge",
+          "owner": "Rust initialization/geography; compatibility view only"
+        },
+        "terrain": {
+          "role": "platform",
+          "phase": "P3-1 bridge",
+          "owner": "Rust initialization/geography; compatibility view only"
+        },
+        "buildable": {
+          "role": "platform",
+          "phase": "P3-1 bridge",
+          "owner": "Rust initialization/geography; compatibility view only"
+        }
+      }
     },
     "rail/value-wire.js": {
       "role": "platform",

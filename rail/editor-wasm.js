@@ -9,35 +9,6 @@
   ];
   const MUTABLE = ['nodes', 'tracks', 'services', 'nextId', 'depot', 'mapVersion', 'routeModel'];
   const cache = new WeakMap();
-  let configuration;
-
-  function config() {
-    if (!configuration) {
-      const R = node ? require('./engine') : root.RailSim,
-        F = node ? require('./fleet') : root.RailFleet,
-        B = node ? require('./regions') : root.RailRegions,
-        Names = node ? require('./place-names') : root.RailPlaceNames;
-      const seed = R.newGame();
-      configuration = {
-        specs: F.SPECS,
-        balance: (node ? require('./game-balance') : root.RailBalance),
-        facilityTypes: (node ? require('./urban-growth') : root.RailUrban)?.TYPES || {},
-        seedNodes: seed.nodes,
-        identities: Object.fromEntries(seed.companies.map(c => [c.id, {
-          name: c.name,
-          short: c.short,
-          color: c.color
-        }])),
-        regions: Object.fromEntries(['tokyo', 'gba'].map(k => [k, {
-          width: B.get(k).width,
-          height: B.get(k).height
-        }])),
-        places: Object.fromEntries(['tokyo', 'gba'].map(k => [k, Names?.places?.(k) || []]))
-      };
-    }
-    return configuration;
-  }
-
   function snapshot(s) {
     const v = {};
     for (const k of FIELDS)
@@ -85,7 +56,7 @@
     return out;
   }
 
-  function ensure() { if (!Core.editorReady()) Core.kernel('editor_config', Wire.encode(config())); }
+  function ensure() { (node?require('./bootstrap-wasm'):root.RailBootstrap).ensure(); }
   function run(s, op, args, query = false) {
     ensure();
     const out = Wire.decode(Core.kernel('editor_run', Wire.encode({

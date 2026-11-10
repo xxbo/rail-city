@@ -17,10 +17,7 @@
     CREDIT = 3e9,
     MAX_LOAN = 1e9,
     RATE = .0005,
-    TERM = 30,
-    TRACK = BAL.TRACK,
-    STATION = BAL.STATION,
-    CAR = BAL.CAR;
+    TERM = 30;
 
   const Assets = node ? require('./assets-wasm') : root.RailAssets;
   function init(s) {
@@ -236,9 +233,9 @@
     MAX_LOAN,
     RATE,
     TERM,
-    TRACK,
-    STATION,
-    CAR
+    get TRACK(){return BAL.TRACK;},
+    get STATION(){return BAL.STATION;},
+    get CAR(){return BAL.CAR;}
   };
   if (node) module.exports = api;
   else root.RailManagement = api;

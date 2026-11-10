@@ -10,103 +10,7 @@
     SIZE = 12,
     AREA = (SIZE * .045) ** 2,
     FIELDS = ['people', 'jobs', 'shops', 'industry', 'leisure'];
-  const TYPES = {
-    school: {
-      name: '学校',
-      icon: '学',
-      color: '#397bd5',
-      radius: [.8, 1.4, 2],
-      capacity: [600, 1800, 4500],
-      price: [20e6, 60e6, 160e6],
-      jobs: [45, 120, 300],
-      visits: [300, 900, 2200]
-    },
-    hospital: {
-      name: '医院',
-      icon: '医',
-      color: '#df706b',
-      radius: [1.5, 2.5, 4],
-      capacity: [800, 2400, 6000],
-      price: [50e6, 140e6, 360e6],
-      jobs: [150, 500, 1200],
-      visits: [500, 1600, 4000]
-    },
-    park: {
-      name: '公园',
-      icon: '园',
-      color: '#37977b',
-      radius: [.6, 1.2, 2.3],
-      capacity: [600, 2000, 6000],
-      price: [12e6, 36e6, 96e6],
-      jobs: [15, 40, 100],
-      visits: [400, 1400, 4200]
-    }
-  };
-  Object.assign(TYPES, {
-    university: {
-      name: '大学',
-      icon: '大',
-      color: '#6574c6',
-      radius: [1, 1.8, 2.8],
-      capacity: [1800, 5500, 14000],
-      price: [40e6, 120e6, 320e6],
-      jobs: [180, 550, 1400],
-      visits: [1000, 3200, 8000],
-      needRate: .08,
-      effect: '住宅 ↑↑ · 商业 ↑ · 科研就业 ↑'
-    },
-    library: {
-      name: '图书馆',
-      icon: '文',
-      color: '#a778ad',
-      radius: [.8, 1.5, 2.4],
-      capacity: [600, 2000, 5000],
-      price: [16e6, 48e6, 128e6],
-      jobs: [35, 90, 220],
-      visits: [450, 1400, 3600],
-      needRate: .03,
-      effect: '住宅 ↑↑ · 文化商业 ↑'
-    },
-    sports: {
-      name: '体育中心',
-      icon: '体',
-      color: '#cf8756',
-      radius: [1, 1.8, 3],
-      capacity: [1200, 4000, 10000],
-      price: [24e6, 72e6, 200e6],
-      jobs: [60, 180, 500],
-      visits: [1000, 3200, 8500],
-      needRate: .04,
-      effect: '休闲商业 ↑↑ · 住宅 ↑'
-    },
-    exhibition: {
-      name: '会展中心',
-      icon: '展',
-      color: '#c39638',
-      radius: [1.2, 2.2, 3.5],
-      capacity: [1800, 6000, 18000],
-      price: [45e6, 140e6, 380e6],
-      jobs: [150, 500, 1400],
-      visits: [2000, 7000, 21000],
-      needRate: .04,
-      effect: '商业 ↑↑↑ · 商务到访 ↑'
-    },
-    logistics: {
-      name: '物流中心',
-      icon: '货',
-      color: '#897399',
-      radius: [1.2, 2.2, 3.5],
-      capacity: [2500, 8000, 22000],
-      price: [32e6, 96e6, 260e6],
-      jobs: [120, 400, 1100],
-      visits: [80, 200, 500],
-      needRate: .03,
-      effect: '工业 ↑↑↑ · 周边住宅吸引力 ↓'
-    }
-  });
-  TYPES.school.effect = '住宅 ↑↑↑ · 教育到访 ↑';
-  TYPES.hospital.effect = '住宅 ↑↑↑ · 服务就业 ↑';
-  TYPES.park.effect = '住宅 ↑↑ · 休闲到访 ↑';
+  const TYPES=new Proxy({}, {get:(_,key)=>(node?require('./bootstrap-wasm'):root.RailBootstrap).settings().types[key],ownKeys:()=>Object.keys((node?require('./bootstrap-wasm'):root.RailBootstrap).settings().types),getOwnPropertyDescriptor:()=>({enumerable:true,configurable:true})});
 
   function native(op,s,extra={}) {
     const T=node?require('./transactions-wasm'):root.RailTransactions;
@@ -125,24 +29,9 @@
   }
   const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x)),
     dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) * .045,
-    cache = new WeakMap(),
-    terrainCache = new WeakMap();
+    cache = new WeakMap();
 
-  function init(s) {
-    if (!s.urban) s.urban = {
-      version: VERSION,
-      revision: 0,
-      step: 0,
-      lastMinute: s.economy?.minute ?? 420,
-      started: s.economy?.minute ?? 420,
-      cells: {},
-      facilities: [],
-      nextId: 1,
-      history: [],
-      totals: Object.fromEntries(FIELDS.map(k => [k, 0]))
-    };
-    return s.urban;
-  }
+  function init(s){if(!s.urban)s.urban=(node?require('./bootstrap-wasm'):root.RailBootstrap).run('urbanInit',{state:{economy:s.economy}});return s.urban;}
   // Automatic city destinations are deterministic game facilities, not a real POI inventory.
   function enableAutomatic(s, base, places = []) {
     const u = init(s);
@@ -181,48 +70,8 @@
 
   function validate(s) {return (node?require('./save-wasm'):root.RailSave).run('urban',{state:s});}
 
-  function terrain(base, p) {
-    let index = terrainCache.get(base);
-    if (!index) {
-      const bins = new Map();
-      for (const c of base.cells) {
-        const key = Math.floor(c.x / 60) + ':' + Math.floor(c.y / 60);
-        if (!bins.has(key)) bins.set(key, []);
-        bins.get(key).push(c);
-      }
-      index = bins;
-      terrainCache.set(base, index);
-    }
-    let best = null,
-      d = Infinity;
-    const x = Math.floor(p.x / 60),
-      y = Math.floor(p.y / 60);
-    for (let a = x - 1; a <= x + 1; a++)
-      for (let b = y - 1; b <= y + 1; b++)
-        for (const c of index.get(a + ':' + b) || []) {
-          const q = Math.hypot(c.x - p.x, c.y - p.y);
-          if (q < d) {
-            d = q;
-            best = c;
-          }
-        }
-    return best;
-  }
-
-  function buildable(s, base, p) {
-    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y) || p.x < 25 || p.y < 25 || p.x > s.world
-      .width - 25 || p.y > s.world.height - 25) return false;
-    const c = terrain(base, p);
-    if (!c) return false;
-    if (H.forRegion(s.region).some(h => h.type !== 'port' && dist(h, p) < .6)) return true;
-    if (s.region === 'gba') {
-      const B = node ? require('./regions') : root.RailRegions,
-        G = node ? require('./gba-data') : root.RailGBA,
-        ll = B.latLon(p, 'gba');
-      return G.land(ll.lon, ll.lat);
-    }
-    return c.populationValid || c.survey > .01;
-  }
+  function terrain(base,p){const B=node?require('./bootstrap-wasm'):root.RailBootstrap;return B.run('terrain',{...B.geo(base),point:p});}
+  function buildable(s,base,p){const B=node?require('./bootstrap-wasm'):root.RailBootstrap;return B.run('buildable',{state:{region:s.region,world:s.world},point:p,...B.geo(base)});}
 
   const assets = () => node ? require('./assets-wasm') : root.RailAssets;
   const facilitiesValue = s => assets().query(s,'facilityValue');

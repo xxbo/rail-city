@@ -15,7 +15,7 @@ extern "C" {
     #[link_name = "sin"]
     fn host_sin(x: f64) -> f64;
 }
-fn random() -> f64 {
+pub(super) fn entropy() -> f64 {
     #[cfg(target_arch = "wasm32")]
     unsafe {
         return host_random();
@@ -23,6 +23,7 @@ fn random() -> f64 {
     #[cfg(not(target_arch = "wasm32"))]
     0.5
 }
+pub(super) fn random() -> f64 { crate::bootstrap::next_entropy() }
 fn sin(x: f64) -> f64 {
     #[cfg(target_arch = "wasm32")]
     unsafe {
@@ -1546,3 +1547,5 @@ pub extern "C" fn editor_run() -> *const f64 {
 pub(super) fn with_config<T>(f: impl FnOnce(&V) -> T) -> T {
     CONFIG.with(|cfg| f(cfg.borrow().as_ref().expect("editor config")))
 }
+
+pub(super) fn install_config(v: V) { CONFIG.with(|c| *c.borrow_mut() = Some(v)); }

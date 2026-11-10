@@ -1,0 +1,1594 @@
+{
+  "unit": "P3-1",
+  "previous": "e2f5414c3d78ce2ee4ffdfa1b92aab929aa895f6",
+  "pureJavaScript": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+  "environment": "Node host; final measurements serialized, local regression runner stopped first. Shared host scheduling/GC variance remains; not browser FPS or whole-page timings.",
+  "assets": {
+    "previousJSBytes": 772898,
+    "currentJSBytes": 624754,
+    "previousWasmBytes": 1634578,
+    "currentWasmBytes": 2103682,
+    "previousWasmGzipBytes": 488822,
+    "currentWasmGzipBytes": 633242,
+    "wasmSha256": "6280f7cd5575de54f9c0dd74e12102c50d777a9454ef401af7829a9159b12cbf"
+  },
+  "cold": {
+    "scope": "Cold API includes JS module loading, WASM compilation/instance and full compatibility view. Three fresh processes per mode/scope, reverse order in round 2. Hash/GC outside time. Peak RSS captured before hash allocation. No DOM, network or FPS.",
+    "baseline": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+    "previous": "e2f5414c3d78ce2ee4ffdfa1b92aab929aa895f6",
+    "summary": [
+      {
+        "scope": "seed",
+        "comparableToJavaScript": true,
+        "hashes": {
+          "javascript": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+          "previous": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+          "current": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185"
+        },
+        "modes": [
+          {
+            "mode": "javascript",
+            "ms": 2.8468289999999996,
+            "cpuMs": 3.934,
+            "heapMiB": 7.044731140136719,
+            "peakRssMiB": 40.18359375,
+            "mainWasmMiB": 0,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "previous",
+            "ms": 8.400015999999994,
+            "cpuMs": 16.971,
+            "heapMiB": 7.193016052246094,
+            "peakRssMiB": 44.55859375,
+            "mainWasmMiB": 1.0625,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "current",
+            "ms": 13.535021,
+            "cpuMs": 25.434,
+            "heapMiB": 7.27783203125,
+            "peakRssMiB": 50.43359375,
+            "mainWasmMiB": 1.375,
+            "bootstrapWasmMiB": 1.6875
+          }
+        ]
+      },
+      {
+        "scope": "tokyoGeo",
+        "comparableToJavaScript": true,
+        "hashes": {
+          "javascript": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+          "previous": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+          "current": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263"
+        },
+        "modes": [
+          {
+            "mode": "javascript",
+            "ms": 22.91598400000001,
+            "cpuMs": 35.377,
+            "heapMiB": 13.303886413574219,
+            "peakRssMiB": 57.80859375,
+            "mainWasmMiB": 0,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "previous",
+            "ms": 28.974572999999992,
+            "cpuMs": 50.768,
+            "heapMiB": 13.398468017578125,
+            "peakRssMiB": 59.15234375,
+            "mainWasmMiB": 1.0625,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "current",
+            "ms": 261.178423,
+            "cpuMs": 369.506,
+            "heapMiB": 14.773796081542969,
+            "peakRssMiB": 156.08203125,
+            "mainWasmMiB": 1.375,
+            "bootstrapWasmMiB": 47.5625
+          }
+        ]
+      },
+      {
+        "scope": "gbaGeo",
+        "comparableToJavaScript": true,
+        "hashes": {
+          "javascript": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+          "previous": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+          "current": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d"
+        },
+        "modes": [
+          {
+            "mode": "javascript",
+            "ms": 222.58668,
+            "cpuMs": 378.749,
+            "heapMiB": 22.769615173339844,
+            "peakRssMiB": 132.62890625,
+            "mainWasmMiB": 0,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "previous",
+            "ms": 232.24433999999997,
+            "cpuMs": 400.786,
+            "heapMiB": 22.864578247070312,
+            "peakRssMiB": 139.9453125,
+            "mainWasmMiB": 1.0625,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "current",
+            "ms": 558.707407,
+            "cpuMs": 709.085,
+            "heapMiB": 23.076255798339844,
+            "peakRssMiB": 235.93359375,
+            "mainWasmMiB": 1.375,
+            "bootstrapWasmMiB": 80.4375
+          }
+        ]
+      },
+      {
+        "scope": "tokyoStartup",
+        "comparableToJavaScript": true,
+        "hashes": {
+          "javascript": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+          "previous": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+          "current": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e"
+        },
+        "modes": [
+          {
+            "mode": "javascript",
+            "ms": 68.21230700000001,
+            "cpuMs": 102.35,
+            "heapMiB": 14.341865539550781,
+            "peakRssMiB": 68.5625,
+            "mainWasmMiB": 0,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "previous",
+            "ms": 99.080411,
+            "cpuMs": 200.148,
+            "heapMiB": 14.768241882324219,
+            "peakRssMiB": 88.01171875,
+            "mainWasmMiB": 1.375,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "current",
+            "ms": 109.878757,
+            "cpuMs": 204.094,
+            "heapMiB": 7.160514831542969,
+            "peakRssMiB": 101.62890625,
+            "mainWasmMiB": 1.375,
+            "bootstrapWasmMiB": 38.3125
+          }
+        ]
+      },
+      {
+        "scope": "gbaStartup",
+        "comparableToJavaScript": true,
+        "hashes": {
+          "javascript": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+          "previous": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+          "current": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1"
+        },
+        "modes": [
+          {
+            "mode": "javascript",
+            "ms": 243.87618500000002,
+            "cpuMs": 403.36,
+            "heapMiB": 28.3714599609375,
+            "peakRssMiB": 136.26953125,
+            "mainWasmMiB": 0,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "previous",
+            "ms": 295.073624,
+            "cpuMs": 510.702,
+            "heapMiB": 28.75323486328125,
+            "peakRssMiB": 149.6640625,
+            "mainWasmMiB": 1.375,
+            "bootstrapWasmMiB": 0
+          },
+          {
+            "mode": "current",
+            "ms": 264.475328,
+            "cpuMs": 366.805,
+            "heapMiB": 7.160560607910156,
+            "peakRssMiB": 129.5859375,
+            "mainWasmMiB": 1.375,
+            "bootstrapWasmMiB": 65.375
+          }
+        ]
+      }
+    ],
+    "results": [
+      {
+        "mode": "javascript",
+        "scope": "seed",
+        "ms": 3.0581069999999926,
+        "cpuMs": 3.934,
+        "heapMiB": 7.056419372558594,
+        "peakRssMiB": 40.05078125,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 0
+      },
+      {
+        "mode": "previous",
+        "scope": "seed",
+        "ms": 11.282808000000003,
+        "cpuMs": 16.971,
+        "heapMiB": 7.1929473876953125,
+        "peakRssMiB": 44.55859375,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 0
+      },
+      {
+        "mode": "current",
+        "scope": "seed",
+        "ms": 14.097529000000009,
+        "cpuMs": 28.234,
+        "heapMiB": 7.27783203125,
+        "peakRssMiB": 49.7578125,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 1.6875,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 0
+      },
+      {
+        "mode": "javascript",
+        "scope": "tokyoGeo",
+        "ms": 22.91598400000001,
+        "cpuMs": 35.377,
+        "heapMiB": 13.303726196289062,
+        "peakRssMiB": 57.43359375,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 0
+      },
+      {
+        "mode": "previous",
+        "scope": "tokyoGeo",
+        "ms": 26.58840699999999,
+        "cpuMs": 44.026,
+        "heapMiB": 13.398490905761719,
+        "peakRssMiB": 59.015625,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 0
+      },
+      {
+        "mode": "current",
+        "scope": "tokyoGeo",
+        "ms": 261.178423,
+        "cpuMs": 369.506,
+        "heapMiB": 14.773796081542969,
+        "peakRssMiB": 156.08203125,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 47.5625,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 0
+      },
+      {
+        "mode": "javascript",
+        "scope": "gbaGeo",
+        "ms": 222.58668,
+        "cpuMs": 383.685,
+        "heapMiB": 22.769363403320312,
+        "peakRssMiB": 132.62890625,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 0
+      },
+      {
+        "mode": "previous",
+        "scope": "gbaGeo",
+        "ms": 209.025654,
+        "cpuMs": 355.041,
+        "heapMiB": 22.864578247070312,
+        "peakRssMiB": 137.8984375,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 0
+      },
+      {
+        "mode": "current",
+        "scope": "gbaGeo",
+        "ms": 552.746971,
+        "cpuMs": 698.068,
+        "heapMiB": 23.076255798339844,
+        "peakRssMiB": 229.921875,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 80.4375,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 0
+      },
+      {
+        "mode": "javascript",
+        "scope": "tokyoStartup",
+        "ms": 68.21230700000001,
+        "cpuMs": 102.35,
+        "heapMiB": 14.341217041015625,
+        "peakRssMiB": 67.82421875,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 0
+      },
+      {
+        "mode": "previous",
+        "scope": "tokyoStartup",
+        "ms": 99.080411,
+        "cpuMs": 200.148,
+        "heapMiB": 14.7611083984375,
+        "peakRssMiB": 87.97265625,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 0,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 0
+      },
+      {
+        "mode": "current",
+        "scope": "tokyoStartup",
+        "ms": 118.04678399999999,
+        "cpuMs": 208.972,
+        "heapMiB": 7.16033935546875,
+        "peakRssMiB": 99.4921875,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 38.3125,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 0
+      },
+      {
+        "mode": "javascript",
+        "scope": "gbaStartup",
+        "ms": 243.87618500000002,
+        "cpuMs": 403.36,
+        "heapMiB": 28.3714599609375,
+        "peakRssMiB": 135.98828125,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 0
+      },
+      {
+        "mode": "previous",
+        "scope": "gbaStartup",
+        "ms": 266.950526,
+        "cpuMs": 460.596,
+        "heapMiB": 28.754165649414062,
+        "peakRssMiB": 149.6640625,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 0,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 0
+      },
+      {
+        "mode": "current",
+        "scope": "gbaStartup",
+        "ms": 264.475328,
+        "cpuMs": 366.805,
+        "heapMiB": 7.160606384277344,
+        "peakRssMiB": 126.078125,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 65.375,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 0
+      },
+      {
+        "mode": "current",
+        "scope": "seed",
+        "ms": 12.725571000000002,
+        "cpuMs": 21.908,
+        "heapMiB": 7.2779693603515625,
+        "peakRssMiB": 49.6171875,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 1.6875,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 1
+      },
+      {
+        "mode": "previous",
+        "scope": "seed",
+        "ms": 8.244495,
+        "cpuMs": 16.685,
+        "heapMiB": 7.1930999755859375,
+        "peakRssMiB": 44.55859375,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 1
+      },
+      {
+        "mode": "javascript",
+        "scope": "seed",
+        "ms": 2.8468289999999996,
+        "cpuMs": 3.798,
+        "heapMiB": 7.044731140136719,
+        "peakRssMiB": 39.9296875,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 1
+      },
+      {
+        "mode": "current",
+        "scope": "tokyoGeo",
+        "ms": 258.67292100000003,
+        "cpuMs": 353.217,
+        "heapMiB": 14.773796081542969,
+        "peakRssMiB": 152.24609375,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 47.5625,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 1
+      },
+      {
+        "mode": "previous",
+        "scope": "tokyoGeo",
+        "ms": 28.974572999999992,
+        "cpuMs": 50.768,
+        "heapMiB": 13.398468017578125,
+        "peakRssMiB": 58.6953125,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 1
+      },
+      {
+        "mode": "javascript",
+        "scope": "tokyoGeo",
+        "ms": 20.057226999999997,
+        "cpuMs": 30.061,
+        "heapMiB": 13.303955078125,
+        "peakRssMiB": 56.30859375,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 1
+      },
+      {
+        "mode": "current",
+        "scope": "gbaGeo",
+        "ms": 558.707407,
+        "cpuMs": 709.085,
+        "heapMiB": 23.076072692871094,
+        "peakRssMiB": 235.93359375,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 80.4375,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 1
+      },
+      {
+        "mode": "previous",
+        "scope": "gbaGeo",
+        "ms": 232.24433999999997,
+        "cpuMs": 411.256,
+        "heapMiB": 22.868865966796875,
+        "peakRssMiB": 139.9453125,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 1
+      },
+      {
+        "mode": "javascript",
+        "scope": "gbaGeo",
+        "ms": 227.23053299999998,
+        "cpuMs": 378.749,
+        "heapMiB": 22.773345947265625,
+        "peakRssMiB": 130.953125,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 1
+      },
+      {
+        "mode": "current",
+        "scope": "tokyoStartup",
+        "ms": 109.878757,
+        "cpuMs": 204.094,
+        "heapMiB": 7.160514831542969,
+        "peakRssMiB": 98.03515625,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 38.3125,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 1
+      },
+      {
+        "mode": "previous",
+        "scope": "tokyoStartup",
+        "ms": 131.944211,
+        "cpuMs": 260.856,
+        "heapMiB": 14.768241882324219,
+        "peakRssMiB": 88.01171875,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 0,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 1
+      },
+      {
+        "mode": "javascript",
+        "scope": "tokyoStartup",
+        "ms": 61.90522299999999,
+        "cpuMs": 99.364,
+        "heapMiB": 14.342323303222656,
+        "peakRssMiB": 67.82421875,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 1
+      },
+      {
+        "mode": "current",
+        "scope": "gbaStartup",
+        "ms": 284.12785199999996,
+        "cpuMs": 401.642,
+        "heapMiB": 7.160560607910156,
+        "peakRssMiB": 126.39453125,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 65.375,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 1
+      },
+      {
+        "mode": "previous",
+        "scope": "gbaStartup",
+        "ms": 325.27688,
+        "cpuMs": 556.516,
+        "heapMiB": 28.75323486328125,
+        "peakRssMiB": 148.953125,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 0,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 1
+      },
+      {
+        "mode": "javascript",
+        "scope": "gbaStartup",
+        "ms": 278.872707,
+        "cpuMs": 457.003,
+        "heapMiB": 28.376434326171875,
+        "peakRssMiB": 135.3515625,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 1
+      },
+      {
+        "mode": "javascript",
+        "scope": "seed",
+        "ms": 2.823444000000009,
+        "cpuMs": 3.941,
+        "heapMiB": 7.0425872802734375,
+        "peakRssMiB": 40.18359375,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 2
+      },
+      {
+        "mode": "previous",
+        "scope": "seed",
+        "ms": 8.400015999999994,
+        "cpuMs": 19.173,
+        "heapMiB": 7.193016052246094,
+        "peakRssMiB": 44.05859375,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 2
+      },
+      {
+        "mode": "current",
+        "scope": "seed",
+        "ms": 13.535021,
+        "cpuMs": 25.434,
+        "heapMiB": 7.276100158691406,
+        "peakRssMiB": 50.43359375,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 1.6875,
+        "hash": "915b17d186a205ac0cdee048782a9c1060cc4c760f3c9b60ad5d435ae51c2185",
+        "round": 2
+      },
+      {
+        "mode": "javascript",
+        "scope": "tokyoGeo",
+        "ms": 23.73579500000001,
+        "cpuMs": 39.199,
+        "heapMiB": 13.303886413574219,
+        "peakRssMiB": 57.80859375,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 2
+      },
+      {
+        "mode": "previous",
+        "scope": "tokyoGeo",
+        "ms": 33.383841000000004,
+        "cpuMs": 51.463,
+        "heapMiB": 13.398399353027344,
+        "peakRssMiB": 59.15234375,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 2
+      },
+      {
+        "mode": "current",
+        "scope": "tokyoGeo",
+        "ms": 267.170122,
+        "cpuMs": 376.323,
+        "heapMiB": 14.773796081542969,
+        "peakRssMiB": 155.51171875,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 47.5625,
+        "hash": "3a9312e4f80e40663a2c23e72b79fc36e3782366604e2ae7fc45df2c8f692263",
+        "round": 2
+      },
+      {
+        "mode": "javascript",
+        "scope": "gbaGeo",
+        "ms": 217.162005,
+        "cpuMs": 365.97,
+        "heapMiB": 22.769615173339844,
+        "peakRssMiB": 131,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 2
+      },
+      {
+        "mode": "previous",
+        "scope": "gbaGeo",
+        "ms": 233.278392,
+        "cpuMs": 400.786,
+        "heapMiB": 22.86450958251953,
+        "peakRssMiB": 137.359375,
+        "mainWasmMiB": 1.0625,
+        "bootstrapWasmMiB": 0,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 2
+      },
+      {
+        "mode": "current",
+        "scope": "gbaGeo",
+        "ms": 601.725972,
+        "cpuMs": 732.27,
+        "heapMiB": 23.076255798339844,
+        "peakRssMiB": 229.15625,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 80.4375,
+        "hash": "a19adbc24c2096e970a88908dcea447c7f199856e24594c95543fbec549b823d",
+        "round": 2
+      },
+      {
+        "mode": "javascript",
+        "scope": "tokyoStartup",
+        "ms": 68.80451000000001,
+        "cpuMs": 107.051,
+        "heapMiB": 14.341865539550781,
+        "peakRssMiB": 68.5625,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 2
+      },
+      {
+        "mode": "previous",
+        "scope": "tokyoStartup",
+        "ms": 98.45538199999999,
+        "cpuMs": 196.453,
+        "heapMiB": 14.769027709960938,
+        "peakRssMiB": 87.4765625,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 0,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 2
+      },
+      {
+        "mode": "current",
+        "scope": "tokyoStartup",
+        "ms": 102.884595,
+        "cpuMs": 188.924,
+        "heapMiB": 7.16094970703125,
+        "peakRssMiB": 101.62890625,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 38.3125,
+        "hash": "4ec2ec685e4982c04c38f42364a8fa6f336ff4e047ba91571c2d115ae4b7bd3e",
+        "round": 2
+      },
+      {
+        "mode": "javascript",
+        "scope": "gbaStartup",
+        "ms": 234.52315099999998,
+        "cpuMs": 378.295,
+        "heapMiB": 28.3707275390625,
+        "peakRssMiB": 136.26953125,
+        "mainWasmMiB": 0,
+        "bootstrapWasmMiB": 0,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 2
+      },
+      {
+        "mode": "previous",
+        "scope": "gbaStartup",
+        "ms": 295.073624,
+        "cpuMs": 510.702,
+        "heapMiB": 28.750946044921875,
+        "peakRssMiB": 125.94921875,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 0,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 2
+      },
+      {
+        "mode": "current",
+        "scope": "gbaStartup",
+        "ms": 234.81967600000002,
+        "cpuMs": 336.915,
+        "heapMiB": 7.1605377197265625,
+        "peakRssMiB": 129.5859375,
+        "mainWasmMiB": 1.375,
+        "bootstrapWasmMiB": 65.375,
+        "hash": "1a346473ed59784cd5d04047d7e97ae24a04966bd3ebd4b07ddffe78ee2e0be1",
+        "round": 2
+      }
+    ]
+  },
+  "runtime": [
+    {
+      "baselineCommit": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+      "scope": "Continuous operating core only: shared serialized world/forecast; 30 warmup + 5 x 30 game minutes; unchanged .1-minute quantum; both Rust versions use compact DTOs; JS receives equivalent full flows; excludes forecast, routing benchmarks, construction, DOM/map rendering and FPS",
+      "method": "Eight independent processes; both Rust versions load compact forecasts, JS uses full forecasts; reversed order in round 2; exact complete state comparison, no excluded fields; forced GC outside timed batches",
+      "lines": 10,
+      "stations": 25,
+      "summary": [
+        {
+          "mode": "javascript",
+          "medianMs": 41.519195000000025,
+          "medianCpuMs": 73.161,
+          "retainedHeapMiB": 18.669052124023438,
+          "eventLoopMaxMs": 59.52697700000002,
+          "peakRssMiB": 105.40234375,
+          "wasmMiB": 0,
+          "bootstrapWasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "previous-worker",
+          "medianMs": 93.82898499999999,
+          "medianCpuMs": 145.895,
+          "retainedHeapMiB": 17.753265380859375,
+          "eventLoopMaxMs": 7.380236000000082,
+          "peakRssMiB": 205.80859375,
+          "wasmMiB": 8.625,
+          "bootstrapWasmMiB": 0,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "rust-sync",
+          "medianMs": 99.17024349999997,
+          "medianCpuMs": 174.228,
+          "retainedHeapMiB": 16.995952606201172,
+          "eventLoopMaxMs": 106.79301499999997,
+          "peakRssMiB": 156.78125,
+          "wasmMiB": 6.875,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        },
+        {
+          "mode": "rust-worker",
+          "medianMs": 113.8827384999999,
+          "medianCpuMs": 173.268,
+          "retainedHeapMiB": 17.582733154296875,
+          "eventLoopMaxMs": 4.513592000000017,
+          "peakRssMiB": 195.69140625,
+          "wasmMiB": 9.5625,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871"
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            60.28501299999999,
+            43.555138,
+            40.693276000000026,
+            37.371601,
+            38.345628999999974
+          ],
+          "medianMs": 40.693276000000026,
+          "cpuMicros": [
+            151388,
+            80008,
+            55766,
+            54135,
+            82832
+          ],
+          "heapMiB": [
+            18.57763671875,
+            18.670364379882812,
+            18.66510772705078,
+            18.757461547851562,
+            18.775962829589844
+          ],
+          "eventLoopMaxMs": [
+            59.52697700000002,
+            43.16348500000004,
+            40.320600999999954,
+            36.472984,
+            37.55860999999999
+          ],
+          "peakRssMiB": 105.40234375,
+          "wasmMiB": 0,
+          "bootstrapWasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            94.01590999999996,
+            95.58813299999997,
+            87.681376,
+            93.19050100000004,
+            93.64206000000001
+          ],
+          "medianMs": 93.64206000000001,
+          "cpuMicros": [
+            162006,
+            134154,
+            144549,
+            147241,
+            120160
+          ],
+          "heapMiB": [
+            17.513137817382812,
+            17.754013061523438,
+            17.68175506591797,
+            17.822540283203125,
+            17.756805419921875
+          ],
+          "eventLoopMaxMs": [
+            1.436380999999983,
+            2.6892380000000458,
+            1.7303930000000491,
+            4.003076999999962,
+            2.478089999999952
+          ],
+          "peakRssMiB": 205.80859375,
+          "wasmMiB": 8.625,
+          "bootstrapWasmMiB": 0,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            107.52152600000005,
+            97.65786600000001,
+            101.15914099999998,
+            93.51260200000002,
+            85.40739000000008
+          ],
+          "medianMs": 97.65786600000001,
+          "cpuMicros": [
+            202118,
+            167496,
+            180960,
+            146175,
+            116605
+          ],
+          "heapMiB": [
+            16.972679138183594,
+            17.0487060546875,
+            16.987686157226562,
+            17.072235107421875,
+            16.99726104736328
+          ],
+          "eventLoopMaxMs": [
+            106.79301499999997,
+            96.78335400000003,
+            100.31442500000003,
+            92.96746700000006,
+            84.53590300000008
+          ],
+          "peakRssMiB": 156.78125,
+          "wasmMiB": 6.875,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            105.69372500000009,
+            118.77959599999997,
+            103.94810100000007,
+            129.235498,
+            113.15082599999982
+          ],
+          "medianMs": 113.15082599999982,
+          "cpuMicros": [
+            180506,
+            169252,
+            176859,
+            175809,
+            149165
+          ],
+          "heapMiB": [
+            17.37474822998047,
+            17.583175659179688,
+            17.512252807617188,
+            17.660438537597656,
+            17.611907958984375
+          ],
+          "eventLoopMaxMs": [
+            1.8144959999999628,
+            4.08652399999994,
+            2.197257000000036,
+            4.513592000000017,
+            3.4101650000000063
+          ],
+          "peakRssMiB": 195.69140625,
+          "wasmMiB": 9.5625,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            125.3979270000001,
+            120.81716600000004,
+            97.79478900000004,
+            114.61465099999998,
+            94.27215199999978
+          ],
+          "medianMs": 114.61465099999998,
+          "cpuMicros": [
+            219843,
+            170727,
+            152805,
+            185166,
+            121814
+          ],
+          "heapMiB": [
+            17.354141235351562,
+            17.582290649414062,
+            17.512313842773438,
+            17.65827178955078,
+            17.613059997558594
+          ],
+          "eventLoopMaxMs": [
+            2.118178000000057,
+            4.435419000000024,
+            2.111827999999946,
+            4.011089999999967,
+            2.483498000000054
+          ],
+          "peakRssMiB": 188.91015625,
+          "wasmMiB": 9.5625,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            107.52862400000004,
+            106.34008499999993,
+            100.68262099999993,
+            89.64471500000002,
+            87.28742199999999
+          ],
+          "medianMs": 100.68262099999993,
+          "cpuMicros": [
+            201656,
+            182823,
+            182401,
+            151303,
+            114724
+          ],
+          "heapMiB": [
+            16.973663330078125,
+            17.0435791015625,
+            16.986045837402344,
+            17.077064514160156,
+            16.994644165039062
+          ],
+          "eventLoopMaxMs": [
+            106.76816500000001,
+            105.48094700000001,
+            99.8569930000001,
+            89.10895400000004,
+            86.41383199999996
+          ],
+          "peakRssMiB": 149.03125,
+          "wasmMiB": 6.875,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            107.29492099999993,
+            109.08369499999992,
+            100.66496700000005,
+            93.16722599999991,
+            89.71394900000007
+          ],
+          "medianMs": 100.66496700000005,
+          "cpuMicros": [
+            188032,
+            155890,
+            161889,
+            120542,
+            116026
+          ],
+          "heapMiB": [
+            17.511642456054688,
+            17.752517700195312,
+            17.68120574951172,
+            17.835403442382812,
+            17.755905151367188
+          ],
+          "eventLoopMaxMs": [
+            2.1381770000000415,
+            4.059653000000026,
+            7.380236000000082,
+            2.5811499999999796,
+            3.626801000000114
+          ],
+          "peakRssMiB": 163.1796875,
+          "wasmMiB": 8.625,
+          "bootstrapWasmMiB": 0,
+          "requests": 564,
+          "inputBytes": 12942564,
+          "outputBytes": 11260680,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "lines": 10,
+          "stations": 25,
+          "samplesMs": [
+            47.88627299999999,
+            40.00531000000001,
+            42.345114000000024,
+            57.623808,
+            30.286067000000003
+          ],
+          "medianMs": 42.345114000000024,
+          "cpuMicros": [
+            124151,
+            69073,
+            69028,
+            77249,
+            68303
+          ],
+          "heapMiB": [
+            18.57819366455078,
+            18.665054321289062,
+            18.667739868164062,
+            18.764175415039062,
+            18.827232360839844
+          ],
+          "eventLoopMaxMs": [
+            47.10352,
+            39.72728799999999,
+            41.973551999999984,
+            56.73274199999997,
+            29.44992400000001
+          ],
+          "peakRssMiB": 104.2734375,
+          "wasmMiB": 0,
+          "bootstrapWasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 7542,
+          "completed": 7300,
+          "checksum": "b7fb86e4b2480232291aa6ae5b261a67050c666b6be64e54464ee3de60d9c871",
+          "round": 1
+        }
+      ]
+    },
+    {
+      "baselineCommit": "498c5cd2af607e60dd1c75a8ba5863c08ac5d4fa",
+      "scope": "Continuous operating core only: shared serialized world/forecast; 30 warmup + 5 x 30 game minutes; unchanged .1-minute quantum; both Rust versions use compact DTOs; JS receives equivalent full flows; excludes forecast, routing benchmarks, construction, DOM/map rendering and FPS",
+      "method": "Eight independent processes; both Rust versions load compact forecasts, JS uses full forecasts; reversed order in round 2; exact complete state comparison, no excluded fields; forced GC outside timed batches",
+      "lines": 14,
+      "stations": 49,
+      "summary": [
+        {
+          "mode": "javascript",
+          "medianMs": 182.0912025,
+          "medianCpuMs": 204.0955,
+          "retainedHeapMiB": 49.416011810302734,
+          "eventLoopMaxMs": 259.169091,
+          "peakRssMiB": 175.68359375,
+          "wasmMiB": 0,
+          "bootstrapWasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "previous-worker",
+          "medianMs": 162.4367515,
+          "medianCpuMs": 219.162,
+          "retainedHeapMiB": 37.530033111572266,
+          "eventLoopMaxMs": 10.733025999999995,
+          "peakRssMiB": 321.02734375,
+          "wasmMiB": 25.5,
+          "bootstrapWasmMiB": 0,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "rust-sync",
+          "medianMs": 172.9336409999999,
+          "medianCpuMs": 229.508,
+          "retainedHeapMiB": 36.96865463256836,
+          "eventLoopMaxMs": 221.76616,
+          "peakRssMiB": 307.7109375,
+          "wasmMiB": 20.5625,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        },
+        {
+          "mode": "rust-worker",
+          "medianMs": 152.55493200000006,
+          "medianCpuMs": 222.8535,
+          "retainedHeapMiB": 37.35468673706055,
+          "eventLoopMaxMs": 5.495676000000003,
+          "peakRssMiB": 348.56640625,
+          "wasmMiB": 26.4375,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a"
+        }
+      ],
+      "results": [
+        {
+          "mode": "javascript",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            259.941137,
+            219.94537200000002,
+            174.136704,
+            125.84536400000002,
+            120.69927099999995
+          ],
+          "medianMs": 174.136704,
+          "cpuMicros": [
+            408805,
+            355461,
+            196966,
+            159531,
+            135217
+          ],
+          "heapMiB": [
+            49.12480163574219,
+            49.29802703857422,
+            49.426612854003906,
+            49.416831970214844,
+            49.611351013183594
+          ],
+          "eventLoopMaxMs": [
+            259.169091,
+            219.14373999999998,
+            174.477844,
+            125.00425399999995,
+            119.86082399999987
+          ],
+          "peakRssMiB": 175.68359375,
+          "wasmMiB": 0,
+          "bootstrapWasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            167.648461,
+            148.8303629999998,
+            159.42984,
+            140.26034000000004,
+            128.00268399999982
+          ],
+          "medianMs": 148.8303629999998,
+          "cpuMicros": [
+            250486,
+            201052,
+            212490,
+            193733,
+            166947
+          ],
+          "heapMiB": [
+            37.46598815917969,
+            37.423583984375,
+            37.52943420410156,
+            37.54133605957031,
+            37.53514862060547
+          ],
+          "eventLoopMaxMs": [
+            10.733025999999995,
+            3.612367999999833,
+            4.240123999999923,
+            3.5456080000001293,
+            3.5797900000000027
+          ],
+          "peakRssMiB": 317.71484375,
+          "wasmMiB": 25.5,
+          "bootstrapWasmMiB": 0,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            222.52302399999996,
+            186.19250499999987,
+            191.93497500000012,
+            156.79008699999986,
+            138.12907699999982
+          ],
+          "medianMs": 186.19250499999987,
+          "cpuMicros": [
+            352270,
+            293322,
+            240072,
+            204451,
+            175800
+          ],
+          "heapMiB": [
+            36.936607360839844,
+            37.22863006591797,
+            37.117942810058594,
+            36.969444274902344,
+            36.897499084472656
+          ],
+          "eventLoopMaxMs": [
+            221.76616,
+            185.33648200000005,
+            191.1116709999999,
+            155.90681300000006,
+            137.2684569999999
+          ],
+          "peakRssMiB": 306.40625,
+          "wasmMiB": 20.5625,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            194.9253809999999,
+            182.933129,
+            150.42915400000015,
+            148.4631260000001,
+            134.04373299999997
+          ],
+          "medianMs": 150.42915400000015,
+          "cpuMicros": [
+            285569,
+            248774,
+            220741,
+            197486,
+            183554
+          ],
+          "heapMiB": [
+            37.27410125732422,
+            37.220733642578125,
+            37.361854553222656,
+            37.364418029785156,
+            37.34754180908203
+          ],
+          "eventLoopMaxMs": [
+            4.9205599999999095,
+            5.28983600000015,
+            3.9660919999998896,
+            3.911550000000034,
+            4.087865999999849
+          ],
+          "peakRssMiB": 348.56640625,
+          "wasmMiB": 26.4375,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 0
+        },
+        {
+          "mode": "rust-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            154.68070999999998,
+            162.93413799999996,
+            182.6058700000001,
+            143.78111799999988,
+            140.27729
+          ],
+          "medianMs": 154.68070999999998,
+          "cpuMicros": [
+            227190,
+            224966,
+            277373,
+            177139,
+            190042
+          ],
+          "heapMiB": [
+            37.274627685546875,
+            37.218544006347656,
+            37.36183166503906,
+            37.37804412841797,
+            37.38158416748047
+          ],
+          "eventLoopMaxMs": [
+            2.9639519999999493,
+            5.370268000000124,
+            3.952771999999868,
+            4.794810000000098,
+            5.495676000000003
+          ],
+          "peakRssMiB": 329.82421875,
+          "wasmMiB": 26.4375,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "rust-sync",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            200.9715399999999,
+            198.89488599999993,
+            159.67477699999995,
+            148.22318699999983,
+            149.71487000000002
+          ],
+          "medianMs": 159.67477699999995,
+          "cpuMicros": [
+            324659,
+            309546,
+            218944,
+            189905,
+            186927
+          ],
+          "heapMiB": [
+            36.939613342285156,
+            37.23187255859375,
+            37.116600036621094,
+            36.967864990234375,
+            36.89018249511719
+          ],
+          "eventLoopMaxMs": [
+            200.24930800000004,
+            198.034847,
+            158.86309000000006,
+            147.34648300000003,
+            148.85033399999998
+          ],
+          "peakRssMiB": 307.7109375,
+          "wasmMiB": 20.5625,
+          "bootstrapWasmMiB": 1.6875,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "previous-worker",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            196.6261649999999,
+            175.3348629999998,
+            167.98242199999981,
+            165.44366300000002,
+            157.15311600000018
+          ],
+          "medianMs": 167.98242199999981,
+          "cpuMicros": [
+            293442,
+            241163,
+            236080,
+            225834,
+            211700
+          ],
+          "heapMiB": [
+            37.43083953857422,
+            37.390350341796875,
+            37.53063201904297,
+            37.54899597167969,
+            37.5474853515625
+          ],
+          "eventLoopMaxMs": [
+            3.6243019999999433,
+            5.01528200000007,
+            4.373927000000094,
+            4.365072000000055,
+            5.17219399999999
+          ],
+          "peakRssMiB": 321.02734375,
+          "wasmMiB": 25.5,
+          "bootstrapWasmMiB": 0,
+          "requests": 566,
+          "inputBytes": 21083474,
+          "outputBytes": 19654568,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        },
+        {
+          "mode": "javascript",
+          "lines": 14,
+          "stations": 49,
+          "samplesMs": [
+            205.35444000000007,
+            201.735953,
+            190.045701,
+            128.57175600000005,
+            112.6299160000001
+          ],
+          "medianMs": 190.045701,
+          "cpuMicros": [
+            385482,
+            260882,
+            211225,
+            161994,
+            137873
+          ],
+          "heapMiB": [
+            49.1341552734375,
+            49.29627990722656,
+            49.42644500732422,
+            49.415191650390625,
+            49.610435485839844
+          ],
+          "eventLoopMaxMs": [
+            204.61785699999996,
+            200.92769099999998,
+            190.18544899999983,
+            127.76182300000005,
+            111.78064200000017
+          ],
+          "peakRssMiB": 174.46875,
+          "wasmMiB": 0,
+          "bootstrapWasmMiB": 0,
+          "requests": 0,
+          "inputBytes": 0,
+          "outputBytes": 0,
+          "generated": 22974,
+          "completed": 22028,
+          "checksum": "5f54b308d3ff29a27fbd4563267a1f6410959759df8acd43ba2747530fde950a",
+          "round": 1
+        }
+      ]
+    }
+  ]
+}

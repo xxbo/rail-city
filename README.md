@@ -33,6 +33,7 @@ P0、P1、P2-1～P2-4的计划内规则迁移完成；浏览器保留显示、�
 - [MAP65存档验收与双基线测量](rail/rust-wasm-map65.md)
 - [迁移审计](rail/rust-migration-audit.md)
 - [P3 完整Rust与纯界面JS计划](rail/rust-ui-only-plan.md)
+- [P3-1 Rust 初始化、世界与数据基础（当前）](rail/rust-wasm-p3-1.md)
 - [P3-0 行为基线、边界和会话基础](rail/rust-wasm-p3-0.md)
 - [P3 会话与平台绑定合同](rail/p3-session-contract.md)
 

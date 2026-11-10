@@ -19,7 +19,7 @@ jobs:
         run: |
           rustup toolchain install 1.99.1 --profile minimal --target wasm32-unknown-unknown
           node scripts/build_rail_wasm.cjs --check
-      - name: Verify opt-in Rust session contract
+      - name: Verify Rust initialization and session artifact
         run: node scripts/build_rail_session_contract.cjs --check
       - name: Verify simulation and standalone publication
         run: node scripts/run_rail_tests.cjs
