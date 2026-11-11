@@ -50,7 +50,7 @@ impl Owner{
         "storageObserved"=>{self.observed.insert(v.get("key").text().into(),v.get("text").clone());Ok(V::Null)},
         "storageExpected"=>Ok(obj(&[("known",boolean(self.observed.contains_key(v.get("key").text()))),("text",self.observed.get(v.get("key").text()).cloned().unwrap_or(V::Null))])),
         "errorNotice"=>{let at=v.num("at");let due=at.is_finite()&&self.last_error.map_or(true,|last|at-last>=30000.0||at<last);if due{self.last_error=Some(at);}Ok(boolean(due))},
-        "mergeRecords"=>{let mut result=merge(v.get("values").array());for key in ["bestDay","bestHour","totalCompleted"]{if !has(&result,key){result.set(key,n(0.0));}}Ok(result)},
+        "mergeRecords"=>{let values=v.get("values").array();let mut result=obj(&[]);for (index,key) in FIELDS.iter().enumerate(){let mut best=f64::NEG_INFINITY;let mut present=index<3;for value in values{let number=match value.get(key){V::Number(number) if number.is_finite()=>{present=true;*number},_=>0.0};if number>best||(number==0.0&&best==0.0&&number.is_sign_positive()){best=number;}}if present{result.set(key,n(if values.is_empty(){0.0}else{best}));}}Ok(result)},
         "fileSize"=>{let bytes=v.num("bytes");if !bytes.is_finite()||bytes<0.0||bytes>crate::json_codec::MAX_BYTES as f64{return Err("PARSE_SIZE".into());}Ok(V::Null)},
         "decode"=>Ok(decoded(v.get("text"))),"parse"=>parse(v.get("text").text()),"pack"=>Ok(pack(v.get("state").clone(),v.get("runtime").clone(),v.get("settings"))),
         "packView"=>{let mut result=pack(v.get("state").clone(),v.get("runtime").clone(),v.get("settings"));result.set("personalRecords",crate::save::run(&obj(&[("op",text("records")),("value",v.get("settings").get("personalRecords").clone())]),&crate::bootstrap::config()));Ok(result)},
@@ -92,6 +92,14 @@ mod tests{
     fn version_fields_reject_boolean_and_string_coercion(){
         for version in ["true","false","null","\"1\"","2"]{let input=format!("{{\"gameVersion\":7,\"runtimeVersion\":{}}}",version);assert_eq!(parse(&input).unwrap_err(),"VALIDATE_RUNTIME_VERSION");}
         assert_eq!(parse("{\"format\":\"rail-local-save\",\"formatVersion\":true,\"gameVersion\":7}").unwrap_err(),"VALIDATE_FORMAT_VERSION");
+    }
+    #[test]
+    fn public_record_merge_preserves_order_and_js_signed_zero(){
+        let mut owner=Owner::default();
+        let values=arr(vec![obj(&[("bestDay",n(-0.0)),("bestHour",n(-3.0)),("bestRevenue",n(20.0))]),obj(&[("bestDay",n(-0.0)),("bestHour",n(-5.0))])]);
+        let merged=owner.request(&obj(&[("action",text("mergeRecords")),("values",values)]));
+        assert_eq!(merged.entries().iter().map(|(key,_)|key.as_str()).collect::<Vec<_>>(),vec!["bestDay","bestHour","totalCompleted","bestRevenue"]);
+        assert!(merged.num("bestDay").is_sign_negative());assert_eq!(merged.num("bestHour"),-3.0);assert_eq!(merged.num("totalCompleted"),0.0);assert_eq!(merged.num("bestRevenue"),20.0);
     }
     #[test]
     fn records_use_per_field_maxima_and_ignore_invalid_values(){let merged=merge(&[obj(&[("bestDay",n(15.0)),("bestHour",n(f64::NAN))]),obj(&[("bestDay",n(10.0)),("totalCompleted",n(25.0))])]);assert_eq!(merged.num("bestDay"),15.0);assert_eq!(merged.num("totalCompleted"),25.0);assert!(!has(&merged,"bestHour"));}

@@ -187,11 +187,9 @@ async function queueContracts() {
     good: true
   }));
   const good = stored.text;
-  await assert.rejects(queue.request(() => db.write('test', {
-    toJSON() {
-      throw Error('encoding');
-    }
-  })), /encoding/);
+  let tooDeep = {};
+  for (let i = 0; i < 100; i++) tooDeep = {child: tooDeep};
+  await assert.rejects(queue.request(() => db.write('test', tooDeep)), /INVALID_WIRE|DEPTH|depth|过深/);
   assert.equal(stored.text, good);
   await queue.request(() => db.write('test', {
     recovered: true

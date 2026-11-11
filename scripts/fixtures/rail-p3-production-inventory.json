@@ -174,7 +174,6 @@
       "rail/hubs.js",
       "rail/operations-wasm.js",
       "rail/operations.js",
-      "rail/passengers.js",
       "rail/regions.js",
       "rail/ridership.js",
       "rail/routing-wasm.js",
@@ -2632,6 +2631,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/connection-model.js",
+            "rail/demand-worker.js",
             "rail/diagnostics-wasm.js",
             "rail/forecast-catalog.js",
             "rail/operations.js",
@@ -4594,7 +4594,7 @@
       ]
     },
     "rail/demand-worker.js": {
-      "sha256": "005d686ed0a270734f183064452b24e9b72c026ce5523a40a0bf570ac5930bdd",
+      "sha256": "b371fbc457ef0f1e2ea8dacf289e1f16ae189903588909cf0e7cc1ca9b295352",
       "role": "platform",
       "owner": "Rust task/revision/timeout/worker ownership",
       "phase": "P3-8",
@@ -4711,11 +4711,6 @@
         },
         {
           "kind": "importScripts",
-          "target": "rail/passengers.js",
-          "line": 2
-        },
-        {
-          "kind": "importScripts",
           "target": "rail/regions.js",
           "line": 2
         },
@@ -4772,11 +4767,11 @@
       ],
       "functions": [
         {
-          "id": "/onmessage@8:12",
+          "id": "/onmessage@7:12",
           "name": "onmessage",
-          "line": 8,
-          "end": 25,
-          "sha256": "0f4f4c096d4fa929d30c4b52ba235bd165b9dfb0f76c0c1c1732ec2a916ae278",
+          "line": 7,
+          "end": 24,
+          "sha256": "57f22576f671cac51d924ff24f007831ffb486fb5392e1e003e9f93b9f2a1a07",
           "scope": [],
           "role": "platform",
           "phase": "P3-8",
@@ -9258,7 +9253,6 @@
           "owner": "Rust ForecastOwner; opaque handles and immutable projections",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
-            "rail/demand-worker.js",
             "rail/passengers.js",
             "rail/runtime-wasm.js"
           ],
@@ -9709,6 +9703,7 @@
           "owner": "Rust ForecastOwner; opaque handles and immutable projections",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
+            "rail/demand-worker.js",
             "rail/passengers.js",
             "rail/runtime-wasm.js"
           ],
@@ -9793,6 +9788,7 @@
           "productionReferenceCandidates": [
             "rail/city.js",
             "rail/connection-model.js",
+            "rail/demand-worker.js",
             "rail/diagnostics-wasm.js",
             "rail/operations.js",
             "rail/passengers.js",
@@ -11911,6 +11907,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [
+            "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map51_clock.cjs",
             "scripts/test_rail_map51_worker.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
@@ -12090,7 +12087,9 @@
           "productionReferenceCandidates": [
             "rail/ui.js"
           ],
-          "testReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map37.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -12156,7 +12155,9 @@
           "productionReferenceCandidates": [
             "rail/ui.js"
           ],
-          "testReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map37.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -16085,6 +16086,7 @@
             "rail/worker-client.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map42.cjs",
             "scripts/test_rail_map51_clock.cjs",
@@ -16115,8 +16117,7 @@
       "owner": "Rust RuntimeOwner for all supported passenger models, cohorts and queries",
       "phase": "P3-6 bridge",
       "contexts": [
-        "page",
-        "rail/demand-worker.js"
+        "page"
       ],
       "globals": [
         "RailPassengers"
@@ -16363,7 +16364,6 @@
           "owner": "Rust RuntimeOwner for all supported passenger models, cohorts and queries",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
-            "rail/demand-worker.js",
             "rail/forecast-catalog.js",
             "rail/runtime-wasm.js"
           ],
@@ -16651,7 +16651,6 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map27.cjs",
-            "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map45.cjs",
             "scripts/test_rail_map46.cjs",
             "scripts/test_rail_map47.cjs",
@@ -16732,6 +16731,7 @@
             "rail/worker-client.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map42.cjs",
             "scripts/test_rail_map51_clock.cjs",
@@ -20851,6 +20851,7 @@
             "rail/passengers.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map53_calendar.cjs",
             "scripts/test_rail_map53_large_catalog.cjs",
             "scripts/test_rail_map53_native_state.cjs",
@@ -20899,6 +20900,7 @@
             "rail/worker-client.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map42.cjs",
             "scripts/test_rail_map51_clock.cjs",
@@ -27650,7 +27652,6 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map27.cjs",
-            "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map45.cjs",
             "scripts/test_rail_map46.cjs",
             "scripts/test_rail_map47.cjs",
@@ -38245,6 +38246,7 @@
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map42.cjs",
             "scripts/test_rail_map51_clock.cjs",
