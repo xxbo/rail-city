@@ -250,6 +250,7 @@
           "owner": "Rust city/statistics/observation",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
+            "rail/forecast-catalog.js",
             "rail/hubs.js",
             "rail/operations-center.js",
             "rail/regions.js",
@@ -2511,7 +2512,7 @@
       ]
     },
     "rail/city.js": {
-      "sha256": "7a0d87c30618afe4e0ef8598f3b3bd3770b2cca29096a2943157ba995d7f8b69",
+      "sha256": "4057154f5755eb197fb76bfbe3e9727c781fcba0112ff2c85534669b0dea3b99",
       "role": "platform",
       "owner": "Rust legacy_city.rs plus modern native demand modules; Map/view decoding only",
       "phase": "P3-6 bridge",
@@ -2588,7 +2589,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 67,
-          "sha256": "cf56f0e308c78c575254ff954dcb6d925b5027b72f0f6ee35bc2110b616ac83c",
+          "sha256": "a863fae6f3fbd8c3723beffe5ded127e8fa70189c145090f30062f06210ed955",
           "scope": [],
           "role": "platform",
           "phase": "P3-6 bridge",
@@ -3061,7 +3062,7 @@
           "name": "evaluateLegacy",
           "line": 49,
           "end": 49,
-          "sha256": "fb09f65b6516c26144509894942e73197158d80a628ad3e24ad65c4fb9569b2e",
+          "sha256": "6708ee397453eacdcd1ad0b3ec3eb48b7f79a41366e2c65f19d8b2bb36d55784",
           "scope": [],
           "role": "platform",
           "phase": "P3-6 bridge",
@@ -8743,7 +8744,7 @@
       ]
     },
     "rail/forecast-catalog.js": {
-      "sha256": "2f85af37f94b0774a408d6267832c65d5c5d76425e8a1fc77f6125342e256171",
+      "sha256": "9e0056a3b1483e4a834bbbdd61a41ce55b43a10b28be1d606f9d2c9c8a69d273",
       "role": "platform",
       "owner": "Rust ForecastOwner; opaque handles and immutable projections",
       "phase": "P3-2 bridge",
@@ -8800,7 +8801,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 37,
-          "sha256": "f1aa890681681b46087d143cc4f2c24d7fffde047f8ef23442c3556b90a367b0",
+          "sha256": "e081f57e28627441ddcd2047d00e2604c1bd80f16203498b91541ad44dc2910b",
           "scope": [],
           "role": "platform",
           "phase": "P3-2 bridge",
@@ -9716,7 +9717,7 @@
           "name": "adopt",
           "line": 34,
           "end": 34,
-          "sha256": "47b94d1b7fee1194dbb600aecfa9fc509cf24bd63320a00f05c0a48406f867b0",
+          "sha256": "857034c8e7653ddcae05c1c6911bfa79a2cbff3f3e9325a454d71efc01ad885d",
           "scope": [],
           "role": "platform",
           "phase": "P3-2 bridge",
@@ -9732,7 +9733,7 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/key@34:131",
+          "id": "<iife>/key@34:185",
           "name": "key",
           "line": 34,
           "end": 34,
@@ -10871,6 +10872,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/alerts.js",
+            "rail/forecast-catalog.js",
             "rail/operations-center.js",
             "rail/regions.js",
             "rail/street-map.js",
@@ -14296,6 +14298,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/alerts.js",
+            "rail/forecast-catalog.js",
             "rail/hubs.js",
             "rail/regions.js",
             "rail/street-map.js",
@@ -17633,6 +17636,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/alerts.js",
+            "rail/forecast-catalog.js",
             "rail/hubs.js",
             "rail/operations-center.js",
             "rail/street-map.js",
@@ -25338,6 +25342,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/alerts.js",
+            "rail/forecast-catalog.js",
             "rail/hubs.js",
             "rail/operations-center.js",
             "rail/regions.js",
@@ -26468,6 +26473,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/alerts.js",
+            "rail/forecast-catalog.js",
             "rail/hubs.js",
             "rail/operations-center.js",
             "rail/regions.js",

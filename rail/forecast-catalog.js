@@ -31,7 +31,7 @@ function connections(base,state){const handle=forecasts.get(base);return handle?
 function diagnostic(base){const handle=forecasts.get(base);if(!handle)return null;const frame=query(handle,'diagnostic');if(!diagnosticTokens.has(handle))diagnosticTokens.set(handle,(node?require('./routing-wasm'):root.RailRouting).allocateToken());return{token:diagnosticTokens.get(handle),meta:{graph:frame.graph,count:frame.count,compact:true,population:base.population,covered:base.catchment?.covered},data:Float64Array.from(frame.flowData)};}
 function sampling(catalog){return query(catalogs.get(catalog),'sampling');}
 function attachLegacy(base,state){const handle=invoke('attachLegacy',{state,forecast:{flows:base.flows,preparedDefinitions:base.preparedDefinitions}});const owned=lease(handle);forecasts.set(base,owned);return owned;}
-const api={adopt:(base,descriptor)=>{forecasts.set(base,lease(descriptor));return base;},attachLegacy,onDaily,definitions,seal,key:journey=>invoke('journeyKey',{journey}),attach,attachOutput,transport,hydrate,select,profile,daily,setDaily,dailyPatch,totals,legs,page,summary,connections,diagnostic,sampling,
+const api={adopt:(base,descriptor,project=false)=>{if(project)return bind(base,descriptor);forecasts.set(base,lease(descriptor));return base;},attachLegacy,onDaily,definitions,seal,key:journey=>invoke('journeyKey',{journey}),attach,attachOutput,transport,hydrate,select,profile,daily,setDaily,dailyPatch,totals,legs,page,summary,connections,diagnostic,sampling,
  source:base=>forecasts.get(base),meta:catalog=>catalogs.get(catalog),status:base=>{const handle=forecasts.get(base);return handle?query(handle,'status'):null;}};
 if(node)module.exports=api;else root.RailForecastCatalog=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

@@ -39,6 +39,7 @@ pub(super) fn encode(v:&V)->Result<String,String>{
     fn walk(v:&V,out:&mut String,depth:usize,nodes:&mut usize)->Result<(),String>{
         *nodes+=1;if depth>80||*nodes>2_000_000{return Err("ENCODE_STRUCTURE".into());}
         match v{
+            V::Shared(value)=>{*nodes-=1;walk(value,out,depth,nodes)?;},
             V::Missing|V::Null=>out.push_str("null"),V::Bool(v)=>out.push_str(if *v{"true"}else{"false"}),
             V::Number(n)=>if !n.is_finite(){out.push_str("null")}else if *n==0.0{out.push('0')}else{out.push_str(&n.to_string())},
             V::String(s)=>string(s,out)?,V::Array(rows)=>{out.push('[');for(i,v)in rows.iter().enumerate(){if i>0{out.push(',');}walk(v,out,depth+1,nodes)?;}out.push(']');},

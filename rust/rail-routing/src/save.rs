@@ -757,7 +757,7 @@ fn accept(v: &V, cfg: &V, structure: &V) -> u32 {
     }
     0
 }
-fn definitions(plan: &V, flows: &V, offset: f64) -> V {
+pub(super) fn definitions(plan: &V, flows: &V, offset: f64) -> V {
     arr(flows
         .array()
         .iter()

@@ -46,7 +46,7 @@
     return evaluateLegacy(s);
   }
 
-  function evaluateLegacy(s){const out=legacy('cityEvaluate',s),descriptor=out.nativeCatalog;delete out.nativeCatalog;out.catchment.mapping=new Map(out.catchment.mapping);return (node?require('./forecast-catalog'):root.RailForecastCatalog).adopt(out,descriptor);}
+  function evaluateLegacy(s){const out=legacy('cityEvaluate',s),descriptor=out.nativeCatalog;delete out.nativeCatalog;out.catchment.mapping=new Map(out.catchment.mapping);return (node?require('./forecast-catalog'):root.RailForecastCatalog).adopt(out,descriptor,true);}
   const profile = (...args) => (node ? require('./temporal-wasm') : root.RailTemporal).profile(...
     args);
   const api = {

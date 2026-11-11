@@ -639,11 +639,8 @@ pub(super) fn run_owned(
             } else {
                 cal.ids.iter().map(|&id| id as f64).collect::<Vec<_>>()
             };
-            let statistics = if q.native_routes() {
-                vec![if q.has_statistics(){0.0}else{-1.0}, 0.0, 0.0]
-            } else {
-                vec![if q.has_statistics(){0.0}else{-1.0}, 0.0]
-            };
+            let mut statistics=if q.has_statistics(){vec![0.0,0.0]}else{vec![-1.0]};
+            if q.native_routes(){statistics.push(0.0);}
             let zero = vec![0.0];
             let parts: [&[f64]; 8] = [
                 &header,

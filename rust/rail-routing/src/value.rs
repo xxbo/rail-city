@@ -2,6 +2,7 @@
 use crate::queues::Read;
 #[derive(Clone, Debug)]
 pub(super) enum Value {
+    Shared(std::rc::Rc<Value>),
     Missing,
     Null,
     Bool(bool),
@@ -16,8 +17,12 @@ impl Default for Value {
     }
 }
 impl Value {
+    pub fn shared(self)->Self{Self::Shared(std::rc::Rc::new(self))}
+    fn own(&mut self){if let Self::Shared(value)=self{*self=(**value).clone();}}
+
     pub fn n(&self) -> f64 {
         match self {
+            Self::Shared(value)=>value.n(),
             Self::Number(n) => *n,
             Self::Null => 0.0,
             Self::Bool(v) => {
@@ -32,6 +37,7 @@ impl Value {
     }
     pub fn truth(&self) -> bool {
         match self {
+            Self::Shared(value)=>value.truth(),
             Self::Missing | Self::Null => false,
             Self::Bool(v) => *v,
             Self::Number(v) => *v != 0.0 && !v.is_nan(),
@@ -40,6 +46,7 @@ impl Value {
         }
     }
     pub fn text(&self) -> &str {
+        if let Self::Shared(value)=self{return value.text();}
         if let Self::String(v) = self {
             v
         } else {
@@ -47,13 +54,14 @@ impl Value {
         }
     }
     pub fn get(&self, k: &str) -> &Value {
+        if let Self::Shared(value)=self{return value.get(k);}
         if let Self::Object(v) = self {
             v.iter().find(|r| r.0 == k).map_or(&Self::Missing, |r| &r.1)
         } else {
             &Self::Missing
         }
     }
-    pub fn get_mut(&mut self, k: &str) -> &mut Value {
+    pub fn get_mut(&mut self, k: &str) -> &mut Value {self.own();
         if !matches!(self, Self::Object(_)) {
             *self = Self::Object(vec![])
         }
@@ -71,13 +79,14 @@ impl Value {
         *self.get_mut(k) = v;
     }
     pub fn array(&self) -> &[Value] {
+        if let Self::Shared(value)=self{return value.array();}
         if let Self::Array(v) = self {
             v
         } else {
             &[]
         }
     }
-    pub fn array_mut(&mut self) -> &mut Vec<Value> {
+    pub fn array_mut(&mut self) -> &mut Vec<Value> {self.own();
         if !matches!(self, Self::Array(_)) {
             *self = Self::Array(vec![])
         }
@@ -88,13 +97,14 @@ impl Value {
         }
     }
     pub fn entries(&self) -> &[(String, Value)] {
+        if let Self::Shared(value)=self{return value.entries();}
         if let Self::Object(v) = self {
             v
         } else {
             &[]
         }
     }
-    pub fn entries_mut(&mut self)->&mut Vec<(String,Value)>{if !matches!(self,Self::Object(_)){*self=Self::Object(vec![]);}if let Self::Object(rows)=self{rows}else{unreachable!()}}
+    pub fn entries_mut(&mut self)->&mut Vec<(String,Value)>{self.own();if !matches!(self,Self::Object(_)){*self=Self::Object(vec![]);}if let Self::Object(rows)=self{rows}else{unreachable!()}}
     pub fn num(&self, k: &str) -> f64 {
         self.get(k).n()
     }
@@ -171,6 +181,7 @@ fn collect(value: &Value) -> (Vec<String>, Vec<f64>) {
         out: &mut Vec<f64>,
     ) {
         match v {
+            Value::Shared(value)=>tree(value,s,ids,out),
             Value::Missing => out.push(0.0),
             Value::Null => out.push(1.0),
             Value::Bool(v) => out.push(if *v { 3.0 } else { 2.0 }),
@@ -308,6 +319,15 @@ pub(super) fn read_packed(v: &[f64], bytes: &[u8]) -> Option<Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn shared_routes_encode_transparently_and_mutations_copy_on_write() {
+        let original=object([("name",Value::String("route".into())),("edges",Value::Array(vec![Value::Number(3.0)]))]).shared();
+        let mut edited=original.clone();edited.set("name",Value::String("changed".into()));edited.get_mut("edges").array_mut().push(Value::Number(4.0));
+        assert_eq!(original.get("name").text(),"route");assert_eq!(original.get("edges").array().len(),1);
+        assert_eq!(edited.get("name").text(),"changed");assert_eq!(edited.get("edges").array().len(),2);
+        let encoded=write(&original);let decoded=read(&mut Read{v:&encoded,at:0});assert_eq!(write(&decoded),encoded);
+        assert_eq!(crate::json_codec::encode(&original).unwrap(),"{\"name\":\"route\",\"edges\":[3]}");
+    }
     #[test]
     fn packed_values_preserve_wire_semantics_and_bound_strings() {
         let v = object([

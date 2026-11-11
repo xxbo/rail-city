@@ -4,6 +4,7 @@ const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=req
 const {create}=require('./fixtures/rail-memory-grid.cjs');
 const close=(a,b)=>assert(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function forecast(s){const line=require('../rail/service-plan').expand(s).services[0];return {preparedDefinitions:[{id:0,legs:[{service:line.id,dir:1,from:line.stops[0],to:line.stops.at(-1)}],daily:50000,fare:180,purpose:'shopping',back:false,hub:null,externalKind:null,from:line.stops[0],to:line.stops.at(-1),lineIds:[line.parentLine],byLine:{[line.parentLine]:1}}],flows:[]};}
+const legacy=N.emptyWorld('tokyo'),legacyRuntime=P.create(legacy,{flows:[]},420,true);M.advance(legacy,legacyRuntime,1);assert.equal(legacyRuntime.minute,421);P.dispose(legacyRuntime);
 const s=create(2),f=forecast(s),input=structuredClone(f),rt=P.create(s,f,480,false);
 assert.deepEqual(f,input,'attaching a legacy forecast leaves the caller DTO cloneable and unchanged');
 assert.equal(rt.demandStatus.profiles,1,'prepared definitions are retained even without full flows');

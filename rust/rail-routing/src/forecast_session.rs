@@ -123,6 +123,11 @@ pub(super) struct ForecastOwner {
     service_cache:VecDeque<(Vec<u64>,Vec<f64>)>,
 }
 impl ForecastOwner {
+    pub(super) fn adopt_legacy(&mut self,state:&V,forecast:&V)->V{
+        let Some((dto,flows,contracts))=crate::legacy_catalog::encode(state,forecast)else{return fault("INVALID_LEGACY_FORECAST")};
+        let Some(c)=Catalog::from_tables(&dto,flows,Some(contracts))else{return fault("INVALID_LEGACY_FORECAST")};
+        let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);out
+    }
     pub(super) fn diagnose(&mut self,id:u64,input:&V)->V{
         if input.get("op").text()=="alerts"{return crate::diagnostics::query_owned(input,&V::Missing,&[]);}
         let Some(c)=self.catalogs.get_mut(&id)else{return fault("FORECAST_EXPIRED")};
@@ -177,7 +182,7 @@ impl ForecastOwner {
             if op=="accept"{if !accepted&&job.background{self.dirty=true;}return obj(&[("accepted",boolean(accepted))]);}
             self.jobs.remove(&id);if self.pending==Some(id){self.pending=None;}return obj(&[("dirty",boolean(self.dirty))]);
         }
-        if op=="attachLegacy"{let dto=crate::legacy_catalog::encode(input.get("state"),input.get("forecast"));let Some(c)=Catalog::load(&dto)else{return fault("INVALID_LEGACY_FORECAST")};let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);return out;}
+        if op=="attachLegacy"{return self.adopt_legacy(input.get("state"),input.get("forecast"));}
         if op=="attach" {
             let Some(c)=Catalog::load(input.get("dto"))else{return fault("INVALID_FORECAST_CATALOG")};let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);return out;
         }
