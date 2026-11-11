@@ -756,5 +756,32 @@
     "ciRuntime": "Node 20",
     "outcomesCompared": 171,
     "matched": true
+  },
+  "pendingSourceBatch": {
+    "source": "230c1d2ffd7b2a55efa6c1974d1c2a31736dc73b",
+    "validated": false,
+    "phase": "source-only",
+    "suites": [
+      "test_rail_map49.cjs",
+      "test_rail_map50.cjs",
+      "test_rail_map51.cjs",
+      "test_rail_map52.cjs",
+      "test_rail_map53_calendar.cjs",
+      "test_rail_map53_native_state.cjs",
+      "test_rail_map54_windows.cjs",
+      "test_rail_map56_statistics.cjs",
+      "test_rail_map58_retirement.cjs",
+      "test_rail_map59_reroutes.cjs"
+    ],
+    "changes": [
+      "retirement archived geometry and car count",
+      "compact live projection on snapshot",
+      "validated cold arrival mode",
+      "checkpoint feedback preservation",
+      "per-arena full statistics frame counter",
+      "native command and detached fixture migration",
+      "versioned business checkpoint oracle retaining money and passenger comparisons"
+    ],
+    "countsRemainLastVerified": true
   }
 }
