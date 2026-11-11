@@ -18,6 +18,7 @@ try{
  try{M.advance(s,rt,.9);}finally{B.runtime=native;B.forecast=nativeForecast;}
  const storage=Runtime.querySync(rt,'storage');
  assert.equal(storage.cachedProfiles,catalog.length);assert.equal(storage.metadataBatches,2,'2600 cold profiles use two bounded native metadata batches');
+ assert.equal(storage.hostCommandValues,0,'owned simulation emits no legacy per-event host commands');
  assert.equal(storage.preparedDefinitions,0,'all staged templates are committed or released');assert.equal(storage.storedDefinitions,catalog.length);
  assert.equal(reads,0,'unchanged weights never revisit JS getters');assert.equal(Catalog.status(forecast).dailyReads,dailyReads,'unchanged native weights never rescan the directory');
  assert.equal(forecastRequests,0,'native continuations never ask JS for metadata');assert.equal(requests.length,1);assert.equal(requests[0].action,'advanceAll');assert(requests[0].bytes<150);

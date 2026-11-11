@@ -4,13 +4,13 @@ const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=req
 const {create}=require('./fixtures/rail-memory-grid.cjs');
 const close=(a,b)=>assert(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function forecast(s){const line=require('../rail/service-plan').expand(s).services[0];return {preparedDefinitions:[{id:0,legs:[{service:line.id,dir:1,from:line.stops[0],to:line.stops.at(-1)}],daily:50000,fare:180,purpose:'shopping',back:false,hub:null,externalKind:null,from:line.stops[0],to:line.stops.at(-1),lineIds:[line.parentLine],byLine:{[line.parentLine]:1}}],flows:[]};}
-const legacy=N.emptyWorld('tokyo'),legacyRuntime=P.create(legacy,{flows:[]},420,true);M.advance(legacy,legacyRuntime,1);assert.equal(legacyRuntime.minute,421);P.dispose(legacyRuntime);
+const legacy=M.init(N.emptyWorld('tokyo'));legacy.routeModel=1;N.addLine(legacy,[{x:600,y:500},{x:640,y:500}]);const legacyRuntime=P.create(legacy,{flows:[]},420,true);M.advance(legacy,legacyRuntime,1);assert.equal(legacyRuntime.minute,421);assert.deepEqual(legacy.ridership.lines,{},'weighted legacy lines do not receive modern feedback');assert.doesNotThrow(()=>LS.parse(JSON.stringify(LS.pack(legacy,P.snapshot(legacyRuntime)))),'legacy running worlds remain valid save files');P.dispose(legacyRuntime);
 const s=create(2),f=forecast(s),input=structuredClone(f),rt=P.create(s,f,480,false);
 assert.deepEqual(f,input,'attaching a legacy forecast leaves the caller DTO cloneable and unchanged');
 assert.equal(rt.demandStatus.profiles,1,'prepared definitions are retained even without full flows');
 for(let i=0;i<4;i++)M.advance(s,rt,10);
 assert(rt.completed>0);assert(rt.boarded>0);assert(rt.revenue>0);
-assert.equal(s.economy.minute,rt.minute,'world and runtime publish the same canonical minute');const saved=P.snapshot(rt),savedWorld=structuredClone(s),restored=P.restore(savedWorld,f,structuredClone(saved));assert(restored);
+assert.equal(s.economy.minute,rt.minute,'world and runtime publish the same canonical minute');const saved=P.snapshot(rt),savedWorld=structuredClone(s),restored=P.restore(savedWorld,f,structuredClone(saved));assert(restored);assert.equal(JSON.stringify(P.snapshot(restored)),JSON.stringify(saved),'immediate native restore preserves the complete ordered checkpoint');
 for(const field of ['lineRevenue','lineBoarded','purposeCompleted'])assert.deepEqual(P.snapshot(restored)[field],saved[field],field+' survives restore');
 assert(Object.values(saved.lineRevenue).some(n=>n>1000));assert(Object.values(saved.lineBoarded).some(n=>n>0));assert(saved.purposeCompleted.shopping>0);
 for(let i=0;i<3;i++){M.advance(s,rt,5);M.advance(savedWorld,restored,5);assert.deepEqual(P.snapshot(rt),P.snapshot(restored),'complete native checkpoint continuation');assert.deepEqual(s,savedWorld,'complete native world continuation');}
@@ -44,6 +44,7 @@ console.log('P3 regressions passed: queue wire ordering, prepared catalogs, immu
  try{
   await M.advanceBudgetAsync(s,rt,12,{budget:1e6,maxSteps:10000});
   assert(require('../rail/runtime-wasm').usesWorker(rt),'normal handoff actually reaches the Worker');
+  const history=await P.historyAsync(rt);assert.deepEqual(history,{current:s.ridership.current,history:s.ridership.history},'history query projects the native ridership fields');history.current.completed=-1;assert.notEqual((await P.historyAsync(rt)).current.completed,-1,'history results are detached');
   const stableSummary=P.summary(rt),world=structuredClone(s),saved=await P.snapshotAsync(rt);assert.deepEqual(P.summary(rt),stableSummary,"full Worker snapshot preserves the live summary");restored=P.restore(world,f,structuredClone(saved));assert(restored);
   await M.advanceBudgetAsync(s,rt,3,{budget:1e6,maxSteps:10000});M.advance(world,restored,3);
   assert.deepEqual(await P.snapshotAsync(rt),P.snapshot(restored),'worker and restored local native arenas continue identically');assert.deepEqual(s,world);

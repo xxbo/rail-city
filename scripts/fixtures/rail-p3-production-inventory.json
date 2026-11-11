@@ -2929,6 +2929,7 @@
             "scripts/test_rail_map19.cjs",
             "scripts/test_rail_map20.cjs",
             "scripts/test_rail_map22.cjs",
+            "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map61_validation.cjs"
           ],
@@ -11104,7 +11105,7 @@
       ]
     },
     "rail/local-save.js": {
-      "sha256": "b6a55754fb776d3d40665596e2119351ac25af41a5c24e8ff4429a90b4f330e1",
+      "sha256": "fbdceda13128aca4ba9e096ff27fd37a76517074bd4abd7402a76508141baad1",
       "role": "platform",
       "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
       "phase": "P3-7 bridge",
@@ -11135,8 +11136,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 20,
-          "sha256": "13604dd246381590442d07addefd79100311ced31a61c452956c664e35e375a4",
+          "end": 21,
+          "sha256": "0d9ca0fa57c15f7703c7b1f338f0cadf8b537cad8667657f204a524e26aa6bd2",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -11204,8 +11205,8 @@
           "id": "<iife>/errorMessage@4:0",
           "name": "errorMessage",
           "line": 4,
-          "end": 15,
-          "sha256": "9bf2f5d7f5e0e5f20ca42f8ce9660428890e125460cd7947d8f13f263e9baeb1",
+          "end": 16,
+          "sha256": "d4bacf8f1356f4c4d85411d8c62568453fc94be8117ca83d05a56fa386ea1e65",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -11220,10 +11221,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/pack@17:7",
+          "id": "<iife>/pack@18:7",
           "name": "pack",
-          "line": 17,
-          "end": 17,
+          "line": 18,
+          "end": 18,
           "sha256": "ab60ef1e7ca6310b128bb2dd33619676853d583da2a017f191f3589d7738ce29",
           "scope": [],
           "role": "platform",
@@ -11245,16 +11246,17 @@
             "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map52.cjs",
+            "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/parse@18:8",
+          "id": "<iife>/parse@19:8",
           "name": "parse",
-          "line": 18,
-          "end": 18,
+          "line": 19,
+          "end": 19,
           "sha256": "f6f3700b7889278032f92f7bd2bb68704fb6000c14fbad4384a6f9dac265da5f",
           "scope": [],
           "role": "platform",
@@ -11304,6 +11306,7 @@
             "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map54_windows.cjs",
+            "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map62_network.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_regressions.cjs",
@@ -11315,10 +11318,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/records@18:515",
+          "id": "<iife>/records@19:515",
           "name": "records",
-          "line": 18,
-          "end": 18,
+          "line": 19,
+          "end": 19,
           "sha256": "3c51e902d45975aff424f9a110c3a4ddda9907eb692bac409ceeb6819e5ab506",
           "scope": [],
           "role": "platform",
@@ -12538,9 +12541,11 @@
             "scripts/test_rail_map53_large_catalog.cjs",
             "scripts/test_rail_map53_native_state.cjs",
             "scripts/test_rail_map53_worker_queue.cjs",
+            "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
+            "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_boundary.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -16134,7 +16139,7 @@
       ]
     },
     "rail/passengers.js": {
-      "sha256": "6791092e16ca1fa6bf97143ea0599bd3222daf1d178c726e165a2ad7fbf97f84",
+      "sha256": "adc58e4133d0f452e5eb54b056c4fdafae4475eb4dd73bad0956a5a9682e7e21",
       "role": "platform",
       "owner": "Rust RuntimeOwner for all supported passenger models, cohorts and queries",
       "phase": "P3-6 bridge",
@@ -16197,7 +16202,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 16,
-          "sha256": "e74ce51d930a0f19cd573571030ea74d1efd5a08430c0f6f378f4d32b69ca02d",
+          "sha256": "39025ad10e98f67e72651c024f8276811929912106129c3ee37620d1d3fe3c9d",
           "scope": [],
           "role": "platform",
           "phase": "P3-6 bridge",
@@ -16780,7 +16785,25 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/nativeViews@12:155",
+          "id": "<iife>/historyAsync@12:118",
+          "name": "historyAsync",
+          "line": 12,
+          "end": 12,
+          "sha256": "612e9df1736fc56ce1ad66c19e99366777884ea11f60112726f6d1cde9f56ad1",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-6 bridge",
+          "owner": "Rust RuntimeOwner for all supported passenger models, cohorts and queries",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map57_lifecycle.cjs",
+            "scripts/test_rail_p3_regressions.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/nativeViews@12:162",
           "name": "nativeViews",
           "line": 12,
           "end": 12,
@@ -18637,7 +18660,8 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map14.cjs",
             "scripts/test_rail_map28.cjs",
-            "scripts/test_rail_map55_history.cjs"
+            "scripts/test_rail_map55_history.cjs",
+            "scripts/test_rail_map57_lifecycle.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -21122,7 +21146,9 @@
             "rail/save-store.js",
             "rail/ui.js"
           ],
-          "testReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map57_lifecycle.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -26656,6 +26682,7 @@
             "scripts/test_rail_map19.cjs",
             "scripts/test_rail_map20.cjs",
             "scripts/test_rail_map22.cjs",
+            "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map61_validation.cjs"
           ],
@@ -29893,6 +29920,7 @@
             "scripts/test_rail_map19.cjs",
             "scripts/test_rail_map20.cjs",
             "scripts/test_rail_map22.cjs",
+            "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map61_validation.cjs"
           ],

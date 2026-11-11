@@ -154,6 +154,7 @@ impl<'a> Read<'a> {
 pub(super) struct Queues {
     token: f64,
     stats_protocol: bool,
+    emit_commands: bool,
     native_routes: bool,
     routing: Option<crate::journey::Context>,
     new_keys: Vec<(Rc<str>, usize)>,
@@ -188,6 +189,8 @@ pub(super) struct Queues {
     purpose_delta: Ordered<usize, f64>,
 }
 impl Queues {
+    pub(super) fn native_owner(&mut self){self.emit_commands=false;}
+    pub(super) fn host_command_values(&self)->usize{self.commands.len()}
     pub(super) fn protocol(&self) -> f64 {
         if self.native_routes {
             if self.sparse {
@@ -454,6 +457,7 @@ impl Queues {
         Self {
             token,
             stats_protocol: false,
+            emit_commands: true,
             native_routes: false,
             routing: None,
             new_keys: vec![],
@@ -489,6 +493,7 @@ impl Queues {
         }
     }
     fn cmd(&mut self, op: f64, args: &[f64]) {
+        if !self.emit_commands { return; }
         if self.sparse && matches!(op as u8, 3 | 4 | 5 | 6 | 8 | 10 | 11 | 12 | 16) {
             return;
         }
@@ -1411,7 +1416,7 @@ fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut 
     }
     if q.stats_protocol {
         if let Some(stats) = &mut q.stats {
-            q.commands.extend(stats.finish());
+            let frame=stats.finish();if q.emit_commands {q.commands.extend(frame);}
         }
     }
     let pending = request.is_some();

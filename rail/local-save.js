@@ -3,6 +3,7 @@
 const run=(action,args)=>(node?require('./bootstrap-wasm'):root.RailBootstrap).persistence(action,args);
 function errorMessage(error){const code=error?.message||String(error);
   if(code==='PARSE_NONFINITE')return 'JSON存档包含无效数值，请检查文件。';
+  if(code==='PARSE_STRUCTURE')return '存档数据过大或嵌套过深，请选择游戏导出的完整文件。';
   if(code==='PARSE_SIZE')return '请选择64MB以内的JSON存档。';
   if(code.startsWith('PARSE_'))return 'JSON存档解析失败，请选择游戏导出的完整文件。';
   if(code.includes('VERSION')||code==='VALIDATE_SAVE_4'||code==='VALIDATE_SAVE_5')return '此存档版本尚未受支持，原存档已保留。';
