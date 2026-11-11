@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "scope": "Rust unit tests and all Node regression suites; no real browser or deployment",
   "status": "failed",
-  "testedSource": "8ae09583a0b9697bc77dd8325b5fa7deebd4c6a3",
-  "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42978881335",
+  "testedSource": "341d8f087765fbb473b709eb60986e6499734118",
+  "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42983980321",
   "rust": {
-    "passed": 69,
+    "passed": 71,
     "failed": 0,
-    "total": 69
+    "total": 71
   },
   "node": {
     "passed": 63,
@@ -19,245 +19,245 @@
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 313
+        "durationMs": 343
       },
       {
         "id": "test_rail_city_data.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1157
+        "durationMs": 1183
       },
       {
         "id": "test_rail_gba.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1717
+        "durationMs": 1716
       },
       {
         "id": "test_rail_management.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 32299
+        "durationMs": 33570
       },
       {
         "id": "test_rail_map11.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 342
+        "durationMs": 310
       },
       {
         "id": "test_rail_map12.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1984
+        "durationMs": 1929
       },
       {
         "id": "test_rail_map13.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1739
+        "durationMs": 1726
       },
       {
         "id": "test_rail_map14.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 12756
+        "durationMs": 12824
       },
       {
         "id": "test_rail_map15.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2243
+        "durationMs": 2280
       },
       {
         "id": "test_rail_map17.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 3657
+        "durationMs": 3675
       },
       {
         "id": "test_rail_map18.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1518
+        "durationMs": 1540
       },
       {
         "id": "test_rail_map19.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 10446
+        "durationMs": 10418
       },
       {
         "id": "test_rail_map20.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1097
+        "durationMs": 1079
       },
       {
         "id": "test_rail_map21.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 40
+        "durationMs": 41
       },
       {
         "id": "test_rail_map22.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2053
+        "durationMs": 2064
       },
       {
         "id": "test_rail_map23.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1529
+        "durationMs": 1545
       },
       {
         "id": "test_rail_map24.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 868
+        "durationMs": 880
       },
       {
         "id": "test_rail_map25.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1031
+        "durationMs": 1023
       },
       {
         "id": "test_rail_map26.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1162
+        "durationMs": 1135
       },
       {
         "id": "test_rail_map27.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 6953
+        "durationMs": 6564
       },
       {
         "id": "test_rail_map28.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 649
+        "durationMs": 663
       },
       {
         "id": "test_rail_map29.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 3132
+        "durationMs": 3219
       },
       {
         "id": "test_rail_map30.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 35
+        "durationMs": 34
       },
       {
         "id": "test_rail_map31.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 12498
+        "durationMs": 12013
       },
       {
         "id": "test_rail_map32.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 99
+        "durationMs": 96
       },
       {
         "id": "test_rail_map34.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2138
+        "durationMs": 2173
       },
       {
         "id": "test_rail_map35.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 22012
+        "durationMs": 22032
       },
       {
         "id": "test_rail_map36.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1441
+        "durationMs": 1468
       },
       {
         "id": "test_rail_map37.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 531
+        "durationMs": 517
       },
       {
         "id": "test_rail_map38.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 682
+        "durationMs": 660
       },
       {
         "id": "test_rail_map39.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 265
+        "durationMs": 259
       },
       {
         "id": "test_rail_map40.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1235
+        "durationMs": 1258
       },
       {
         "id": "test_rail_map41.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 5521
+        "durationMs": 5623
       },
       {
         "id": "test_rail_map42.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 17590
+        "durationMs": 17459
       },
       {
         "id": "test_rail_map43.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 19526
+        "durationMs": 18993
       },
       {
         "id": "test_rail_map44.cjs",
@@ -271,49 +271,49 @@
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 374
+        "durationMs": 357
       },
       {
         "id": "test_rail_map46.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 421
+        "durationMs": 439
       },
       {
         "id": "test_rail_map47.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 445
+        "durationMs": 432
       },
       {
         "id": "test_rail_map48.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 956
+        "durationMs": 960
       },
       {
         "id": "test_rail_map49.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1005
+        "durationMs": 959
       },
       {
         "id": "test_rail_map49_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 332
+        "durationMs": 328
       },
       {
         "id": "test_rail_map50.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1019
+        "durationMs": 1031
       },
       {
         "id": "test_rail_map50_budget.cjs",
@@ -327,329 +327,329 @@
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 388
+        "durationMs": 363
       },
       {
         "id": "test_rail_map51.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1036
+        "durationMs": 1031
       },
       {
         "id": "test_rail_map51_budget.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 265
+        "durationMs": 263
       },
       {
         "id": "test_rail_map51_clock.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 165
+        "durationMs": 170
       },
       {
         "id": "test_rail_map51_worker.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1129
+        "durationMs": 1113
       },
       {
         "id": "test_rail_map51_worker_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 470
+        "durationMs": 452
       },
       {
         "id": "test_rail_map52.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1026
+        "durationMs": 1042
       },
       {
         "id": "test_rail_map52_budget.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 274
+        "durationMs": 261
       },
       {
         "id": "test_rail_map52_transport.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 589
+        "durationMs": 558
       },
       {
         "id": "test_rail_map52_worker.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1157
+        "durationMs": 1131
       },
       {
         "id": "test_rail_map52_worker_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 489
+        "durationMs": 457
       },
       {
         "id": "test_rail_map53_budget.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 263
+        "durationMs": 269
       },
       {
         "id": "test_rail_map53_calendar.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1353
+        "durationMs": 1229
       },
       {
         "id": "test_rail_map53_demand.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 164
+        "durationMs": 161
       },
       {
         "id": "test_rail_map53_large_catalog.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2575
+        "durationMs": 2495
       },
       {
         "id": "test_rail_map53_native_state.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1010
+        "durationMs": 970
       },
       {
         "id": "test_rail_map53_worker.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1148
+        "durationMs": 1130
       },
       {
         "id": "test_rail_map53_worker_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 482
+        "durationMs": 463
       },
       {
         "id": "test_rail_map54_windows.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 251
+        "durationMs": 246
       },
       {
         "id": "test_rail_map55_history.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 930
+        "durationMs": 925
       },
       {
         "id": "test_rail_map56_statistics.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 287
+        "durationMs": 277
       },
       {
         "id": "test_rail_map57_lifecycle.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 16469
+        "durationMs": 16333
       },
       {
         "id": "test_rail_map58_catalog.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1403
+        "durationMs": 1364
       },
       {
         "id": "test_rail_map58_retirement.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 675
+        "durationMs": 827
       },
       {
         "id": "test_rail_map58_urban.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 41508
+        "durationMs": 40118
       },
       {
         "id": "test_rail_map58_worker_transport.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2005
+        "durationMs": 2047
       },
       {
         "id": "test_rail_map59_reroutes.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 610
+        "durationMs": 744
       },
       {
         "id": "test_rail_map60_services.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 266
+        "durationMs": 267
       },
       {
         "id": "test_rail_map61_validation.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 506
+        "durationMs": 493
       },
       {
         "id": "test_rail_map62_network.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1001
+        "durationMs": 1003
       },
       {
         "id": "test_rail_map63_assets.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1436
+        "durationMs": 1431
       },
       {
         "id": "test_rail_map63_browser.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 398
+        "durationMs": 390
       },
       {
         "id": "test_rail_map64_diagnostics.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 33291
+        "durationMs": 30704
       },
       {
         "id": "test_rail_map65_saves.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1162
+        "durationMs": 1106
       },
       {
         "id": "test_rail_metrics.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 76
+        "durationMs": 72
       },
       {
         "id": "test_rail_network.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 333
+        "durationMs": 322
       },
       {
         "id": "test_rail_operations.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 476
+        "durationMs": 474
       },
       {
         "id": "test_rail_p31_bootstrap.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2072
+        "durationMs": 2063
       },
       {
         "id": "test_rail_p3_boundary.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1911
+        "durationMs": 1912
       },
       {
         "id": "test_rail_p3_contract.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 528
+        "durationMs": 506
       },
       {
         "id": "test_rail_p3_regressions.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 584
+        "durationMs": 631
       },
       {
         "id": "test_rail_publication.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 66
+        "durationMs": 60
       },
       {
         "id": "test_rail_repository.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 25
+        "durationMs": 24
       },
       {
         "id": "test_rail_services.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1978
+        "durationMs": 1917
       },
       {
         "id": "test_rail_streets.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 212
+        "durationMs": 217
       },
       {
         "id": "test_rail_tokyo.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 13919
+        "durationMs": 14040
       },
       {
         "id": "test_rail_view.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 118
+        "durationMs": 101
       }
     ]
   },
@@ -666,21 +666,17 @@
     "nodeFailed": 72
   },
   "previousRound": {
-    "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42974681068",
-    "source": "8b0d0bc9895698510fb1213694ced0b180dedf90",
-    "rustPassed": 68,
-    "nodePassed": 61,
-    "nodeFailed": 30,
-    "verified": "Completed CI job 130370877068; 61/91 Node suites and 68 Rust tests."
+    "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42978881335",
+    "source": "8ae09583a0b9697bc77dd8325b5fa7deebd4c6a3",
+    "rustPassed": 69,
+    "nodePassed": 63,
+    "nodeFailed": 28
   },
-  "improvedSuites": [
-    "test_rail_map65_saves.cjs",
-    "test_rail_p3_contract.cjs"
-  ],
+  "improvedSuites": [],
   "regressedSuites": [],
   "browser": "not-run",
   "deployment": "not-run",
-  "evidence": "Completed independent GitHub Actions job 130384318776 on Node 20: all 171 syntax/regression outcomes collected. Formal pinned Rust 1.99.1 artifacts built successfully; 69 Rust unit tests passed. Node regression suites: 63 passed, 28 failed; all 80 JS syntax checks passed. The final CI gate remains failed. The completed local Node 24 full run agrees with CI Node 20 on all 171 syntax/regression outcomes; no previously passing suite regressed.",
+  "evidence": "Completed CI job 130400693891: pinned Rust 1.99.1 formal WASM build succeeded; 71 Rust tests, all 80 JS syntax checks, and 63/91 Node regression suites passed. The remaining 28 Node suites keep the final CI gate failed. The completed local Node 24 run agrees with CI Node 20 on every one of the 171 syntax/regression outcomes; all 71 local Rust tests also pass.",
   "history": [
     {
       "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42941179936",
@@ -702,18 +698,24 @@
       "rustPassed": 68,
       "nodePassed": 60,
       "nodeFailed": 31
+    },
+    {
+      "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42974681068",
+      "source": "8b0d0bc9895698510fb1213694ced0b180dedf90",
+      "rustPassed": 68,
+      "nodePassed": 61,
+      "nodeFailed": 30,
+      "verified": "Completed CI job 130370877068; 61/91 Node suites and 68 Rust tests."
     }
   ],
   "supplementalValidation": {
-    "formalWasmSha256": "1e9baaee4fc05fb0f5cf9a2bf5a910821fc8b9e5ea7935df64948fe12803f5ca",
-    "formalWasmBytes": 2974263,
+    "formalWasmSha256": "d1a38466b9dcd83bb2f57f233a7cf224d4b505f27cc58d68c6bbeb2d139b09f6",
+    "formalWasmBytes": 2980375,
     "compiler": "Rust 1.99.1",
-    "nativeRestoreExact": true,
-    "historicalFloatAbsoluteTolerance": 1e-07,
-    "deadlineEpsilonMinutes": 1e-08,
-    "map65Checks": 526,
-    "p3ContractChecks": 341,
-    "frozenOracleFiles": "unchanged",
+    "arrivalBufferWireAndPointerReuse": "passed Rust unit test",
+    "clockBudgetAtomicityAndIdleSteps": "passed Rust unit test",
+    "nativeViewProjectionParity": "passed Rust assertion",
+    "authoritativeRebindAndInvalidFullAdvance": "passed Node native regression",
     "boundary": {
       "modules": 80,
       "functions": 1564,
@@ -723,18 +725,12 @@
   },
   "ciStatus": "completed",
   "ciConclusion": "failure",
-  "ciJob": 130384318776,
-  "localAgreement": {
-    "runtime": "Node 24",
-    "ciRuntime": "Node 20",
-    "outcomesCompared": 171,
-    "matched": true
-  },
-  "pendingSourceBatch": {
+  "ciJob": 130400693891,
+  "validatedSourceBatch": {
     "source": "eba3ce0c542cd147dff11ccee9296a2733a9a4af",
-    "phase": "source-only; validation deferred at user request",
-    "validated": false,
-    "ciTriggered": false,
+    "phase": "unified compilation and full regression completed",
+    "validated": true,
+    "ciTriggered": true,
     "lastVerifiedNodePassed": 63,
     "lastVerifiedNodeFailed": 28,
     "changes": [
@@ -745,6 +741,20 @@
       "authoritative checkpoint rebinding",
       "native retirement commands and per-session reroute counters"
     ],
-    "note": "Existing complete-world/checkpoint/business assertions retained. No new passing-suite count is claimed."
+    "note": "New runtime assertions pass. No Node suite changed status; retirement/reroute oracles now reach actual business-state comparisons.",
+    "validationSource": "341d8f087765fbb473b709eb60986e6499734118",
+    "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42983980321"
+  },
+  "remainingFindings": {
+    "management": "Large Tokyo weighted warmup still traps in WASM; no memory-resolution claim.",
+    "retirement": "First native remove-stop command, preview and single-charge assertions pass; the subsequent complete world differs in passenger outcomes and economy values. Remaining edit branches are not reached.",
+    "reroutes": "Native line removal succeeds; subsequent complete worlds differ in ridership, revenue and operating grant.",
+    "otherSuites": "25 earlier full-world/snapshot/budget/RPC/immutable-input comparisons still require individual investigation."
+  },
+  "localAgreement": {
+    "runtime": "Node 24",
+    "ciRuntime": "Node 20",
+    "outcomesCompared": 171,
+    "matched": true
   }
 }
