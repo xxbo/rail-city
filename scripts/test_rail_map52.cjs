@@ -187,12 +187,12 @@ function pair(start=480,weighted=false,prepare=()=>{}){
  const a=create(3);a.economy.minute=start;prepare(a);const b=structuredClone(a),f=forecast(a),ra=Oracle.create(P,a,f,start,weighted),rb=OldP.create(b,f,start,false);if(weighted)rb.arrivalMode='weighted';
  const p={a,b,f,ra,rb};pairs.add(p);return p;
 }
-function closePairs(){for(const p of pairs){if(p.ra)P.dispose(p.ra);if(p.rb)OldP.dispose(p.rb);}pairs.clear();}
+function closePairs(){for(const p of pairs){if(p.ra)P.dispose(p.ra);if(p.rb)OldP.dispose?.(p.rb);}pairs.clear();}
 async function compare(p){Oracle.world(p.a,p.b);Oracle.checkpoint(await P.snapshotAsync(p.ra),OldP.snapshot(p.rb),p.rb.defs,p.a);}
-async function check(p,dt){const actual=M.advanceBudget(p.a,p.ra,dt,{budget:1e6,maxSteps:10000});const expected=OldM.advanceBudget(p.b,p.rb,dt,{budget:1e6,maxSteps:10000,now:()=>0});Oracle.batch(actual,expected);await compare(p);checks++;}
-async function dispatch(p,values){for(const line of [...p.a.services]){const result=Runtime.commandSync(p.ra,{kind:'network',op:'configure',args:{id:line.id,values:{dispatch:values}}}).result;assert(!result.error,result.error);assert(!N.configure(p.b,line.id,{dispatch:values}).error);}OldP.reconcile(p.rb,p.b);}
+async function check(p,dt){const actual=M.advanceBudget(p.a,p.ra,dt,{budget:1e6,maxSteps:10000});const expected=Oracle.advanceLegacy(OldM,p.b,p.rb,dt,{budget:1e6,maxSteps:10000,now:()=>0});Oracle.batch(actual,expected);await compare(p);checks++;}
+async function dispatch(p,values){for(const line of [...p.a.services]){const result=Runtime.commandSync(p.ra,{kind:'network',op:'configure',args:{id:line.id,values:{dispatch:values}}}).result;assert(!result.error,result.error);assert(!OldM.change(p.b,state=>N.configure(state,line.id,{dispatch:values})).error);}OldP.reconcile(p.rb,p.b);}
 async function restoreFixture(p,edit){
- const a=await P.snapshotAsync(p.ra),b=OldP.snapshot(p.rb);P.dispose(p.ra);OldP.dispose(p.rb);edit(p.a,a);edit(p.b,b);
+ const a=await P.snapshotAsync(p.ra),b=OldP.snapshot(p.rb);P.dispose(p.ra);OldP.dispose?.(p.rb);edit(p.a,a);edit(p.b,b);
  p.ra=P.restore(p.a,p.f,a);p.rb=OldP.restore(p.b,p.f,b);assert(p.ra&&p.rb,'explicit edited fixture restores');p.rb.demandStatus.updatedAt=b.demandStatus.updatedAt;
 }
 (async()=>{try{
@@ -205,7 +205,7 @@ for(const weighted of [false,true]){
 for(const start of [539.9,1019.9,1139.9,1379.9,1439.9,1859.9]){
  const p=pair(start);await dispatch(p,{mode:'auto',manual:8,offPeak:4,peak:8});for(let i=0;i<15;i++)await check(p,.1);
 }
-for(const start of [419.9,1139.9]){const p=pair(start);await dispatch(p,{mode:'auto',manual:8,offPeak:0,peak:8});for(let i=0;i<20;i++)await check(p,.2);}
+for(const start of [419.9,1139.9]){const p=pair(start,false,state=>{for(const line of state.services)assert(!N.configure(state,line.id,{dispatch:{mode:'auto',manual:8,offPeak:0,peak:8}}).error);});for(let i=0;i<20;i++)await check(p,.2);}
 // Standalone sampling keeps its independent exact temporal oracle.
 s.ridership={model:22,lines:{missing:{satisfaction:.1,awareness:.4,trust:.6}}};
 exact(SIM.timedArrivals(catalog,s,1020,1,.2,99,true),OldSIM.arrivals(catalog,j=>OldQ.factor(s,j),j=>OldC.profile(j.purpose,j.back,1020,j.externalKind),.2,99));
@@ -216,9 +216,9 @@ assert.equal(Core.status().temporalAbi,1);const source=fs.readFileSync(path.join
 {
  const p=pair();await check(p,.1);const runtime=B.runtime,kernel=Core.kernel,Worker=require('node:worker_threads').Worker,post=Worker.prototype.postMessage;let advances=0,accounts=0;
  Worker.prototype.postMessage=function(data,...args){if(data.kind==='session'&&data.action==='advance')advances++;return post.call(this,data,...args);};B.runtime=(action,...args)=>{if(action==='advance')advances++;return runtime(action,...args);};Core.kernel=(name,input,...args)=>{if(name==='operations_run'&&[2,3].includes(input[1]))accounts++;return kernel(name,input,...args);};
- try{for(let i=0;i<40;i++){const result=await M.advanceBudgetAsync(p.a,p.ra,.1,{worker:false,budget:1e6,maxSteps:10000});assert.equal(result.steps,1);OldM.advance(p.b,p.rb,.1);}}finally{B.runtime=runtime;Core.kernel=kernel;Worker.prototype.postMessage=post;}
+ try{for(let i=0;i<40;i++){const result=await M.advanceBudgetAsync(p.a,p.ra,.1,{worker:false,budget:1e6,maxSteps:10000});assert.equal(result.steps,1);}}finally{B.runtime=runtime;Core.kernel=kernel;Worker.prototype.postMessage=post;}
  // Count stateful requests in either transport; no host accounting RPC is added.
- assert.equal(accounts,0);assert.equal(advances,40);await compare(p);
+ assert.equal(accounts,0);assert.equal(advances,40);for(let i=0;i<40;i++)OldM.advance(p.b,p.rb,.1);await compare(p);
  await restoreFixture(p,state=>{state.economy.cash+=12345;});await check(p,.1);
  Oracle.equal(await M.borrowAsync(p.a,p.ra,1e8),OldM.borrow(p.b,1e8));await check(p,.2);
  Oracle.equal(await M.repayAsync(p.a,p.ra,p.a.economy.loans[0].id),OldM.repay(p.b,p.b.economy.loans[0].id));await check(p,.2);
@@ -266,7 +266,7 @@ for(const cash of [5e9,.01]){
   }
 }
 {
-  const p=pair();const saved=await P.snapshotAsync(p.ra);P.dispose(p.ra);OldP.dispose(p.rb);pairs.delete(p);p.ra={...structuredClone(saved),defs:structuredClone(saved.urbanDefs),plan:X.expand(p.a)};p.rb={...structuredClone(saved),defs:structuredClone(saved.urbanDefs),plan:X.expand(p.b)};
+  const p=pair();const saved=await P.snapshotAsync(p.ra);P.dispose(p.ra);OldP.dispose?.(p.rb);pairs.delete(p);p.ra={...structuredClone(saved),defs:structuredClone(saved.urbanDefs),plan:X.expand(p.a)};p.rb={...structuredClone(saved),defs:structuredClone(saved.urbanDefs),plan:X.expand(p.b)};
   for(const s of [p.a,p.b]) s.urban={facilities:[{kind:'school',level:1,x:s.nodes[0].x,y:s.nodes[0].y}]};
   Q.updateSatisfaction(p.a,p.ra,0);OldQ.updateSatisfaction(p.b,p.rb,0);Oracle.world(p.a,p.b);
   const start=Core.status();

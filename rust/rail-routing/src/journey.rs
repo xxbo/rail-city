@@ -68,6 +68,7 @@ impl Context {
         );
         self.router.update_weights(&rows);
     }
+    pub(super) fn seed_routes(&mut self,routes:&V,trees:&V){self.router.seed(routes);self.router.seed_trees(trees);}
     pub fn resolve(&mut self, source: &V, station: usize, id: usize) -> (Option<V>, V) {
         let next = self.router.route(source, station, id);
         let purpose = source.get("purpose").text().to_string();

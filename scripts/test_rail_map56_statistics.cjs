@@ -18,10 +18,10 @@ function forecast(s,populated){
   s.economy.minute=start;const old=structuredClone(s);let rt=Oracle.create(P,s,f,start,weighted),before=OldP.create(old,f,start,false);
   s.economy.minute=old.economy.minute=start;
   if(weighted)before.arrivalMode='weighted';
-  P.nativeViews(rt);OldP.nativeViews(before);
+  P.nativeViews(rt);
   try{
    for(const dt of [.3,15,45,30,30]){
-    const a=await M.advanceBudgetAsync(s,rt,dt,options),b=await OldM.advanceBudgetAsync(old,before,dt,options);
+    const a=await M.advanceBudgetAsync(s,rt,dt,options),b=Oracle.advanceLegacy(OldM,old,before,dt,options);
     Oracle.batch(a,b);Oracle.world(s,old);Oracle.checkpoint(await P.snapshotAsync(rt),await OldP.snapshotAsync(before),before.defs,s);checks++;
    }
    const stable=await Runtime.query(rt,'storage');maxFull=Math.max(maxFull,stable.statisticsFullFrames);
@@ -33,7 +33,7 @@ function forecast(s,populated){
    const trip={lineIds:[],fare:0,byLine:{}};
    for(const state of [s,old])OldQ.event(state,{minute:nativeSaved.minute,plan:state},trip,'enter',.25);
    rt=P.restore(s,f,nativeSaved);before=OldP.restore(old,f,saved);assert(rt&&before);before.demandStatus.updatedAt=saved.demandStatus.updatedAt;
-   await M.advanceBudgetAsync(s,rt,.4,options);await OldM.advanceBudgetAsync(old,before,.4,options);
+   await M.advanceBudgetAsync(s,rt,.4,options);Oracle.advanceLegacy(OldM,old,before,.4,options);
    Oracle.world(s,old);Oracle.checkpoint(await P.snapshotAsync(rt),await OldP.snapshotAsync(before),before.defs,s);checks++;
    assert.equal((await Runtime.query(rt,'storage')).statisticsFullFrames,1,'new owner loads a single full statistics frame');
   }finally{P.dispose(rt);OldP.dispose(before);}

@@ -14,6 +14,7 @@ const {
 let checkpoints = 0,
   resumes = 0;
 const runtimes=[];
+const Oracle=require('./helpers/native-oracle.cjs');
 const kernel = Core.kernel;
 Core.kernel = function(name, input, ...rest) {
   if (name === 'engine_step' && input[4] === 1) resumes++;
@@ -28,9 +29,9 @@ function forecast(s) {
     w: 8,
     h: 8,
     area: .13,
-    people: 300000,
-    jobs: 200000,
-    shops: 100000,
+    people: 3000000,
+    jobs: 2000000,
+    shops: 1000000,
     industry: 500,
     leisure: 10000
   }));
@@ -50,14 +51,7 @@ function pair(weighted = false) {
   const a = create(3),
     b = structuredClone(a),
     f = forecast(a);
-  const ra = P.create(a, f, 480, false),
-    rb = Old.create(b, f, 480, false);
-  if (weighted) ra.arrivalMode = rb.arrivalMode = 'weighted';
-  for (const rt of [ra, rb])
-    for (const k of Object.keys(rt.stationLimits)) rt.stationLimits[k] = {
-      capacity: 20,
-      outsideCapacity: 15
-    };
+  const ra = Oracle.create(P,a,f,480,weighted), rb = Old.create(b,f,480,false);if(weighted)rb.arrivalMode='weighted';
   return {
     a,
     b,
@@ -70,11 +64,8 @@ function pair(weighted = false) {
 async function step(p,dt) {
   const actual=await M.advanceBudgetAsync(p.a,p.ra,dt,{budget:1e6,maxSteps:10000,now:()=>0});
   const expected=OldM.advanceBudget(p.b,p.rb,dt,{budget:1e6,maxSteps:10000,now:()=>0});
-  assert.deepEqual(actual,expected);
-  assert.deepEqual(p.a,p.b);
-  assert.equal(JSON.stringify(p.a),JSON.stringify(p.b));
-  assert.equal(JSON.stringify(P.snapshot(p.ra)),JSON.stringify(Old.snapshot(p.rb)));
-  assert.deepEqual(p.ra.defs,p.rb.defs);checkpoints++;
+  Oracle.batch(actual,expected);Oracle.world(p.a,p.b);
+  Oracle.checkpoint(await P.snapshotAsync(p.ra),Old.snapshot(p.rb),p.rb.defs,p.a);checkpoints++;
 }
 (async()=>{
 for (const weighted of [false, true]) {
@@ -83,22 +74,17 @@ for (const weighted of [false, true]) {
   assert(p.ra.rejected > 0);
   assert(p.ra.completed > 0);
   // Editing a populated network retains incumbent fares and retires old train geometry.
-  for (const s of [p.a, p.b]) {
-    const l = s.services[0];
-    assert(!N.removeStation(s, l.id, l.stops[1]).error);
-  }
-  P.reconcile(p.ra, p.a);
-  Old.reconcile(p.rb, p.b);
+  const line=p.a.services[0],removed=await M.changeAsync(p.a,p.ra,{kind:'network',op:'removeStation',args:{id:line.id,nodeId:line.stops[1]}});assert(!removed.error,removed.error);
+  assert(!OldM.change(p.b,state=>N.removeStation(state,state.services[0].id,state.services[0].stops[1])).error);Old.reconcile(p.rb,p.b);
   for (let i = 0; i < 50; i++) await step(p, .5);
-  for (const s of [p.a, p.b]) assert(!N.removeLine(s, s.services[2].id).error);
-  P.reconcile(p.ra, p.a);
-  Old.reconcile(p.rb, p.b);
+  const id=p.a.services[2].id,deleted=await M.changeAsync(p.a,p.ra,{kind:'network',op:'removeLine',args:{id}});assert(!deleted.error,deleted.error);
+  assert(!OldM.change(p.b,state=>N.removeLine(state,id)).error);Old.reconcile(p.rb,p.b);
   for (let i = 0; i < 40; i++) await step(p, .5);
   // Full archive replacement triggers a native reload without resetting queues or counters.
-  P.rebase(p.ra, p.a, forecast(p.a));
+  await M.replaceDemandAsync(p.ra,forecast(p.a));
   Old.rebase(p.rb, p.b, forecast(p.b));
   for (let i = 0; i < 20; i++) await step(p, .5);
-  P.dispose(p.ra);
+  P.dispose(p.ra);Old.dispose?.(p.rb);
 }
 console.log(`MAP51 worker queues: ${checkpoints} exact complete states; crowding, retiring trains, station/line removal, reroutes and archive rebase.`);
 })().catch(error=>{console.error(error);for(const rt of runtimes)P.dispose(rt);process.exitCode=1;});

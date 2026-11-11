@@ -28,17 +28,17 @@ const opts={budget:1e6,maxSteps:10000};
    while(expected.defs.length<56001)expected.defs.push({...expected.defs[0],id:expected.defs.length,daily:0});
    await M.replaceDemandAsync(rt,f);OldP.rebase(expected,old,structuredClone(legacyForecast));await P.materializeAsync(rt);assert(rt.defs.length<100);Oracle.checkpoint(await P.snapshotAsync(rt),OldP.snapshot(expected),expected.defs,s);checks++;
    const dispatch={mode:'auto',manual:8,offPeak:4,peak:8},changed=await M.changeAsync(s,rt,{kind:'network',op:'configure',args:{id:l.id,values:{dispatch}}});assert(!changed.error,changed.error);
-   assert(!N.configure(old,l.id,{dispatch}).error);OldP.reconcile(expected,old);Oracle.checkpoint(await P.snapshotAsync(rt),OldP.snapshot(expected),expected.defs,s);
+   assert(!OldM.change(old,state=>N.configure(state,l.id,{dispatch})).error);OldP.reconcile(expected,old);Oracle.checkpoint(await P.snapshotAsync(rt),OldP.snapshot(expected),expected.defs,s);
    await M.advanceBudgetAsync(s,rt,3,opts);OldM.advanceBudget(old,expected,3,opts);Oracle.checkpoint(await P.snapshotAsync(rt),OldP.snapshot(expected),expected.defs,s);Oracle.world(s,old);checks++;
    const saved=await P.snapshotAsync(rt),restored=P.restore(s,f,saved);assert(restored);P.dispose(rt);rt=restored;
-   const oldSaved=OldP.snapshot(expected);OldP.dispose(expected);expected=OldP.restore(old,structuredClone(legacyForecast),oldSaved);assert(expected);expected.demandStatus.updatedAt=oldSaved.demandStatus.updatedAt;
+   const oldSaved=OldP.snapshot(expected);OldP.dispose?.(expected);expected=OldP.restore(old,structuredClone(legacyForecast),oldSaved);assert(expected);expected.demandStatus.updatedAt=oldSaved.demandStatus.updatedAt;
    await M.advanceBudgetAsync(s,rt,3,opts);OldM.advanceBudget(old,expected,3,opts);Oracle.checkpoint(await P.snapshotAsync(rt),OldP.snapshot(expected),expected.defs,s);Oracle.world(s,old);checks++;
-  }finally{P.dispose(rt);OldP.dispose(expected);}
+  }finally{P.dispose(rt);OldP.dispose?.(expected);}
  }
  const threads=require('node:worker_threads'),Worker=threads.Worker;threads.Worker=class{constructor(){throw Error('worker unavailable in this test');}};
  try{
   const s=create(2);s.economy.minute=480;const old=structuredClone(s),l=s.services[0],f={preparedDefinitions:[{id:0,legs:[{service:l.id,dir:1,from:l.stops[0],to:l.stops.at(-1)}],daily:20000,fare:180,purpose:'work',back:false,hub:null,externalKind:null,from:l.stops[0],to:l.stops.at(-1),lineIds:[l.id],byLine:{[l.id]:1}}]};
-  const rt=P.create(s,f,480,false),expected=OldP.create(old,structuredClone(f),480,false);try{await M.advanceBudgetAsync(s,rt,4.2,opts);OldM.advanceBudget(old,expected,4.2,opts);Oracle.world(s,old);Oracle.checkpoint(P.snapshot(rt),OldP.snapshot(expected),expected.defs,s);assert(!Runtime.usesWorker(rt));checks++;}finally{P.dispose(rt);OldP.dispose(expected);}
+  const rt=P.create(s,f,480,false),expected=OldP.create(old,structuredClone(f),480,false);try{await M.advanceBudgetAsync(s,rt,4.2,opts);OldM.advanceBudget(old,expected,4.2,opts);Oracle.world(s,old);Oracle.checkpoint(P.snapshot(rt),OldP.snapshot(expected),expected.defs,s);assert(!Runtime.usesWorker(rt));checks++;}finally{P.dispose(rt);OldP.dispose?.(expected);}
  }finally{threads.Worker=Worker;}
  console.log('MAP53 native state:',checks,'Worker/local business checkpoints, physical crowding, explicit demand edits, archive compaction, native commands and restore.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

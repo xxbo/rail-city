@@ -21,7 +21,7 @@ fn signatures(plan:&V)->V{V::Object(plan.get("services").array().iter().map(|l|{
     let geometry=l.get("trackIds").array().iter().map(|id|crate::editor_geometry::track(plan,id).cloned().unwrap_or(V::Null)).collect();
     (l.get("id").text().into(),text(&crate::diagnostics::json(&arr(vec![l.get("stops").clone(),l.get("trackIds").clone(),if l.get("callStops").truth(){l.get("callStops").clone()}else{l.get("stops").clone()},arr(dirs(l).iter().map(|d|n(*d)).collect()),arr(geometry)]))))
 }).collect())}
-pub(super) struct Migration{pub saved:V,pub rejected:V,pub catalog:u64}
+pub(super) struct Migration{pub saved:V,pub rejected:V,pub catalog:u64,pub routes:V,pub trees:V}
 pub(super) fn migrate(world:&V,previous:&V,mut saved:V,catalog:u64,replacement:bool,owner:&mut ForecastOwner)->Result<Migration,String>{
     let mut plan=expanded(world,saved.num("minute"))?;for k in ["nodes","tracks","companies"]{plan.set(k,world.get(k).clone());}plan.set("baseLines",world.get("services").clone());
     let mut directions=obj(&[]);let mut headways=obj(&[]);let mut limits=obj(&[]);let cfg=crate::bootstrap::config();
@@ -36,7 +36,8 @@ pub(super) fn migrate(world:&V,previous:&V,mut saved:V,catalog:u64,replacement:b
     let mut indices=vec![];for i in 0..count.num("count")as usize{let legs=owner.handle(&obj(&[("action",text("legs")),("id",n(catalog as f64)),("index",n(i as f64))]));if legs.array().iter().all(|e|crate::migration::leg_valid(&plan,&directions,e)){indices.push(n(i as f64));}}
     let selected=owner.handle(&obj(&[("action",text("select")),("id",n(catalog as f64)),("indices",arr(indices))]));if selected.get("error").truth(){return Err(selected.get("error").text().into());}
     let mut saved=result.get("runtime").clone();saved.set("urbanDefs",saved.get("defs").clone());
-    Ok(Migration{saved,rejected:result.get("rejected").clone(),catalog:selected.num("id")as u64})
+    let routes=arr(result.get("routeCache").array().iter().map(|row|{let mut values=row.array().to_vec();if values[4].truth()||matches!(values[4],V::Number(_)){values[4]=saved.get("defs").array().get(values[4].n()as usize).cloned().unwrap_or(V::Null);}arr(values)}).collect());
+    Ok(Migration{saved,rejected:result.get("rejected").clone(),catalog:selected.num("id")as u64,routes,trees:result.get("trees").clone()})
 }
 pub(super) fn review(world:&mut V,runtime:&V,op:&str,args:V)->V{
     let out=crate::diagnostic_review::run(&obj(&[("state",world.clone()),("runtime",runtime.clone()),("op",text(op)),("args",args)]),&crate::bootstrap::config());world.set("operationsReview",out.get("review").clone());out.get("result").clone()

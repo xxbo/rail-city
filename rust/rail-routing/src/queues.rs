@@ -191,6 +191,7 @@ pub(super) struct Queues {
 }
 impl Queues {
     pub(super) fn native_owner(&mut self){self.emit_commands=false;}
+    pub(super) fn seed_routes(&mut self,routes:&crate::value::Value,trees:&crate::value::Value){if let Some(context)=self.routing.as_mut(){context.seed_routes(routes,trees);}}
     pub(super) fn host_command_values(&self)->usize{self.commands.len()}
     pub(super) fn native_reroutes(&self)->usize{self.reroutes}
     pub(super) fn statistics_full_frames(&self)->usize{self.statistics_full_frames}

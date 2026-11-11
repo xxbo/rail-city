@@ -341,6 +341,13 @@ impl Calendar {
             p += 8 + if f[p + 7] != 0.0 { 16 } else { 0 };
         }
     }
+    // City growth changes coverage metadata, not the live calendar or sampling stream.
+    pub(super) fn replace_feedback(&mut self,feedback:Vec<f64>){
+        let mut p=7+int(feedback[6])*2;p+=1+int(feedback[p])*3;
+        let count=int(feedback[p]);p+=1;assert_eq!(count,self.ids.len());
+        let mut offsets=Vec::with_capacity(count);for _ in 0..count{offsets.push(p);p+=9+int(feedback[p+8])+10;}
+        self.feedback=feedback;self.line_offsets=offsets;self.run_offset=p;
+    }
     pub(super) fn refresh_feedback(&mut self,now:f64,q:&crate::queues::Queues,order:&[usize],cache:&mut crate::operations::CoverageCache){
         let frame=self.feedback_frame(now,0.0,q,order);let result=crate::operations::run_cached(&frame,cache);let mut prepared=vec![1.0,result.len()as f64,0.0,0.0];prepared.extend(result);self.save_feedback(&prepared,now);
     }
@@ -449,7 +456,7 @@ pub(super) fn run(
     run_owned(Batch{token:input[0],time:input[1],remaining:input[2],max_steps:int(input[3]),budget:input[4],barrier:input[5],finance:&input[8..8+nf],trace:true},calendar_state,cycle_state,cycle_bytes,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state,&mut |_,_,_,_|false).wire
 }
 pub(super) struct Batch<'a>{pub token:f64,pub time:f64,pub remaining:f64,pub max_steps:usize,pub budget:f64,pub barrier:f64,pub finance:&'a[f64],pub trace:bool}
-pub(super) struct BatchResult{pub wire:Vec<f64>,pub definitions:Vec<(usize,usize)>,pub spawned:Vec<(usize,usize,usize)>}
+pub(super) struct BatchResult{pub minute:f64,pub wire:Vec<f64>,pub definitions:Vec<(usize,usize)>,pub spawned:Vec<(usize,usize,usize)>}
 pub(super) fn run_owned(
     request:Batch<'_>,calendar_state:&mut Option<Calendar>,cycle_state:&mut Option<crate::cycle::Cycle>,cycle_bytes:&[u8],sampling_state:&mut Option<crate::simulation::Sampling>,feedback_cache:&mut crate::operations::CoverageCache,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<crate::queues::Queues>,settlement_state:&mut Option<crate::engine::Settlement>,profiles:&mut impl FnMut(&mut crate::cycle::Cycle,&mut crate::queues::Queues,&[usize],bool)->bool
 )->BatchResult{
@@ -735,7 +742,7 @@ pub(super) fn run_owned(
         let mut output = vec![1.0, steps as f64, remaining, reason, view.len() as f64];
         output.extend(chunks);
         output.extend(view);
-        BatchResult{wire:output,definitions,spawned}
+        BatchResult{minute:time,wire:output,definitions,spawned}
 
 }
 

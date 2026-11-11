@@ -29,7 +29,7 @@ const options = {budget: 1e6, maxSteps: 10000, now: () => 0};
       people: populated ? 3000 + i * 200 : 0, jobs: populated ? 1500 + i * 100 : 0, shops: populated ? 500 : 0, industry: 0, leisure: 0}));
     const forecast = D.evaluate(s, {cells, totals: Object.fromEntries(['people','jobs','shops','industry','leisure'].map(k => [k, cells.reduce((n,c) => n+c[k],0)])),
       metadata: {effectiveConnections: true, demandZoneUnits: 40}});
-    if (start > 40000) s.ridership.history = Array.from({length: 30}, (_, i) => ({...structuredClone(s.ridership.current), number: i + 1}));
+    if(start>40000){s.ridership.history=Array.from({length:30},(_,i)=>({...structuredClone(s.ridership.current),number:i+1}));s.ridership.current.number=32;s.ridership.current.flow.since=start;s.ridership.current.flow.through=start;}
     s.economy.minute=start;const old = structuredClone(s), rt = P.create(s, forecast, start, false), expected = OldP.create(old, forecast, start, false);
     s.economy.minute = old.economy.minute = start;
     P.nativeViews(rt);
@@ -43,7 +43,7 @@ const options = {budget: 1e6, maxSteps: 10000, now: () => 0};
         Oracle.checkpoint(saved,OldP.snapshot(expected),expected.defs,s);
         Oracle.checkpoint(JSON.parse(JSON.stringify(saved)),JSON.parse(JSON.stringify(OldP.snapshot(expected))),expected.defs,s);
         for (const field of FLOW.FIELDS) for (const width of [15,30,60]) {
-          assert.deepEqual(FLOW.view(s.ridership.current, field, width), FLOW.view(old.ridership.current, field, width));
+          Oracle.equal(FLOW.view(s.ridership.current, field, width), FLOW.view(old.ridership.current, field, width));
         }
         assert(s.ridership.history.length <= 30);
         checks++;
