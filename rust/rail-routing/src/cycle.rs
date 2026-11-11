@@ -234,6 +234,14 @@ pub(super) fn run(
     assert_eq!(r.at, input.len());
     execute(state,int(input[4]),int(input[5]),if input[0]==2.0{Some(input[29])}else{None},sparse,&ids,templates,rules,prep,finance,&parts,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state)
 }
+// Reuse the arrival allocation for its wire envelope. Large weighted batches
+// previously kept a second complete arrival vector alive while building tail.
+fn arrival_tail(mut arrivals:Vec<f64>,order:&[f64],total:f64)->Vec<f64>{
+    let prefix=order.len()+3;let old=arrivals.len();
+    arrivals.reserve(prefix);arrivals.resize(old+prefix,0.0);arrivals.copy_within(0..old,prefix);
+    arrivals[0]=order.len()as f64;arrivals[1..1+order.len()].copy_from_slice(order);
+    arrivals[1+order.len()]=0.0;arrivals[2+order.len()]=total;arrivals
+}
 pub(super) fn execute(
     state:&mut Cycle,serial:usize,next:usize,legacy_carry:Option<f64>,sparse:bool,ids:&[usize],templates:&[f64],rules:&[f64],prep:&[f64],finance:&[f64],parts:&[&[f64]],
     sampling_state:&mut Option<crate::simulation::Sampling>,feedback_cache:&mut crate::operations::CoverageCache,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<crate::queues::Queues>,settlement_state:&mut Option<crate::engine::Settlement>
@@ -299,7 +307,9 @@ pub(super) fn execute(
     }
     let mut new = vec![];
     let mut definitions = vec![parts[2][0]];
-    let mut arrivals = vec![];
+    let arrival_values:usize=if ns>0{sample[4..].chunks_exact(2).map(|row|4+state.profiles.get(&int(row[0])).unwrap().lines.len()).sum()}else{0};
+    // At most one train can spawn per template; reserve the future envelope too.
+    let mut arrivals=Vec::with_capacity(arrival_values+int(parts[6][0])+int(templates[0])+3);
     if ns > 0 {
         for (i, row) in sample[4..].chunks_exact(2).enumerate() {
             let p = int(row[0]);
@@ -387,10 +397,8 @@ pub(super) fn execute(
     motion.extend(new_motion);
     let mut header = parts[0].to_vec();
     header[13] = motion.len() as f64;
-    let mut tail = vec![order.len() as f64];
-    tail.extend(order);
-    tail.extend_from_slice(&[0.0, if ns > 0 { sample[3] } else { 0.0 }]);
-    tail.extend(arrivals);
+    let tail=arrival_tail(arrivals,&order,if ns>0{sample[3]}else{0.0});
+    drop(order);
     let mut all_definitions=vec![definitions[0]];all_definitions.extend_from_slice(&parts[2][1..]);all_definitions.extend_from_slice(&definitions[1..]);drop(definitions);
     let mut patch = vec![];
     let mut maturity = vec![];
@@ -480,3 +488,15 @@ impl Cycle{
 }
 
 impl Cycle{pub(super) fn collect_keys(&mut self,q:&mut crate::queues::Queues){for(key,id)in q.take_keys(){self.keys.insert(key,id);self.count=self.count.max(id+1);}}}
+
+#[cfg(test)]
+mod arrival_buffer_tests{
+    use super::arrival_tail;
+    #[test]
+    fn envelope_preserves_wire_and_reuses_reserved_arrival_buffer(){
+        let mut rows=Vec::with_capacity(32);rows.extend_from_slice(&[4.0,0.0,2.5,1.0,7.0]);let ptr=rows.as_ptr();
+        let tail=arrival_tail(rows,&[11.0,12.0],2.5);
+        assert_eq!(tail,vec![2.0,11.0,12.0,0.0,2.5,4.0,0.0,2.5,1.0,7.0]);assert_eq!(tail.as_ptr(),ptr);
+        assert_eq!(arrival_tail(Vec::new(),&[],0.0),vec![0.0,0.0,0.0]);
+    }
+}

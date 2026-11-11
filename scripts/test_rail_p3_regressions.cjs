@@ -22,6 +22,13 @@ close(Object.values(s.ridership.current.lines).reduce((n,row)=>n+(row.operating|
 const authoritative=P.snapshot(rt);rt.minute=-1;rt.generated=-1;rt.trains[0].progress=999;assert.deepEqual(P.snapshot(rt),authoritative,'display mutations cannot alter authoritative state');
 const summary=P.summary(rt);close(summary.generated,summary.waiting+summary.onboard+summary.completed+summary.cancelled);
 assert(P.station(rt,0).today);assert('transferring' in P.station(rt,0));
+{const Runtime=require('../rail/runtime-wasm'),before=P.snapshot(rt);rt.minute=-1;rt.generated=-1;assert.equal(Runtime.rebind(rt,s,f),rt);assert.deepEqual(P.snapshot(rt),before,'rebind consumes an authoritative checkpoint, never display edits');}
+{const world=create(2),runtime=P.create(world,{flows:[]},480,false),before=P.snapshot(runtime);try{
+ for(const minutes of [-1,NaN,Infinity,1e8+1])assert.throws(()=>require('../rail/runtime-wasm').advance(world,runtime,minutes,{full:true}),/INVALID_RUNTIME_BUDGET/);
+ assert.deepEqual(P.snapshot(runtime),before,'invalid full advances preserve the complete arena');
+ const batch=M.advanceBudget(world,runtime,0,{budget:0,maxSteps:1});assert.equal(batch.steps,0);assert.equal(batch.consumed,0);assert.equal(batch.reason,'complete');assert.deepEqual(batch.events,[]);
+}finally{P.dispose(runtime);}}
+
 // Invalid service references reject cleanly and leave the WASM instance usable.
 assert.throws(()=>P.create(create(2),{flows:[{from:0,to:1,trips:1,path:{edges:[{service:'missing',to:1}],fare:1,km:1}}]},480,false),/INVALID_LEGACY_FORECAST/);
 assert.deepEqual(P.snapshot(rt),authoritative);

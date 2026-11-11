@@ -28,8 +28,8 @@ impl Clock {
         self.visible=visible;self.playing=playing;Ok(())
     }
     pub(super) fn begin(&mut self,input:&V)->Result<V,&'static str>{
-        self.observe(input)?;let budget=input.num("budget");if !budget.is_finite()||budget<0.0{return Err("INVALID_SIMULATION_BUDGET");}
-        let mut out=self.status();
+        let budget=input.num("budget");if !budget.is_finite()||budget<0.0{return Err("INVALID_SIMULATION_BUDGET");}self.observe(input)?;
+        let mut out=self.status();out.set("steps",n(0.0));
         if self.active.is_none()&&self.running&&self.pending>EPS&&self.visible&&self.playing{
             self.serial+=1;self.active=Some((self.serial,self.epoch,self.pending));
             out.set("request",obj(&[("ticket",n(self.serial as f64)),("minutes",n(self.pending)),("budget",n(budget)),("maxSteps",n(100.0))]));out.set("busy",boolean(true));
@@ -42,7 +42,7 @@ impl Clock {
         if !left.is_finite()||left<0.0||left>requested||!steps.is_finite()||steps<0.0||steps.fract()!=0.0||steps>100.0{return Err("INVALID_SIMULATION_RESULT");}
         self.active=None;self.elapsed_ms=input.zero("ms");
         if epoch==self.epoch{self.running=result.get("running").truth();self.pending=if self.running{(self.pending-(requested-left)).max(0.0)}else{0.0};}
-        Ok(self.status())
+        let mut status=self.status();status.set("steps",n(steps));Ok(status)
     }
     pub(super) fn fail(&mut self,input:&V)->Result<V,&'static str>{
         let Some((ticket,epoch,_))=self.active else{return Err("NO_ACTIVE_PULSE")};if input.num("ticket")!=ticket as f64{return Err("PULSE_TICKET_MISMATCH");}
@@ -65,5 +65,22 @@ impl Controls{
                 if !running||batch.left<=EPS||batch.steps>=100||batch.steps>0&&v.num("wall")-batch.start>=batch.budget{let mut status=clock.complete(&obj(&[("ticket",n(batch.ticket)),("result",obj(&[("remaining",n(batch.left)),("steps",n(batch.steps as f64)),("running",boolean(running))])),("ms",n(v.num("wall")-batch.start))]))?;status.set("steps",n(batch.steps as f64));status.set("done",boolean(true));self.compat.remove(&(id as u64));return Ok(status);}let dt=batch.left.min(0.1);batch.waiting=Some(dt);return Ok(obj(&[("dt",n(dt)),("done",boolean(false))]));}
             match op{"begin"=>clock.begin(v),"complete"=>clock.complete(v),"fail"=>clock.fail(v),"reset"=>{clock.reset();Ok(clock.status())},"status"=>Ok(clock.status()),_=>Err("UNKNOWN_CLOCK_ACTION")}
         })();result.unwrap_or_else(|e|obj(&[("error",text(e))]))
+    }
+}
+
+#[cfg(test)]
+mod budget_atomicity_tests{
+    use super::*;
+    #[test]
+    fn rejected_budget_does_not_observe_elapsed_and_idle_batches_report_zero_steps(){
+        let mut clock=Clock::new();
+        let input=obj(&[("elapsed",n(0.1)),("speed",n(10.0)),("budget",n(-1.0))]);
+        assert!(matches!(clock.begin(&input),Err("INVALID_SIMULATION_BUDGET")));
+        assert_eq!(clock.status().num("pending"),0.0);
+        let idle=clock.begin(&obj(&[("elapsed",n(0.0)),("speed",n(10.0)),("budget",n(0.0))])).unwrap();
+        assert_eq!(idle.num("steps"),0.0);assert!(!idle.get("request").truth());
+        let started=clock.begin(&obj(&[("elapsed",n(0.1)),("speed",n(10.0)),("budget",n(1.0))])).unwrap();
+        let result=clock.complete(&obj(&[("ticket",started.get("request").get("ticket").clone()),("result",obj(&[("remaining",n(0.5)),("steps",n(5.0)),("running",boolean(true))])),("ms",n(0.0))])).unwrap();
+        assert_eq!(result.num("steps"),5.0);assert_eq!(result.num("pending"),0.5);
     }
 }

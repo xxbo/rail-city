@@ -191,6 +191,7 @@ pub(super) struct Queues {
 impl Queues {
     pub(super) fn native_owner(&mut self){self.emit_commands=false;}
     pub(super) fn host_command_values(&self)->usize{self.commands.len()}
+    pub(super) fn native_reroutes(&self)->usize{self.reroutes}
     pub(super) fn protocol(&self) -> f64 {
         if self.native_routes {
             if self.sparse {
@@ -1526,6 +1527,17 @@ pub(super) fn install(input:&[f64],motion:&mut Option<crate::simulation::MotionS
 impl Queues{pub(super) fn retire_trains(&mut self,ids:&[usize]){for id in ids{self.trains.remove(id);}}}
 
 impl Queues{
+    // Full checkpoints need the live summary, but never a second train/definition tree.
+    pub(super) fn native_view(&self,names:&[String])->crate::value::Value{
+        use crate::editor_support::*;use crate::value::Value as V;
+        let mut queues=V::Object(vec![]);let mut outside=V::Object(vec![]);let mut stations=V::Object(vec![]);
+        let(mut inside,mut external,mut transferring)=(0.0,0.0,0.0);
+        for key in &self.queue_order{let total=self.queues[key].sum(|c|c.n);inside+=total;let station=key.2.to_string();stations.set(&station,n(stations.zero(&station)+total));let name=names.get(key.0).cloned().unwrap_or_default();queues.set(&format!("{}|{}|{}",name,key.1,key.2),obj(&[("total",n(total))]));}
+        for(id,q)in &self.outside{let total=q.sum(|c|c.n);external+=total;outside.set(&id.to_string(),obj(&[("total",n(total))]));}
+        let transfers=self.transfers.iter().map(|x|{transferring+=x.n;let station=x._station.to_string();stations.set(&station,n(stations.zero(&station)+x.n));obj(&[("journey",n(x.j as f64)),("leg",n(x.leg as f64)),("amount",n(x.n)),("ready",n(x.ready)),("station",n(x._station as f64))])}).collect();
+        let onboard=self.trains.values().fold(0.0,|sum,t|sum+t.onboard);
+        obj(&[("minute",n(self.now)),("summary",obj(&[("waiting",n(inside+external+transferring)),("inside",n(inside+transferring)),("outside",n(external)),("transferring",n(transferring)),("onboard",n(onboard))])),("queues",queues),("outside",outside),("transfers",arr(transfers)),("stations",stations)])
+    }
     pub(super) fn object_view(&self,names:&[String],ids:&std::collections::HashMap<usize,String>,full:bool)->crate::value::Value{
         use crate::editor_support::*;use crate::value::Value as V;
         let name=|id:usize|names.get(id).cloned().unwrap_or_default();let token=|t:Token|if t.stamp>=0{format!("{}:{}:{}",t.j,t.leg,t.stamp)}else{format!("{}:{}",t.j,t.leg)};
@@ -1577,6 +1589,7 @@ mod projection_tests{
         let mut passengers=Ordered::new();passengers.set(token,5.0);q.trains.insert(1,Cargo{service:0,parent:0,capacity:800.0,dir:1,is_loop:false,stops:vec![1,2],calls:[1,2].into_iter().collect(),onboard:5.0,cars:8.0,passengers});q.counters[0]=14.0;
         let names=vec!["L".into()];let ids=[(1,"T0001".into())].into_iter().collect();let world=obj(&[]);let mut saved=q.object_view(&names,&ids,true);saved.set("stationLimits",obj(&[("1",obj(&[("capacity",n(20.0)),("outsideCapacity",n(10.0))]))]));
         for(query,target)in [("station",n(1.0)),("train",text("T0001"))]{let actual=if query=="station"{q.station_projection(&world,1,&names)}else{q.train_projection(1)};let reference=crate::runtime_query::query(&world,&saved,&obj(&[("query",text(query)),("target",target)]));assert_eq!(value::write(&actual),value::write(&reference));}
+        assert_eq!(value::write(&q.native_view(&names)),value::write(q.object_view(&names,&ids,false).get("nativeView")));
         assert_eq!(q.station_projection(&world,1,&names).get("lines").num("L"),7.0);let summary=q.summary_projection();assert_eq!(summary.num("waiting"),9.0);assert_eq!(summary.num("inside"),7.0);assert_eq!(summary.num("onboard"),5.0);assert_eq!(summary.num("generated"),14.0);
         assert_eq!(Queues::new(1.0).summary_projection().num("onboard").to_bits(),0.0_f64.to_bits());
         assert!(matches!(q.station_projection(&world,1,&names),V::Object(_)));

@@ -905,6 +905,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
@@ -1663,6 +1664,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
@@ -6836,6 +6838,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
@@ -7350,6 +7353,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
@@ -8932,6 +8936,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
@@ -9873,7 +9878,6 @@
             "scripts/test_rail_map53_budget.cjs",
             "scripts/test_rail_map55_history.cjs",
             "scripts/test_rail_map58_catalog.cjs",
-            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
@@ -11901,7 +11905,8 @@
             "scripts/test_rail_map53_calendar.cjs",
             "scripts/test_rail_map53_native_state.cjs",
             "scripts/test_rail_map53_worker_queue.cjs",
-            "scripts/test_rail_map54_windows.cjs"
+            "scripts/test_rail_map54_windows.cjs",
+            "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -12101,7 +12106,9 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map27.cjs",
-            "scripts/test_rail_map37.cjs"
+            "scripts/test_rail_map37.cjs",
+            "scripts/test_rail_map58_retirement.cjs",
+            "scripts/test_rail_map59_reroutes.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -12135,7 +12142,8 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [
-            "scripts/test_rail_map27.cjs"
+            "scripts/test_rail_map27.cjs",
+            "scripts/test_rail_map58_retirement.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -18471,6 +18479,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
@@ -19899,7 +19908,6 @@
             "scripts/test_rail_map53_budget.cjs",
             "scripts/test_rail_map55_history.cjs",
             "scripts/test_rail_map58_catalog.cjs",
-            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
@@ -20037,7 +20045,7 @@
       ]
     },
     "rail/runtime-wasm.js": {
-      "sha256": "edf16be6641eac9b33b17d04b31c45d0b9285c600cc64b2ecbd57cde04974cc9",
+      "sha256": "7beba7618402101c1b55989b4dc179d6ae251f7c4a60b9abd75facd2b0178bd0",
       "role": "platform",
       "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
       "phase": "P3-8 bridge",
@@ -20114,7 +20122,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 36,
-          "sha256": "bafefd6e7a6588ac0fab2c45c743d46dcbabeb7345bde4c352e3aabe1eb32569",
+          "sha256": "1ff600f74850a314649bbbbca61a9d40bbd6e82700c01c0a533df20261a250fe",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -20994,14 +21002,16 @@
           "name": "rebind",
           "line": 28,
           "end": 28,
-          "sha256": "28e825fff7f5ea1bc7796ba727b3945cffd516c428a580be10e0ebad9048c71d",
+          "sha256": "242abf988fc55dedb81f0acc89f42cd04da8ba6e953447f23e4f911d67b83d4e",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
           "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_p3_regressions.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -21285,6 +21295,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
@@ -21576,6 +21587,7 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map51_clock.cjs",
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -37478,6 +37490,7 @@
             "rail/urban-growth.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
