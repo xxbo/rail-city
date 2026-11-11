@@ -21,8 +21,8 @@ pub(super) fn pack(state:V,mut runtime:V,settings:&V)->V{
 }
 pub(super) fn parse(text:&str)->Result<V,String>{
     let mut value=crate::json_codec::parse(text)?;
-    if has(&value,"runtimeVersion")&&value.num("runtimeVersion")!=1.0{return Err("VALIDATE_RUNTIME_VERSION".into());}
-    if has(&value,"format")&&(value.get("format").text()!="rail-local-save"||value.num("formatVersion")!=1.0){return Err("VALIDATE_FORMAT_VERSION".into());}
+    if has(&value,"runtimeVersion")&&!eq(value.get("runtimeVersion"),&n(1.0)){return Err("VALIDATE_RUNTIME_VERSION".into());}
+    if has(&value,"format")&&(value.get("format").text()!="rail-local-save"||!eq(value.get("formatVersion"),&n(1.0))){return Err("VALIDATE_FORMAT_VERSION".into());}
     // Same migration path as startup; malformed/unknown explicit envelopes never
     // fall back to a new empty game. Legacy imports restore world-only snapshots.
     if value.num("gameVersion")!=7.0{
@@ -88,6 +88,11 @@ mod tests{
     }
     #[test]
     fn unknown_runtime_version_is_rejected_before_migration(){assert_eq!(parse("{\"gameVersion\":6,\"runtimeVersion\":42}").unwrap_err(),"VALIDATE_RUNTIME_VERSION");}
+    #[test]
+    fn version_fields_reject_boolean_and_string_coercion(){
+        for version in ["true","false","null","\"1\"","2"]{let input=format!("{{\"gameVersion\":7,\"runtimeVersion\":{}}}",version);assert_eq!(parse(&input).unwrap_err(),"VALIDATE_RUNTIME_VERSION");}
+        assert_eq!(parse("{\"format\":\"rail-local-save\",\"formatVersion\":true,\"gameVersion\":7}").unwrap_err(),"VALIDATE_FORMAT_VERSION");
+    }
     #[test]
     fn records_use_per_field_maxima_and_ignore_invalid_values(){let merged=merge(&[obj(&[("bestDay",n(15.0)),("bestHour",n(f64::NAN))]),obj(&[("bestDay",n(10.0)),("totalCompleted",n(25.0))])]);assert_eq!(merged.num("bestDay"),15.0);assert_eq!(merged.num("totalCompleted"),25.0);assert!(!has(&merged,"bestHour"));}
 }

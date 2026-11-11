@@ -7,9 +7,9 @@ const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=req
  try {
   const result=await M.advanceBudgetAsync(s,rt,1.2,{budget:1e6,maxSteps:10000,now:()=>0});
   assert(result.running);assert.equal(result.steps,12);assert(rt.minute>481);
-  const status=require('../rail/simulation-wasm').demandStatus(catalog);assert(status.managed);assert.equal(status.reads,catalog.length);
-  const before=status.reads;await M.advanceBudgetAsync(s,rt,1,{budget:1e6,maxSteps:10000,now:()=>0});
-  assert.equal(require('../rail/simulation-wasm').demandStatus(catalog).reads,before);
+  const status=(await M.forecastQueryAsync(rt,'status')).projection;assert.equal(status.count,catalog.length);assert.equal(status.dailyReads,catalog.length);
+  const before=status.dailyReads;await M.advanceBudgetAsync(s,rt,1,{budget:1e6,maxSteps:10000,now:()=>0});
+  assert.equal((await M.forecastQueryAsync(rt,'status')).projection.dailyReads,before);
   assert.equal(P.summary(rt).generated,0);assert(Object.is(P.summary(rt).onboard,0),'empty onboard count is positive zero');assert.equal(Object.keys(rt.queues).length,0);
   assert.equal((await P.snapshotAsync(rt)).generated,0);
   console.log('MAP53 large catalog: 151056 profiles, cold native calendar, transferable metadata without spread/stack overflow, no unchanged-minute scans.');

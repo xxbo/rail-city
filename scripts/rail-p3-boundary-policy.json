@@ -132,7 +132,7 @@
       "role": "platform",
       "phase": "P3-2 bridge",
       "owner": "Rust ForecastOwner; opaque handles and immutable projections",
-      "bridgeDisposition": "Only value/buffer transport, object-identity handles, leases and read-only array compatibility. Table indexing, view limits, revisions, daily mutation, summaries and filtering execute in Rust."
+      "bridgeDisposition": "Opaque handles, bounded numeric transport, leases and one read-only display page in JS. Rust validates page bounds, owns tables and identities, assembles legacy chunks atomically, tracks revisions and calculates all demand summaries."
     },
     "rail/game-balance.js": {
       "role": "platform",
@@ -565,7 +565,7 @@
       "role": "platform",
       "phase": "P3-8 bridge",
       "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
-      "bridgeDisposition": "UI/RPC/IO primitive bridge. Model decisions execute in Rust; source acceptance remains pending P3-9 per-function review."
+      "bridgeDisposition": "Native RPC and detached display application; Worker handoff uses the native world. Before a successful handoff, initialization failures keep the existing main-thread Rust arena; after handoff, uncertain commits propagate as faults. Handles have explicit disposal and a GC safety net."
     },
     "rail/view-model.js": {
       "role": "platform",

@@ -343,28 +343,11 @@ async function workerContracts() {
   assert.match(await cancelled, /关闭/);
   await assert.rejects(client.request({}), /关闭/);
   assert.equal(timers.size, 0);
-  const fallback = Client.create({
-    ...options,
-    createWorker: () => null,
-    fallback: ({
-      value
-    }) => ({
-      result: value * 2
-    })
-  });
-  const backup = fallback.request({
-    value: 7
-  });
-  [...timers.values()][0]();
-  assert.equal((await backup).result, 14);
-  assert.equal(fallback.pending, 0);
-  assert.equal(timers.size, 0);
-  const stopped = fallback.request({
-    value: 3
-  }).catch(e => e.message);
-  fallback.dispose();
-  assert.match(await stopped, /关闭/);
-  assert.equal(timers.size, 0);
+  let fallbacks=0;
+  const fallback=Client.create({...options,createWorker:()=>null,fallback:()=>{fallbacks++;return {result:14};}});
+  await assert.rejects(fallback.request({value:7}),/broken/);
+  assert.equal(fallbacks,0,'native-owned requests never execute a host business fallback');assert.equal(fallback.pending,0);assert.equal(timers.size,0);
+  fallback.dispose();await assert.rejects(fallback.request({value:3}),/关闭/);assert.equal(timers.size,0);
   const denied = Client.create({
     ...options,
     createWorker: () => {
@@ -374,7 +357,7 @@ async function workerContracts() {
   await assert.rejects(denied.request({}), /denied/);
 }
 workerContracts().then(() => console.log(
-  'MAP38 passed: exact MAP37 statistics (local/express/cross/loop/legacy), one-pass batch, in-place mutation freshness, compact diagnostic parity, escaped views, concurrent RPC, timeout/crash/clone cleanup, stale callbacks, fallback and restart.'
+  'MAP38 passed: exact MAP37 statistics (local/express/cross/loop/legacy), one-pass batch, in-place mutation freshness, compact diagnostic parity, escaped views, concurrent RPC, timeout/crash/clone cleanup, stale callbacks, unavailable-worker rejection and restart.'
   )).catch(e => {
   console.error(e);
   process.exitCode = 1;

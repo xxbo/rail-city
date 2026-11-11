@@ -9,10 +9,11 @@
     SPACING = 2;
 
   const native=(action,s={},args={})=>R.compat(action,s,args).result;
-  const routeTime=(s,line)=>native('routeTime',s,{line}),isOpen=(line,minute)=>native('operationsOpen',{}, {line,minute}),demandGroups=(s,metrics)=>native('operationsGroups',s,{metrics});
+  const routeTime=(s,line)=>native('routeTime',s,{line}),isOpen=(line,minute)=>native('operationsOpen',{}, {line,minute}),demandGroups=(s,metrics)=>owned('groups',forecastArgs(s,metrics));
   const arenas=new WeakMap(),owned=(action,args)=>(typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap).legacyOperations(action,args);
   const releases=typeof FinalizationRegistry==='function'?new FinalizationRegistry(id=>{try{owned('close',{id});}catch{}}):null;
-  function create(s,metrics,start=420){const out=owned('create',{state:s,metrics,start});arenas.set(out.runtime,out.id);releases?.register(out.runtime,out.id,out.runtime);return out.runtime;}
+  function forecastArgs(state,metrics){const Catalog=typeof module!=='undefined'&&module.exports?require('./forecast-catalog'):root.RailForecastCatalog,handle=Catalog.source(metrics);return {state,...(handle?{catalog:handle.id}:{metrics})};}
+  function create(s,metrics,start=420){const out=owned('create',{...forecastArgs(s,metrics),start});arenas.set(out.runtime,out.id);releases?.register(out.runtime,out.id,out.runtime);return out.runtime;}
   function advance(rt,s,minutes){let id=arenas.get(rt);if(!id){id=owned('restore',{state:s,runtime:rt}).id;arenas.set(rt,id);releases?.register(rt,id,rt);}R.sync(rt,owned('advance',{id,state:s,minutes}).runtime);return rt;}
 
   function ease(p) {

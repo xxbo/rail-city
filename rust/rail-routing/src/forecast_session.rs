@@ -27,7 +27,7 @@ fn offsets(data: &[f64], count: usize, contracts: bool) -> Option<Vec<usize>> {
 struct Catalog {
     graph: Rc<V>, hubs: Rc<V>, effective: bool,
     flows: Vec<f64>, contracts: Vec<f64>, fp: Vec<usize>, cp: Vec<usize>,
-    revision: u64, changed: BTreeMap<usize,u64>,
+    revision: u64, changed: BTreeMap<usize,u64>,changes_by_revision:BTreeMap<u64,usize>,daily_reads:usize,
     views: VecDeque<(bool,usize,Rc<V>)>, summary: Option<(Vec<u64>,Rc<V>)>, diagnostics:Option<Vec<crate::diagnostics::Flow>>,
 }
 impl Catalog {
@@ -56,7 +56,24 @@ impl Catalog {
             if p+2>end{return None;} let shares=cursor(&contracts,p)?;p=p.checked_add(2)?.checked_add(shares.checked_mul(2)?)?;
             if p!=end{return None;}
         }
-        Some(Self {graph:Rc::new(graph.clone()),hubs:Rc::new(dto.get("hubs").clone()),effective:dto.get("effective").truth(),flows,contracts,fp,cp,revision:0,changed:BTreeMap::new(),views:VecDeque::new(),summary:None,diagnostics:None})
+        Some(Self {graph:Rc::new(graph.clone()),hubs:Rc::new(dto.get("hubs").clone()),effective:dto.get("effective").truth(),flows,contracts,fp,cp,revision:0,changed:BTreeMap::new(),changes_by_revision:BTreeMap::new(),daily_reads:0,views:VecDeque::new(),summary:None,diagnostics:None})
+    }
+    fn append(&mut self,mut other:Self)->Option<()>{
+        fn names(target:&mut V,source:&V)->Vec<usize>{let rows=target.array_mut();source.array().iter().map(|name|rows.iter().position(|v|eq(v,name)).unwrap_or_else(||{rows.push(name.clone());rows.len()-1})).collect()}
+        // This builder accepts prepared contracts only; their synthetic flows have no edge directory.
+        if !self.graph.get("edges").array().is_empty()||!other.graph.get("edges").array().is_empty(){return None;}
+        let graph=Rc::make_mut(&mut self.graph);let services=names(graph.get_mut("services"),other.graph.get("services"));let lines=names(graph.get_mut("lines"),other.graph.get("lines"));let hubs=names(Rc::make_mut(&mut self.hubs),&other.hubs);
+        let base=self.count();
+        for (i,&at) in other.cp.iter().enumerate(){let row=&mut other.contracts;row[at]=(base+i)as f64;if row[at+5]>=0.0{row[at+5]=*hubs.get(row[at+5]as usize)?as f64;}
+            let mut p=at+10;for _ in 0..row[at+9]as usize{row[p]=*services.get(row[p]as usize)?as f64;p+=4;}
+            let count=row[p]as usize;p+=1;for _ in 0..count{row[p]=*lines.get(row[p]as usize)?as f64;p+=1;}
+            let count=row[p]as usize;let mapping=if row[p+1]!=0.0{&services}else{&lines};p+=2;for _ in 0..count{row[p]=*mapping.get(row[p]as usize)?as f64;p+=2;}
+        }
+        for &at in &other.fp{let row=&mut other.flows;if row[at+10]>=0.0{row[at+10]=*hubs.get(row[at+10]as usize)?as f64;}row[at+13]=*services.get(row[at+13]as usize)?as f64;row[at+15]=*lines.get(row[at+15]as usize)?as f64;
+            let mut p=at+24;let count=row[p]as usize;p+=1;for _ in 0..count{row[p]=*lines.get(row[p]as usize)?as f64;p+=2;}
+        }
+        let flow_base=self.flows.len();let contract_base=self.contracts.len()-1;self.fp.extend(other.fp.iter().map(|i|flow_base+i));self.cp.extend(other.cp.iter().map(|i|contract_base+i));
+        self.flows.extend(other.flows);self.contracts.extend_from_slice(&other.contracts[1..]);self.contracts[0]=self.count()as f64;self.views.clear();self.summary=None;self.diagnostics=None;Some(())
     }
     fn count(&self)->usize{self.fp.len()}
     fn descriptor(&self,id:u64)->V{obj(&[("id",n(id as f64)),("count",n(self.count() as f64)),("revision",n(self.revision as f64))])}
@@ -111,21 +128,35 @@ impl Catalog {
     }
 }
 struct Job{stamp:Vec<u64>,epoch:u64,background:bool,snapshot:Rc<V>}
+struct LegacyBuild{world:V,catalog:Option<Catalog>}
 struct Live { definitions:Vec<V>, index:HashMap<Vec<u64>,usize> }
 fn journey_text(j:&V)->String{crate::diagnostics::json(&arr(["legs","from","to","purpose","back","hub","externalKind","fare","byLine"].iter().map(|k|j.get(k).clone()).collect()))}
 fn journey_key(j:&V)->Vec<u64>{journey_text(j).encode_utf16().map(|c|c as u64).collect()}
 #[derive(Default)]
 pub(super) struct ForecastOwner {
-    serial:u64, catalogs:HashMap<u64,Catalog>, live:HashMap<u64,Live>,
+    serial:u64, builders:HashMap<u64,LegacyBuild>,catalogs:HashMap<u64,Catalog>, live:HashMap<u64,Live>,
     graphs:HashMap<u64,Rc<V>>,
     pins:HashMap<u64,usize>, deferred_release:std::collections::HashSet<u64>,
     epoch:u64, jobs:HashMap<u64,Job>, pending:Option<u64>, dirty:bool,
     service_cache:VecDeque<(Vec<u64>,Vec<f64>)>,
 }
 impl ForecastOwner {
+    pub(super) fn legacy_groups(&self,state:&V,id:u64)->V{
+        let Some(c)=self.catalogs.get(&id)else{return fault("FORECAST_EXPIRED")};let mut rows:Vec<V>=vec![];let mut indices=HashMap::new();
+        for &at in &c.cp{let daily=c.contracts[at+1];let mut p=at+10;for _ in 0..c.contracts[at+9]as usize{let service=named(c.graph.get("services"),c.contracts[p]);let dir=c.contracts[p+1];let from=c.contracts[p+2];let to=c.contracts[p+3];p+=4;
+            if from==to||!crate::legacy::line(state,&service).truth(){continue;}
+            let key=format!("{}|{}|{}|{}",service.text(),dir,from,to);if let Some(&index)=indices.get(&key){crate::legacy::add(&mut rows[index],"daily",daily);}else{indices.insert(key,rows.len());rows.push(obj(&[("service",service),("dir",n(dir)),("from",n(from)),("to",n(to)),("daily",n(daily))]));}
+        }}arr(rows)
+    }
+    pub(super) fn export_numeric(&self,id:u64,flow_only:bool)->(Vec<f64>,Vec<u8>){
+        let Some(c)=self.catalogs.get(&id)else{let(v,b)=value::write_packed(&fault("FORECAST_EXPIRED"));let mut out=vec![v.len()as f64];out.extend(v);return(out,b);};
+        let metadata=obj(&[("count",n(c.count()as f64)),("graph",(*c.graph).clone()),("hubs",(*c.hubs).clone()),("effective",boolean(c.effective)),("flowLength",n(c.flows.len()as f64))]);
+        let(v,b)=value::write_packed(&metadata);let mut out=Vec::with_capacity(1+v.len()+c.flows.len()+if flow_only{0}else{c.contracts.len()});out.push(v.len()as f64);out.extend(v);out.extend_from_slice(&c.flows);if !flow_only{out.extend_from_slice(&c.contracts);}(out,b)
+    }
     pub(super) fn adopt_legacy(&mut self,state:&V,forecast:&V)->V{
         let Some((dto,flows,contracts))=crate::legacy_catalog::encode(state,forecast)else{return fault("INVALID_LEGACY_FORECAST")};
         let Some(c)=Catalog::from_tables(&dto,flows,Some(contracts))else{return fault("INVALID_LEGACY_FORECAST")};
+        if !c.totals().get("valid").truth(){return fault("INVALID_LEGACY_FORECAST");}
         let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);out
     }
     pub(super) fn diagnose(&mut self,id:u64,input:&V)->V{
@@ -182,6 +213,18 @@ impl ForecastOwner {
             if op=="accept"{if !accepted&&job.background{self.dirty=true;}return obj(&[("accepted",boolean(accepted))]);}
             self.jobs.remove(&id);if self.pending==Some(id){self.pending=None;}return obj(&[("dirty",boolean(self.dirty))]);
         }
+        if op=="legacyBegin"{let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};self.builders.insert(id,LegacyBuild{world:input.get("state").clone(),catalog:None});return n(id as f64);}
+        if matches!(op,"legacyAppend"|"legacyFinish"|"legacyCancel"){
+            let id=input.num("id")as u64;
+            if op=="legacyCancel"{self.builders.remove(&id);return V::Null;}
+            if op=="legacyFinish"{let Some(build)=self.builders.remove(&id)else{return fault("LEGACY_BUILD_EXPIRED")};let Some(c)=build.catalog else{return self.adopt_legacy(&build.world,&obj(&[("flows",arr(vec![]))]));};let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let descriptor=c.descriptor(id);self.catalogs.insert(id,c);return descriptor;}
+            let Some(build)=self.builders.get_mut(&id)else{return fault("LEGACY_BUILD_EXPIRED")};let rows=input.get("rows").array();
+            if rows.len()>2048||build.catalog.as_ref().map_or(0,Catalog::count)+rows.len()>300000||rows.iter().any(|j|!finite(j.get("daily"))||j.num("daily")<0.0||!finite(j.get("fare"))||j.num("fare")<0.0||j.get("legs").array().is_empty()){return fault("INVALID_LEGACY_FORECAST");}
+            let Some((dto,flows,contracts))=crate::legacy_catalog::encode(&build.world,&obj(&[("preparedDefinitions",arr(rows.to_vec()))]))else{return fault("INVALID_LEGACY_FORECAST")};
+            let Some(chunk)=Catalog::from_tables(&dto,flows,Some(contracts))else{return fault("INVALID_LEGACY_FORECAST")};
+            if let Some(c)=build.catalog.as_mut(){if c.append(chunk).is_none(){return fault("INVALID_LEGACY_FORECAST");}}else{build.catalog=Some(chunk);}return V::Null;
+        }
+
         if op=="attachLegacy"{return self.adopt_legacy(input.get("state"),input.get("forecast"));}
         if op=="attach" {
             let Some(c)=Catalog::load(input.get("dto"))else{return fault("INVALID_FORECAST_CATALOG")};let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);return out;
@@ -199,7 +242,7 @@ impl ForecastOwner {
         if op=="select" {
             let Some(source)=self.catalogs.get(&id)else{return fault("FORECAST_EXPIRED")};let mut flows=vec![];let mut contracts=vec![input.get("indices").array().len() as f64];
             for ix in input.get("indices").array(){let Some(i)=unsigned(ix).filter(|i|*i<source.count())else{return fault("INVALID_CATALOG_INDEX")};let a=source.fp[i];let b=source.fp.get(i+1).copied().unwrap_or(source.flows.len());flows.extend_from_slice(&source.flows[a..b]);let a=source.cp[i];let size=source.contracts[a-1] as usize;contracts.push(size as f64);contracts.extend_from_slice(&source.contracts[a..a+size]);}
-            let c=Catalog{graph:source.graph.clone(),hubs:source.hubs.clone(),effective:source.effective,fp:offsets(&flows,contracts[0] as usize,false).unwrap(),cp:offsets(&contracts,contracts[0] as usize,true).unwrap(),flows,contracts,revision:0,changed:BTreeMap::new(),views:VecDeque::new(),summary:None,diagnostics:None};
+            let c=Catalog{graph:source.graph.clone(),hubs:source.hubs.clone(),effective:source.effective,fp:offsets(&flows,contracts[0] as usize,false).unwrap(),cp:offsets(&contracts,contracts[0] as usize,true).unwrap(),flows,contracts,revision:0,changed:BTreeMap::new(),changes_by_revision:BTreeMap::new(),daily_reads:0,views:VecDeque::new(),summary:None,diagnostics:None};
             let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let out=c.descriptor(id);self.catalogs.insert(id,c);return out;
         }
         let Some(c)=self.catalogs.get_mut(&id)else{return fault("FORECAST_EXPIRED")};
@@ -211,9 +254,9 @@ impl ForecastOwner {
             "totals"=>c.totals(),
             "runtimeGraph"=>(*c.graph).clone(),
             "diagnostic"=>obj(&[("graph",(*c.graph).clone()),("count",n(c.count() as f64)),("flowData",numeric(&c.flows))]),
-            "status"=>obj(&[("count",n(c.count() as f64)),("bytes",n(((c.flows.len()+c.contracts.len())*8) as f64)),("revision",n(c.revision as f64)),("retainedFlowViews",n(c.views.iter().filter(|x|!x.0).count() as f64)),("retainedContractViews",n(c.views.iter().filter(|x|x.0).count() as f64)),("limit",n(PAGE as f64))]),
-            "dailyPatch"=>{let Some(after)=unsigned(input.get("after"))else{return fault("INVALID_DEMAND_REVISION")};let load=input.get("load").truth();let rows=(0..c.count()).filter(|i|load||c.changed.get(i).is_some_and(|r|*r>after as u64)).map(|i|arr(vec![n(i as f64),n(c.contracts[c.cp[i]+1])])).collect();obj(&[("revision",n(c.revision as f64)),("entries",arr(rows))])},
-            "setDaily"=>{let Some(i)=unsigned(input.get("index")).filter(|i|*i<c.count())else{return fault("INVALID_CATALOG_INDEX")};let v=input.get("value");if !finite(v)||v.n()<0.0{return fault("INVALID_DAILY_DEMAND");}let at=c.cp[i]+1;if c.contracts[at].to_bits()!=v.n().to_bits(){if c.revision>=MAX_SAFE{return fault("DEMAND_REVISION_LIMIT");}c.revision+=1;c.contracts[at]=v.n();c.changed.insert(i,c.revision);c.views.retain(|(d,k,_)|!*d||*k!=i);}n(c.revision as f64)},
+            "status"=>obj(&[("count",n(c.count() as f64)),("bytes",n(((c.flows.len()+c.contracts.len())*8) as f64)),("revision",n(c.revision as f64)),("retainedFlowViews",n(c.views.iter().filter(|x|!x.0).count() as f64)),("retainedContractViews",n(c.views.iter().filter(|x|x.0).count() as f64)),("limit",n(PAGE as f64)),("dailyReads",n(c.daily_reads as f64))]),
+            "dailyPatch"=>{let Some(after)=unsigned(input.get("after"))else{return fault("INVALID_DEMAND_REVISION")};let load=input.get("load").truth();let indices=if load{(0..c.count()).collect::<Vec<_>>()}else{c.changes_by_revision.range((std::ops::Bound::Excluded(after as u64),std::ops::Bound::Unbounded)).map(|(_,index)|*index).collect::<std::collections::BTreeSet<_>>().into_iter().collect()};c.daily_reads+=indices.len();let rows=indices.into_iter().map(|i|arr(vec![n(i as f64),n(c.contracts[c.cp[i]+1])])).collect();obj(&[("revision",n(c.revision as f64)),("entries",arr(rows))])},
+            "setDaily"=>{let Some(i)=unsigned(input.get("index")).filter(|i|*i<c.count())else{return fault("INVALID_CATALOG_INDEX")};let v=input.get("value");if !finite(v)||v.n()<0.0{return fault("INVALID_DAILY_DEMAND");}let at=c.cp[i]+1;if c.contracts[at].to_bits()!=v.n().to_bits(){if c.revision>=MAX_SAFE{return fault("DEMAND_REVISION_LIMIT");}c.revision+=1;c.contracts[at]=v.n();if let Some(old)=c.changed.insert(i,c.revision){c.changes_by_revision.remove(&old);}c.changes_by_revision.insert(c.revision,i);c.views.retain(|(d,k,_)|!*d||*k!=i);}n(c.revision as f64)},
             "daily"=>{let Some(i)=unsigned(input.get("index")).filter(|i|*i<c.count())else{return fault("INVALID_CATALOG_INDEX")};n(c.contracts[c.cp[i]+1])},
             "page"=>{let Some(start)=unsigned(input.get("start"))else{return fault("INVALID_CATALOG_PAGE")};let count=unsigned(input.get("count")).unwrap_or(PAGE).min(PAGE);let definition=input.get("view").text()!="flow";let end=start.saturating_add(count).min(c.count());arr((start..end).map(|i|c.view(definition,i)).collect())},
             "flow"|"definition"|"profile"|"legs"=>{let Some(i)=unsigned(input.get("index")).filter(|i|*i<c.count())else{return fault("INVALID_CATALOG_INDEX")};if op=="flow"{c.view(false,i)}else{let j=c.view(true,i);if op=="legs"{j.get("legs").clone()}else if op=="profile"{obj(&[("lineIds",j.get("lineIds").clone()),("hub",j.get("hub").clone()),("purpose",j.get("purpose").clone()),("back",j.get("back").clone()),("externalKind",j.get("externalKind").clone())])}else{j}}},
@@ -259,3 +302,33 @@ pub(super) fn graph_frame(input:&V)->V{
 
 #[no_mangle]
 pub extern "C" fn forecast_session_abi()->u32{1}
+
+#[cfg(test)]
+mod transport_tests{
+    use super::*;
+    fn journey(service:&str,hub:&str,lines:&[&str])->V{
+        obj(&[("id",n(0.0)),("legs",arr(vec![obj(&[("service",text(service)),("dir",n(1.0)),("from",n(0.0)),("to",n(1.0))])])),("daily",n(15.0)),("fare",n(180.0)),("purpose",text("work")),("back",boolean(false)),("hub",text(hub)),("externalKind",V::Null),("from",n(0.0)),("to",n(1.0)),("lineIds",arr(lines.iter().map(|s|text(s)).collect())),("byLine",V::Object(lines.iter().map(|s|(s.to_string(),n(0.5))).collect()))])
+    }
+    #[test]
+    fn chunked_catalog_remaps_names_and_numeric_export_round_trips(){
+        let mut owner=ForecastOwner::default();let state=obj(&[("services",arr(vec![]))]);
+        let builder=owner.handle(&obj(&[("action",text("legacyBegin")),("state",state)]));let id=builder.n();
+        for row in [journey("A","H1",&["A","B"]),journey("B","H2",&["B","A"])]{assert!(!owner.handle(&obj(&[("action",text("legacyAppend")),("id",n(id)),("rows",arr(vec![row]))])).get("error").truth());}
+        let descriptor=owner.handle(&obj(&[("action",text("legacyFinish")),("id",n(id))]));let id=descriptor.num("id")as u64;let catalog=&owner.catalogs[&id];assert_eq!(catalog.count(),2);
+        let second=catalog.definition(1);assert_eq!(second.num("id"),1.0);assert_eq!(second.get("legs").array()[0].get("service").text(),"B");assert_eq!(second.get("hub").text(),"H2");assert_eq!(second.get("lineIds").array()[0].text(),"B");assert_eq!(second.get("byLine").num("A"),0.5);
+        let(data,bytes)=owner.export_numeric(id,false);let split=1+data[0]as usize;let dto=value::read_packed(&data[1..split],&bytes).unwrap();let len=dto.num("flowLength")as usize;
+        let decoded=Catalog::from_tables(&dto,data[split..split+len].to_vec(),Some(data[split+len..].to_vec())).unwrap();
+        for i in 0..2{assert_eq!(value::write(&decoded.definition(i)),value::write(&catalog.definition(i)));assert_eq!(value::write(&decoded.flow(i)),value::write(&catalog.flow(i)));}
+    }
+    #[test]
+    fn invalid_chunks_are_atomic_and_consumed_patches_do_not_scan_old_rows(){
+        let mut owner=ForecastOwner::default();let b=owner.handle(&obj(&[("action",text("legacyBegin")),("state",obj(&[("services",arr(vec![]))]))])).n();
+        let valid=journey("A","H1",&["A","B"]);let mut invalid=valid.clone();invalid.set("daily",n(f64::NAN));
+        assert!(owner.handle(&obj(&[("action",text("legacyAppend")),("id",n(b)),("rows",arr(vec![valid.clone(),invalid]))])).get("error").truth());assert!(owner.builders[&(b as u64)].catalog.is_none());
+        owner.handle(&obj(&[("action",text("legacyAppend")),("id",n(b)),("rows",arr(vec![valid]))]));let id=owner.handle(&obj(&[("action",text("legacyFinish")),("id",n(b))])).num("id");
+        owner.handle(&obj(&[("action",text("dailyPatch")),("id",n(id)),("after",n(0.0)),("load",boolean(true))]));
+        owner.handle(&obj(&[("action",text("setDaily")),("id",n(id)),("index",n(0.0)),("value",n(20.0))]));
+        let patch=owner.handle(&obj(&[("action",text("dailyPatch")),("id",n(id)),("after",n(0.0)),("load",boolean(false))]));assert_eq!(patch.get("entries").array().len(),1);
+        let reads=owner.catalogs[&(id as u64)].daily_reads;for _ in 0..10{let empty=owner.handle(&obj(&[("action",text("dailyPatch")),("id",n(id)),("after",n(1.0)),("load",boolean(false))]));assert!(empty.get("entries").array().is_empty());}assert_eq!(owner.catalogs[&(id as u64)].daily_reads,reads);
+    }
+}

@@ -160,8 +160,8 @@ impl SessionHost {
         }
         if input.get("op").text()=="platform"||input.get("op").text()=="viewModel"{let result=if input.get("op").text()=="platform"{self.platform.request(input)}else{crate::view_model::query(input)};if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
         if input.get("op").text()=="persistence"{let result=self.persistence.request(input);if matches!(result.get("error"),V::String(_)){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
-        if input.get("op").text()=="legacyOperations"{let result=self.legacy_operations.request(input);if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
-        if input.get("op").text()=="compat"{let mut out=crate::legacy::run(input);if input.get("action").text()=="cityEvaluate"{let catalog=self.forecasts.adopt_legacy(input.get("state"),out.get("result"));if catalog.get("error").truth(){return error(catalog.get("error").text(),0,0);}crate::editor_support::del(out.get_mut("result"),"flows");out.get_mut("result").set("nativeCatalog",catalog);}return envelope(true,0,0,out);}
+        if input.get("op").text()=="legacyOperations"{let result=self.legacy_operations.request(input,&self.forecasts);if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
+        if input.get("op").text()=="compat"{let mut out=crate::legacy::run(input);if matches!(input.get("action").text(),"cityEvaluate"|"evaluate"){let catalog=self.forecasts.adopt_legacy(input.get("state"),out.get("result"));if catalog.get("error").truth(){return error(catalog.get("error").text(),0,0);}crate::editor_support::del(out.get_mut("result"),"flows");out.get_mut("result").set("nativeCatalog",catalog);}return envelope(true,0,0,out);}
         if input.get("op").text()=="runtime"||input.get("op").text()=="clock"{
             let result=if input.get("op").text()=="runtime"{self.runtimes.request(input,&mut self.forecasts)}else{self.clocks.request(input)};
             if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,self.state.as_ref().map_or(0,|s|s.id),self.state.as_ref().map_or(0,|s|s.revision),result);
@@ -561,5 +561,13 @@ pub extern "C" fn forecast_numeric() -> *const f64 {
         })()
     }).unwrap_or_else(||obj(&[("error",text("INVALID_FORECAST_WIRE"))]));
     let (values,bytes)=value::write_packed(&result);
+    CORE.with(|c|{let mut c=c.borrow_mut();c.output=values;c.cycle_bytes=bytes;c.output.as_ptr()})
+}
+
+// Opaque table transport: no generic Value tree for millions of numeric cells.
+#[no_mangle]
+pub extern "C" fn forecast_numeric_export()->*const f64{
+    let(id,flow_only)=CORE.with(|c|{let c=c.borrow();(c.input.first().copied().unwrap_or(0.0),c.input.get(1).copied()==Some(1.0))});
+    let(values,bytes)=HOST.with(|host|host.borrow().forecasts.export_numeric(if id.is_finite()&&id>0.0&&id.fract()==0.0{id as u64}else{0},flow_only));
     CORE.with(|c|{let mut c=c.borrow_mut();c.output=values;c.cycle_bytes=bytes;c.output.as_ptr()})
 }

@@ -1531,3 +1531,43 @@ impl Queues{
         result
     }
 }
+
+impl Queues{
+    pub(super) fn summary_projection(&self)->crate::value::Value{
+        use crate::editor_support::*;
+        let inside=self.queue_order.iter().fold(0.0,|sum,key|sum+self.queues[key].sum(|c|c.n));let outside=self.outside.values().fold(0.0,|sum,q|sum+q.sum(|c|c.n));let transferring=self.transfers.iter().fold(0.0,|sum,t|sum+t.n);let onboard=self.trains.values().fold(0.0,|sum,t|sum+t.onboard);
+        obj(&[("active",n(self.trains.len()as f64)),("waiting",n(inside+outside+transferring)),("inside",n(inside+transferring)),("outside",n(outside)),("transferring",n(transferring)),("onboard",n(onboard)),("completed",n(self.counters[3])),("cancelled",n(self.counters[4])),("generated",n(self.counters[0])),("revenue",n(self.counters[6]))])
+    }
+    fn project_journey(&self,id:usize,count:f64,destinations:&mut crate::value::Value,purposes:&mut crate::value::Value){
+        use crate::editor_support::*;if let Some(j)=self.defs.get(&id){let destination=j.contract.as_ref().map_or_else(||"undefined".into(),|c|jsstring(&n(c.to)));crate::legacy::add(destinations,&destination,count);crate::legacy::add(purposes,["work","shopping","leisure"][j.purpose],count);}
+    }
+    pub(super) fn station_projection(&self,world:&crate::value::Value,id:usize,names:&[String])->crate::value::Value{
+        use crate::editor_support::*;let(mut lines,mut destinations)=(obj(&[]),obj(&[]));let mut purposes=obj(&[("work",n(0.0)),("shopping",n(0.0)),("leisure",n(0.0))]);let(mut waiting,mut transferring)=(0.0,0.0);
+        for key in &self.queue_order{if key.2!=id{continue;}for(token,cohort)in self.queues[key].rows.iter().flatten(){waiting+=cohort.n;crate::legacy::add(&mut lines,&names[key.0],cohort.n);self.project_journey(token.j,cohort.n,&mut destinations,&mut purposes);}}
+        for t in &self.transfers{if t._station!=id{continue;}waiting+=t.n;transferring+=t.n;self.project_journey(t.j,t.n,&mut destinations,&mut purposes);if let Some(leg)=self.defs.get(&t.j).and_then(|j|j.legs.get(t.leg)){crate::legacy::add(&mut lines,&names[leg.service],t.n);}}
+        let outside=self.outside.get(&id).map_or(0.0,|q|q.sum(|c|c.n));let limits=self.limits.get(&id).copied().unwrap_or((0.0,0.0));let today=world.get("ridership").get("current").get("stations").get(&id.to_string());
+        obj(&[("waiting",n(waiting)),("outside",n(outside)),("capacity",n(limits.0)),("outsideCapacity",n(limits.1)),("transferring",n(transferring)),("lines",lines),("destinations",destinations),("purposes",purposes),("today",if today.truth(){today.clone()}else{obj(&[("entered",n(0.0)),("boarded",n(0.0)),("alighted",n(0.0))])})])
+    }
+    pub(super) fn train_projection(&self,id:usize)->crate::value::Value{
+        use crate::editor_support::*;let(mut passengers,mut destinations)=(obj(&[]),obj(&[]));if let Some(t)=self.trains.get(&id){for(token,count)in t.passengers.rows.iter().flatten(){let key=if token.stamp>=0{format!("{}:{}:{}",token.j,token.leg,token.stamp)}else{format!("{}:{}",token.j,token.leg)};passengers.set(&key,n(*count));if let Some(j)=self.defs.get(&token.j){let destination=j.contract.as_ref().map_or_else(||"undefined".into(),|c|jsstring(&n(c.to)));crate::legacy::add(&mut destinations,&destination,*count);}}}
+        obj(&[("passengers",passengers),("destinations",destinations)])
+    }
+}
+
+#[cfg(test)]
+mod projection_tests{
+    use super::*;use crate::{editor_support::*,value::{self,Value as V}};
+    #[test]
+    fn targeted_projections_match_complete_views_and_include_transferring_line(){
+        let mut q=Queues::new(1.0);let token=Token{j:0,leg:0,stamp:-1};
+        q.defs.insert(0,Journey{contract:Some(Contract{from:1.0,to:2.0,back:false,hub:None,kind:None}),fare:180.0,purpose:0,byline:Rc::from(vec![]),line_ids:Rc::from(vec![0]),legs:Rc::from(vec![Leg{service:0,dir:1,from:1,to:2,valid:true}])});
+        let mut inside=Ordered::new();inside.set(token,Cohort{n:4.0,since:None});q.queue_order.push((0,1,1));q.queues.insert((0,1,1),inside);
+        let mut outside=Ordered::new();outside.set(token,Cohort{n:2.0,since:None});q.outside.insert(1,outside);q.limits.insert(1,(20.0,10.0));q.transfers.push(Transfer{j:0,leg:0,n:3.0,ready:10.0,_station:1});
+        let mut passengers=Ordered::new();passengers.set(token,5.0);q.trains.insert(1,Cargo{service:0,parent:0,capacity:800.0,dir:1,is_loop:false,stops:vec![1,2],calls:[1,2].into_iter().collect(),onboard:5.0,cars:8.0,passengers});q.counters[0]=14.0;
+        let names=vec!["L".into()];let ids=[(1,"T0001".into())].into_iter().collect();let world=obj(&[]);let mut saved=q.object_view(&names,&ids,true);saved.set("stationLimits",obj(&[("1",obj(&[("capacity",n(20.0)),("outsideCapacity",n(10.0))]))]));
+        for(query,target)in [("station",n(1.0)),("train",text("T0001"))]{let actual=if query=="station"{q.station_projection(&world,1,&names)}else{q.train_projection(1)};let reference=crate::runtime_query::query(&world,&saved,&obj(&[("query",text(query)),("target",target)]));assert_eq!(value::write(&actual),value::write(&reference));}
+        assert_eq!(q.station_projection(&world,1,&names).get("lines").num("L"),7.0);let summary=q.summary_projection();assert_eq!(summary.num("waiting"),9.0);assert_eq!(summary.num("inside"),7.0);assert_eq!(summary.num("onboard"),5.0);assert_eq!(summary.num("generated"),14.0);
+        assert_eq!(Queues::new(1.0).summary_projection().num("onboard").to_bits(),0.0_f64.to_bits());
+        assert!(matches!(q.station_projection(&world,1,&names),V::Object(_)));
+    }
+}

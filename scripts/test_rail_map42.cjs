@@ -117,7 +117,7 @@ for (const effective of [false, true]) {
   const source = JSON.stringify(city);
   assert.deepEqual(D.distribution(city), Old.distribution(city));
   matrices++;
-  assert.strictEqual(D.distribution(city), D.distribution(city));
+  const first=D.distribution(city),second=D.distribution(city);assert.deepEqual(first,second);assert.notStrictEqual(first,second);first.matrices.work[0]=-123;assert.deepEqual(D.distribution(city),second,'display matrix edits leave native distribution unchanged');
   const actual = D.evaluate(state, city),
     expected = Old.evaluate(state, city);
   assert.deepEqual(clean(actual), clean(expected));
@@ -224,8 +224,9 @@ for (let step = 0; step < 6; step++) {
   const sum = P.summary(rt);
   assert(Math.abs(sum.generated - sum.waiting - sum.onboard - sum.completed - sum.cancelled) < 1e-5);
   const save = LS.parse(JSON.stringify(LS.pack(state, P.snapshot(rt))));
-  assert(P.restore(save.state, next, save.runtime));
+  const restored=P.restore(save.state,next,save.runtime);assert(restored);P.dispose(restored);
 }
+P.dispose(rt);
 const bytes = fs.readFileSync(path.join(__dirname, '../rail/wasm/rail-core-v33.wasm'));
 Router.create(bytes, {
   recycleBytes: 0

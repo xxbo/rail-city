@@ -35,12 +35,20 @@ const file=LS.pack(s,P.snapshot(rt),{personalRecords:{bestDay:12}});assert.equal
 for(const value of [rt,restored,pr,evaluatedRuntime])P.dispose(value);
 console.log('P3 regressions passed: queue wire ordering, prepared catalogs, immutable DTOs, native restore/continuation, cumulative costs, authoritative views, compiled services, invalid-input recovery and save compatibility.');
 (async()=>{
+ for(const start of [390,419.9]){
+  const world=create(2),f=forecast(world),rt=P.create(world,f,start,false),saved=P.snapshot(rt),cash=world.economy.cash;
+  assert.equal(P.restore(structuredClone(world),f,saved),null,'public checkpoints retain the 420-minute lower bound');world.economy.cash=1;
+  try{await M.advanceBudgetAsync(world,rt,1,{budget:1e6,maxSteps:10000});assert(rt.minute>=start+1-1e-8);assert(world.economy.cash>1,'handoff uses the native bank, not a modified JS view');assert(world.economy.cash<=cash);}finally{P.dispose(rt);}
+ }
  const s=create(2),f=forecast(s),rt=P.create(s,f,480,false);let restored;
  try{
   await M.advanceBudgetAsync(s,rt,12,{budget:1e6,maxSteps:10000});
+  assert(require('../rail/runtime-wasm').usesWorker(rt),'normal handoff actually reaches the Worker');
   const world=structuredClone(s),saved=await P.snapshotAsync(rt);restored=P.restore(world,f,structuredClone(saved));assert(restored);
   await M.advanceBudgetAsync(s,rt,3,{budget:1e6,maxSteps:10000});M.advance(world,restored,3);
   assert.deepEqual(await P.snapshotAsync(rt),P.snapshot(restored),'worker and restored local native arenas continue identically');assert.deepEqual(s,world);
-  console.log('P3 Worker regression passed: session handoff, full checkpoint and deterministic native continuation.');
+  const threads=require('node:worker_threads'),Worker=threads.Worker;threads.Worker=class{constructor(){throw Error('worker creation denied');}};
+ try{const world=create(2),f=forecast(world),local=P.create(world,f,480,false),referenceWorld=structuredClone(world),reference=P.create(referenceWorld,f,480,false);try{await M.advanceBudgetAsync(world,local,3,{budget:1e6,maxSteps:10000});M.advance(referenceWorld,reference,3);assert(!require('../rail/runtime-wasm').usesWorker(local));assert.deepEqual(P.snapshot(local),P.snapshot(reference));assert.deepEqual(world,referenceWorld);}finally{P.dispose(local);P.dispose(reference);}}finally{threads.Worker=Worker;}
+ console.log('P3 Worker regression passed: session handoff, full checkpoint and deterministic native continuation.');
  }finally{P.dispose(rt);if(restored)P.dispose(restored);}
 })().catch(error=>{console.error(error);process.exitCode=1;});

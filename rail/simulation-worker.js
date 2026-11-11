@@ -20,7 +20,7 @@
       await Core.init();
       if(request.kind==='session'){
         const args=request.args||{};let result;
-        if(request.action==='create'){const forecast=Catalog.hydrate(args.forecast);result=Bootstrap.runtime('create',{world:args.world,saved:args.saved,start:args.start,warm:args.warm,catalog:Catalog.source(forecast).id,forecastView:{population:forecast.population,covered:forecast.catchment?.covered||0}});}
+        if(request.action==='create'){const forecast=Catalog.hydrate(args.forecast);result=Bootstrap.runtime('create',{world:args.world,saved:args.saved,start:args.start,warm:args.warm,transfer:true,catalog:Catalog.source(forecast).id,forecastView:{population:forecast.population,covered:forecast.catchment?.covered||0}});}
         else if(['demand','prepareImport'].includes(request.action)){const {forecast:transport,...command}=args;const forecast=Catalog.hydrate(transport),catalog=Catalog.source(forecast).id;try{result=Bootstrap.runtime(request.action,{...command,catalog,forecastView:{population:forecast.population,covered:forecast.catchment?.covered||0}});}finally{Bootstrap.forecast('release',{id:catalog});}}
         else result=Bootstrap.runtime(request.action,args);
         send({id:request.id,result});return;

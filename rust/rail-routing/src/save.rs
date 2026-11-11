@@ -407,10 +407,11 @@ pub(super) fn mass(r: &V) -> bool {
         <= 0.1_f64.max(r.num("generated") * 1e-8)
 }
 // Header checks are also usable before a forecast has been reconstructed.
-fn header(s: &V, r: &V) -> bool {
+fn header(s: &V,r: &V)->bool{header_at(s,r,420.0)}
+fn header_at(s: &V, r: &V, earliest:f64) -> bool {
     if !object(r)
         || !finite(r.get("minute"))
-        || r.num("minute") < 420.0
+        || r.num("minute") < earliest
         || r.num("minute") > 1e8
         || !array(r.get("trains"))
         || r.get("trains").array().len() > 2400
@@ -476,8 +477,9 @@ fn header(s: &V, r: &V) -> bool {
     }
     mass(r)
 }
-fn restore(s: &V, plan: &V, r: &V, defs: &V, cfg: &V) -> bool {
-    if !header(s, r) {
+fn restore(s:&V,plan:&V,r:&V,defs:&V,cfg:&V)->bool{restore_at(s,plan,r,defs,cfg,420.0)}
+fn restore_at(s: &V, plan: &V, r: &V, defs: &V, cfg: &V, earliest:f64) -> bool {
+    if !header_at(s, r, earliest) {
         return false;
     }
     let services = plan.get("services").array();
@@ -1005,7 +1007,7 @@ fn checkpoint(v: &V, region: &V, cfg: &V) -> V {
     };
     let s = if kind > 0.0 { v.get("state") } else { v };
     let version = kind != 7.0 || !has(v, "runtimeVersion") || eq(v.get("runtimeVersion"), &n(1.0));
-    let format = !has(v,"format") || v.get("format").text()=="rail-local-save" && v.num("formatVersion")==1.0;
+    let format = !has(v,"format") || v.get("format").text()=="rail-local-save" && eq(v.get("formatVersion"),&n(1.0));
     let valid = version && format && E::validate(s, cfg) && eq(s.get("region"), region);
     let use_runtime =
         valid && kind == 7.0 && v.get("runtime").truth() && signature_matches(v.get("signature"), s);
@@ -1042,6 +1044,7 @@ pub(super) fn run(v: &V, cfg: &V) -> V {
         }
         "ridership" => boolean(ridership(v.get("value"))),
         "records" => records(v.get("value")),
+        "restoreTransfer"=>boolean(restore_at(s,v.get("plan"),v.get("saved"),v.get("defs"),cfg,390.0)),
         "restore" => boolean(restore(
             s,
             v.get("plan"),

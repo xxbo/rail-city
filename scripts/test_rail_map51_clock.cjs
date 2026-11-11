@@ -22,17 +22,10 @@ const turn=()=>new Promise(resolve=>setImmediate(resolve));
   // Same Rust kernel in environments without Worker. No alternative simulation algorithm.
   const P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),{create}=require('./fixtures/rail-memory-grid.cjs');
   const state=create(2),rt=P.create(state,{preparedDefinitions:[]},480,false);
-  let captured;const kernel=Core.kernel;
-  Core.kernel=(name,input,...args)=>{
-    if(name==='engine_cycle')captured={name,input:input.slice(),bytes:args[2]?.slice()};
-    return kernel(name,input,...args);
-  };
-  try{M.advance(state,rt,.1);}finally{Core.kernel=kernel;}
+  const referenceWorld=structuredClone(state),reference=P.create(referenceWorld,{preparedDefinitions:[]},480,false),threads=require('node:worker_threads'),Worker=threads.Worker;
+  threads.Worker=class{constructor(){throw Error('unavailable');}};
+  try{const result=await M.advanceBudgetAsync(state,rt,.1,{budget:1e6,maxSteps:10000});M.advance(referenceWorld,reference,.1);assert(result.running);assert.equal(result.steps,1);assert.equal(result.remaining,0);assert(!require('../rail/runtime-wasm').usesWorker(rt));assert.deepEqual(P.snapshot(rt),P.snapshot(reference));assert.deepEqual(state,referenceWorld);}finally{threads.Worker=Worker;P.dispose(rt);P.dispose(reference);}
   Core.recycleSimulation();
-  const local=Client.create({forceLocal:true});
-  assert.equal(await local.run(function*(){return Core.cycleToken();}),0);
-  await local.run(function*(){const result=yield captured;assert.equal(result[0],1);assert.equal(result[1],0);});
-  local.close();
   const worker=Client.create();
   try {
     await assert.rejects(worker.run(function*(){yield {name:'forbidden',input:new Float64Array()};}),/Unknown simulation worker operation/);

@@ -150,18 +150,20 @@ const slim = {
   const adapter = {
     get: async () => stored,
     put: async (k, v) => {
-      stored = v;
+      if(rejectNext)throw Error('storage failed');stored = v;
     }
   };
   let rejectNext = false;
-  const db = DB.create(adapter, null, v => rejectNext ? Promise.reject(Error('worker failed')) : Promise.resolve(JSON.stringify(v)));
+  const db = DB.create(adapter, null);
   await db.write('test', value);
   const good = stored.text;
   rejectNext = true;
   await assert.rejects(db.write('test', {
     bad: true
-  }), /worker failed/);
+  }), /storage failed/);
   assert.equal(stored.text, good);
+  rejectNext = false;
+  let deep={};for(let i=0;i<100;i++)deep={deep};await assert.rejects(async()=>db.write('test',deep),/ENCODE_STRUCTURE|过深|WIRE/);assert.equal(stored.text,good,'native serialization failure preserves the last committed checkpoint');
   rejectNext = false;
   await db.write('test', {
     recovered: true
@@ -169,7 +171,7 @@ const slim = {
   assert.deepEqual(JSON.parse((await db.read('test')).text), {
     recovered: true
   });
-  console.log('MAP34 passed: diagnostic Worker exact parity, forecast reuse/version rejection, compact queue equivalence, read-only state/runtime, 9MB worker JSON roundtrip, last-good preservation on serialization failure and successful retry.');
+  console.log('MAP34 passed: diagnostic Worker exact parity, forecast reuse/version rejection, compact queue equivalence, read-only state/runtime, 9MB worker JSON roundtrip, last-good preservation on native serialization/storage failure and successful retry.');
 })().catch(e => {
   console.error(e);
   process.exitCode = 1;
