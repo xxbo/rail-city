@@ -1,4 +1,4 @@
-/* MAP47 frozen temporal/continuous oracle. Exact state and insertion order, not approximate totals. */
+/* Exact frozen temporal kernels plus versioned native-session business checkpoints. */
 const assert = require('node:assert/strict'),
   fs = require('node:fs'),
   path = require('node:path');
@@ -181,174 +181,52 @@ function forecast(s) {
   });
 }
 
-function pair(start = 480, weighted = false) {
-  const a = create(3),
-    b = structuredClone(a),
-    f = forecast(a),
-    ra = P.create(a, f, start, false),
-    rb = OldP.create(b, f, start, false);
-  if (weighted) ra.arrivalMode = rb.arrivalMode = 'weighted';
-  return {
-    a,
-    b,
-    f,
-    ra,
-    rb
-  };
+const Oracle=require('./helpers/native-oracle.cjs'),Runtime=require('../rail/runtime-wasm'),B=require('../rail/bootstrap-wasm');
+const pairs=new Set();
+function pair(start=480,weighted=false,prepare=()=>{}){
+ const a=create(3);a.economy.minute=start;prepare(a);const b=structuredClone(a),f=forecast(a),ra=Oracle.create(P,a,f,start,weighted),rb=OldP.create(b,f,start,false);if(weighted)rb.arrivalMode='weighted';
+ const p={a,b,f,ra,rb};pairs.add(p);return p;
 }
-
-function check(p, dt, managed = true) {
-  if (managed) assert.equal(M.advance(p.a, p.ra, dt), OldM.advance(p.b, p.rb, dt));
-  else {
-    P.advance(p.ra, p.a, dt);
-    OldP.advance(p.rb, p.b, dt);
-  }
-  exact(P.snapshot(p.ra), OldP.snapshot(p.rb));
-  exact(p.a, p.b);
-  exact(p.ra.defs, p.rb.defs);
-  checks++;
+function closePairs(){for(const p of pairs){if(p.ra)P.dispose(p.ra);if(p.rb)OldP.dispose(p.rb);}pairs.clear();}
+async function compare(p){Oracle.world(p.a,p.b);Oracle.checkpoint(await P.snapshotAsync(p.ra),OldP.snapshot(p.rb),p.rb.defs,p.a);}
+async function check(p,dt){const actual=M.advanceBudget(p.a,p.ra,dt,{budget:1e6,maxSteps:10000});const expected=OldM.advanceBudget(p.b,p.rb,dt,{budget:1e6,maxSteps:10000,now:()=>0});Oracle.batch(actual,expected);await compare(p);checks++;}
+async function dispatch(p,values){for(const line of [...p.a.services]){const result=Runtime.commandSync(p.ra,{kind:'network',op:'configure',args:{id:line.id,values:{dispatch:values}}}).result;assert(!result.error,result.error);assert(!N.configure(p.b,line.id,{dispatch:values}).error);}OldP.reconcile(p.rb,p.b);}
+async function restoreFixture(p,edit){
+ const a=await P.snapshotAsync(p.ra),b=OldP.snapshot(p.rb);P.dispose(p.ra);OldP.dispose(p.rb);edit(p.a,a);edit(p.b,b);
+ p.ra=P.restore(p.a,p.f,a);p.rb=OldP.restore(p.b,p.f,b);assert(p.ra&&p.rb,'explicit edited fixture restores');p.rb.demandStatus.updatedAt=b.demandStatus.updatedAt;
 }
-for (const weighted of [false, true]) {
-  const p = pair(419.9, weighted);
-  for (let i = 0; i < 40; i++) check(p, .2, i % 2 === 0);
-  for (const s of [p.a, p.b])
-    for (const l of s.services) assert(!N.configure(s, l.id, {
-      dispatch: {
-        mode: 'auto',
-        manual: 8,
-        offPeak: 4,
-        peak: 8
-      }
-    }).error);
-  P.reconcile(p.ra, p.a);
-  OldP.reconcile(p.rb, p.b);
-  for (let i = 0; i < 30; i++) check(p, .3);
-  for (const q of [p.a, p.b]) {
-    delete q.ridership.model;
-    for (const r of Object.values(q.ridership.lines)) {
-      r.awareness = .43;
-      r.trust = .7;
-    }
-  }
-  check(p, 70);
-  const loaded = LS.parse(JSON.stringify(LS.pack(p.a, P.snapshot(p.ra))));
-  assert(P.restore(loaded.state, p.f, loaded.runtime));
+(async()=>{try{
+for(const weighted of [false,true]){
+ const p=pair(419.9,weighted);for(let i=0;i<40;i++)await check(p,.2);
+ await dispatch(p,{mode:'auto',manual:8,offPeak:4,peak:8});for(let i=0;i<30;i++)await check(p,.3);
+ await restoreFixture(p,state=>{delete state.ridership.model;for(const row of Object.values(state.ridership.lines)){row.awareness=.43;row.trust=.7;}});await check(p,70);
+ const loaded=LS.parse(JSON.stringify(LS.pack(p.a,await P.snapshotAsync(p.ra)))),restored=P.restore(loaded.state,p.f,loaded.runtime);assert(restored);P.dispose(restored);
 }
-for (const start of [539.9, 1019.9, 1139.9, 1379.9, 1439.9, 1859.9]) {
-  const p = pair(start);
-  for (const s of [p.a, p.b])
-    for (const l of s.services) assert(!N.configure(s, l.id, {
-      dispatch: {
-        mode: 'auto',
-        manual: 8,
-        offPeak: 4,
-        peak: 8
-      }
-    }).error);
-  P.reconcile(p.ra, p.a);
-  OldP.reconcile(p.rb, p.b);
-  for (let i = 0; i < 15; i++) check(p, .1);
+for(const start of [539.9,1019.9,1139.9,1379.9,1439.9,1859.9]){
+ const p=pair(start);await dispatch(p,{mode:'auto',manual:8,offPeak:4,peak:8});for(let i=0;i<15;i++)await check(p,.1);
 }
-// Zero off-peak service retires existing trains without breaking passengers or departure recovery.
-for (const start of [419.9, 1139.9]) {
-  const p = pair(start);
-  for (const state of [p.a, p.b])
-    for (const line of state.services)
-      assert(!N.configure(state, line.id, {
-        dispatch: {
-          mode: 'auto',
-          manual: 8,
-          offPeak: 0,
-          peak: 8
-        }
-      }).error);
-  P.reconcile(p.ra, p.a);
-  OldP.reconcile(p.rb, p.b);
-  for (let i = 0; i < 20; i++) check(p, .2);
-}
-// A previously absent line can become available without rebuilding group metadata.
-s.ridership = {
-  model: 22,
-  lines: {
-    missing: {
-      satisfaction: .1,
-      awareness: .4,
-      trust: .6
-    }
-  }
-};
-exact(SIM.timedArrivals(catalog, s, 1020, 1, .2, 99, true), OldSIM.arrivals(catalog, j => OldQ
-  .factor(s, j), j => OldC.profile(j.purpose, j.back, 1020, j.externalKind), .2, 99));
-const bytes = fs.readFileSync(path.join(__dirname, '../rail/wasm/rail-core-v33.wasm'));
-Core.create(bytes, {
-  recycleBytes: 0
-});
-const recovery = pair();
-for (let i = 0; i < 10; i++) check(recovery, .2);
-Core.create(bytes, {
-  recycleBytes: 64 * 1024 * 1024
-});
-assert.equal(Core.status().temporalAbi, 1);
-const source = fs.readFileSync(path.join(__dirname, '../rail/passengers.js'), 'utf8');
-assert(!source.includes('C.profile('));
-assert(!source.includes('Q.factor('));
-assert(!source.includes('F.allocations('));
-
-// Common UI .1-minute requests reuse the native next-clock plan and one transaction.
+for(const start of [419.9,1139.9]){const p=pair(start);await dispatch(p,{mode:'auto',manual:8,offPeak:0,peak:8});for(let i=0;i<20;i++)await check(p,.2);}
+// Standalone sampling keeps its independent exact temporal oracle.
+s.ridership={model:22,lines:{missing:{satisfaction:.1,awareness:.4,trust:.6}}};
+exact(SIM.timedArrivals(catalog,s,1020,1,.2,99,true),OldSIM.arrivals(catalog,j=>OldQ.factor(s,j),j=>OldC.profile(j.purpose,j.back,1020,j.externalKind),.2,99));
+const bytes=fs.readFileSync(path.join(__dirname,'../rail/wasm/rail-core-v33.wasm'));closePairs();Core.create(bytes,{recycleBytes:0});
+const recovery=pair();for(let i=0;i<10;i++)await check(recovery,.2);closePairs();Core.create(bytes,{recycleBytes:64*1024*1024});
+assert.equal(Core.status().temporalAbi,1);const source=fs.readFileSync(path.join(__dirname,'../rail/passengers.js'),'utf8');for(const snippet of ['C.profile(','Q.factor(','F.allocations('])assert(!source.includes(snippet));
+// Hot stepping has one stateful native request and no host accounting RPC.
 {
-  const p = pair();
-  M.advance(p.a, p.ra, .1);
-  const before = Core.status(),
-    original = Core.kernel;
-  let accountsCalls = 0;
-  Core.kernel = function(name, input, ...args) {
-    if (name === 'operations_run' && [2, 3].includes(input[1])) accountsCalls++;
-    return original(name, input, ...args);
-  };
-  try {
-    for (let i = 0; i < 40; i++) M.advance(p.a, p.ra, .1);
-  } finally {
-    Core.kernel = original;
-  }
-  const after = Core.status();
-  assert.equal(after.engineSteps - before.engineSteps, 40);
-  assert.equal(accountsCalls, 0);
-  // A public balance edit invalidates the persistent financial snapshot.
-  p.a.economy.cash += 12345;
-  for (let i = 0; i < 41; i++) OldM.advance(p.b, p.rb, .1);
-  p.b.economy.cash += 12345;
-  check(p, .1);
-  exact(M.borrow(p.a, 1e8), OldM.borrow(p.b, 1e8));
-  check(p, .2);
-  exact(M.repay(p.a, 1), OldM.repay(p.b, 1));
-  check(p, .2);
-  Q.finance(p.a, p.ra, 123, 57);
-  OldQ.finance(p.b, p.rb, 123, 57);
-  check(p, .2);
+ const p=pair();await check(p,.1);const runtime=B.runtime,kernel=Core.kernel,Worker=require('node:worker_threads').Worker,post=Worker.prototype.postMessage;let advances=0,accounts=0;
+ Worker.prototype.postMessage=function(data,...args){if(data.kind==='session'&&data.action==='advance')advances++;return post.call(this,data,...args);};B.runtime=(action,...args)=>{if(action==='advance')advances++;return runtime(action,...args);};Core.kernel=(name,input,...args)=>{if(name==='operations_run'&&[2,3].includes(input[1]))accounts++;return kernel(name,input,...args);};
+ try{for(let i=0;i<40;i++){const result=await M.advanceBudgetAsync(p.a,p.ra,.1,{worker:false,budget:1e6,maxSteps:10000});assert.equal(result.steps,1);OldM.advance(p.b,p.rb,.1);}}finally{B.runtime=runtime;Core.kernel=kernel;Worker.prototype.postMessage=post;}
+ // Count stateful requests in either transport; no host accounting RPC is added.
+ assert.equal(accounts,0);assert.equal(advances,40);await compare(p);
+ await restoreFixture(p,state=>{state.economy.cash+=12345;});await check(p,.1);
+ Oracle.equal(await M.borrowAsync(p.a,p.ra,1e8),OldM.borrow(p.b,1e8));await check(p,.2);
+ Oracle.equal(await M.repayAsync(p.a,p.ra,p.a.economy.loans[0].id),OldM.repay(p.b,p.b.economy.loans[0].id));await check(p,.2);
+ await restoreFixture(p,(state,saved)=>OldQ.finance(state,{minute:saved.minute,plan:state},123,57));await check(p,.2);
 }
-// Cached next-clock plans must split debt dues and honor stop/recovery boundaries.
-for (const cash of [5e9, .01]) {
-  const p = pair(1859.85);
-  for (const s of [p.a, p.b]) {
-    s.economy.minute = 1859.85;
-    s.economy.cash = cash;
-    s.economy.loans = [1860, 1860.035].map((nextDue, i) => ({
-      id: i + 1,
-      initial: 1e8,
-      principal: 1e8,
-      interest: 10,
-      installment: 1e8 / 30,
-      nextDue
-    }));
-  }
-  const actual = [],
-    expected = [];
-  for (let i = 0; i < 25; i++) actual.push(M.advance(p.a, p.ra, .1));
-  for (let i = 0; i < 25; i++) expected.push(OldM.advance(p.b, p.rb, .1));
-  exact(actual, expected);
-  exact(p.a, p.b);
-  exact(P.snapshot(p.ra), OldP.snapshot(p.rb));
-  checks++;
+for(const cash of [5e9,.01]){
+ const p=pair(1859.85,false,state=>{state.economy.cash=cash;state.economy.nextLoan=3;state.economy.loans=[1860,1860.035].map((nextDue,i)=>({id:i+1,initial:1e8,principal:1e8,interest:10,installment:1e8/30,nextDue}));});
+ const actual=[],expected=[];for(let i=0;i<25;i++)actual.push(M.advanceBudget(p.a,p.ra,.1,{budget:1e6,maxSteps:10000}).running);for(let i=0;i<25;i++)expected.push(OldM.advance(p.b,p.rb,.1));exact(actual,expected);await compare(p);checks++;
 }
 // Native-owned daily values transmit only deltas, preserving arbitrary direct edits.
 {
@@ -390,3 +268,5 @@ for (const cash of [5e9, .01]) {
 console.log(
   `MAP49 passed: ${checks} complete frozen MAP48 checkpoints; queue/finance transaction, next-clock reuse, mutable economy, credit, external statistics, sparse 151056-profile daily updates and forced recycling.`
 );
+
+}finally{closePairs();}})().catch(error=>{console.error(error);process.exitCode=1;});

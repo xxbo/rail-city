@@ -45,6 +45,8 @@ const file=LS.pack(s,P.snapshot(rt),{personalRecords:{bestDay:12}});assert.equal
 for(const value of [rt,restored,pr,evaluatedRuntime])P.dispose(value);
 console.log('P3 regressions passed: queue wire ordering, prepared catalogs, immutable DTOs, native restore/continuation, cumulative costs, authoritative views, compiled services, invalid-input recovery and save compatibility.');
 (async()=>{
+ {const world=create(2),f=forecast(world),rt=P.create(world,f,419.9,false,{arrivalMode:'weighted'});try{assert.equal(rt.arrivalMode,'weighted');await M.advanceBudgetAsync(world,rt,.3,{budget:1e6,maxSteps:10000});assert.equal(rt.arrivalMode,'weighted','cold arrival mode survives internal Worker handoff');}finally{P.dispose(rt);}}
+ for(const initial of [{arrivalMode:'invalid'},{arrivalMode:'integer',extra:true}])assert.throws(()=>P.create(create(2),{flows:[]},480,false,initial),/INVALID_RUNTIME_INITIAL_OPTIONS/);
  for(const start of [390,419.9]){
   const world=create(2),f=forecast(world),rt=P.create(world,f,start,false),saved=P.snapshot(rt),cash=world.economy.cash;
   assert.equal(P.restore(structuredClone(world),f,saved),null,'public checkpoints retain the 420-minute lower bound');world.economy.cash=1;
@@ -55,7 +57,7 @@ console.log('P3 regressions passed: queue wire ordering, prepared catalogs, immu
   await M.advanceBudgetAsync(s,rt,12,{budget:1e6,maxSteps:10000});
   assert(require('../rail/runtime-wasm').usesWorker(rt),'normal handoff actually reaches the Worker');
   const history=await P.historyAsync(rt);assert.deepEqual(history,{current:s.ridership.current,history:s.ridership.history},'history query projects the native ridership fields');history.current.completed=-1;assert.notEqual((await P.historyAsync(rt)).current.completed,-1,'history results are detached');
-  const stableSummary=P.summary(rt),world=structuredClone(s),saved=await P.snapshotAsync(rt);assert.deepEqual(P.summary(rt),stableSummary,"full Worker snapshot preserves the live summary");restored=P.restore(world,f,structuredClone(saved));assert(restored);
+  const stableSummary=P.summary(rt),world=structuredClone(s),saved=await P.snapshotAsync(rt);assert.deepEqual(P.summary(rt),stableSummary,"full Worker snapshot preserves the live summary");assert.equal(Object.keys(rt.queues).length,0,'saving does not republish native queue cohorts into the live UI');assert.equal(rt.transfers.length,0);assert(rt.trains.every(train=>Object.keys(train.passengers).length===0));for(const train of saved.trains)close(Object.values(train.passengers).reduce((sum,count)=>sum+count,0),train.onboard);restored=P.restore(world,f,structuredClone(saved));assert(restored);
   await M.advanceBudgetAsync(s,rt,3,{budget:1e6,maxSteps:10000});M.advance(world,restored,3);
   assert.deepEqual(await P.snapshotAsync(rt),P.snapshot(restored),'worker and restored local native arenas continue identically');assert.deepEqual(s,world);
   await P.detailsAsync(rt,'station',0);await M.advanceBudgetAsync(s,rt,.7,{budget:1e6,maxSteps:10000});const liveStation=P.station(rt,0),freshStation=await P.detailsAsync(rt,'station',0);assert.equal(liveStation.waiting,freshStation.waiting,'station display cache expires after time advances');assert.equal(liveStation.outside,freshStation.outside);

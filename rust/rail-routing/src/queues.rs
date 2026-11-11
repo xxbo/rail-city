@@ -154,6 +154,7 @@ impl<'a> Read<'a> {
 pub(super) struct Queues {
     token: f64,
     stats_protocol: bool,
+    statistics_full_frames:usize,
     emit_commands: bool,
     native_routes: bool,
     routing: Option<crate::journey::Context>,
@@ -192,6 +193,7 @@ impl Queues {
     pub(super) fn native_owner(&mut self){self.emit_commands=false;}
     pub(super) fn host_command_values(&self)->usize{self.commands.len()}
     pub(super) fn native_reroutes(&self)->usize{self.reroutes}
+    pub(super) fn statistics_full_frames(&self)->usize{self.statistics_full_frames}
     pub(super) fn protocol(&self) -> f64 {
         if self.native_routes {
             if self.sparse {
@@ -458,6 +460,7 @@ impl Queues {
         Self {
             token,
             stats_protocol: false,
+            statistics_full_frames:0,
             emit_commands: true,
             native_routes: false,
             routing: None,
@@ -1276,7 +1279,7 @@ fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut 
             } else {
                 f64::NAN
             };
-            q.stats = Some(crate::statistics::Statistics::read(&mut r, now));
+            q.stats = Some(crate::statistics::Statistics::read(&mut r, now));q.statistics_full_frames+=1;
             if mode == 6.0 {
                 q.stats.as_mut().unwrap().install_lifecycle(&mut r);
             }

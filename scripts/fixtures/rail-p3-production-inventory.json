@@ -253,6 +253,7 @@
             "rail/hubs.js",
             "rail/operations-center.js",
             "rail/regions.js",
+            "rail/runtime-wasm.js",
             "rail/street-map.js",
             "rail/tokyo.js",
             "rail/ui.js",
@@ -300,6 +301,7 @@
           "productionReferenceCandidates": [
             "rail/diagnostic-snapshot.js",
             "rail/passengers.js",
+            "rail/runtime-wasm.js",
             "rail/ui-stations-view.js",
             "rail/ui.js"
           ],
@@ -905,6 +907,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
@@ -1128,6 +1131,10 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map12.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs"
           ],
@@ -1436,7 +1443,12 @@
             "rail/ui-stations-view.js",
             "rail/ui.js"
           ],
-          "testReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -1664,6 +1676,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
@@ -2096,7 +2109,11 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map27.cjs",
-            "scripts/test_rail_map40.cjs"
+            "scripts/test_rail_map40.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         }
@@ -2928,7 +2945,17 @@
             "scripts/test_rail_map19.cjs",
             "scripts/test_rail_map20.cjs",
             "scripts/test_rail_map22.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
+            "scripts/test_rail_map53_calendar.cjs",
+            "scripts/test_rail_map53_native_state.cjs",
+            "scripts/test_rail_map54_windows.cjs",
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map57_lifecycle.cjs",
+            "scripts/test_rail_map58_retirement.cjs",
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map61_validation.cjs"
           ],
@@ -2973,6 +3000,7 @@
             "rail/demand-world.js",
             "rail/editor-wasm.js",
             "rail/fleet.js",
+            "rail/runtime-wasm.js",
             "rail/save-store.js",
             "rail/ui.js",
             "rail/urban-growth.js",
@@ -4510,7 +4538,11 @@
             "rail/service-plan.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map37.cjs"
+            "scripts/test_rail_map37.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -5256,6 +5288,7 @@
             "rail/city.js",
             "rail/editor-wasm.js",
             "rail/fleet.js",
+            "rail/runtime-wasm.js",
             "rail/save-store.js",
             "rail/ui.js",
             "rail/urban-growth.js",
@@ -6838,6 +6871,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
@@ -7353,6 +7387,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
@@ -8936,6 +8971,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
@@ -10886,6 +10922,7 @@
             "rail/forecast-catalog.js",
             "rail/operations-center.js",
             "rail/regions.js",
+            "rail/runtime-wasm.js",
             "rail/street-map.js",
             "rail/tokyo.js",
             "rail/ui.js",
@@ -11896,9 +11933,13 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map50_budget.cjs",
+            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_budget.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map52_budget.cjs",
             "scripts/test_rail_map52_worker_queue.cjs",
             "scripts/test_rail_map53_budget.cjs",
@@ -11925,9 +11966,13 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map27.cjs",
             "scripts/test_rail_map37.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_clock.cjs",
             "scripts/test_rail_map51_worker.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map52_worker.cjs",
             "scripts/test_rail_map52_worker_queue.cjs",
             "scripts/test_rail_map53_calendar.cjs",
@@ -12107,6 +12152,7 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map27.cjs",
             "scripts/test_rail_map37.cjs",
+            "scripts/test_rail_map53_native_state.cjs",
             "scripts/test_rail_map58_retirement.cjs",
             "scripts/test_rail_map59_reroutes.cjs"
           ],
@@ -12180,7 +12226,8 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map27.cjs",
-            "scripts/test_rail_map37.cjs"
+            "scripts/test_rail_map37.cjs",
+            "scripts/test_rail_map53_native_state.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -12217,7 +12264,12 @@
           "productionReferenceCandidates": [
             "rail/ui.js"
           ],
-          "testReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -12251,7 +12303,12 @@
           "productionReferenceCandidates": [
             "rail/ui.js"
           ],
-          "testReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -12558,7 +12615,8 @@
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_boundary.cjs",
-            "scripts/test_rail_p3_contract.cjs"
+            "scripts/test_rail_p3_contract.cjs",
+            "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -12647,7 +12705,11 @@
             "scripts/test_rail_map27.cjs",
             "scripts/test_rail_map30.cjs",
             "scripts/test_rail_map35.cjs",
-            "scripts/test_rail_map36.cjs"
+            "scripts/test_rail_map36.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -12732,6 +12794,7 @@
             "rail/memory-audit.js",
             "rail/operations-wasm.js",
             "rail/passengers.js",
+            "rail/runtime-wasm.js",
             "rail/shell-ui.js",
             "rail/ui.js"
           ],
@@ -13486,7 +13549,12 @@
             "rail/ui-stations-view.js",
             "rail/ui.js"
           ],
-          "testReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -14084,7 +14152,11 @@
             "scripts/test_rail_map27.cjs",
             "scripts/test_rail_map30.cjs",
             "scripts/test_rail_map35.cjs",
-            "scripts/test_rail_map36.cjs"
+            "scripts/test_rail_map36.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -14344,6 +14416,7 @@
             "rail/forecast-catalog.js",
             "rail/hubs.js",
             "rail/regions.js",
+            "rail/runtime-wasm.js",
             "rail/street-map.js",
             "rail/tokyo.js",
             "rail/ui.js",
@@ -14803,7 +14876,11 @@
             "rail/service-plan.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map37.cjs"
+            "scripts/test_rail_map37.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -16129,9 +16206,13 @@
             "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map42.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_clock.cjs",
             "scripts/test_rail_map51_worker.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map52_transport.cjs",
             "scripts/test_rail_map52_worker.cjs",
             "scripts/test_rail_map52_worker_queue.cjs",
@@ -16155,7 +16236,7 @@
       ]
     },
     "rail/passengers.js": {
-      "sha256": "adc58e4133d0f452e5eb54b056c4fdafae4475eb4dd73bad0956a5a9682e7e21",
+      "sha256": "640cd46a98683d3a5ca0aed5f9d81f7747e77de35468bc6a920aef03e17dc22c",
       "role": "platform",
       "owner": "Rust RuntimeOwner for all supported passenger models, cohorts and queries",
       "phase": "P3-6 bridge",
@@ -16218,7 +16299,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 16,
-          "sha256": "39025ad10e98f67e72651c024f8276811929912106129c3ee37620d1d3fe3c9d",
+          "sha256": "8391907fb0bcb5d1945f4a7f6011a74f045a7b288149293c5f5727c8571469a6",
           "scope": [],
           "role": "platform",
           "phase": "P3-6 bridge",
@@ -16233,7 +16314,7 @@
           "name": "create",
           "line": 4,
           "end": 4,
-          "sha256": "669c03350f25488d3eb01c0431600d12be9e5550d9b8f7e794f4ab1a01c2e5e5",
+          "sha256": "bed2027f2da805fa8d7392bebab5352111188e480a26c5f64f6c85fd9874d308",
           "scope": [],
           "role": "platform",
           "phase": "P3-6 bridge",
@@ -16780,9 +16861,13 @@
             "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map42.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_clock.cjs",
             "scripts/test_rail_map51_worker.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map52_transport.cjs",
             "scripts/test_rail_map52_worker.cjs",
             "scripts/test_rail_map52_worker_queue.cjs",
@@ -16836,7 +16921,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map53_calendar.cjs",
             "scripts/test_rail_map53_large_catalog.cjs",
-            "scripts/test_rail_map53_native_state.cjs",
             "scripts/test_rail_map54_windows.cjs",
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map57_lifecycle.cjs",
@@ -17098,6 +17182,10 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map12.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs"
           ],
@@ -17739,6 +17827,7 @@
             "rail/forecast-catalog.js",
             "rail/hubs.js",
             "rail/operations-center.js",
+            "rail/runtime-wasm.js",
             "rail/street-map.js",
             "rail/tokyo.js",
             "rail/ui.js",
@@ -18479,6 +18568,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
@@ -19161,7 +19251,11 @@
             "rail/service-plan.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map37.cjs"
+            "scripts/test_rail_map37.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -19294,9 +19388,13 @@
             "scripts/test_rail_map43.cjs",
             "scripts/test_rail_map44.cjs",
             "scripts/test_rail_map45.cjs",
+            "scripts/test_rail_map49.cjs",
             "scripts/test_rail_map49_queue.cjs",
+            "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map50_queue.cjs",
+            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map52_worker_queue.cjs",
             "scripts/test_rail_map53_demand.cjs",
             "scripts/test_rail_map53_worker_queue.cjs",
@@ -19554,9 +19652,13 @@
             "scripts/test_rail_map43.cjs",
             "scripts/test_rail_map44.cjs",
             "scripts/test_rail_map45.cjs",
+            "scripts/test_rail_map49.cjs",
             "scripts/test_rail_map49_queue.cjs",
+            "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map50_queue.cjs",
+            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map52_worker_queue.cjs",
             "scripts/test_rail_map53_demand.cjs",
             "scripts/test_rail_map53_worker_queue.cjs",
@@ -19852,9 +19954,7 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map45.cjs",
-            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_clock.cjs",
-            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map53_demand.cjs",
             "scripts/test_rail_map58_catalog.cjs",
             "scripts/test_rail_map62_network.cjs",
@@ -20045,7 +20145,7 @@
       ]
     },
     "rail/runtime-wasm.js": {
-      "sha256": "7beba7618402101c1b55989b4dc179d6ae251f7c4a60b9abd75facd2b0178bd0",
+      "sha256": "200ad7cd0d62eee55642b9952957d1627a6b62389e44afba18b6bb14afef4ee6",
       "role": "platform",
       "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
       "phase": "P3-8 bridge",
@@ -20061,6 +20161,7 @@
         "cancelImport",
         "checkpoint",
         "command",
+        "commandSync",
         "commitImport",
         "create",
         "credit",
@@ -20108,12 +20209,12 @@
         {
           "kind": "worker",
           "target": "rail/simulation-worker.js",
-          "line": 12
+          "line": 15
         },
         {
           "kind": "require",
           "target": "rail/worker-client.js",
-          "line": 10
+          "line": 13
         }
       ],
       "functions": [
@@ -20121,8 +20222,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 36,
-          "sha256": "1ff600f74850a314649bbbbca61a9d40bbd6e82700c01c0a533df20261a250fe",
+          "end": 40,
+          "sha256": "5f7f561165c1a4d3fc8eed8b9bb1369f48d0a2412789f0ffc5111e880145938d",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -20305,10 +20406,42 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/supports@7:0",
+          "id": "<iife>/applySnapshot@9:0",
+          "name": "applySnapshot",
+          "line": 9,
+          "end": 9,
+          "sha256": "a03a961a547afc86f80d4b34ba177c4d102d40b6f53160da197d7a265b7e3f86",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-8 bridge",
+          "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/applySnapshot/<callback:9:203>@9:203",
+          "name": "<callback:9:203>",
+          "line": 9,
+          "end": 9,
+          "sha256": "33bb9b9492a1c3f3f350c0323a0d46574d8cfa6d44b446d74c6fbf65a121f2ca",
+          "scope": [
+            "applySnapshot"
+          ],
+          "role": "platform",
+          "phase": "P3-8 bridge",
+          "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/supports@10:0",
           "name": "supports",
-          "line": 7,
-          "end": 7,
+          "line": 10,
+          "end": 10,
           "sha256": "6ca16246f854b13889fa22cf01a683d6985c3a271a281ceec4e020362a7a4c87",
           "scope": [],
           "role": "platform",
@@ -20320,11 +20453,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create@8:0",
+          "id": "<iife>/create@11:0",
           "name": "create",
-          "line": 8,
-          "end": 8,
-          "sha256": "8f886946237bb800ebc66bb37c253712d5657fab77a808e1ea40cbd9b2d5b2df",
+          "line": 11,
+          "end": 11,
+          "sha256": "27e079fd145a81aaeb5817d7234dc27c6c693e387049ae750935d1b1e8ccab82",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -20431,10 +20564,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/worker@9:0",
+          "id": "<iife>/worker@12:0",
           "name": "worker",
-          "line": 9,
-          "end": 16,
+          "line": 12,
+          "end": 19,
           "sha256": "f930959a5e0fbb203daef6492f70396b60d7127085b19bc54b3ae28c320b276f",
           "scope": [],
           "role": "platform",
@@ -20454,10 +20587,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/worker/createWorker@12:15",
+          "id": "<iife>/worker/createWorker@15:15",
           "name": "createWorker",
-          "line": 12,
-          "end": 12,
+          "line": 15,
+          "end": 15,
           "sha256": "1ce0866dcd1063d62c07c999dff5e7b482273d02c9eeb12bd9bca569330f603c",
           "scope": [
             "worker"
@@ -20476,10 +20609,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/worker/onFault@13:10",
+          "id": "<iife>/worker/onFault@16:10",
           "name": "onFault",
-          "line": 13,
-          "end": 13,
+          "line": 16,
+          "end": 16,
           "sha256": "38beb2186186fc4ac1b27861b2702fa8e7fa5a7e19c0fc8a23b2b99d6eb312da",
           "scope": [
             "worker"
@@ -20496,10 +20629,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/worker/<callback:14:165>@14:165",
-          "name": "<callback:14:165>",
-          "line": 14,
-          "end": 14,
+          "id": "<iife>/worker/<callback:17:165>@17:165",
+          "name": "<callback:17:165>",
+          "line": 17,
+          "end": 17,
           "sha256": "ea97311a755af963c52cc407a5b1cd1242d220645d6bc5f9b6bce287700f31bd",
           "scope": [
             "worker"
@@ -20513,10 +20646,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/worker/<callback:14:346>@14:346",
-          "name": "<callback:14:346>",
-          "line": 14,
-          "end": 14,
+          "id": "<iife>/worker/<callback:17:346>@17:346",
+          "name": "<callback:17:346>",
+          "line": 17,
+          "end": 17,
           "sha256": "d59d0317085dea476248540e9ea508c360beacb2004d95e85a708f21ce293442",
           "scope": [
             "worker"
@@ -20530,10 +20663,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/worker/<callback:15:19>@15:19",
-          "name": "<callback:15:19>",
-          "line": 15,
-          "end": 15,
+          "id": "<iife>/worker/<callback:18:19>@18:19",
+          "name": "<callback:18:19>",
+          "line": 18,
+          "end": 18,
           "sha256": "dec7a076dec41531da7f2d40bd4b896e27d45dd09ecd541190941bf88e6de894",
           "scope": [
             "worker"
@@ -20547,10 +20680,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/send@17:0",
+          "id": "<iife>/send@20:0",
           "name": "send",
-          "line": 17,
-          "end": 17,
+          "line": 20,
+          "end": 20,
           "sha256": "0b818c1601ec2e786c56fcbae710fc0fff788454c6097f8d7f78bddb16dd434a",
           "scope": [],
           "role": "platform",
@@ -20568,10 +20701,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/send/<callback:17:96>@17:96",
-          "name": "<callback:17:96>",
-          "line": 17,
-          "end": 17,
+          "id": "<iife>/send/<callback:20:96>@20:96",
+          "name": "<callback:20:96>",
+          "line": 20,
+          "end": 20,
           "sha256": "08468fc7a4141b25db91312527c5ff55b1663abb0d432bfc9058de022791d225",
           "scope": [
             "send"
@@ -20585,11 +20718,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/enqueue@18:0",
+          "id": "<iife>/enqueue@21:0",
           "name": "enqueue",
-          "line": 18,
-          "end": 18,
-          "sha256": "92e88fab0a2d4d7a08462f8eb02226a909fd734426b54e0ab944d975df22d469",
+          "line": 21,
+          "end": 21,
+          "sha256": "006c056f7eba4992e33064d355974af6e8548a800396e3cbb0ef78ce49f2dbde",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -20600,11 +20733,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/enqueue/<callback:18:66>@18:66",
-          "name": "<callback:18:66>",
-          "line": 18,
-          "end": 18,
-          "sha256": "93510a76f29062a12586aee4b74847997cc7a0cb137d7b91734eab1b0a124900",
+          "id": "<iife>/enqueue/<callback:21:80>@21:80",
+          "name": "<callback:21:80>",
+          "line": 21,
+          "end": 21,
+          "sha256": "abc1b1463d2d7382bb85feb9869b98f4e14bb1b001a054f31670a413293a22e1",
           "scope": [
             "enqueue"
           ],
@@ -20617,10 +20750,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/enqueue/<callback:18:865>@18:865",
-          "name": "<callback:18:865>",
-          "line": 18,
-          "end": 18,
+          "id": "<iife>/enqueue/<callback:21:883>@21:883",
+          "name": "<callback:21:883>",
+          "line": 21,
+          "end": 21,
           "sha256": "dec7a076dec41531da7f2d40bd4b896e27d45dd09ecd541190941bf88e6de894",
           "scope": [
             "enqueue"
@@ -20634,10 +20767,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/enqueue/<callback:18:872>@18:872",
-          "name": "<callback:18:872>",
-          "line": 18,
-          "end": 18,
+          "id": "<iife>/enqueue/<callback:21:890>@21:890",
+          "name": "<callback:21:890>",
+          "line": 21,
+          "end": 21,
           "sha256": "dec7a076dec41531da7f2d40bd4b896e27d45dd09ecd541190941bf88e6de894",
           "scope": [
             "enqueue"
@@ -20651,10 +20784,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/advance@19:0",
+          "id": "<iife>/advance@22:0",
           "name": "advance",
-          "line": 19,
-          "end": 19,
+          "line": 22,
+          "end": 22,
           "sha256": "35e65b4f5d2dad55613754e02e4869d18fed3239243f9f25ddbcf376d75eb5f4",
           "scope": [],
           "role": "platform",
@@ -20723,10 +20856,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/advanceAsync@20:0",
+          "id": "<iife>/advanceAsync@23:0",
           "name": "advanceAsync",
-          "line": 20,
-          "end": 20,
+          "line": 23,
+          "end": 23,
           "sha256": "f661af2c9712497d75ec0f72715c3326fb83638758df629dfb1880371f5665be",
           "scope": [],
           "role": "platform",
@@ -20741,10 +20874,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/advanceAsync/<callback:20:222>@20:222",
-          "name": "<callback:20:222>",
-          "line": 20,
-          "end": 20,
+          "id": "<iife>/advanceAsync/<callback:23:222>@23:222",
+          "name": "<callback:23:222>",
+          "line": 23,
+          "end": 23,
           "sha256": "8f07873eee8c52a50bab625e85c42f01ecd9c92688dbac5500bef424afcb15cb",
           "scope": [
             "advanceAsync"
@@ -20758,10 +20891,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/pulse@21:0",
+          "id": "<iife>/pulse@24:0",
           "name": "pulse",
-          "line": 21,
-          "end": 21,
+          "line": 24,
+          "end": 24,
           "sha256": "0e492484652318c6c9b2caa4dc14aa04dacffb127de26db5830d13eb5d02e0a8",
           "scope": [],
           "role": "platform",
@@ -20780,10 +20913,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/pulse/<callback:21:204>@21:204",
-          "name": "<callback:21:204>",
-          "line": 21,
-          "end": 21,
+          "id": "<iife>/pulse/<callback:24:204>@24:204",
+          "name": "<callback:24:204>",
+          "line": 24,
+          "end": 24,
           "sha256": "968dc393e84a4f99154a5a2e876f875dfb2aea873b29c33e4154efe01e850730",
           "scope": [
             "pulse"
@@ -20797,10 +20930,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/intent@23:0",
+          "id": "<iife>/intent@26:0",
           "name": "intent",
-          "line": 23,
-          "end": 23,
+          "line": 26,
+          "end": 26,
           "sha256": "888afa14625e6eade7436396d7c1bb0fd0a75f34491652d922380790cabc2ec0",
           "scope": [],
           "role": "platform",
@@ -20814,10 +20947,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/savedView@24:0",
+          "id": "<iife>/savedView@27:0",
           "name": "savedView",
-          "line": 24,
-          "end": 24,
+          "line": 27,
+          "end": 27,
           "sha256": "36a5648da5cc563674fae6223dd30252df87bc0b8f8cea9c3e18a1532014fcc7",
           "scope": [],
           "role": "platform",
@@ -20829,11 +20962,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/snapshot@25:0",
+          "id": "<iife>/snapshot@28:0",
           "name": "snapshot",
-          "line": 25,
-          "end": 25,
-          "sha256": "5f26107c10513b44ede7b03d110674ab9a7b8e28e60de62093b65f59e27895aa",
+          "line": 28,
+          "end": 28,
+          "sha256": "c371a8024c4aca2f0cb35933fd5bb9d44d1f3ef7d72faec3117d546f0f2e6c94",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -20905,11 +21038,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/snapshotAsync@26:0",
+          "id": "<iife>/snapshotAsync@29:0",
           "name": "snapshotAsync",
-          "line": 26,
-          "end": 26,
-          "sha256": "9ef4595607d02d8aefbdfcdd9d9a678bf6fc4d0a91339ea5fa7448f9607f8685",
+          "line": 29,
+          "end": 29,
+          "sha256": "2578458ebaf9006d80c263438efa8b141ee131187e9a6a3d3fe09c032d26320c",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -20921,6 +21054,10 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map27.cjs",
             "scripts/test_rail_map37.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map53_calendar.cjs",
             "scripts/test_rail_map53_large_catalog.cjs",
             "scripts/test_rail_map53_native_state.cjs",
@@ -20935,10 +21072,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/snapshotAsync/<callback:26:93>@26:93",
-          "name": "<callback:26:93>",
-          "line": 26,
-          "end": 26,
+          "id": "<iife>/snapshotAsync/<callback:29:110>@29:110",
+          "name": "<callback:29:110>",
+          "line": 29,
+          "end": 29,
           "sha256": "3a3b71c8c4cbff87cd0842c3cb812cef9db667994f71afd20b619bc38535c029",
           "scope": [
             "snapshotAsync"
@@ -20952,10 +21089,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/dispose@27:0",
+          "id": "<iife>/dispose@30:0",
           "name": "dispose",
-          "line": 27,
-          "end": 27,
+          "line": 30,
+          "end": 30,
           "sha256": "07e89dd7b7ffb6e23b6a823fe689e3c79dd9509488a3754920c35fd33dd753b3",
           "scope": [],
           "role": "platform",
@@ -20974,9 +21111,13 @@
             "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map42.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_clock.cjs",
             "scripts/test_rail_map51_worker.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map52_transport.cjs",
             "scripts/test_rail_map52_worker.cjs",
             "scripts/test_rail_map52_worker_queue.cjs",
@@ -20998,10 +21139,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/rebind@28:0",
+          "id": "<iife>/rebind@31:0",
           "name": "rebind",
-          "line": 28,
-          "end": 28,
+          "line": 31,
+          "end": 31,
           "sha256": "242abf988fc55dedb81f0acc89f42cd04da8ba6e953447f23e4f911d67b83d4e",
           "scope": [],
           "role": "platform",
@@ -21015,10 +21156,30 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/transaction@29:0",
+          "id": "<iife>/commandSync@32:0",
+          "name": "commandSync",
+          "line": 32,
+          "end": 32,
+          "sha256": "97a55de86b28f335d773807ac44a7b988abdd8d1e50552f832c0196f4c4c5564",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-8 bridge",
+          "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/transaction@33:0",
           "name": "transaction",
-          "line": 29,
-          "end": 29,
+          "line": 33,
+          "end": 33,
           "sha256": "c640519253ea3c3558c60482e196b1badc38866640ab41da97ec4208d529b5b1",
           "scope": [],
           "role": "platform",
@@ -21035,10 +21196,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/replaceDemandSync@30:0",
+          "id": "<iife>/replaceDemandSync@34:0",
           "name": "replaceDemandSync",
-          "line": 30,
-          "end": 30,
+          "line": 34,
+          "end": 34,
           "sha256": "dceb8d39be3545008ac1f88eed6228e51508ef5abcbca88d0a757a5503df3923",
           "scope": [],
           "role": "platform",
@@ -21052,10 +21213,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/replaceDemand@31:0",
+          "id": "<iife>/replaceDemand@35:0",
           "name": "replaceDemand",
-          "line": 31,
-          "end": 31,
+          "line": 35,
+          "end": 35,
           "sha256": "c5311765ae123e0c52f657a907b80dd1e1c7f09f1adf2d15959383b63285d013",
           "scope": [],
           "role": "platform",
@@ -21072,10 +21233,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/replaceDemand/<callback:31:285>@31:285",
-          "name": "<callback:31:285>",
-          "line": 31,
-          "end": 31,
+          "id": "<iife>/replaceDemand/<callback:35:285>@35:285",
+          "name": "<callback:35:285>",
+          "line": 35,
+          "end": 35,
           "sha256": "81f38c2353ea5a8b4fe4439201dc8eacc97266bc9c4d8478b2dfc3383f5a4986",
           "scope": [
             "replaceDemand"
@@ -21089,10 +21250,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/request@32:0",
+          "id": "<iife>/request@36:0",
           "name": "request",
-          "line": 32,
-          "end": 32,
+          "line": 36,
+          "end": 36,
           "sha256": "e40abff7380e9109cf9e4a83b8b2828d4e69747993041537e296e196a507e7dc",
           "scope": [],
           "role": "platform",
@@ -21115,10 +21276,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/setDaily@33:0",
+          "id": "<iife>/setDaily@37:0",
           "name": "setDaily",
-          "line": 33,
-          "end": 33,
+          "line": 37,
+          "end": 37,
           "sha256": "c46d837f961ae6dc1c484fca5760036ee1e5f29ef612e4b9d539baf700f82e3f",
           "scope": [],
           "role": "platform",
@@ -21137,10 +21298,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/setDaily/<callback:33:135>@33:135",
-          "name": "<callback:33:135>",
-          "line": 33,
-          "end": 33,
+          "id": "<iife>/setDaily/<callback:37:135>@37:135",
+          "name": "<callback:37:135>",
+          "line": 37,
+          "end": 37,
           "sha256": "52121db348ce8afdde50162930ede22705cb0c43826d4fec7bddf09c640dac20",
           "scope": [
             "setDaily"
@@ -21154,10 +21315,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/checkpoint@34:22",
+          "id": "<iife>/checkpoint@38:22",
           "name": "checkpoint",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "fe36aa225a17178482f2659a140736439689c9e0047aeb3b9ea7094ede5ae243",
           "scope": [],
           "role": "platform",
@@ -21172,15 +21333,25 @@
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map57_lifecycle.cjs"
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
+            "scripts/test_rail_map53_calendar.cjs",
+            "scripts/test_rail_map53_native_state.cjs",
+            "scripts/test_rail_map54_windows.cjs",
+            "scripts/test_rail_map56_statistics.cjs",
+            "scripts/test_rail_map57_lifecycle.cjs",
+            "scripts/test_rail_map58_retirement.cjs",
+            "scripts/test_rail_map59_reroutes.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/previewImport@34:104",
+          "id": "<iife>/previewImport@38:104",
           "name": "previewImport",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "f48fa4cebc35cbd222edc70c4e5de12c125beb334233fa7f8552003060bd9de3",
           "scope": [],
           "role": "platform",
@@ -21194,10 +21365,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/previewImport/<callback:34:155>@34:155",
-          "name": "<callback:34:155>",
-          "line": 34,
-          "end": 34,
+          "id": "<iife>/previewImport/<callback:38:155>@38:155",
+          "name": "<callback:38:155>",
+          "line": 38,
+          "end": 38,
           "sha256": "e206e9af94cb36add6895f22ae4e344f0696edae52cc2f6cd645c33d12fce2d3",
           "scope": [
             "previewImport"
@@ -21211,10 +21382,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/prepareImport@34:187",
+          "id": "<iife>/prepareImport@38:187",
           "name": "prepareImport",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "e269d41b97f6f6b95f8407b1b2feb428c8c492c4f28d47fd3f7fe897b92ca37f",
           "scope": [],
           "role": "platform",
@@ -21228,10 +21399,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cancelImport@34:296",
+          "id": "<iife>/cancelImport@38:296",
           "name": "cancelImport",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "676f565a5d4e2a48e25d83b7a538baf0eae967aef45177575e9cf3e43a3639a2",
           "scope": [],
           "role": "platform",
@@ -21245,10 +21416,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/commitImport@34:356",
+          "id": "<iife>/commitImport@38:356",
           "name": "commitImport",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "79e2cf387d1228c754b24e5cb5f39e21b489b4e61abed0dddd269fc36cc87533",
           "scope": [],
           "role": "platform",
@@ -21262,10 +21433,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/query@34:412",
+          "id": "<iife>/query@38:412",
           "name": "query",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "cd82535d33ef069c7c22258cbb8283b0f8127fe82a37070683a88ca3cffa76b3",
           "scope": [],
           "role": "platform",
@@ -21295,6 +21466,7 @@
             "rail/view-model.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
@@ -21303,10 +21475,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/query/<callback:34:471>@34:471",
-          "name": "<callback:34:471>",
-          "line": 34,
-          "end": 34,
+          "id": "<iife>/query/<callback:38:471>@38:471",
+          "name": "<callback:38:471>",
+          "line": 38,
+          "end": 38,
           "sha256": "1cf5a866597cbf54333f0e40cac2ac0037a22a6dba69426ce64ce13fd635f9a7",
           "scope": [
             "query"
@@ -21320,10 +21492,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/querySync@34:502",
+          "id": "<iife>/querySync@38:502",
           "name": "querySync",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "4386cb15bd6ebebf0ffb91613756fe96e8fcc75287e3b5eb63d83845833a01e8",
           "scope": [],
           "role": "platform",
@@ -21339,10 +21511,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecastInvalidate@34:690",
+          "id": "<iife>/forecastInvalidate@38:690",
           "name": "forecastInvalidate",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "e1dcf0b60f845f711500c6d74140fe6c68b03b668c79c1916d43bc978dc45673",
           "scope": [],
           "role": "platform",
@@ -21356,10 +21528,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecastBegin@34:741",
+          "id": "<iife>/forecastBegin@38:741",
           "name": "forecastBegin",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "41e8d8766e671b82d4b1ae1cc3b2aa708fc10d7a594a6be7801cf1cc6e3ac47c",
           "scope": [],
           "role": "platform",
@@ -21373,10 +21545,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecastFinish@34:814",
+          "id": "<iife>/forecastFinish@38:814",
           "name": "forecastFinish",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "beb7d1ca33d49a79e04bfa54c399737ab95ac43fb0cde18c4a8e5b7dd1a83a5e",
           "scope": [],
           "role": "platform",
@@ -21390,10 +21562,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnose@34:903",
+          "id": "<iife>/diagnose@38:903",
           "name": "diagnose",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "06354bfd976b1faa4cca1a4764b3133f3a901645892aea65c14a06ab876000a1",
           "scope": [],
           "role": "platform",
@@ -21407,10 +21579,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/observe@34:954",
+          "id": "<iife>/observe@38:954",
           "name": "observe",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "1197b23d6e2b173a0d8e20a8e6ff1eb62192e1239446bdbd4f336b77390b3a1a",
           "scope": [],
           "role": "platform",
@@ -21430,10 +21602,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecastQuery@34:1014",
+          "id": "<iife>/forecastQuery@38:1014",
           "name": "forecastQuery",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "0c227270fdf463ef970e953479bfc65571ec44d1aedbec25856d4ffb34691a9d",
           "scope": [],
           "role": "platform",
@@ -21447,10 +21619,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/command@34:1086",
+          "id": "<iife>/command@38:1098",
           "name": "command",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "5fbbb3f4844f36f576245b7f8c8d50b093c0ff90cc57e0c23c25ed8ed443828a",
           "scope": [],
           "role": "platform",
@@ -21473,10 +21645,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/preview@34:1160",
+          "id": "<iife>/preview@38:1172",
           "name": "preview",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "8f980782d2fd47f6a8119519d3915927124dd64bec459b3ac067f72e261a58d6",
           "scope": [],
           "role": "platform",
@@ -21500,10 +21672,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/undo@34:1215",
+          "id": "<iife>/undo@38:1227",
           "name": "undo",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "d0aebf9b32ef16879ebe2678f3eb59cc4e1511a4c594f0c74e2ec01ee3dae901",
           "scope": [],
           "role": "platform",
@@ -21518,10 +21690,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/editRevision@34:1311",
+          "id": "<iife>/editRevision@38:1323",
           "name": "editRevision",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "34bb69e2ef51750a31f554ab1a41675c590b7ffe6f4408efd51fa2f668c4c6ef",
           "scope": [],
           "role": "platform",
@@ -21537,10 +21709,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/credit@34:1352",
+          "id": "<iife>/credit@38:1364",
           "name": "credit",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "29da064ec9be15d716c2f269389b5bffdf1ce15f196a3a57defd4707ffb4eab5",
           "scope": [],
           "role": "platform",
@@ -21555,10 +21727,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/credit/<callback:34:1407>@34:1407",
-          "name": "<callback:34:1407>",
-          "line": 34,
-          "end": 34,
+          "id": "<iife>/credit/<callback:38:1419>@38:1419",
+          "name": "<callback:38:1419>",
+          "line": 38,
+          "end": 38,
           "sha256": "89c64fdfc40e4d9111730d2b1d05fa73bd7d626f900941691b7c139f0b30276b",
           "scope": [
             "credit"
@@ -21572,10 +21744,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/usesWorker@34:1441",
+          "id": "<iife>/usesWorker@38:1453",
           "name": "usesWorker",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "4deb825094141064454a664e5ea71a0b082e5e4e815953f43252d17db012356f",
           "scope": [],
           "role": "platform",
@@ -21587,16 +21759,17 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map51_clock.cjs",
+            "scripts/test_rail_map53_native_state.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/has@34:1491",
+          "id": "<iife>/has@38:1503",
           "name": "has",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "e2575384360673b8c6d3051cbe86cb3e5e60a3fb6e240e4fbc2ecc35dcde2158",
           "scope": [],
           "role": "platform",
@@ -21631,10 +21804,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/materializeAsync@34:1585",
+          "id": "<iife>/materializeAsync@38:1597",
           "name": "materializeAsync",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "043b170f935a36f3ed9bc872721101061e8de2917baf071018354d3b9c8a2687",
           "scope": [],
           "role": "platform",
@@ -21653,10 +21826,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/materializeAsync/<callback:34:1630>@34:1630",
-          "name": "<callback:34:1630>",
-          "line": 34,
-          "end": 34,
+          "id": "<iife>/materializeAsync/<callback:38:1642>@38:1642",
+          "name": "<callback:38:1642>",
+          "line": 38,
+          "end": 38,
           "sha256": "ab664b8a51006756486c9b3a585bb23cc5ada558c1cb49268f6d784ccf94ad6f",
           "scope": [
             "materializeAsync"
@@ -21670,10 +21843,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/syncBank@34:1662",
+          "id": "<iife>/syncBank@38:1674",
           "name": "syncBank",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "cb5ff229340f9a5075ffc8e9d239712d092ec4a7bdb5e4e628441105911b5550",
           "scope": [],
           "role": "platform",
@@ -21685,10 +21858,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/idle@34:1739",
+          "id": "<iife>/idle@38:1751",
           "name": "idle",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "ba7d5eb68a22650ed41fbe22e36a17f0142f04bcd0b38379f501c8783ebb0fce",
           "scope": [],
           "role": "platform",
@@ -21703,10 +21876,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/isBusy@34:1791",
+          "id": "<iife>/isBusy@38:1803",
           "name": "isBusy",
-          "line": 34,
-          "end": 34,
+          "line": 38,
+          "end": 38,
           "sha256": "e11de0b5add87471d5187c61f267f104597f5ff6546620c79c1e6c0c0e099fa6",
           "scope": [],
           "role": "platform",
@@ -23795,6 +23968,9 @@
             "scripts/test_rail_map42.cjs",
             "scripts/test_rail_map46.cjs",
             "scripts/test_rail_map47.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
@@ -25459,6 +25635,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/local-save.js",
+            "rail/runtime-wasm.js",
             "rail/ui.js",
             "rail/view.js"
           ],
@@ -25539,6 +25716,7 @@
             "rail/hubs.js",
             "rail/operations-center.js",
             "rail/regions.js",
+            "rail/runtime-wasm.js",
             "rail/tokyo.js",
             "rail/ui.js",
             "rail/view.js"
@@ -26014,6 +26192,10 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map12.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs"
           ],
@@ -26672,6 +26854,7 @@
             "rail/hubs.js",
             "rail/operations-center.js",
             "rail/regions.js",
+            "rail/runtime-wasm.js",
             "rail/street-map.js",
             "rail/ui.js",
             "rail/view.js"
@@ -26709,7 +26892,17 @@
             "scripts/test_rail_map19.cjs",
             "scripts/test_rail_map20.cjs",
             "scripts/test_rail_map22.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
+            "scripts/test_rail_map53_calendar.cjs",
+            "scripts/test_rail_map53_native_state.cjs",
+            "scripts/test_rail_map54_windows.cjs",
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map57_lifecycle.cjs",
+            "scripts/test_rail_map58_retirement.cjs",
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map61_validation.cjs"
           ],
@@ -29759,6 +29952,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/local-save.js",
+            "rail/runtime-wasm.js",
             "rail/street-map.js",
             "rail/view.js"
           ],
@@ -29947,7 +30141,17 @@
             "scripts/test_rail_map19.cjs",
             "scripts/test_rail_map20.cjs",
             "scripts/test_rail_map22.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
+            "scripts/test_rail_map53_calendar.cjs",
+            "scripts/test_rail_map53_native_state.cjs",
+            "scripts/test_rail_map54_windows.cjs",
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map57_lifecycle.cjs",
+            "scripts/test_rail_map58_retirement.cjs",
+            "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map61_validation.cjs"
           ],
@@ -37490,6 +37694,7 @@
             "rail/urban-growth.js"
           ],
           "testReferenceCandidates": [
+            "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
@@ -37971,6 +38176,10 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map12.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs"
           ],
@@ -38343,9 +38552,13 @@
             "scripts/test_rail_map37.cjs",
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map42.cjs",
+            "scripts/test_rail_map49.cjs",
+            "scripts/test_rail_map50.cjs",
+            "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map51_clock.cjs",
             "scripts/test_rail_map51_worker.cjs",
             "scripts/test_rail_map51_worker_queue.cjs",
+            "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map52_transport.cjs",
             "scripts/test_rail_map52_worker.cjs",
             "scripts/test_rail_map52_worker_queue.cjs",
