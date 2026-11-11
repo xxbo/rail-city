@@ -22,7 +22,10 @@ for (let i = 0; i < 4; i++) assert(!N.addLine(s, Array.from({
 }).error);
 Q.enableSatisfaction(s);
 const f = C.evaluate(s),
-  rt = P.create(s, f, 480, false);
+  nativeRt = P.create(s, f, 480, false),
+  rt = structuredClone(nativeRt);
+// Diagnostic fixtures are detached view DTOs; edits here never target the native arena.
+delete rt.nativeView;
 const plan = rt.plan.services[0];
 rt.trains = [{
   parentLine: s.services[0].id,
@@ -137,7 +140,7 @@ const slim = {
   const sw = worker('save-worker.js'),
     value = {
       state: s,
-      runtime: P.snapshot(rt),
+      runtime: P.snapshot(nativeRt),
       large: 'x'.repeat(9 * 1024 * 1024)
     };
   await sw.send({
@@ -172,7 +175,7 @@ const slim = {
     recovered: true
   });
   console.log('MAP34 passed: diagnostic Worker exact parity, forecast reuse/version rejection, compact queue equivalence, read-only state/runtime, 9MB worker JSON roundtrip, last-good preservation on native serialization/storage failure and successful retry.');
-})().catch(e => {
+})().finally(()=>P.dispose(nativeRt)).catch(e => {
   console.error(e);
   process.exitCode = 1;
 });

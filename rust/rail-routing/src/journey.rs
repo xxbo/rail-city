@@ -112,5 +112,23 @@ pub(super) fn key(j: &V) -> Rc<str> {
         "byLine",
     ];
     let value = V::Array(fields.iter().map(|k| j.get(k).clone()).collect());
-    Rc::from(crate::diagnostics::json(&value))
+    compact_key(&crate::diagnostics::json(&value))
+}
+
+// JSON encoders escape control characters, so these four dictionary codes cannot
+// collide with input text. All remaining bytes (including key/property order) survive.
+pub(super) fn compact_key(json: &str) -> Rc<str> {
+    Rc::from(json.replace("\"service\":", "\u{1}").replace("\"dir\":", "\u{2}").replace("\"from\":", "\u{3}").replace("\"to\":", "\u{4}"))
+}
+#[cfg(test)]
+mod identity_tests {
+    #[test]
+    fn dictionary_identity_is_lossless_for_escaped_values_and_unicode() {
+        for raw in [r#"[{"service":"s1","dir":1,"from":0,"to":2},"住宅😀"]"#,r#"[{"service":"\"service\":","dir":-1,"from":1,"to":2},"\u0001"]"#] {
+            let key=super::compact_key(raw);
+            let restored=key.replace('\u{1}',"\"service\":").replace('\u{2}',"\"dir\":").replace('\u{3}',"\"from\":").replace('\u{4}',"\"to\":");
+            assert_eq!(restored,raw);assert!(key.len()<raw.len());
+        }
+        assert_ne!(super::compact_key(r#"[{"from":1,"to":2}]"#),super::compact_key(r#"[{"from":2,"to":1}]"#));
+    }
 }

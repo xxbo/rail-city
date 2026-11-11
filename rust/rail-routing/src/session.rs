@@ -535,11 +535,16 @@ mod tests {
 
 #[no_mangle]
 pub extern "C" fn session_packed() -> *const f64 {
-    let (input, bytes) = CORE.with(|c| {
-        let c = c.borrow();
-        (c.input.clone(), c.cycle_bytes.clone())
+    let input = CORE.with(|c| {
+        let mut c = c.borrow_mut();
+        let input=value::read_packed(&c.input,&c.cycle_bytes);
+        // Decoding owns the request. Do not retain/copy a large wire beside its tree.
+        if c.input.capacity()>131072{c.input=Vec::new();}else{c.input.clear();}
+        if c.cycle_bytes.capacity()>1048576{c.cycle_bytes=Vec::new();}else{c.cycle_bytes.clear();}
+        input
     });
-    let (v, b) = HOST.with(|h| h.borrow_mut().request_packed(&input, &bytes));
+    let out=match input{Some(input)=>HOST.with(|h|h.borrow_mut().handle(&input)),None=>error("INVALID_WIRE",0,0)};
+    let (v,b)=value::write_packed(&out);
     CORE.with(|c| {
         let mut c = c.borrow_mut();
         c.output = v;

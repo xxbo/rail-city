@@ -1305,6 +1305,18 @@ pub(super) fn command(s: &mut V, op: &str, args: &V, cfg: &V) -> Res<V> {
             configure(s, id, args.get("values"), cfg)?;
             Ok(obj(&[]))
         }
+        "geometry" => {
+            let li=index_id(s.get("services"),id).ok_or("请先选择线路。")?;
+            let line=s.get("services").array()[li].clone();
+            let shapes=args.get("shapes");
+            if !matches!(shapes,V::Array(_))||shapes.array().len()!=line.get("trackIds").array().len(){return Err(error("线路几何无效。"));}
+            for shape in shapes.array(){if shape.truth()&&(!matches!(shape,V::Array(_))||shape.array().len()>120||shape.array().iter().any(|point|!finite(point.get("x"))||!finite(point.get("y"))||point.num("x")<25.0||point.num("y")<25.0||point.num("x")>s.get("world").num("width")-25.0||point.num("y")>s.get("world").num("height")-25.0)){return Err(error("线路几何无效。"));}}
+            for (index,track_id) in line.get("trackIds").array().iter().enumerate(){
+                if shapes.array()[index].truth(){let ti=index_id(s.get("tracks"),track_id).ok_or("线路几何无效。")?;let track=&mut s.get_mut("tracks").array_mut()[ti];del(track,"curve");let mut bends=shapes.array()[index].array().to_vec();if !eq(track.get("a"),&line.get("stops").array()[index]){bends.reverse();}track.set("bends",arr(bends));}
+            }
+            G::geometry(s,&line,shapes)?;
+            Ok(obj(&[]))
+        }
         "renameStation" => {
             let node = at(s.get("nodes"), id);
             let name = args.get("name");

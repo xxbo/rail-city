@@ -44,9 +44,10 @@ console.log('P3 regressions passed: queue wire ordering, prepared catalogs, immu
  try{
   await M.advanceBudgetAsync(s,rt,12,{budget:1e6,maxSteps:10000});
   assert(require('../rail/runtime-wasm').usesWorker(rt),'normal handoff actually reaches the Worker');
-  const world=structuredClone(s),saved=await P.snapshotAsync(rt);restored=P.restore(world,f,structuredClone(saved));assert(restored);
+  const stableSummary=P.summary(rt),world=structuredClone(s),saved=await P.snapshotAsync(rt);assert.deepEqual(P.summary(rt),stableSummary,"full Worker snapshot preserves the live summary");restored=P.restore(world,f,structuredClone(saved));assert(restored);
   await M.advanceBudgetAsync(s,rt,3,{budget:1e6,maxSteps:10000});M.advance(world,restored,3);
   assert.deepEqual(await P.snapshotAsync(rt),P.snapshot(restored),'worker and restored local native arenas continue identically');assert.deepEqual(s,world);
+  await P.detailsAsync(rt,'station',0);await M.advanceBudgetAsync(s,rt,.7,{budget:1e6,maxSteps:10000});const liveStation=P.station(rt,0),freshStation=await P.detailsAsync(rt,'station',0);assert.equal(liveStation.waiting,freshStation.waiting,'station display cache expires after time advances');assert.equal(liveStation.outside,freshStation.outside);
   const threads=require('node:worker_threads'),Worker=threads.Worker;threads.Worker=class{constructor(){throw Error('worker creation denied');}};
  try{const world=create(2),f=forecast(world),local=P.create(world,f,480,false),referenceWorld=structuredClone(world),reference=P.create(referenceWorld,f,480,false);try{await M.advanceBudgetAsync(world,local,3,{budget:1e6,maxSteps:10000});M.advance(referenceWorld,reference,3);assert(!require('../rail/runtime-wasm').usesWorker(local));assert.deepEqual(P.snapshot(local),P.snapshot(reference));assert.deepEqual(world,referenceWorld);}finally{P.dispose(local);P.dispose(reference);}}finally{threads.Worker=Worker;}
  console.log('P3 Worker regression passed: session handoff, full checkpoint and deterministic native continuation.');

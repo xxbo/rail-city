@@ -446,12 +446,12 @@ pub(super) fn run(
 )->Vec<f64>{
     let nf=int(input[6]);let nm=int(input[7]);assert_eq!(input.len(),8+nf+nm);
     if nm>0{*calendar_state=Some(Calendar::read(&input[8+nf..],sampling_state));}
-    run_owned(Batch{token:input[0],time:input[1],remaining:input[2],max_steps:int(input[3]),budget:input[4],barrier:input[5],finance:&input[8..8+nf],trace:true},calendar_state,cycle_state,cycle_bytes,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state,&mut |_,_,_|false).wire
+    run_owned(Batch{token:input[0],time:input[1],remaining:input[2],max_steps:int(input[3]),budget:input[4],barrier:input[5],finance:&input[8..8+nf],trace:true},calendar_state,cycle_state,cycle_bytes,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state,&mut |_,_,_,_|false).wire
 }
 pub(super) struct Batch<'a>{pub token:f64,pub time:f64,pub remaining:f64,pub max_steps:usize,pub budget:f64,pub barrier:f64,pub finance:&'a[f64],pub trace:bool}
 pub(super) struct BatchResult{pub wire:Vec<f64>,pub definitions:Vec<(usize,usize)>,pub spawned:Vec<(usize,usize,usize)>}
 pub(super) fn run_owned(
-    request:Batch<'_>,calendar_state:&mut Option<Calendar>,cycle_state:&mut Option<crate::cycle::Cycle>,cycle_bytes:&[u8],sampling_state:&mut Option<crate::simulation::Sampling>,feedback_cache:&mut crate::operations::CoverageCache,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<crate::queues::Queues>,settlement_state:&mut Option<crate::engine::Settlement>,profiles:&mut impl FnMut(&mut crate::cycle::Cycle,&[usize],bool)->bool
+    request:Batch<'_>,calendar_state:&mut Option<Calendar>,cycle_state:&mut Option<crate::cycle::Cycle>,cycle_bytes:&[u8],sampling_state:&mut Option<crate::simulation::Sampling>,feedback_cache:&mut crate::operations::CoverageCache,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<crate::queues::Queues>,settlement_state:&mut Option<crate::engine::Settlement>,profiles:&mut impl FnMut(&mut crate::cycle::Cycle,&mut crate::queues::Queues,&[usize],bool)->bool
 )->BatchResult{
         let cal = calendar_state.as_mut().expect("calendar missing");
         assert_eq!(cal.token, request.token);
@@ -658,7 +658,7 @@ pub(super) fn run_owned(
             let mut attempts=0;
             while result[1]!=0.0&&attempts<4096{
                 let ids=result[11..11+int(result[3])].iter().map(|x|int(*x)).collect::<Vec<_>>();
-                if !profiles(state,&ids,result[2]!=0.0){break;}
+                if !profiles(state,queue_state.as_mut().unwrap(),&ids,result[2]!=0.0){break;}
                 result=crate::cycle::execute(state,cal.serial,cal.next,Some(cal.carry),cal.sparse,&cal.ids,&templates,&rules,&prep,&fin,&parts,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state);attempts+=1;
             }
             if result[1] != 0.0 {

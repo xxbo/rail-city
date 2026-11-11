@@ -156,80 +156,53 @@ pub(super) fn read(r: &mut Read) -> Value {
     }
     tree(r, &strings)
 }
-fn collect(value: &Value) -> (Vec<String>, Vec<f64>) {
-    let mut strings = vec![];
-    let mut ids = std::collections::HashMap::<String, usize>::new();
-    let mut body = vec![];
-    fn intern(
-        s: &str,
-        strings: &mut Vec<String>,
-        ids: &mut std::collections::HashMap<String, usize>,
-    ) -> usize {
-        if let Some(&id) = ids.get(s) {
-            id
-        } else {
-            let id = strings.len();
-            strings.push(s.into());
-            ids.insert(s.into(), id);
-            id
+// Collect symbols and size first, then write directly into the final buffer.
+// Large checkpoints never need a second full numeric body beside the output.
+fn symbols(value: &Value) -> (Vec<String>, std::collections::HashMap<String, usize>, usize) {
+    fn intern(value: &str, strings: &mut Vec<String>, ids: &mut std::collections::HashMap<String,usize>) {
+        if !ids.contains_key(value) { ids.insert(value.into(), strings.len()); strings.push(value.into()); }
+    }
+    fn visit(value: &Value, strings: &mut Vec<String>, ids: &mut std::collections::HashMap<String,usize>) -> usize {
+        match value {
+            Value::Shared(value) => visit(value,strings,ids),
+            Value::Missing | Value::Null | Value::Bool(_) => 1,
+            Value::Number(_) => 2,
+            Value::String(value) => { intern(value,strings,ids); 2 },
+            Value::Array(rows) => 2 + rows.iter().map(|value|visit(value,strings,ids)).sum::<usize>(),
+            Value::Object(rows) => 2 + rows.iter().map(|(key,value)|{intern(key,strings,ids);1+visit(value,strings,ids)}).sum::<usize>(),
         }
     }
-    fn tree(
-        v: &Value,
-        s: &mut Vec<String>,
-        ids: &mut std::collections::HashMap<String, usize>,
-        out: &mut Vec<f64>,
-    ) {
-        match v {
-            Value::Shared(value)=>tree(value,s,ids,out),
-            Value::Missing => out.push(0.0),
-            Value::Null => out.push(1.0),
-            Value::Bool(v) => out.push(if *v { 3.0 } else { 2.0 }),
-            Value::Number(v) => out.extend([4.0, *v]),
-            Value::String(v) => out.extend([5.0, intern(v, s, ids) as f64]),
-            Value::Array(a) => {
-                out.extend([6.0, a.len() as f64]);
-                for v in a {
-                    tree(v, s, ids, out)
-                }
-            }
-            Value::Object(a) => {
-                out.extend([7.0, a.len() as f64]);
-                for (k, v) in a {
-                    out.push(intern(k, s, ids) as f64);
-                    tree(v, s, ids, out)
-                }
-            }
-        }
+    let mut strings=vec![];let mut ids=std::collections::HashMap::new();
+    let words=visit(value,&mut strings,&mut ids);(strings,ids,words)
+}
+fn write_tree(value: &Value, ids: &std::collections::HashMap<String,usize>, output: &mut Vec<f64>) {
+    match value {
+        Value::Shared(value) => write_tree(value,ids,output),
+        Value::Missing => output.push(0.0), Value::Null => output.push(1.0),
+        Value::Bool(value) => output.push(if *value {3.0}else{2.0}),
+        Value::Number(value) => output.extend([4.0,*value]),
+        Value::String(value) => output.extend([5.0,ids[value] as f64]),
+        Value::Array(rows) => {output.extend([6.0,rows.len() as f64]);for value in rows{write_tree(value,ids,output);}},
+        Value::Object(rows) => {output.extend([7.0,rows.len() as f64]);for(key,value)in rows{output.push(ids[key] as f64);write_tree(value,ids,output);}},
     }
-    tree(value, &mut strings, &mut ids, &mut body);
-    (strings, body)
 }
 pub(super) fn write(value: &Value) -> Vec<f64> {
-    let (strings, body) = collect(value);
-    let mut out = vec![strings.len() as f64];
-    for s in strings {
-        let v = s.encode_utf16().collect::<Vec<_>>();
-        out.push(v.len() as f64);
-        out.extend(v.iter().map(|&v| v as f64));
-    }
-    out.extend(body);
-    out
+    let (strings,ids,words)=symbols(value);
+    let header=1+strings.iter().map(|value|1+value.encode_utf16().count()).sum::<usize>();
+    let mut output=Vec::with_capacity(header+words);output.push(strings.len() as f64);
+    for value in &strings{output.push(value.encode_utf16().count() as f64);output.extend(value.encode_utf16().map(|unit|unit as f64));}
+    write_tree(value,&ids,&mut output);output
 }
 pub(super) fn write_packed(value: &Value) -> (Vec<f64>, Vec<u8>) {
-    let (strings, body) = collect(value);
-    let mut values = vec![strings.len() as f64];
-    let mut bytes = vec![];
-    for s in strings {
-        let at = bytes.len();
-        let units = s.encode_utf16().collect::<Vec<_>>();
-        values.extend([at as f64, units.len() as f64]);
-        for c in units {
-            bytes.extend(c.to_le_bytes());
-        }
+    let (strings,ids,words)=symbols(value);
+    let mut values=Vec::with_capacity(1+strings.len()*2+words);values.push(strings.len() as f64);
+    let byte_count=strings.iter().map(|value|value.encode_utf16().count()*2).sum();
+    let mut bytes=Vec::with_capacity(byte_count);
+    for value in &strings{
+        values.extend([bytes.len() as f64,value.encode_utf16().count() as f64]);
+        for unit in value.encode_utf16(){bytes.extend(unit.to_le_bytes());}
     }
-    values.extend(body);
-    (values, bytes)
+    write_tree(value,&ids,&mut values);(values,bytes)
 }
 pub(super) fn read_packed(v: &[f64], bytes: &[u8]) -> Option<Value> {
     fn count(v: &[f64], at: &mut usize) -> Option<usize> {
@@ -319,6 +292,15 @@ pub(super) fn read_packed(v: &[f64], bytes: &[u8]) -> Option<Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn encoders_keep_the_exact_wire_and_allocate_only_the_final_numeric_body() {
+        let value=object([("a",Value::Number(1.0)),("b",Value::String("a".into())),("c",Value::Array(vec![Value::Null,Value::Bool(false),Value::Missing]))]);
+        let body=vec![7.0,3.0,0.0,4.0,1.0,1.0,5.0,0.0,2.0,6.0,3.0,1.0,2.0,0.0];
+        let mut expected=vec![3.0,1.0,97.0,1.0,98.0,1.0,99.0];expected.extend_from_slice(&body);
+        let wire=write(&value);assert_eq!(wire,expected);assert_eq!(wire.capacity(),wire.len());
+        let (packed,bytes)=write_packed(&value);let mut expected=vec![3.0,0.0,1.0,2.0,1.0,4.0,1.0];expected.extend(body);
+        assert_eq!(packed,expected);assert_eq!(bytes,b"a\0b\0c\0");assert_eq!(packed.capacity(),packed.len());assert_eq!(bytes.capacity(),bytes.len());
+    }
     #[test]
     fn shared_routes_encode_transparently_and_mutations_copy_on_write() {
         let original=object([("name",Value::String("route".into())),("edges",Value::Array(vec![Value::Number(3.0)]))]).shared();

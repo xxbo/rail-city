@@ -9,9 +9,11 @@ struct Profile {
     key: Rc<str>,
     service: f64,
     id: Option<usize>,
+    owned: bool,
     data: Vec<f64>,
     lines: Vec<f64>,
 }
+type Profiles = crate::numbers::Paged<Profile>;
 pub(super) struct Cycle {
     token: f64,
     arrival: [f64; 3],
@@ -21,8 +23,9 @@ pub(super) struct Cycle {
     count: usize,
     loaded: bool,
     keys: HashMap<Rc<str>, usize>,
-    profiles: HashMap<usize, Profile>,
+    profiles: Profiles,
     pending: Option<(Vec<f64>, f64)>,
+    metadata_batches: usize,
 }
 impl Cycle {
     pub(super) fn snapshot(&self, now: f64) -> [f64; 8] {
@@ -42,7 +45,7 @@ impl Cycle {
     }
 }
 fn string(bytes: &[u8], off: f64, len: f64) -> Rc<str> {
-    Rc::from(
+    crate::journey::compact_key(
         std::str::from_utf8(&bytes[int(off)..int(off) + int(len)]).expect("invalid identity key"),
     )
 }
@@ -162,8 +165,9 @@ pub(super) fn run(
             count,
             loaded: count == 0,
             keys: HashMap::new(),
-            profiles: HashMap::new(),
+            profiles: Profiles::default(),
             pending: None,
+            metadata_batches: 0,
         });
     }
     let state = cycle_state.as_mut().unwrap();
@@ -207,6 +211,7 @@ pub(super) fn run(
                 key,
                 service,
                 id: None,
+                owned: false,
                 lines: line_ids(&data),
                 data,
             },
@@ -303,15 +308,20 @@ pub(super) fn execute(
             let id = if available {
                 if profile.id.is_none() {
                     let id = if let Some(&id) = state.keys.get(&profile.key) {
+                        if profile.owned { queue_state.as_mut().unwrap().discard_definition(p); }
                         id
                     } else {
                         let id = state.count;
                         state.count += 1;
                         state.keys.insert(profile.key.clone(), id);
-                        let mut data = std::mem::take(&mut profile.data);
-                        data[0] = id as f64;
-                        definitions[0] += 1.0;
-                        definitions.extend(data);
+                        if profile.owned {
+                            queue_state.as_mut().unwrap().commit_definition(p, id);
+                        } else {
+                            let mut data = std::mem::take(&mut profile.data);
+                            data[0] = id as f64;
+                            definitions[0] += 1.0;
+                            definitions.extend(data);
+                        }
                         new.push((p, id));
                         id
                     };
@@ -456,9 +466,17 @@ pub(super) fn execute(
 
 impl Cycle{
     pub(super) fn owned(token:f64,catalog:f64,count:usize,next:usize,arrival:[f64;3],carry:f64,keys:Vec<(Rc<str>,usize)>)->Self{
-        Self{token,catalog,count,next,arrival,carry,loaded:true,keys:keys.into_iter().collect(),profiles:HashMap::new(),pending:None}
+        Self{token,catalog,count,next,arrival,carry,loaded:true,keys:keys.into_iter().collect(),profiles:Profiles::default(),pending:None,metadata_batches:0}
     }
-    pub(super) fn install_profile(&mut self,index:usize,key:Rc<str>,service:f64,data:Vec<f64>){let lines=line_ids(&data);self.profiles.insert(index,Profile{key,service,id:None,data,lines});}
+    pub(super) fn install_profile(&mut self,index:usize,key:Rc<str>,service:f64,data:Vec<f64>){let lines=line_ids(&data);self.profiles.insert(index,Profile{key,service,id:None,owned:false,data,lines});}
+    pub(super) fn metadata_batch(&mut self){self.metadata_batches+=1;}
+    pub(super) fn storage(&self)->[usize;2]{[self.profiles.len(),self.metadata_batches]}
+    pub(super) fn install_owned_profile(&mut self,index:usize,key:Rc<str>,service:f64,data:Vec<f64>,queues:&mut crate::queues::Queues){
+        let lines=line_ids(&data);
+        queues.prepare_definition(index,&data);
+        self.profiles.insert(index,Profile{key,service,id:None,owned:true,data:vec![],lines});
+    }
+
 }
 
 impl Cycle{pub(super) fn collect_keys(&mut self,q:&mut crate::queues::Queues){for(key,id)in q.take_keys(){self.keys.insert(key,id);self.count=self.count.max(id+1);}}}

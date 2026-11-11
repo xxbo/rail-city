@@ -160,12 +160,12 @@ pub(super) struct Queues {
     reroutes: usize,
     sparse: bool,
     stats: Option<crate::statistics::Statistics>,
-    arrival_ids: Vec<Vec<usize>>,
     now: f64,
     modern: bool,
     integer: bool,
     transfer: f64,
-    defs: HashMap<usize, Journey>,
+    defs: crate::numbers::Paged<Journey>,
+    prepared: crate::numbers::Paged<Journey>,
     leg_pool: HashSet<Rc<[Leg]>>,
     share_pool: HashSet<Rc<[(usize, u64)]>>,
     line_pool: HashSet<Rc<[usize]>>,
@@ -211,6 +211,7 @@ impl Queues {
             ctx.refresh(rows);
         }
     }
+    pub(super) fn prepared_count(&self)->usize{self.prepared.len()}
     pub(super) fn definition_count(&self) -> usize {
         self.defs.len()
     }
@@ -459,12 +460,12 @@ impl Queues {
             reroutes: 0,
             sparse: false,
             stats: None,
-            arrival_ids: vec![],
             now: 0.0,
             modern: false,
             integer: false,
             transfer: 0.0,
-            defs: HashMap::default(),
+            defs: crate::numbers::Paged::default(),
+            prepared: crate::numbers::Paged::default(),
             leg_pool: HashSet::default(),
             share_pool: HashSet::default(),
             line_pool: HashSet::default(),
@@ -512,21 +513,8 @@ impl Queues {
     ) {
         if self.stats_protocol {
             if let Some(stats) = &mut self.stats {
-                if kind == 0 {
-                    stats.event(kind, &self.arrival_ids[j], 0.0, &[], n, wait, line, station);
-                } else {
-                    let trip = &self.defs[&j];
-                    stats.event(
-                        kind,
-                        &trip.line_ids,
-                        trip.fare,
-                        &trip.byline,
-                        n,
-                        wait,
-                        line,
-                        station,
-                    );
-                }
+                let trip = &self.defs[&j];
+                stats.event(kind,&trip.line_ids,trip.fare,&trip.byline,n,wait,line,station);
             }
             return;
         }
@@ -921,69 +909,77 @@ impl Queues {
             self.cmd(10.0, &[id as f64]);
         }
     }
-    fn read_defs(&mut self, r: &mut Read) {
-        let n = r.u();
-        for _ in 0..n {
-            let id = r.u();
-            let fare = r.f();
-            let purpose = r.u();
-            let nb = r.u();
-            let byline = (0..nb)
-                .map(|_| (r.u(), r.f().to_bits()))
-                .collect::<Vec<_>>();
-            let byline = intern(&mut self.share_pool, byline);
-            let line_ids = if self.stats_protocol {
-                let n = r.u();
-                intern(
-                    &mut self.line_pool,
-                    (0..n).map(|_| r.u()).collect::<Vec<_>>(),
-                )
-            } else {
-                intern(&mut self.line_pool, vec![])
-            };
-            let nl = r.u();
-            let legs = (0..nl)
-                .map(|_| Leg {
-                    service: r.u(),
-                    dir: r.f() as i32,
-                    from: r.u(),
-                    to: r.u(),
-                    valid: r.f() != 0.0,
-                })
-                .collect::<Vec<_>>();
-            let legs = intern(&mut self.leg_pool, legs);
-            let contract = if self.native_routes {
-                let from = r.f();
-                let to = r.f();
-                let back = r.f() != 0.0;
-                let hub = r.f();
-                let kind = r.f();
-                Some(Contract {
-                    from,
-                    to,
-                    back,
-                    hub: if hub < 0.0 { None } else { Some(hub as usize) },
-                    kind: if kind < 0.0 {
-                        None
-                    } else {
-                        Some(kind as usize)
-                    },
-                })
-            } else {
-                None
-            };
-            self.defs.insert(
-                id,
-                Journey {
-                    contract,
-                    fare,
-                    purpose,
-                    byline,
-                    line_ids,
-                    legs,
+    fn read_definition(&mut self, r: &mut Read) -> (usize, Journey) {
+        let id = r.u();
+        let fare = r.f();
+        let purpose = r.u();
+        let nb = r.u();
+        let byline = (0..nb)
+            .map(|_| (r.u(), r.f().to_bits()))
+            .collect::<Vec<_>>();
+        let byline = intern(&mut self.share_pool, byline);
+        let line_ids = if self.stats_protocol {
+            let n = r.u();
+            intern(
+                &mut self.line_pool,
+                (0..n).map(|_| r.u()).collect::<Vec<_>>(),
+            )
+        } else {
+            intern(&mut self.line_pool, vec![])
+        };
+        let nl = r.u();
+        let legs = (0..nl)
+            .map(|_| Leg {
+                service: r.u(),
+                dir: r.f() as i32,
+                from: r.u(),
+                to: r.u(),
+                valid: r.f() != 0.0,
+            })
+            .collect::<Vec<_>>();
+        let legs = intern(&mut self.leg_pool, legs);
+        let contract = if self.native_routes {
+            let from = r.f();
+            let to = r.f();
+            let back = r.f() != 0.0;
+            let hub = r.f();
+            let kind = r.f();
+            Some(Contract {
+                from,
+                to,
+                back,
+                hub: if hub < 0.0 { None } else { Some(hub as usize) },
+                kind: if kind < 0.0 {
+                    None
+                } else {
+                    Some(kind as usize)
                 },
-            );
+            })
+        } else {
+            None
+        };
+        (id, Journey { contract, fare, purpose, byline, line_ids, legs })
+    }
+    fn read_defs(&mut self, r: &mut Read) {
+        let count = r.u();
+        for _ in 0..count {
+            let (id, journey) = self.read_definition(r);
+            self.defs.insert(id, journey);
         }
+    }
+    // Cold metadata is interned once; it does not admit riders or advance a clock.
+    pub(super) fn prepare_definition(&mut self, index: usize, data: &[f64]) {
+        let mut reader = Read { v: data, at: 0 };
+        let (_, journey) = self.read_definition(&mut reader);
+        assert_eq!(reader.at, data.len());
+        self.prepared.insert(index, journey);
+    }
+    pub(super) fn commit_definition(&mut self, index: usize, id: usize) {
+        let journey = self.prepared.remove(&index).expect("cold definition missing");
+        self.defs.insert(id, journey);
+    }
+    pub(super) fn discard_definition(&mut self, index: usize) {
+        self.prepared.remove(&index);
     }
     fn read_trains(&mut self, r: &mut Read) {
         let n = r.u();
@@ -1260,17 +1256,9 @@ fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut 
         .map(|_| [r.f(), r.f(), r.f(), r.f()])
         .collect::<Vec<_>>();
     let na = r.u();
-    q.arrival_ids.clear();
-    let arrivals = (0..na)
-        .map(|_| {
-            let row = [r.f(), r.f(), r.f()];
-            if q.stats_protocol {
-                let n = r.u();
-                q.arrival_ids.push((0..n).map(|_| r.u()).collect());
-            }
-            row
-        })
-        .collect::<Vec<_>>();
+    let arrival_start=r.at;
+    for _ in 0..na { r.at+=3;if q.stats_protocol {let count=r.u();r.at+=count;} }
+    let arrivals=&r.v[arrival_start..r.at];
     if let Some(p)=parts{r=Read{v:p.statistics,at:0};}
     if q.stats_protocol {
         let mode = r.f();
@@ -1332,12 +1320,17 @@ fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut 
         if gates {
             q.gates();
         }
-        for a in arrivals {
+        let mut arrival_reader=Read{v:arrivals,at:0};
+        for _ in 0..na {
+            let a=[arrival_reader.f(),arrival_reader.f(),arrival_reader.f()];
+            let lines=if q.stats_protocol {let count=arrival_reader.u();let lines=&arrival_reader.v[arrival_reader.at..arrival_reader.at+count];arrival_reader.at+=count;lines}else{&[]};
             if a[2] <= 0.0 {
                 continue;
             }
             q.inc(0, a[2]);
-            q.event(0, int(a[1]), a[2], 0.0, None, None);
+            if q.stats_protocol {
+                if let Some(stats)=&mut q.stats {let lines=lines.iter().map(|id|int(*id)).collect::<Vec<_>>();stats.event(0,&lines,0.0,&[],a[2],0.0,None,None);}
+            }else{q.cmd(1.0,&[0.0,a[1],a[2],0.0,-1.0,-1.0]);}
             if a[0] < 0.0 {
                 q.inc(4, a[2]);
             } else {
@@ -1464,6 +1457,19 @@ fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut 
 #[cfg(test)]
 mod tests {
     use super::Ordered;
+    #[test]
+    fn cold_definitions_share_storage_and_commit_without_passenger_mutation() {
+        let data=vec![0.0,180.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,0.0,1.0,1.0,2.0,1.0,1.0,2.0,0.0,-1.0,-1.0];
+        let mut staged=super::Queues::new(1.0);staged.stats_protocol=true;staged.native_routes=true;
+        staged.prepare_definition(257,&data);assert_eq!(staged.definition_count(),0);assert_eq!(staged.prepared.len(),1);assert_eq!(staged.counters,[0.0;8]);
+        staged.commit_definition(257,0);assert_eq!(staged.definition_count(),1);assert_eq!(staged.prepared.len(),0);
+        staged.prepare_definition(500,&data);
+        assert!(super::Rc::ptr_eq(&staged.defs[&0].legs,&staged.prepared[&500].legs));staged.discard_definition(500);
+        let mut raw=super::Queues::new(1.0);raw.stats_protocol=true;raw.native_routes=true;
+        let mut packet=vec![1.0];packet.extend(data);raw.read_defs(&mut super::Read{v:&packet,at:0});
+        let names=vec!["s0".into()];let ids=std::collections::HashMap::new();
+        assert_eq!(crate::value::write(&staged.object_view(&names,&ids,true)),crate::value::write(&raw.object_view(&names,&ids,true)));
+    }
     #[test]
     fn identical_itineraries_share_storage() {
         use super::{intern, HashSet, Leg, Rc};
