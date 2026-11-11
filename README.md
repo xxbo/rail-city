@@ -21,7 +21,7 @@ Rust固定为 `rust/rail-routing/rust-toolchain.toml` 所指定的1.99.1，需�
 
 ## 独立CI与发布
 
-`.github/workflows/game.yml` 对PR、main提交与手动运行执行固定Rust构建/字节核对、全部游戏回归和静态发布检查。验证后将 `rail/` 内容直接作为项目Pages根目录发布；PR只验证，不部署。部署下载本次验证生成的同一份 `rail-city-public` 产物，不重新选择另一仓库或另一版本的游戏。
+`.github/workflows/game.yml` 对PR、main提交与手动运行从固定Rust源码生成当前WASM及会话测试产物，进行字节核对、全部游戏回归和静态发布检查；这些生成文件无需预先提交到仓库。验证后将 `rail/` 内容直接作为项目Pages根目录发布；PR只验证，不部署。部署下载本次验证生成的同一份 `rail-city-public` 产物，不重新选择另一仓库或另一版本的游戏。
 
 新仓Pages的Source设为 **GitHub Actions**。无需跨仓令牌、资讯采集、Python新闻测试或资讯快照。`deployment.json` 记录本仓源码SHA和运行ID。流水线部署权限仅授予依赖验证成功的main部署任务。
 
