@@ -35,5 +35,34 @@ for(const c of oracle.cold){
  check(send({op:'close',sessionId:2}).ok);check(send({op:'query',sessionId:2,view:'snapshot'}).error.code==='NO_SESSION');
 }
 // Baseline runtime remains unchanged; future ownership migration must preserve these full states.
-const {runtimeTrace}=require('./freeze_rail_p3.cjs');exact(runtimeTrace(path.resolve(__dirname,'..')),oracle.runtime);
-console.log(`P3-0 contract: ${checks} guards plus complete ordered cold-world and four MAP65 runtime traces passed; real Rust WASM, no JS business fallback.`);
+const {runtimeTrace}=require('./freeze_rail_p3.cjs'),P=require('../rail/passengers'),LS=require('../rail/local-save'),Q=require('../rail/ridership');
+function business(actual,expected,field=''){
+ if(typeof actual==='number'&&typeof expected==='number'&&(!Number.isInteger(actual)||!Number.isInteger(expected))){assert(Number.isFinite(actual)&&Number.isFinite(expected)&&Math.abs(actual-expected)<1e-7,field+': '+actual+' != '+expected);return;}
+ if(actual&&expected&&typeof actual==='object'&&typeof expected==='object'){assert.deepEqual(Object.keys(actual).sort(),Object.keys(expected).sort(),field+' keys');for(const key of Object.keys(expected))business(actual[key],expected[key],field+'.'+key);return;}
+ assert.deepEqual(actual,expected,field);
+}
+const traces=runtimeTrace(path.resolve(__dirname,'..'));assert.equal(traces.length,oracle.runtime.length);
+for(let i=0;i<traces.length;i++){
+ const trace=traces[i],before=oracle.runtime[i];assert.equal(trace.region,before.region);assert.equal(trace.modern,before.modern);assert.equal(trace.windows.length,before.windows.length);
+ for(let j=0;j<trace.windows.length;j++){
+  const current=trace.windows[j],old=before.windows[j],saved=current.runtime;assert.equal(current.dt,old.dt);
+  // Validate the complete new native contract independently, including ordered
+  // restore. Only the historical comparison below uses the old public shape.
+  assert.equal(saved.demandStatus.storage,'native');assert.equal(saved.storedProfiles,saved.urbanDefs.length);assert.equal(saved.storedProfiles,saved.demandStatus.profiles);
+  assert.equal(saved.nativeSerial,saved.nextId-1);assert.equal(saved.nativeEditRevision,0);assert.equal(saved.nativeCommandSerial,0);
+  exact(saved.forecastStatus,{dirty:false,busy:false,stamp:[0,0,0,0]});exact(saved.forecastView,{population:9600,covered:9600});exact(LS.records(saved.personalRecords),saved.personalRecords);
+  assert.doesNotThrow(()=>LS.parse(JSON.stringify(LS.pack(current.state,saved))));
+  const forecast={preparedDefinitions:saved.urbanDefs,population:saved.forecastView.population,catchment:{covered:saved.forecastView.covered},flows:[]},world=structuredClone(current.state),restored=P.restore(world,forecast,structuredClone(saved));assert(restored,'complete current checkpoint restores');try{exact(P.snapshot(restored),saved);exact(world,current.state);}finally{P.dispose(restored);}
+  const state=structuredClone(current.state),oldState=structuredClone(old.state),runtime=structuredClone(saved),expected=structuredClone(old.runtime);
+  if(trace.modern){assert.equal(state.operationsReview.version,1);delete state.operationsReview;}else{assert.deepEqual(state.ridership.lines,{});for(const row of Object.values(oldState.ridership.lines)){for(const key of ['awareness','trust'])assert(Number.isFinite(row[key])&&row[key]>=0&&row[key]<=1);assert(Number.isFinite(row.serviceDays)&&row.serviceDays>=0);}oldState.ridership.lines={};}
+  for(const key of ['forecastView','personalRecords','nativeSerial','storedProfiles','forecastStatus','nativeEditRevision','nativeCommandSerial','urbanDefs'])delete runtime[key];
+  runtime.demandStatus.storage='lazy';
+  for(const value of [runtime,expected])for(const key of Object.keys(value.blocks))if(value.blocks[key]===0)delete value.blocks[key];
+  for(const [id,row]of Object.entries(expected.stationLimits)){
+   const limits=Q.limits(current.state,+id);for(const key of ['area','length','platforms','spacePerPerson','usableWidth'])assert.equal(limits[key],row[key],'derived station geometry '+key);
+  }
+  for(const value of [runtime,expected])for(const [id,row]of Object.entries(value.stationLimits))value.stationLimits[id]={capacity:row.capacity,outsideCapacity:row.outsideCapacity};
+  business(state,oldState,'world');business(runtime,expected,'passengers');checks++;
+ }
+}
+console.log(`P3-0 contract: ${checks} guards plus complete ordered cold-world and four MAP65 business traces plus exact ordered native restores passed; real Rust WASM, no JS business fallback.`);

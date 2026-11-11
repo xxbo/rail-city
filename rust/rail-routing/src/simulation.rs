@@ -43,10 +43,10 @@ fn move_train(now: f64, spacing: f64, t: &[f64], blocks: &mut [f64]) -> [f64; 8]
                 }
             }
         }
-    } else if t[1] != 3.0 && now >= t[8] && t[19] >= 0.0 {
+    } else if t[1] != 3.0 && now + 1e-8 >= t[8] && t[19] >= 0.0 {
         let block = int(t[19]);
         assert!(block < blocks.len());
-        if now < blocks[block] {
+        if now + 1e-8 < blocks[block] {
             action = 6.0;
         } else {
             action = 7.0;
@@ -247,6 +247,16 @@ pub extern "C" fn simulation_run() -> *const f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn motion_deadlines_ignore_clock_roundoff_without_skipping_a_tick() {
+        let mut train=[0.0;20];train[0]=1.0;train[8]=480.70000000000005;train[17]=1.8;train[19]=0.0;
+        let mut blocks=[480.70000000000005];
+        assert_eq!(move_train(480.7,2.0,&train,&mut blocks)[0],7.0);
+        blocks[0]=480.8;
+        assert_eq!(move_train(480.7,2.0,&train,&mut blocks)[0],6.0);
+        train[8]=480.8;blocks[0]=0.0;
+        assert_eq!(move_train(480.7,2.0,&train,&mut blocks)[0],0.0);
+    }
     #[test]
     fn sampling_keeps_global_residual() {
         let out = sample(&[

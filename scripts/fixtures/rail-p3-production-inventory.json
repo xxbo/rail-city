@@ -634,6 +634,7 @@
             "scripts/test_rail_map53_worker_queue.cjs",
             "scripts/test_rail_map54_windows.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
           ],
@@ -1984,8 +1985,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -2261,8 +2261,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -2297,9 +2296,7 @@
           "productionReferenceCandidates": [
             "rail/urban-growth.js"
           ],
-          "testReferenceCandidates": [
-            "scripts/test_rail_map65_saves.cjs"
-          ],
+          "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -2648,6 +2645,7 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map64_diagnostics.cjs",
+            "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -2824,8 +2822,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -5643,8 +5640,10 @@
             "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map58_catalog.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
+            "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_metrics.cjs",
             "scripts/test_rail_network.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs",
             "scripts/test_rail_tokyo.cjs"
@@ -6601,6 +6600,7 @@
             "scripts/test_rail_map53_worker_queue.cjs",
             "scripts/test_rail_map54_windows.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
           ],
@@ -6894,6 +6894,7 @@
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map62_network.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
           ],
@@ -9159,8 +9160,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -9226,8 +9226,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -9734,7 +9733,8 @@
             "rail/urban-growth.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map64_diagnostics.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs",
+            "scripts/test_rail_map65_saves.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -9808,6 +9808,7 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map64_diagnostics.cjs",
+            "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -9978,8 +9979,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         }
@@ -10269,8 +10269,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         }
@@ -11015,7 +11014,8 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map28.cjs",
             "scripts/test_rail_map55_history.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -11248,6 +11248,7 @@
             "scripts/test_rail_map52.cjs",
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -11309,6 +11310,7 @@
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map62_network.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_publication.cjs",
             "scripts/test_rail_services.cjs",
@@ -11340,7 +11342,8 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map28.cjs",
             "scripts/test_rail_map55_history.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         }
@@ -12546,7 +12549,8 @@
             "scripts/test_rail_map59_reroutes.cjs",
             "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs",
-            "scripts/test_rail_p3_boundary.cjs"
+            "scripts/test_rail_p3_boundary.cjs",
+            "scripts/test_rail_p3_contract.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -13868,6 +13872,7 @@
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map62_network.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
           ],
@@ -16087,6 +16092,7 @@
             "scripts/test_rail_map53_worker_queue.cjs",
             "scripts/test_rail_map54_windows.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
           ],
@@ -16132,6 +16138,8 @@
             "scripts/test_rail_map58_catalog.cjs",
             "scripts/test_rail_map58_retirement.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
+            "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -16375,6 +16383,7 @@
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map62_network.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
           ],
@@ -16780,6 +16789,8 @@
             "scripts/test_rail_map58_catalog.cjs",
             "scripts/test_rail_map58_retirement.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
+            "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -16991,6 +17002,7 @@
             "scripts/test_rail_map26.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map51_clock.cjs",
+            "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_publication.cjs",
             "scripts/test_rail_repository.cjs"
@@ -17699,8 +17711,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -18542,7 +18553,8 @@
             "rail/value-wire.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map14.cjs"
+            "scripts/test_rail_map14.cjs",
+            "scripts/test_rail_p3_contract.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -20878,6 +20890,7 @@
             "scripts/test_rail_map53_worker_queue.cjs",
             "scripts/test_rail_map54_windows.cjs",
             "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
           ],
@@ -20970,6 +20983,8 @@
             "scripts/test_rail_map58_catalog.cjs",
             "scripts/test_rail_map58_retirement.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
+            "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -22430,8 +22445,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -22930,7 +22944,8 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map28.cjs",
             "scripts/test_rail_map55_history.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -35303,8 +35318,7 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map54_windows.cjs",
-            "scripts/test_rail_map64_diagnostics.cjs",
-            "scripts/test_rail_map65_saves.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -35339,9 +35353,7 @@
           "productionReferenceCandidates": [
             "rail/city-development.js"
           ],
-          "testReferenceCandidates": [
-            "scripts/test_rail_map65_saves.cjs"
-          ],
+          "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -35440,7 +35452,8 @@
             "rail/forecast-catalog.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map64_diagnostics.cjs"
+            "scripts/test_rail_map64_diagnostics.cjs",
+            "scripts/test_rail_map65_saves.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -37598,6 +37611,7 @@
             "scripts/test_rail_map26.cjs",
             "scripts/test_rail_map40.cjs",
             "scripts/test_rail_map51_clock.cjs",
+            "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_publication.cjs",
             "scripts/test_rail_repository.cjs"
@@ -38333,6 +38347,8 @@
             "scripts/test_rail_map58_catalog.cjs",
             "scripts/test_rail_map58_retirement.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
+            "scripts/test_rail_map65_saves.cjs",
+            "scripts/test_rail_p3_contract.cjs",
             "scripts/test_rail_p3_regressions.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"

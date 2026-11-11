@@ -5,6 +5,9 @@ const {create}=require('./fixtures/rail-memory-grid.cjs');
 const close=(a,b)=>assert(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function forecast(s){const line=require('../rail/service-plan').expand(s).services[0];return {preparedDefinitions:[{id:0,legs:[{service:line.id,dir:1,from:line.stops[0],to:line.stops.at(-1)}],daily:50000,fare:180,purpose:'shopping',back:false,hub:null,externalKind:null,from:line.stops[0],to:line.stops.at(-1),lineIds:[line.parentLine],byLine:{[line.parentLine]:1}}],flows:[]};}
 const legacy=M.init(N.emptyWorld('tokyo'));legacy.routeModel=1;N.addLine(legacy,[{x:600,y:500},{x:640,y:500}]);const legacyRuntime=P.create(legacy,{flows:[]},420,true);M.advance(legacy,legacyRuntime,1);assert.equal(legacyRuntime.minute,421);assert.deepEqual(legacy.ridership.lines,{},'weighted legacy lines do not receive modern feedback');assert.doesNotThrow(()=>LS.parse(JSON.stringify(LS.pack(legacy,P.snapshot(legacyRuntime)))),'legacy running worlds remain valid save files');P.dispose(legacyRuntime);
+// New routes start cultivation at the requested session clock; existing opening
+// dates survive both cold initialization and checkpoint restore.
+{const world=M.init(N.emptyWorld('gba'));N.addLine(world,[{x:600,y:500},{x:640,y:500}]);const id=world.services[0].id,rt=P.create(world,{flows:[]},479.9,false);assert.equal(world.ridership.lines[id].opened,479.9);const saved=P.snapshot(rt),copy=structuredClone(world),restored=P.restore(copy,{flows:[]},saved);assert(restored);assert.equal(copy.ridership.lines[id].opened,479.9);P.dispose(rt);P.dispose(restored);}
 const s=create(2),f=forecast(s),input=structuredClone(f),rt=P.create(s,f,480,false);
 assert.deepEqual(f,input,'attaching a legacy forecast leaves the caller DTO cloneable and unchanged');
 assert.equal(rt.demandStatus.profiles,1,'prepared definitions are retained even without full flows');

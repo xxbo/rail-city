@@ -17,7 +17,7 @@ impl Seed{
     fn block(&mut self,id:String)->usize{if let Some(i)=self.blocks.iter().position(|s|*s==id){i}else{self.blocks.push(id);self.blocks.len()-1}}
     fn group(&mut self,id:String)->usize{if let Some(i)=self.groups.iter().position(|s|*s==id){i}else{self.groups.push(id);self.groups.len()-1}}
     pub fn new(mut world:V,saved:V,catalog:u64,owner:&mut crate::forecast_session::ForecastOwner,start:f64,warm:bool)->Result<Self,String>{
-        crate::bootstrap::ridership_init(&mut world,false);
+        crate::bootstrap::ridership_init_at(&mut world,false,if saved.truth(){saved.num("minute")}else{start});
         let mut plan=crate::editor_support::expanded(&world,start)?;for key in ["nodes","tracks","companies","ridership","urban"]{plan.set(key,world.get(key).clone());}plan.set("baseLines",world.get("services").clone());plan.set("operatingPlan",boolean(true));
         if world.num("routeModel")!=9.0{for l in plan.get_mut("services").array_mut(){if !has(l,"parentLine"){l.set("parentLine",l.get("id").clone());}if !has(l,"callStops"){l.set("callStops",l.get("stops").clone());}if !l.get("cars").truth(){l.set("cars",n(8.0));}l.set("fleet",n(l.zero("fleet")));}}
         if saved.truth(){let mut tracks=world.get("tracks").array().to_vec();for t in saved.get("retiredTracks").array(){if !tracks.iter().any(|old|eq(old.get("id"),t.get("id"))){tracks.push(t.clone());}}plan.set("tracks",arr(tracks));plan.set("routeArchives",saved.get("routeArchives").clone());}

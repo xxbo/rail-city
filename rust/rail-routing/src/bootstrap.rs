@@ -952,14 +952,17 @@ pub(super) fn urban_init(s: &mut V) {
     }
 }
 pub(super) fn ridership_init(s: &mut V, enable: bool) {
-    if s.num("routeModel") != 9.0 {
-        return;
-    }
     let minute = if s.get("economy").get("minute").truth() {
         s.get("economy").num("minute")
     } else {
         420.0
     };
+    ridership_init_at(s, enable, minute);
+}
+pub(super) fn ridership_init_at(s: &mut V, enable: bool, minute: f64) {
+    if s.num("routeModel") != 9.0 {
+        return;
+    }
     let day = crate::history::day(minute);
     let lines = if s.get("baseLines").truth() {
         s.get("baseLines").clone()
