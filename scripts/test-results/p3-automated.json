@@ -1,13 +1,21 @@
 {
   "schemaVersion": 1,
-  "scope": "Rust unit tests and all Node regression suites; no real browser or deployment",
+  "scope": "Pinned native/WASM compilation, Rust unit tests, all Node regression suites and release source boundary audit",
   "status": "failed",
-  "testedSource": "341d8f087765fbb473b709eb60986e6499734118",
-  "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42983980321",
+  "testedSource": "1e686db2ba9ff11abae41d3e2d0f4664129c9533",
+  "runner": {
+    "location": "local managed executor",
+    "node": "24.22.1",
+    "rust": "1.99.1",
+    "date": "2026-11-11",
+    "timezone": "Asia/Shanghai"
+  },
+  "ciRun": null,
+  "ciStatus": "not-run-for-this-source",
   "rust": {
-    "passed": 71,
+    "passed": 72,
     "failed": 0,
-    "total": 71
+    "total": 72
   },
   "node": {
     "passed": 63,
@@ -19,664 +27,1449 @@
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 343
+        "durationMs": 997
       },
       {
         "id": "test_rail_city_data.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1183
+        "durationMs": 3314
       },
       {
         "id": "test_rail_gba.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1716
+        "durationMs": 4840
       },
       {
         "id": "test_rail_management.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 33570
+        "durationMs": 63492
       },
       {
         "id": "test_rail_map11.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 310
+        "durationMs": 550
       },
       {
         "id": "test_rail_map12.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1929
+        "durationMs": 3993
       },
       {
         "id": "test_rail_map13.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1726
+        "durationMs": 3616
       },
       {
         "id": "test_rail_map14.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 12824
+        "durationMs": 28600
       },
       {
         "id": "test_rail_map15.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2280
+        "durationMs": 6439
       },
       {
         "id": "test_rail_map17.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 3675
+        "durationMs": 10019
       },
       {
         "id": "test_rail_map18.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1540
+        "durationMs": 4636
       },
       {
         "id": "test_rail_map19.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 10418
+        "durationMs": 23340
       },
       {
         "id": "test_rail_map20.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1079
+        "durationMs": 2453
       },
       {
         "id": "test_rail_map21.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 41
+        "durationMs": 269
       },
       {
         "id": "test_rail_map22.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2064
+        "durationMs": 5181
       },
       {
         "id": "test_rail_map23.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1545
+        "durationMs": 5014
       },
       {
         "id": "test_rail_map24.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 880
+        "durationMs": 2735
       },
       {
         "id": "test_rail_map25.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1023
+        "durationMs": 3027
       },
       {
         "id": "test_rail_map26.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1135
+        "durationMs": 3648
       },
       {
         "id": "test_rail_map27.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 6564
+        "durationMs": 21763
       },
       {
         "id": "test_rail_map28.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 663
+        "durationMs": 1672
       },
       {
         "id": "test_rail_map29.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 3219
+        "durationMs": 7382
       },
       {
         "id": "test_rail_map30.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 34
+        "durationMs": 128
       },
       {
         "id": "test_rail_map31.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 12013
+        "durationMs": 30303
       },
       {
         "id": "test_rail_map32.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 96
+        "durationMs": 281
       },
       {
         "id": "test_rail_map34.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2173
+        "durationMs": 6701
       },
       {
         "id": "test_rail_map35.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 22032
+        "durationMs": 45260
       },
       {
         "id": "test_rail_map36.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1468
+        "durationMs": 3224
       },
       {
         "id": "test_rail_map37.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 517
+        "durationMs": 1498
       },
       {
         "id": "test_rail_map38.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 660
+        "durationMs": 2003
       },
       {
         "id": "test_rail_map39.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 259
+        "durationMs": 659
       },
       {
         "id": "test_rail_map40.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1258
+        "durationMs": 2694
       },
       {
         "id": "test_rail_map41.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 5623
+        "durationMs": 16673
       },
       {
         "id": "test_rail_map42.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 17459
+        "durationMs": 37831
       },
       {
         "id": "test_rail_map43.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 18993
+        "durationMs": 51801
       },
       {
         "id": "test_rail_map44.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 357
+        "durationMs": 11527
       },
       {
         "id": "test_rail_map45.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 357
+        "durationMs": 4812
       },
       {
         "id": "test_rail_map46.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 439
+        "durationMs": 5235
       },
       {
         "id": "test_rail_map47.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 432
+        "durationMs": 7315
       },
       {
         "id": "test_rail_map48.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 960
+        "durationMs": 7598
       },
       {
         "id": "test_rail_map49.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 959
+        "durationMs": 839
       },
       {
         "id": "test_rail_map49_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 328
+        "durationMs": 4967
       },
       {
         "id": "test_rail_map50.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1031
+        "durationMs": 1334
       },
       {
         "id": "test_rail_map50_budget.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 263
+        "durationMs": 414
       },
       {
         "id": "test_rail_map50_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 363
+        "durationMs": 6849
       },
       {
         "id": "test_rail_map51.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1031
+        "durationMs": 2157
       },
       {
         "id": "test_rail_map51_budget.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 263
+        "durationMs": 573
       },
       {
         "id": "test_rail_map51_clock.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 170
+        "durationMs": 947
       },
       {
         "id": "test_rail_map51_worker.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1113
+        "durationMs": 2145
       },
       {
         "id": "test_rail_map51_worker_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 452
+        "durationMs": 1000
       },
       {
         "id": "test_rail_map52.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1042
+        "durationMs": 1621
       },
       {
         "id": "test_rail_map52_budget.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 261
+        "durationMs": 476
       },
       {
         "id": "test_rail_map52_transport.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 558
+        "durationMs": 777
       },
       {
         "id": "test_rail_map52_worker.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1131
+        "durationMs": 3731
       },
       {
         "id": "test_rail_map52_worker_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 457
+        "durationMs": 1129
       },
       {
         "id": "test_rail_map53_budget.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 269
+        "durationMs": 1053
       },
       {
         "id": "test_rail_map53_calendar.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1229
+        "durationMs": 3560
       },
       {
         "id": "test_rail_map53_demand.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 161
+        "durationMs": 1006
       },
       {
         "id": "test_rail_map53_large_catalog.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2495
+        "durationMs": 8489
       },
       {
         "id": "test_rail_map53_native_state.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 970
+        "durationMs": 19641
       },
       {
         "id": "test_rail_map53_worker.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 1130
+        "durationMs": 3732
       },
       {
         "id": "test_rail_map53_worker_queue.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 463
+        "durationMs": 1403
       },
       {
         "id": "test_rail_map54_windows.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 246
+        "durationMs": 1216
       },
       {
         "id": "test_rail_map55_history.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 925
+        "durationMs": 2167
       },
       {
         "id": "test_rail_map56_statistics.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 277
+        "durationMs": 1025
       },
       {
         "id": "test_rail_map57_lifecycle.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 16333
+        "durationMs": 38572
       },
       {
         "id": "test_rail_map58_catalog.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1364
+        "durationMs": 4428
       },
       {
         "id": "test_rail_map58_retirement.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 827
+        "durationMs": 2264
       },
       {
         "id": "test_rail_map58_urban.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 40118
+        "durationMs": 87061
       },
       {
         "id": "test_rail_map58_worker_transport.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2047
+        "durationMs": 7877
       },
       {
         "id": "test_rail_map59_reroutes.cjs",
         "status": "failed",
         "exitCode": 1,
         "signal": null,
-        "durationMs": 744
+        "durationMs": 5805
       },
       {
         "id": "test_rail_map60_services.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 267
+        "durationMs": 764
       },
       {
         "id": "test_rail_map61_validation.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 493
+        "durationMs": 1909
       },
       {
         "id": "test_rail_map62_network.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1003
+        "durationMs": 3282
       },
       {
         "id": "test_rail_map63_assets.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1431
+        "durationMs": 10401
       },
       {
         "id": "test_rail_map63_browser.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 390
+        "durationMs": 1572
       },
       {
         "id": "test_rail_map64_diagnostics.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 30704
+        "durationMs": 87900
       },
       {
         "id": "test_rail_map65_saves.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1106
+        "durationMs": 2679
       },
       {
         "id": "test_rail_metrics.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 72
+        "durationMs": 317
       },
       {
         "id": "test_rail_network.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 322
+        "durationMs": 734
       },
       {
         "id": "test_rail_operations.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 474
+        "durationMs": 1270
       },
       {
         "id": "test_rail_p31_bootstrap.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 2063
+        "durationMs": 6068
       },
       {
         "id": "test_rail_p3_boundary.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1912
+        "durationMs": 4893
       },
       {
         "id": "test_rail_p3_contract.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 506
+        "durationMs": 1150
       },
       {
         "id": "test_rail_p3_regressions.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 631
+        "durationMs": 1660
       },
       {
         "id": "test_rail_publication.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 60
+        "durationMs": 187
       },
       {
         "id": "test_rail_repository.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 24
+        "durationMs": 364
       },
       {
         "id": "test_rail_services.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 1917
+        "durationMs": 3942
       },
       {
         "id": "test_rail_streets.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 217
+        "durationMs": 663
       },
       {
         "id": "test_rail_tokyo.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 14040
+        "durationMs": 24850
       },
       {
         "id": "test_rail_view.cjs",
         "status": "passed",
         "exitCode": 0,
         "signal": null,
-        "durationMs": 101
+        "durationMs": 348
       }
     ]
   },
   "syntax": {
     "passed": 80,
     "failed": 0,
-    "total": 80
+    "total": 80,
+    "results": [
+      {
+        "id": "syntax:alerts.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 116
+      },
+      {
+        "id": "syntax:assets-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 122
+      },
+      {
+        "id": "syntax:bootstrap-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 151
+      },
+      {
+        "id": "syntax:bounded-cache.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 114
+      },
+      {
+        "id": "syntax:city-development.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 122
+      },
+      {
+        "id": "syntax:city.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 97
+      },
+      {
+        "id": "syntax:connection-model.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 155
+      },
+      {
+        "id": "syntax:console-ui.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 173
+      },
+      {
+        "id": "syntax:currency.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 136
+      },
+      {
+        "id": "syntax:demand-kernels.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 128
+      },
+      {
+        "id": "syntax:demand-model.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 151
+      },
+      {
+        "id": "syntax:demand-rates.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 132
+      },
+      {
+        "id": "syntax:demand-snapshot.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 439
+      },
+      {
+        "id": "syntax:demand-worker.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 141
+      },
+      {
+        "id": "syntax:demand-world.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 136
+      },
+      {
+        "id": "syntax:density-field.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 104
+      },
+      {
+        "id": "syntax:diagnostic-snapshot.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 132
+      },
+      {
+        "id": "syntax:diagnostics-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 142
+      },
+      {
+        "id": "syntax:editor-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 125
+      },
+      {
+        "id": "syntax:engine-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 137
+      },
+      {
+        "id": "syntax:engine.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 115
+      },
+      {
+        "id": "syntax:fleet.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 109
+      },
+      {
+        "id": "syntax:flow-history.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 132
+      },
+      {
+        "id": "syntax:forecast-catalog.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 163
+      },
+      {
+        "id": "syntax:game-balance.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 139
+      },
+      {
+        "id": "syntax:gba-data.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 116
+      },
+      {
+        "id": "syntax:history-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 166
+      },
+      {
+        "id": "syntax:hubs.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 511
+      },
+      {
+        "id": "syntax:insights.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 166
+      },
+      {
+        "id": "syntax:local-save.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 145
+      },
+      {
+        "id": "syntax:management.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 188
+      },
+      {
+        "id": "syntax:map-detail.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 153
+      },
+      {
+        "id": "syntax:memory-audit.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 133
+      },
+      {
+        "id": "syntax:metrics.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 120
+      },
+      {
+        "id": "syntax:network-stats.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 116
+      },
+      {
+        "id": "syntax:network.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 190
+      },
+      {
+        "id": "syntax:operations-center.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 121
+      },
+      {
+        "id": "syntax:operations-review.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 138
+      },
+      {
+        "id": "syntax:operations-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 244
+      },
+      {
+        "id": "syntax:operations-worker.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 536
+      },
+      {
+        "id": "syntax:operations.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 129
+      },
+      {
+        "id": "syntax:passengers.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 129
+      },
+      {
+        "id": "syntax:performance.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 139
+      },
+      {
+        "id": "syntax:place-names.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 175
+      },
+      {
+        "id": "syntax:preparation-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 149
+      },
+      {
+        "id": "syntax:queue-runtime.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 245
+      },
+      {
+        "id": "syntax:regions.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 156
+      },
+      {
+        "id": "syntax:review-view.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 170
+      },
+      {
+        "id": "syntax:ridership.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 287
+      },
+      {
+        "id": "syntax:routing-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 150
+      },
+      {
+        "id": "syntax:runtime-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 125
+      },
+      {
+        "id": "syntax:save-queue.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 599
+      },
+      {
+        "id": "syntax:save-store.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 253
+      },
+      {
+        "id": "syntax:save-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 334
+      },
+      {
+        "id": "syntax:save-worker.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 275
+      },
+      {
+        "id": "syntax:service-plan.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 211
+      },
+      {
+        "id": "syntax:shell-ui.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 190
+      },
+      {
+        "id": "syntax:simulation-client.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 126
+      },
+      {
+        "id": "syntax:simulation-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 183
+      },
+      {
+        "id": "syntax:simulation-worker.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 188
+      },
+      {
+        "id": "syntax:statistics-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 614
+      },
+      {
+        "id": "syntax:street-map.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 431
+      },
+      {
+        "id": "syntax:temporal-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 233
+      },
+      {
+        "id": "syntax:tokyo-data.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 299
+      },
+      {
+        "id": "syntax:tokyo.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 182
+      },
+      {
+        "id": "syntax:transactions-wasm.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 178
+      },
+      {
+        "id": "syntax:ui-center-view.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 193
+      },
+      {
+        "id": "syntax:ui-dom.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 248
+      },
+      {
+        "id": "syntax:ui-finance-view.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 524
+      },
+      {
+        "id": "syntax:ui-line-view.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 257
+      },
+      {
+        "id": "syntax:ui-save-view.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 312
+      },
+      {
+        "id": "syntax:ui-stations-view.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 115
+      },
+      {
+        "id": "syntax:ui.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 175
+      },
+      {
+        "id": "syntax:urban-growth.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 148
+      },
+      {
+        "id": "syntax:value-wire.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 125
+      },
+      {
+        "id": "syntax:vector-map.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 125
+      },
+      {
+        "id": "syntax:vector-worker.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 105
+      },
+      {
+        "id": "syntax:view-model.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 96
+      },
+      {
+        "id": "syntax:view.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 190
+      },
+      {
+        "id": "syntax:worker-client.js",
+        "status": "passed",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 109
+      }
+    ]
   },
-  "firstRound": {
-    "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42847540228",
-    "source": "10448728d2edd64cf8df63e5a55adc1b30624ca6",
-    "rustPassed": 56,
-    "nodePassed": 18,
-    "nodeFailed": 72
-  },
-  "previousRound": {
-    "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42978881335",
-    "source": "8ae09583a0b9697bc77dd8325b5fa7deebd4c6a3",
-    "rustPassed": 69,
-    "nodePassed": 63,
-    "nodeFailed": 28
-  },
+  "phases": [
+    {
+      "phase": "build",
+      "exitCode": 0,
+      "seconds": 103.3
+    },
+    {
+      "phase": "build-check",
+      "exitCode": 0,
+      "seconds": 0.3
+    },
+    {
+      "phase": "session",
+      "exitCode": 0,
+      "seconds": 0.3
+    },
+    {
+      "phase": "session-check",
+      "exitCode": 0,
+      "seconds": 0.3
+    },
+    {
+      "phase": "native",
+      "exitCode": 0,
+      "seconds": 107.0
+    },
+    {
+      "phase": "rust",
+      "exitCode": 0,
+      "seconds": 14.8
+    },
+    {
+      "phase": "node",
+      "exitCode": 1,
+      "seconds": 831.7
+    },
+    {
+      "phase": "boundary",
+      "exitCode": 1,
+      "seconds": 1.8
+    }
+  ],
   "improvedSuites": [],
   "regressedSuites": [],
   "browser": "not-run",
   "deployment": "not-run",
-  "evidence": "Completed CI job 130400693891: pinned Rust 1.99.1 formal WASM build succeeded; 71 Rust tests, all 80 JS syntax checks, and 63/91 Node regression suites passed. The remaining 28 Node suites keep the final CI gate failed. The completed local Node 24 run agrees with CI Node 20 on every one of the 171 syntax/regression outcomes; all 71 local Rust tests also pass.",
+  "evidence": "All 171 syntax/regression outcomes collected. Rust 72/72 pass; Node 63/91 pass, same 28 suites fail as prior baseline. Native release and both WASM artifacts compile; repeated WASM byte checks pass. Failure exit codes retained. New snapshot and retired-geometry assertions pass; this is not full regression acceptance.",
+  "supplementalValidation": {
+    "formalWasmSha256": "04c08feed929096caf9d5740da64441752682c62bfcb3f71891b8dcd9508048e",
+    "formalWasmBytes": 2984566,
+    "compiler": "Rust 1.99.1",
+    "retirementArchivedGeometryAndCars": "passed Rust unit test",
+    "compactSnapshotAndColdOptions": "passed P3 Node regressions",
+    "releaseBoundary": {
+      "exitCode": 1,
+      "complete": false,
+      "violations": [],
+      "pendingFunctions": 844,
+      "functions": 1559,
+      "assets": 80
+    }
+  },
+  "validatedSourceBatch": {
+    "source": "230c1d2ffd7b2a55efa6c1974d1c2a31736dc73b",
+    "validated": true,
+    "phase": "local compilation and all automated regression suites completed",
+    "suites": [
+      "test_rail_map49.cjs",
+      "test_rail_map50.cjs",
+      "test_rail_map51.cjs",
+      "test_rail_map52.cjs",
+      "test_rail_map53_calendar.cjs",
+      "test_rail_map53_native_state.cjs",
+      "test_rail_map54_windows.cjs",
+      "test_rail_map56_statistics.cjs",
+      "test_rail_map58_retirement.cjs",
+      "test_rail_map59_reroutes.cjs"
+    ],
+    "changes": [
+      "retirement archived geometry and car count",
+      "compact live projection on snapshot",
+      "validated cold arrival mode",
+      "checkpoint feedback preservation",
+      "per-arena full statistics frame counter",
+      "native command and detached fixture migration",
+      "versioned business checkpoint oracle retaining money and passenger comparisons"
+    ],
+    "validationSource": "1e686db2ba9ff11abae41d3e2d0f4664129c9533",
+    "ciTriggered": false
+  },
+  "remainingFindings": {
+    "management": "Tokyo warmup still triggers WASM RuntimeError: unreachable.",
+    "legacyCleanup": "MAP49–51 report OldP.dispose is not a function in finally; the cleanup exception may mask an earlier failure.",
+    "legacyShape": "MAP52, MAP54 windows and MAP56 statistics reject native-only observations in line feedback.",
+    "checkpoint": "MAP53 native-state rejects fleetMinute -1 versus floor(minute) 561.",
+    "calendar": "Line s6 wait 1562.9373082739744 versus 1563.7363286505615 at minute 564.6999999999999.",
+    "retirement": "Line s1 wait 347.5991151515759 versus 353.8079448297223.",
+    "reroutes": "Line s1 wait 1118.4864354282636 versus 1126.4761487559597.",
+    "releaseBoundary": "Zero violations but 844 functions remain pending acceptance; audit exits 1."
+  },
+  "failureDiagnostics": {
+    "test_rail_management.cjs": {
+      "excerpt": "wasm://wasm/00b629da:1\n\n\nRuntimeError: unreachable\n    at wasm://wasm/00b629da:wasm-function[1203]:0x26bb92\n    at wasm://wasm/00b629da:wasm-function[1202]:0x26bb5f\n    at wasm://wasm/00b629da:wasm-function[1222]:0x26e0b1\n    at wasm://wasm/00b629da:wasm-function[1221]:0x26e081\n    at wasm://wasm/00b629da:wasm-function[1248]:0x26ea2e\n    at wasm://wasm/00b629da:wasm-function[1246]:0x26e986\n    at wasm://wasm/00b629da:wasm-function[300]:0x32138\n    at wasm://wasm/00b629da:wasm-function[308]:0x38a93\n    at wasm://wasm/00b629da:wasm-function[655]:0xfec2f\n    at wasm://wasm/00b629da:wasm-function[550]:0x9fbc6\n\nNode.js v24.22.1",
+      "truncated": false
+    },
+    "test_rail_map44.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    alighted: 0,\n    arrivalMode: 'integer',\n    arrivalRemainder: 0,\n+   blocks: {\n+     't11|-1': 0,\n+     't11|1': 0,\n+     't12|-1': 0,\n+     't12|1': 0,\n+     't14|-1': 0,\n+     't14|1': 0,\n+     't15|-1': 0,\n+     't15|1': 0,\n+     't17|-1': 0,\n+     't17|1': 0,\n+     't18|-1': 0,\n+     't18|1': 0,\n+     't2|-1': 0,\n+     't2|1': 0,\n+     't3|-1': 0,\n+     't3|1': 0,\n+     't5|-1': 0,\n+     't5|1': 0,\n+     't6|-1': 0,\n+     't6|1': 0,\n+     't8|-1': 0,\n+     't8|1': 0,\n+     't9|-1': 0,\n+     't9|1': 0\n+   },\n-   blocks: {},\n    boarded: 0,\n    cancelled: 0,\n    city: true,\n    completed: 0,\n    demandCarry: 0.03,\n...\n      profiles: 648,\n+     storage: 'native',\n-     storage: 'lazy',\n      updatedAt: 480\n    },\n    departures: {\n      's10|-1': {\n        headway: 2,\n...\n    fleetMinute: 480,\n+   forecastStatus: {\n+     busy: false,\n+     dirty: false,\n+     stamp: [\n+       0,\n+       0,\n+       0,\n+       0\n+     ]\n+   },\n+   forecastView: {\n+     covered: 79200,\n+     population: 79200\n+   },\n    generated: 0,\n    lineBoarded: {},\n    lineRevenue: {},\n    minute: 480.03,\n+   nativeCommandSerial: 0,\n+   nativeEditRevision: 0,\n+   nativeSerial: 2,\n    nextId: 3,\n    outside: {},\n    outsideSince: {},\n+   personalRecords: {\n+     bestDay: 0,\n+     bestHour: 0,\n+     bestLineKm: 2.16,\n+     bestNetworkKm: 12.96,\n+     bestRevenue: 0,\n+     totalCompleted: 0,\n+     totalPassengerKm: 0\n+   },\n    purposeCompleted: {\n      leisure: 0,\n      shopping: 0,\n      work: 0\n    },\n...\n      '0': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '1': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '2': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '3': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '4': {\n-       area: 1680,\n        capacity: 18",
+      "truncated": true
+    },
+    "test_rail_map45.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    alighted: 0,\n    arrivalMode: 'integer',\n    arrivalRemainder: 0,\n+   blocks: {\n+     't11|-1': 0,\n+     't11|1': 0,\n+     't12|-1': 0,\n+     't12|1': 0,\n+     't14|-1': 0,\n+     't14|1': 0,\n+     't15|-1': 0,\n+     't15|1': 0,\n+     't17|-1': 0,\n+     't17|1': 0,\n+     't18|-1': 0,\n+     't18|1': 0,\n+     't2|-1': 0,\n+     't2|1': 0,\n+     't3|-1': 0,\n+     't3|1': 0,\n+     't5|-1': 0,\n+     't5|1': 0,\n+     't6|-1': 0,\n+     't6|1': 0,\n+     't8|-1': 0,\n+     't8|1': 0,\n+     't9|-1': 0,\n+     't9|1': 0\n+   },\n-   blocks: {},\n    boarded: 0,\n    cancelled: 0,\n    city: true,\n    completed: 0,\n    demandCarry: 0.5,\n...\n      profiles: 648,\n+     storage: 'native',\n-     storage: 'lazy',\n      updatedAt: 480\n    },\n    departures: {\n      's10|-1': {\n        headway: 2,\n...\n    fleetMinute: 480,\n+   forecastStatus: {\n+     busy: false,\n+     dirty: false,\n+     stamp: [\n+       0,\n+       0,\n+       0,\n+       0\n+     ]\n+   },\n+   forecastView: {\n+     covered: 2700000,\n+     population: 2700000\n+   },\n    generated: 0,\n    lineBoarded: {},\n    lineRevenue: {},\n+   minute: 480.5,\n+   nativeCommandSerial: 0,\n+   nativeEditRevision: 0,\n+   nativeSerial: 3,\n-   minute: 480.5000000000001,\n    nextId: 4,\n    outside: {},\n    outsideSince: {},\n+   personalRecords: {\n+     bestDay: 0,\n+     bestHour: 0,\n+     bestLineKm: 2.16,\n+     bestNetworkKm: 12.96,\n+     bestRevenue: 0,\n+     totalCompleted: 0,\n+     totalPassengerKm: 0\n+   },\n    purposeCompleted: {\n      leisure: 0,\n      shopping: 0,\n      work: 0\n    },\n...\n      '0': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '1': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '2': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '3': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '4': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '5': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '6': {\n+       capacity: 1806,\n+",
+      "truncated": true
+    },
+    "test_rail_map46.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    alighted: 0,\n    arrivalMode: 'integer',\n    arrivalRemainder: 0,\n+   blocks: {\n+     't11|-1': 0,\n+     't11|1': 0,\n+     't12|-1': 0,\n+     't12|1': 0,\n+     't14|-1': 0,\n+     't14|1': 0,\n+     't15|-1': 0,\n+     't15|1': 0,\n+     't17|-1': 0,\n+     't17|1': 0,\n+     't18|-1': 0,\n+     't18|1': 0,\n+     't2|-1': 0,\n+     't2|1': 0,\n+     't3|-1': 0,\n+     't3|1': 0,\n+     't5|-1': 0,\n+     't5|1': 0,\n+     't6|-1': 0,\n+     't6|1': 0,\n+     't8|-1': 0,\n+     't8|1': 0,\n+     't9|-1': 0,\n+     't9|1': 0\n+   },\n-   blocks: {},\n    boarded: 0,\n    cancelled: 0,\n    city: true,\n    completed: 0,\n    demandCarry: 0.2,\n...\n      profiles: 648,\n+     storage: 'native',\n-     storage: 'lazy',\n      updatedAt: 480\n    },\n    departures: {\n      's10|-1': {\n        headway: 2,\n...\n    fleetMinute: 480,\n+   forecastStatus: {\n+     busy: false,\n+     dirty: false,\n+     stamp: [\n+       0,\n+       0,\n+       0,\n+       0\n+     ]\n+   },\n+   forecastView: {\n+     covered: 180000,\n+     population: 180000\n+   },\n    generated: 0,\n    lineBoarded: {},\n    lineRevenue: {},\n+   minute: 480.2,\n+   nativeCommandSerial: 0,\n+   nativeEditRevision: 0,\n+   nativeSerial: 2,\n-   minute: 480.20000000000005,\n    nextId: 3,\n    outside: {},\n    outsideSince: {},\n+   personalRecords: {\n+     bestDay: 0,\n+     bestHour: 0,\n+     bestLineKm: 2.16,\n+     bestNetworkKm: 12.96,\n+     bestRevenue: 0,\n+     totalCompleted: 0,\n+     totalPassengerKm: 0\n+   },\n    purposeCompleted: {\n      leisure: 0,\n      shopping: 0,\n      work: 0\n    },\n...\n      '0': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '1': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '2': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '3': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '4': {\n-       ",
+      "truncated": true
+    },
+    "test_rail_map47.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    alighted: 0,\n    arrivalMode: 'integer',\n    arrivalRemainder: 0,\n+   blocks: {\n+     't11|-1': 0,\n+     't11|1': 0,\n+     't12|-1': 0,\n+     't12|1': 0,\n+     't14|-1': 0,\n+     't14|1': 0,\n+     't15|-1': 0,\n+     't15|1': 0,\n+     't17|-1': 0,\n+     't17|1': 0,\n+     't18|-1': 0,\n+     't18|1': 0,\n+     't2|-1': 0,\n+     't2|1': 0,\n+     't3|-1': 0,\n+     't3|1': 0,\n+     't5|-1': 0,\n+     't5|1': 0,\n+     't6|-1': 0,\n+     't6|1': 0,\n+     't8|-1': 0,\n+     't8|1': 0,\n+     't9|-1': 0,\n+     't9|1': 0\n+   },\n-   blocks: {},\n    boarded: 0,\n    cancelled: 0,\n    city: true,\n    completed: 0,\n    demandCarry: 0.2,\n...\n      profiles: 648,\n+     storage: 'native',\n-     storage: 'lazy',\n      updatedAt: 480\n    },\n    departures: {\n      's10|-1': {\n        headway: 2,\n...\n    fleetMinute: 480,\n+   forecastStatus: {\n+     busy: false,\n+     dirty: false,\n+     stamp: [\n+       0,\n+       0,\n+       0,\n+       0\n+     ]\n+   },\n+   forecastView: {\n+     covered: 180000,\n+     population: 180000\n+   },\n    generated: 0,\n    lineBoarded: {},\n    lineRevenue: {},\n+   minute: 480.2,\n+   nativeCommandSerial: 0,\n+   nativeEditRevision: 0,\n+   nativeSerial: 2,\n-   minute: 480.20000000000005,\n    nextId: 3,\n    outside: {},\n    outsideSince: {},\n+   personalRecords: {\n+     bestDay: 0,\n+     bestHour: 0,\n+     bestLineKm: 2.16,\n+     bestNetworkKm: 12.96,\n+     bestRevenue: 0,\n+     totalCompleted: 0,\n+     totalPassengerKm: 0\n+   },\n    purposeCompleted: {\n      leisure: 0,\n      shopping: 0,\n      work: 0\n    },\n...\n      '0': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '1': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '2': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '3': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '4': {\n-       ",
+      "truncated": true
+    },
+    "test_rail_map48.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    alighted: 0,\n    arrivalMode: 'integer',\n    arrivalRemainder: 0,\n+   blocks: {\n+     't11|-1': 0,\n+     't11|1': 0,\n+     't12|-1': 0,\n+     't12|1': 0,\n+     't14|-1': 0,\n+     't14|1': 0,\n+     't15|-1': 0,\n+     't15|1': 0,\n+     't17|-1': 0,\n+     't17|1': 0,\n+     't18|-1': 0,\n+     't18|1': 0,\n+     't2|-1': 0,\n+     't2|1': 0,\n+     't3|-1': 0,\n+     't3|1': 0,\n+     't5|-1': 0,\n+     't5|1': 0,\n+     't6|-1': 0,\n+     't6|1': 0,\n+     't8|-1': 0,\n+     't8|1': 0,\n+     't9|-1': 0,\n+     't9|1': 0\n+   },\n-   blocks: {},\n    boarded: 0,\n    cancelled: 0,\n    city: true,\n    completed: 0,\n    demandCarry: 0.2,\n...\n      profiles: 648,\n+     storage: 'native',\n-     storage: 'lazy',\n      updatedAt: 419.9\n    },\n    departures: {\n      's10|-1': {\n        headway: 2,\n...\n    fleetMinute: 420,\n+   forecastStatus: {\n+     busy: false,\n+     dirty: true,\n+     stamp: [\n+       0,\n+       0,\n+       0,\n+       1\n+     ]\n+   },\n+   forecastView: {\n+     covered: 180000,\n+     population: 180000\n+   },\n    generated: 0,\n    lineBoarded: {},\n    lineRevenue: {},\n    minute: 420.1,\n+   nativeCommandSerial: 0,\n+   nativeEditRevision: 0,\n+   nativeSerial: 2,\n    nextId: 3,\n    outside: {},\n    outsideSince: {},\n+   personalRecords: {\n+     bestDay: 0,\n+     bestHour: 0,\n+     bestLineKm: 2.16,\n+     bestNetworkKm: 12.96,\n+     bestRevenue: 0,\n+     totalCompleted: 0,\n+     totalPassengerKm: 0\n+   },\n    purposeCompleted: {\n      leisure: 0,\n      shopping: 0,\n      work: 0\n    },\n...\n      '0': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '1': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '2': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '3': {\n-       area: 1680,\n        capacity: 1806,\n-       length: 140,\n        outsideCapacity: 903,\n-       platforms: 4,\n-       spacePerPerson: 0.93,\n-       usableWidth: 3\n      },\n      '4': {\n-       area: 1680,\n        capacity: 1",
+      "truncated": true
+    },
+    "test_rail_map49.cjs": {
+      "excerpt": "TypeError: OldP.dispose is not a function\n    at closePairs (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map49.cjs:190:82)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map49.cjs:272:10",
+      "truncated": false
+    },
+    "test_rail_map49_queue.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    alighted: 0,\n    arrivalMode: 'integer',\n    arrivalRemainder: 0,\n+   blocks: {\n+     't11|-1': 0,\n+     't11|1': 0,\n+     't12|-1': 0,\n+     't12|1': 0,\n+     't14|-1': 0,\n+     't14|1': 0,\n+     't15|-1': 0,\n+     't15|1': 0,\n+     't17|-1': 0,\n+     't17|1': 0,\n+     't18|-1': 0,\n+     't18|1': 0,\n+     't2|-1': 0,\n+     't2|1': 0,\n+     't3|-1': 0,\n+     't3|1': 0,\n+     't5|-1': 0,\n+     't5|1': 0,\n+     't6|-1': 0,\n+     't6|1': 0,\n+     't8|-1': 0,\n+     't8|1': 0,\n+     't9|-1': 0,\n+     't9|1': 0\n+   },\n-   blocks: {},\n    boarded: 0,\n    cancelled: 0,\n    city: true,\n    completed: 0,\n    demandCarry: 0.5,\n...\n      profiles: 648,\n+     storage: 'native',\n-     storage: 'lazy',\n      updatedAt: 480\n    },\n    departures: {\n      's10|-1': {\n        headway: 2,\n...\n    fleetMinute: 480,\n+   forecastStatus: {\n+     busy: false,\n+     dirty: false,\n+     stamp: [\n+       0,\n+       0,\n+       0,\n+       0\n+     ]\n+   },\n+   forecastView: {\n+     covered: 2700000,\n+     population: 2700000\n+   },\n    generated: 0,\n    lineBoarded: {},\n    lineRevenue: {},\n+   minute: 480.5,\n+   nativeCommandSerial: 0,\n+   nativeEditRevision: 0,\n+   nativeSerial: 3,\n-   minute: 480.5000000000001,\n    nextId: 4,\n    outside: {},\n    outsideSince: {},\n+   personalRecords: {\n+     bestDay: 0,\n+     bestHour: 0,\n+     bestLineKm: 2.16,\n+     bestNetworkKm: 12.96,\n+     bestRevenue: 0,\n+     totalCompleted: 0,\n+     totalPassengerKm: 0\n+   },\n    purposeCompleted: {\n      leisure: 0,\n      shopping: 0,\n      work: 0\n    },\n...\n      '0': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '1': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '2': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '3': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '4': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '5': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '6': {\n+       capacity: 1806,\n+",
+      "truncated": true
+    },
+    "test_rail_map50.cjs": {
+      "excerpt": "TypeError: OldP.dispose is not a function\n    at closePairs (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map50.cjs:190:82)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map50.cjs:289:10",
+      "truncated": false
+    },
+    "test_rail_map50_budget.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   busy: false,\n+   epoch: 0,\n    ms: 0,\n    ok: true,\n    pending: 0,\n    steps: 0\n  }\n\n    at exact (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map50_budget.cjs:7:28)\n    at Object.<anonymous> (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map50_budget.cjs:69:3)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: { ok: true, pending: 0, busy: false, ms: 0, epoch: 0, steps: 0 },\n  expected: { ok: true, steps: 0, pending: 0, ms: 0 },\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.22.1",
+      "truncated": false
+    },
+    "test_rail_map50_queue.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    alighted: 0,\n    arrivalMode: 'integer',\n    arrivalRemainder: 0,\n+   blocks: {\n+     't11|-1': 0,\n+     't11|1': 0,\n+     't12|-1': 0,\n+     't12|1': 0,\n+     't14|-1': 0,\n+     't14|1': 0,\n+     't15|-1': 0,\n+     't15|1': 0,\n+     't17|-1': 0,\n+     't17|1': 0,\n+     't18|-1': 0,\n+     't18|1': 0,\n+     't2|-1': 0,\n+     't2|1': 0,\n+     't3|-1': 0,\n+     't3|1': 0,\n+     't5|-1': 0,\n+     't5|1': 0,\n+     't6|-1': 0,\n+     't6|1': 0,\n+     't8|-1': 0,\n+     't8|1': 0,\n+     't9|-1': 0,\n+     't9|1': 0\n+   },\n-   blocks: {},\n    boarded: 0,\n    cancelled: 0,\n    city: true,\n    completed: 0,\n    demandCarry: 0.5,\n...\n      profiles: 648,\n+     storage: 'native',\n-     storage: 'lazy',\n      updatedAt: 480\n    },\n    departures: {\n      's10|-1': {\n        headway: 2,\n...\n    fleetMinute: 480,\n+   forecastStatus: {\n+     busy: false,\n+     dirty: false,\n+     stamp: [\n+       0,\n+       0,\n+       0,\n+       0\n+     ]\n+   },\n+   forecastView: {\n+     covered: 2700000,\n+     population: 2700000\n+   },\n    generated: 0,\n    lineBoarded: {},\n    lineRevenue: {},\n+   minute: 480.5,\n+   nativeCommandSerial: 0,\n+   nativeEditRevision: 0,\n+   nativeSerial: 3,\n-   minute: 480.5000000000001,\n    nextId: 4,\n    outside: {},\n    outsideSince: {},\n+   personalRecords: {\n+     bestDay: 0,\n+     bestHour: 0,\n+     bestLineKm: 2.16,\n+     bestNetworkKm: 12.96,\n+     bestRevenue: 0,\n+     totalCompleted: 0,\n+     totalPassengerKm: 0\n+   },\n    purposeCompleted: {\n      leisure: 0,\n      shopping: 0,\n      work: 0\n    },\n...\n      '0': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '1': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '2': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '3': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '4': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '5': {\n+       capacity: 1806,\n+       outsideCapacity: 903\n-       capacity: 20,\n-       outsideCapacity: 15\n      },\n      '6': {\n+       capacity: 1806,\n+",
+      "truncated": true
+    },
+    "test_rail_map51.cjs": {
+      "excerpt": "TypeError: OldP.dispose is not a function\n    at closePairs (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map51.cjs:190:82)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map51.cjs:289:10",
+      "truncated": false
+    },
+    "test_rail_map51_budget.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   busy: false,\n+   epoch: 0,\n    ms: 0,\n    ok: true,\n    pending: 0,\n    steps: 0\n  }\n\n    at exact (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map51_budget.cjs:7:28)\n    at Object.<anonymous> (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map51_budget.cjs:69:3)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: { ok: true, pending: 0, busy: false, ms: 0, epoch: 0, steps: 0 },\n  expected: { ok: true, steps: 0, pending: 0, ms: 0 },\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.22.1",
+      "truncated": false
+    },
+    "test_rail_map51_worker.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    companies: [\n      {\n        cash: 620,\n        color: '#078a73',\n...\n      blocked: false,\n+     cash: 4999999185.328999,\n-     cash: 49996665827.308174,\n      construction: 0,\n      infrastructureRebate: 0,\n+     interestPaid: 0,\n-     interestPaid: 24.687499999998895,\n      ledger: [\n        {\n-         amount: -3333358.0208333335,\n-         minute: 419.965,\n-         type: '每日偿还贷款本息'\n-       },\n-       {\n          amount: 5000000000,\n          minute: 420,\n          type: '初始资金'\n        }\n      ],\n+     loans: [],\n+     minute: 421.13,\n-     loans: [\n-       {\n-         id: 1,\n-         initial: 100000000,\n-         installment: 3333333.3333333335,\n-         interest: 39.103009259260325,\n-         nextDue: 1859.965,\n-         principal: 96666666.66666667\n-       }\n-     ],\n-     minute: 421.1300000000003,\n      nextLoan: 1,\n      operating: 814.6710000000506,\n      operatingGrant: 0,\n+     principalPaid: 0,\n-     principalPaid: 3333333.3333333335,\n      revenue: 0,\n      salvage: 0\n    },\n    log: [],\n    mapVersion: 12,\n...\n    operationsReview: {\n+     buckets: [],\n-     buckets: [\n-       {\n-         from: NaN,\n-         peak: false,\n-         rows: {\n-           s10: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: null,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s13: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: null,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s16: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: 0,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s1: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: 0,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s4: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-       ",
+      "truncated": true
+    },
+    "test_rail_map51_worker_queue.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   boundary: false,\n    consumed: 0.5,\n+   events: [\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 1,\n+       uid: 1\n+     },\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 2,\n+       uid: 2\n+     },\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 3,\n+       uid: 3\n+     }\n+   ],\n    reason: 'complete',\n    remaining: 2.7755575615628914e-17,\n    running: true,\n    steps: 5\n  }\n\n    at step (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map51_worker_queue.cjs:73:10)\n    at async /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map51_worker_queue.cjs:82:32 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: [Object],\n  expected: [Object],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map52.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: complete world.ridership.lines.s1 fields\n+ actual - expected\n... Skipped lines\n\n  [\n    'attempted',\n    'awareness',\n    'bestDay',\n    'boarded',\n...\n    'migrated',\n+   'observations',\n    'opened',\n    'satisfaction',\n    'scores',\n    'serviceDays',\n    'trust',\n\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:8:82)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at Object.world (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:16:2)\n    at compare (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map52.cjs:191:34)\n    at check (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map52.cjs:192:219)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map52.cjs:200:58\n    at Object.<anonymous> (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map52.cjs:289:26)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14) {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: [Array],\n  expected: [Array],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map52_budget.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   busy: false,\n+   epoch: 0,\n    ms: 0,\n    ok: true,\n    pending: 0,\n    steps: 0\n  }\n\n    at exact (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map52_budget.cjs:7:28)\n    at Object.<anonymous> (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map52_budget.cjs:69:3)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: { ok: true, pending: 0, busy: false, ms: 0, epoch: 0, steps: 0 },\n  expected: { ok: true, steps: 0, pending: 0, ms: 0 },\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.22.1",
+      "truncated": false
+    },
+    "test_rail_map52_worker.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    companies: [\n      {\n        cash: 620,\n        color: '#078a73',\n...\n      blocked: false,\n+     cash: 4999999185.328999,\n-     cash: 49996665827.308174,\n      construction: 0,\n      infrastructureRebate: 0,\n+     interestPaid: 0,\n-     interestPaid: 24.687499999998895,\n      ledger: [\n        {\n-         amount: -3333358.0208333335,\n-         minute: 419.965,\n-         type: '每日偿还贷款本息'\n-       },\n-       {\n          amount: 5000000000,\n          minute: 420,\n          type: '初始资金'\n        }\n      ],\n+     loans: [],\n+     minute: 421.13,\n-     loans: [\n-       {\n-         id: 1,\n-         initial: 100000000,\n-         installment: 3333333.3333333335,\n-         interest: 39.103009259260325,\n-         nextDue: 1859.965,\n-         principal: 96666666.66666667\n-       }\n-     ],\n-     minute: 421.1300000000003,\n      nextLoan: 1,\n      operating: 814.6710000000506,\n      operatingGrant: 0,\n+     principalPaid: 0,\n-     principalPaid: 3333333.3333333335,\n      revenue: 0,\n      salvage: 0\n    },\n    log: [],\n    mapVersion: 12,\n...\n    operationsReview: {\n+     buckets: [],\n-     buckets: [\n-       {\n-         from: NaN,\n-         peak: false,\n-         rows: {\n-           s10: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: null,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s13: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: null,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s16: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: 0,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s1: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: 0,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s4: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-       ",
+      "truncated": true
+    },
+    "test_rail_map52_worker_queue.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   boundary: false,\n    consumed: 0.5,\n+   events: [\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 1,\n+       uid: 1\n+     },\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 2,\n+       uid: 2\n+     },\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 3,\n+       uid: 3\n+     }\n+   ],\n    reason: 'complete',\n    remaining: 2.7755575615628914e-17,\n    running: true,\n    steps: 5\n  }\n\n    at step (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map52_worker_queue.cjs:73:10)\n    at async /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map52_worker_queue.cjs:82:32 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: [Object],\n  expected: [Object],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map53_budget.cjs": {
+      "excerpt": "node:assert:152\n  throw new AssertionError(obj);\n  ^\n\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   busy: false,\n+   epoch: 0,\n    ms: 0,\n    ok: true,\n    pending: 0,\n    steps: 0\n  }\n\n    at exact (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map53_budget.cjs:7:28)\n    at Object.<anonymous> (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map53_budget.cjs:69:3)\n    at Module._compile (node:internal/modules/cjs/loader:1929:14)\n    at Object..js (node:internal/modules/cjs/loader:2060:10)\n    at Module.load (node:internal/modules/cjs/loader:1651:32)\n    at Module._load (node:internal/modules/cjs/loader:1443:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: { ok: true, pending: 0, busy: false, ms: 0, epoch: 0, steps: 0 },\n  expected: { ok: true, steps: 0, pending: 0, ms: 0 },\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}\n\nNode.js v24.22.1",
+      "truncated": false
+    },
+    "test_rail_map53_calendar.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: false/both world 564.6999999999999.ridership.lines.s6.wait: 1562.9373082739744 != 1563.7363286505615\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:6:93)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at Object.world (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:16:2)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map53_calendar.cjs:26:40 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map53_native_state.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n-1 !== 561\n\n    at canonical (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:40:10)\n    at Object.checkpoint (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:44:8)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map53_native_state.cjs:29:158 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: -1,\n  expected: 561,\n  operator: 'strictEqual',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map53_worker.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    companies: [\n      {\n        cash: 620,\n        color: '#078a73',\n...\n      blocked: false,\n+     cash: 4999999185.328999,\n-     cash: 49996665827.308174,\n      construction: 0,\n      infrastructureRebate: 0,\n+     interestPaid: 0,\n-     interestPaid: 24.687499999998895,\n      ledger: [\n        {\n-         amount: -3333358.0208333335,\n-         minute: 419.965,\n-         type: '每日偿还贷款本息'\n-       },\n-       {\n          amount: 5000000000,\n          minute: 420,\n          type: '初始资金'\n        }\n      ],\n+     loans: [],\n+     minute: 421.13,\n-     loans: [\n-       {\n-         id: 1,\n-         initial: 100000000,\n-         installment: 3333333.3333333335,\n-         interest: 39.103009259260325,\n-         nextDue: 1859.965,\n-         principal: 96666666.66666667\n-       }\n-     ],\n-     minute: 421.1300000000003,\n      nextLoan: 1,\n      operating: 814.6710000000506,\n      operatingGrant: 0,\n+     principalPaid: 0,\n-     principalPaid: 3333333.3333333335,\n      revenue: 0,\n      salvage: 0\n    },\n    log: [],\n    mapVersion: 12,\n...\n    operationsReview: {\n+     buckets: [],\n-     buckets: [\n-       {\n-         from: NaN,\n-         peak: false,\n-         rows: {\n-           s10: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: null,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s13: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: null,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s16: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: 0,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s1: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-             load: 0,\n-             open: false,\n-             operating: 0,\n-             quality: 0.7,\n-             revenue: 0,\n-             waitMinutes: 0\n-           },\n-           s4: {\n-             boarded: 0,\n-             completed: 0,\n-             grant: 0,\n-       ",
+      "truncated": true
+    },
+    "test_rail_map53_worker_queue.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   boundary: false,\n    consumed: 0.5,\n+   events: [\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 1,\n+       uid: 1\n+     },\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 2,\n+       uid: 2\n+     },\n+     {\n+       kind: 'TrainCreated',\n+       ordinal: 3,\n+       uid: 3\n+     }\n+   ],\n    reason: 'complete',\n    remaining: 2.7755575615628914e-17,\n    running: true,\n    steps: 5\n  }\n\n    at step (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map53_worker_queue.cjs:73:10)\n    at async /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map53_worker_queue.cjs:82:32 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: [Object],\n  expected: [Object],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map54_windows.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: world 434.85/false/435.15000000000003.ridership.lines.s1 fields\n+ actual - expected\n... Skipped lines\n\n  [\n    'attempted',\n    'awareness',\n    'bestDay',\n    'boarded',\n...\n    'migrated',\n+   'observations',\n    'opened',\n    'satisfaction',\n    'scores',\n    'serviceDays',\n    'trust',\n\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:8:82)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at Object.world (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:16:2)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map54_windows.cjs:41:16 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: [Array],\n  expected: [Array],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map56_statistics.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: complete world.ridership.lines.s1 fields\n+ actual - expected\n... Skipped lines\n\n  [\n    'attempted',\n    'awareness',\n    'bestDay',\n    'boarded',\n...\n    'migrated',\n+   'observations',\n    'opened',\n    'satisfaction',\n    'scores',\n    'serviceDays',\n    'trust',\n\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:8:82)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at Object.world (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:16:2)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map56_statistics.cjs:25:30 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: [Array],\n  expected: [Array],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map58_retirement.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: complete world.ridership.lines.s1.wait: 347.5991151515759 != 353.8079448297223\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:6:93)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at Object.world (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:16:2)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map58_retirement.cjs:11:213 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}",
+      "truncated": false
+    },
+    "test_rail_map59_reroutes.cjs": {
+      "excerpt": "AssertionError [ERR_ASSERTION]: complete world.ridership.lines.s1.wait: 1118.4864354282636 != 1126.4761487559597\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:6:93)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at equal (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:9:35)\n    at Object.world (/workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/helpers/native-oracle.cjs:16:2)\n    at /workspace/scratch/c8ecd30ec612/rail-city-fix31/scripts/test_rail_map59_reroutes.cjs:4:1712 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}",
+      "truncated": false
+    }
+  },
+  "previousVerification": {
+    "testedSource": "341d8f087765fbb473b709eb60986e6499734118",
+    "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42983980321",
+    "ciJob": 130400693891,
+    "rust": {
+      "passed": 71,
+      "failed": 0,
+      "total": 71
+    },
+    "ciStatus": "completed",
+    "ciConclusion": "failure",
+    "localAgreement": {
+      "runtime": "Node 24",
+      "ciRuntime": "Node 20",
+      "outcomesCompared": 171,
+      "matched": true
+    },
+    "node": {
+      "passed": 63,
+      "failed": 28,
+      "total": 91
+    },
+    "syntax": {
+      "passed": 80,
+      "failed": 0,
+      "total": 80
+    }
+  },
   "history": [
     {
       "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42941179936",
@@ -707,81 +1500,5 @@
       "nodeFailed": 30,
       "verified": "Completed CI job 130370877068; 61/91 Node suites and 68 Rust tests."
     }
-  ],
-  "supplementalValidation": {
-    "formalWasmSha256": "d1a38466b9dcd83bb2f57f233a7cf224d4b505f27cc58d68c6bbeb2d139b09f6",
-    "formalWasmBytes": 2980375,
-    "compiler": "Rust 1.99.1",
-    "arrivalBufferWireAndPointerReuse": "passed Rust unit test",
-    "clockBudgetAtomicityAndIdleSteps": "passed Rust unit test",
-    "nativeViewProjectionParity": "passed Rust assertion",
-    "authoritativeRebindAndInvalidFullAdvance": "passed Node native regression",
-    "boundary": {
-      "modules": 80,
-      "functions": 1564,
-      "pageScripts": 69,
-      "workers": 3
-    }
-  },
-  "ciStatus": "completed",
-  "ciConclusion": "failure",
-  "ciJob": 130400693891,
-  "validatedSourceBatch": {
-    "source": "eba3ce0c542cd147dff11ccee9296a2733a9a4af",
-    "phase": "unified compilation and full regression completed",
-    "validated": true,
-    "ciTriggered": true,
-    "lastVerifiedNodePassed": 63,
-    "lastVerifiedNodeFailed": 28,
-    "changes": [
-      "reuse arrival wire buffers",
-      "avoid duplicate full-checkpoint train trees",
-      "atomic budget rejection and complete no-work batches",
-      "validate full advance inputs and retain all batch events",
-      "authoritative checkpoint rebinding",
-      "native retirement commands and per-session reroute counters"
-    ],
-    "note": "New runtime assertions pass. No Node suite changed status; retirement/reroute oracles now reach actual business-state comparisons.",
-    "validationSource": "341d8f087765fbb473b709eb60986e6499734118",
-    "ciRun": "https://github.com/xxbo/rail-city/actions/runs/42983980321"
-  },
-  "remainingFindings": {
-    "management": "Large Tokyo weighted warmup still traps in WASM; no memory-resolution claim.",
-    "retirement": "First native remove-stop command, preview and single-charge assertions pass; the subsequent complete world differs in passenger outcomes and economy values. Remaining edit branches are not reached.",
-    "reroutes": "Native line removal succeeds; subsequent complete worlds differ in ridership, revenue and operating grant.",
-    "otherSuites": "25 earlier full-world/snapshot/budget/RPC/immutable-input comparisons still require individual investigation."
-  },
-  "localAgreement": {
-    "runtime": "Node 24",
-    "ciRuntime": "Node 20",
-    "outcomesCompared": 171,
-    "matched": true
-  },
-  "pendingSourceBatch": {
-    "source": "230c1d2ffd7b2a55efa6c1974d1c2a31736dc73b",
-    "validated": false,
-    "phase": "source-only",
-    "suites": [
-      "test_rail_map49.cjs",
-      "test_rail_map50.cjs",
-      "test_rail_map51.cjs",
-      "test_rail_map52.cjs",
-      "test_rail_map53_calendar.cjs",
-      "test_rail_map53_native_state.cjs",
-      "test_rail_map54_windows.cjs",
-      "test_rail_map56_statistics.cjs",
-      "test_rail_map58_retirement.cjs",
-      "test_rail_map59_reroutes.cjs"
-    ],
-    "changes": [
-      "retirement archived geometry and car count",
-      "compact live projection on snapshot",
-      "validated cold arrival mode",
-      "checkpoint feedback preservation",
-      "per-arena full statistics frame counter",
-      "native command and detached fixture migration",
-      "versioned business checkpoint oracle retaining money and passenger comparisons"
-    ],
-    "countsRemainLastVerified": true
-  }
+  ]
 }

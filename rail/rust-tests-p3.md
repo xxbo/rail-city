@@ -1,6 +1,35 @@
 # P3 自动测试修复进展
 
-## 新增源码批次：待统一验证
+## 最新统一验证：2026-11-11
+
+**编译通过；Rust 72/72 通过；Node 63/91 通过、28 组失败，整体未通过。** 对照上次，Rust 新增一项通过，Node 没有新增通过组，也没有已通过套件回退，失败名单完全相同。
+
+| 检查 | 本次实际结果 |
+| --- | --- |
+| Rust 1.99.1 原生 release（session-contract） | 编译通过 |
+| 正式 WASM / 会话 WASM | 构建通过，重复构建字节校验通过 |
+| Rust 单测 | 72 通过，0 失败 |
+| JS 语法 | 80 通过，0 失败 |
+| Node 回归 | 全部 91 组执行；63 通过，28 失败 |
+| 发布源码边界审计 | 退出码 1；0 项 violations，844 个函数待验收 |
+
+测试源码：[1e686db2ba9ff11abae41d3e2d0f4664129c9533](https://github.com/xxbo/rail-city/commit/1e686db2ba9ff11abae41d3e2d0f4664129c9533)。本次结果来自本地 Node 24.22.1 / Rust 1.99.1；前次 CI 结果单独保存在机器报告 previousVerification 中，不作为本次 CI 证据。逐组退出码、耗时、失败摘要和编译阶段结果见[机器报告](../scripts/test-results/p3-automated.json)。本次正式 WASM 为 2,984,566 字节，SHA-256 为 04c08feed929096caf9d5740da64441752682c62bfcb3f71891b8dcd9508048e。
+
+新增退休列车归档几何/八节编组重建 Rust 单测通过；快照紧凑视图、冷启动参数校验、Worker 交接等 P3 regressions 通过。十组重点修复套件仍全部失败，不能据此宣布迁移回归完成。
+
+| 失败范围 | 本次首个可见阻塞 |
+| --- | --- |
+| management | WASM RuntimeError: unreachable |
+| MAP49、50、51 | 清理阶段调用不存在的 OldP.dispose；可能覆盖更早的原始异常 |
+| MAP52、MAP54 windows、MAP56 statistics | 线反馈新增 observations 字段与旧参考结构不一致 |
+| MAP53 native-state | fleetMinute=-1，与 floor(minute)=561 的 helper 断言不一致 |
+| MAP53 calendar | 564.7 分钟附近 s6.wait：1562.9373082739744 / 1563.7363286505615 |
+| MAP58 retirement | s1.wait：347.5991151515759 / 353.8079448297223 |
+| MAP59 reroutes | s1.wait：1118.4864354282636 / 1126.4761487559597 |
+
+其余既有失败套件及每组当前异常保存在机器报告 failureDiagnostics 中。财务和客流断言继续保留；本次在更早的 wait 字段停止，不能据此推断后续金额对照已通过。发布审计的 pending 表示验收资料尚未闭环，不等同于 844 项新增业务错误。
+
+## 已验证源码批次记录（以下为验证前记录）
 
 2026-11-11。按失败用例批量修改，仅修改源码；本批未编译、未运行测试。源码提交：[230c1d2ffd7b2a55efa6c1974d1c2a31736dc73b](https://github.com/xxbo/rail-city/commit/230c1d2ffd7b2a55efa6c1974d1c2a31736dc73b)。下方 71/71、63/91 和 28 组失败属于上次已验证基线，不代表本批结果。
 
