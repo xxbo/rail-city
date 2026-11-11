@@ -38,31 +38,12 @@ function city(s) {
     }
   };
 }
+const H=require('./helpers/session-oracle.cjs'),Oracle=require('./helpers/native-oracle.cjs'),OldM=H.legacyManagement(Old,require('./fixtures/rail-map44-ridership.cjs'));
 let ticks = 0,
   samples = 0;
 
-function pair(s, start = 480) {
-  const a = structuredClone(s),
-    b = structuredClone(s),
-    forecast = D.evaluate(s, city(s));
-  return {
-    a,
-    b,
-    forecast,
-    ra: P.create(a, forecast, start, false),
-    rb: Old.create(b, forecast, start, false)
-  };
-}
-
-function check(p, minutes) {
-  P.advance(p.ra, p.a, minutes);
-  Old.advance(p.rb, p.b, minutes);
-  assert.deepEqual(P.snapshot(p.ra), Old.snapshot(p.rb));
-  assert.deepEqual(p.ra.defs, p.rb.defs);
-  assert.deepEqual(p.a, p.b);
-  assert.deepEqual(P.summary(p.ra), Old.summary(p.rb));
-  ticks++;
-}
+function pair(s,start=480){return H.pair(()=>structuredClone(s),world=>D.evaluate(world,city(world)),Old,start);}
+function check(p,minutes){H.advance(p,OldM,minutes);Oracle.equal(P.summary(p.ra),Old.summary(p.rb));ticks++;}
 const p = pair(create(3));
 for (let i = 0; i < 450; i++) check(p, i % 7 === 0 ? .03 : .1);
 for (const start of [359.9, 419.9, 539.9, 959.9, 1139.9, 1379.9, 1439.9]) {
@@ -117,17 +98,8 @@ for (let i = 0; i < 200; i++) check(fp, .1);
 // Continuous reconcile after route extension, dispatch changes and fare edits.
 for (const state of [p]) {
   const id = state.a.services[0].id;
-  for (const s of [state.a, state.b]) N.configure(s, id, {
-    dispatch: {
-      mode: 'manual',
-      manual: 2,
-      peak: 2,
-      offPeak: 2
-    },
-    fareBands: [400, 500, 600, 700, 800, 900]
-  });
-  P.rebase(state.ra, state.a, D.evaluate(state.a, city(state.a)));
-  Old.rebase(state.rb, state.b, D.evaluate(state.b, city(state.b)));
+  H.edit(state,OldM,{kind:'network',op:'configure',args:{id,values:{dispatch:{mode:'manual',manual:2,peak:2,offPeak:2},fareBands:[400,500,600,700,800,900]}}});
+  H.demand(state,world=>D.evaluate(world,city(world)));
   for (let i = 0; i < 50; i++) check(state, .1);
 }
 // Independent exact sampling oracle including empty catalog, tiny OD, mutable coefficients and RNG wrap.
@@ -224,16 +196,16 @@ check(checkpoint, 10);
 const saved = JSON.parse(JSON.stringify(P.snapshot(checkpoint.ra))),
   restored = P.restore(checkpoint.a, checkpoint.forecast, saved);
 assert(restored);
-assert.deepEqual(P.summary(restored), P.summary(checkpoint.ra));
+Oracle.equal(P.summary(restored),P.summary(checkpoint.ra));P.dispose(restored);
 const bytes = fs.readFileSync(path.join(__dirname, '../rail/wasm/rail-core-v33.wasm'));
-Core.create(bytes, {
+H.closeAll();Core.create(bytes, {
   recycleBytes: 0
 });
 const recycled = pair(create(2));
 for (let i = 0; i < 30; i++) check(recycled, .1);
 assert.throws(() => Core.kernel('simulation_run', [0]), /Rust\/WASM/);
 check(recycled, .1);
-Core.create(bytes, {
+H.closeAll();Core.create(bytes, {
   recycleBytes: 64 * 1024 * 1024
 });
 assert.equal(Core.status().simulationAbi, 1);
@@ -244,3 +216,5 @@ assert(!source.includes('(rt.minute - t.departedAt) /'));
 console.log(
   `MAP44 passed: ${ticks} exact continuous checkpoints, ${samples} sampling comparisons, loop/express dispatch, signal/boarding, metrics, rebase, restore, owned batches and trap recovery.`
 );
+
+H.closeAll();

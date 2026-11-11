@@ -473,7 +473,7 @@ pub(super) fn run_owned(
         let mut reason = 0.0;
         let mut chunks = vec![];let mut definitions=vec![];let mut spawned=vec![];
         let mut quantum_left=remaining.min(0.1);
-        while remaining > 1e-8 && steps < max {
+        while remaining > 1e-9 && steps < max {
             if if request.trace{time+quantum_left>=barrier-1e-8}else{time>=barrier-1e-8} {
                 reason = 1.0;
                 break;

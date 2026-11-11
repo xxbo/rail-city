@@ -117,6 +117,7 @@ impl Routing {
         out.update_weights(&weights);
         out
     }
+    pub(super) fn clear_routes(&mut self){self.routes.clear();}
     pub(super) fn route(&mut self, j: &V, from: usize, id: usize) -> Option<V> {
         let to = j.num("to") as usize;
         if from == to {

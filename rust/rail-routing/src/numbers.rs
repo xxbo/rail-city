@@ -52,6 +52,10 @@ impl<T> Default for Paged<T> {
 }
 impl<T> Paged<T> {
     pub fn len(&self) -> usize { self.len }
+    pub fn retain(&mut self,mut keep:impl FnMut(usize,&mut T)->bool){
+        let mut empty=vec![];for(&base,page)in &mut self.pages{for(slot,row)in page.rows.iter_mut().enumerate(){if row.as_mut().is_some_and(|value|!keep(base*256+slot,value)){*row=None;page.used-=1;self.len-=1;}}if page.used==0{empty.push(base);}}
+        for base in empty{self.pages.remove(&base);}
+    }
     pub fn get(&self, index: &usize) -> Option<&T> { self.pages.get(&(index / 256))?.rows[index % 256].as_ref() }
     pub fn get_mut(&mut self, index: &usize) -> Option<&mut T> { self.pages.get_mut(&(index / 256))?.rows[index % 256].as_mut() }
     pub fn insert(&mut self, index: usize, value: T) -> Option<T> {

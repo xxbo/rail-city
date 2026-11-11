@@ -95,50 +95,16 @@ function forecast(s) {
   });
 }
 
-function pair(start = 480, weighted = false) {
-  const a = create(3),
-    b = structuredClone(a),
-    f = forecast(a),
-    ra = P.create(a, f, start, false),
-    rb = OldP.create(b, f, start, false);
-  if (weighted) ra.arrivalMode = rb.arrivalMode = 'weighted';
-  return {
-    a,
-    b,
-    f,
-    ra,
-    rb
-  };
-}
-
-function check(p, dt, managed = false) {
-  if (managed) {
-    assert.equal(M.advance(p.a, p.ra, dt), OldM.advance(p.b, p.rb, dt));
-  } else {
-    P.advance(p.ra, p.a, dt);
-    OldP.advance(p.rb, p.b, dt);
-  }
-  exact(P.snapshot(p.ra), OldP.snapshot(p.rb));
-  exact(p.a, p.b);
-  exact(p.ra.defs, p.rb.defs);
-  checks++;
-}
+const H=require('./helpers/session-oracle.cjs'),Oracle=require('./helpers/native-oracle.cjs'),Runtime=require('../rail/runtime-wasm');
+function pair(start=480,weighted=false){return H.pair(()=>create(3),forecast,OldP,start,weighted);}
+function check(p,dt,managed=false){H.advance(p,OldM,dt);checks++;}
 for (const weighted of [false, true]) {
   const p = pair(480, weighted);
   for (let i = 0; i < 100; i++) check(p, .2, i % 2 === 0);
   // External events and fare edits invalidate only the relevant native statistic inputs.
-  for (const [s, rt, lib] of [
-      [p.a, p.ra, Q],
-      [p.b, p.rb, OldQ]
-    ]) lib.event(s, rt, rt.defs[0], 'reject', .1);
+  H.fixture(p,(state,saved,index)=>{const lib=index?OldQ:Q;lib.event(state,{...saved,plan:X.expand(state)},saved.urbanDefs[0],'reject',.1);});
   for (let i = 0; i < 30; i++) check(p, .2, true);
-  for (const s of [p.a, p.b]) assert(!N.configure(s, s.services[0].id, {
-    fareBands: [400, 500, 600, 700, 800, 900]
-  }).error);
-  P.reconcile(p.ra, p.a);
-  OldP.reconcile(p.rb, p.b);
-  P.rebase(p.ra, p.a, forecast(p.a));
-  OldP.rebase(p.rb, p.b, forecast(p.b));
+  H.edit(p,OldM,{kind:'network',op:'configure',args:{id:p.a.services[0].id,values:{fareBands:[400,500,600,700,800,900]}}});H.demand(p,forecast);
   for (let i = 0; i < 30; i++) check(p, .2, true);
   // Hour trimming, records and bucket transitions use the same operation order.
   check(p, 70, true);
@@ -148,30 +114,21 @@ for (const start of [419.9, 479.9, 1379.9, 1439.9, 1859.9]) {
   for (let i = 0; i < 12; i++) check(p, .1, true);
 }
 const batchOnly = pair();
-const standalone = Core.status().statisticsCalls;
-check(batchOnly, 60);
-assert.equal(Core.status().statisticsCalls, standalone,
-  'hot simulation must integrate statistics without a second WASM call');
+const standalone=Core.status().statisticsCalls;M.advance(batchOnly.a,batchOnly.ra,60);assert.equal(Core.status().statisticsCalls,standalone,'owned hot advance makes no host statistics calls');OldM.advance(batchOnly.b,batchOnly.rb,60);H.compare(batchOnly);checks++;
 // A busy line removal must use one statistics batch rather than one native call per rejected cohort.
 const removed = pair(480, true);
 check(removed, 4);
 assert(P.summary(removed.ra).waiting > 0);
-for (const s of [removed.a, removed.b])
-  for (const l of [...s.services]) assert(!N.removeLine(s, l.id).error);
-const editsBefore = Core.status().statisticsCalls;
-P.reconcile(removed.ra, removed.a);
-OldP.reconcile(removed.rb, removed.b);
-assert.equal(Core.status().statisticsCalls, editsBefore + 1);
-exact(P.snapshot(removed.ra), OldP.snapshot(removed.rb));
-exact(removed.a, removed.b);
+for(const line of [...removed.a.services])H.edit(removed,OldM,{kind:'network',op:'removeLine',args:{id:line.id}});
+assert.equal(Runtime.querySync(removed.ra,'storage').hostCommandValues,0,'owned rejection accounting stays inside Rust');H.compare(removed);
 check(removed, 5);
 const bytes = fs.readFileSync(path.join(__dirname, '../rail/wasm/rail-core-v33.wasm'));
-Core.create(bytes, {
+H.closeAll();Core.create(bytes, {
   recycleBytes: 0
 });
 const recovery = pair();
 for (let i = 0; i < 12; i++) check(recovery, .2, true);
-Core.create(bytes, {
+H.closeAll();Core.create(bytes, {
   recycleBytes: 64 * 1024 * 1024
 });
 const source = fs.readFileSync(path.join(__dirname, '../rail/queue-runtime.js'), 'utf8');
@@ -184,3 +141,5 @@ assert.equal(Core.status().statisticsAbi, 1);
 console.log(
   `MAP46 passed: ${direct} exact standalone event/travel comparisons and ${checks} complete MAP45 checkpoints; property order, fractional cohorts, hours/days/bins, finance interleaving, external edits, rebase and forced native recovery. Hot queue events make no per-event JS statistics calls.`
 );
+
+H.closeAll();

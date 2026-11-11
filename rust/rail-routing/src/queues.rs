@@ -190,6 +190,20 @@ pub(super) struct Queues {
     purpose_delta: Ordered<usize, f64>,
 }
 impl Queues {
+    // Compact numeric identities in their arena; never construct a save tree to
+    // discard unused definitions. Cohort order and ages stay in the same rows.
+    pub(super) fn compact_active(&mut self)->Vec<Option<usize>>{
+        let mut mapping=vec![None;self.defs.len()];
+        for rows in self.queues.values().chain(self.outside.values()){for(token,_)in rows.rows.iter().flatten(){mapping[token.j]=Some(0);}}
+        for train in self.trains.values(){for(token,_)in train.passengers.rows.iter().flatten(){mapping[token.j]=Some(0);}}
+        for transfer in &self.transfers{mapping[transfer.j]=Some(0);}
+        let mut count=0;for value in &mut mapping{if value.is_some(){*value=Some(count);count+=1;}}
+        if count==self.defs.len(){return mapping;}
+        let mut definitions=crate::numbers::Paged::default();for(old,new)in mapping.iter().enumerate(){if let Some(new)=new{definitions.insert(*new,self.defs.remove(&old).expect("active definition missing"));}}self.defs=definitions;
+        fn remap<T:Copy>(rows:&mut Ordered<Token,T>,mapping:&[Option<usize>]){rows.index.clear();for(i,row)in rows.rows.iter_mut().enumerate(){if let Some((token,_))=row{token.j=mapping[token.j].expect("live cohort missing from compaction");rows.index.insert(*token,i);}}}
+        for rows in self.queues.values_mut().chain(self.outside.values_mut()){remap(rows,&mapping);}for train in self.trains.values_mut(){remap(&mut train.passengers,&mapping);}for transfer in &mut self.transfers{transfer.j=mapping[transfer.j].unwrap();}
+        self.new_keys.clear();if let Some(context)=self.routing.as_mut(){context.clear_routes();}mapping
+    }
     pub(super) fn native_owner(&mut self){self.emit_commands=false;}
     pub(super) fn seed_routes(&mut self,routes:&crate::value::Value,trees:&crate::value::Value){if let Some(context)=self.routing.as_mut(){context.seed_routes(routes,trees);}}
     pub(super) fn host_command_values(&self)->usize{self.commands.len()}
@@ -1538,7 +1552,7 @@ impl Queues{
         let(mut inside,mut external,mut transferring)=(0.0,0.0,0.0);
         for key in &self.queue_order{let total=self.queues[key].sum(|c|c.n);inside+=total;let station=key.2.to_string();stations.set(&station,n(stations.zero(&station)+total));let name=names.get(key.0).cloned().unwrap_or_default();queues.set(&format!("{}|{}|{}",name,key.1,key.2),obj(&[("total",n(total))]));}
         for(id,q)in &self.outside{let total=q.sum(|c|c.n);external+=total;outside.set(&id.to_string(),obj(&[("total",n(total))]));}
-        let transfers=self.transfers.iter().map(|x|{transferring+=x.n;let station=x._station.to_string();stations.set(&station,n(stations.zero(&station)+x.n));obj(&[("journey",n(x.j as f64)),("leg",n(x.leg as f64)),("amount",n(x.n)),("ready",n(x.ready)),("station",n(x._station as f64))])}).collect();
+        for x in &self.transfers{transferring+=x.n;let station=x._station.to_string();stations.set(&station,n(stations.zero(&station)+x.n));}let transfers=vec![];
         let onboard=self.trains.values().fold(0.0,|sum,t|sum+t.onboard);
         obj(&[("minute",n(self.now)),("summary",obj(&[("waiting",n(inside+external+transferring)),("inside",n(inside+transferring)),("outside",n(external)),("transferring",n(transferring)),("onboard",n(onboard))])),("queues",queues),("outside",outside),("transfers",arr(transfers)),("stations",stations)])
     }
@@ -1550,7 +1564,7 @@ impl Queues{
         let mut queues=V::Object(vec![]);let mut wait=V::Object(vec![]);let mut outside=V::Object(vec![]);let mut outside_since=V::Object(vec![]);let mut stations=V::Object(vec![]);let(mut ni,mut no,mut nt,mut nb)=(0.0,0.0,0.0,0.0);
         for key in &self.queue_order{let k=format!("{}|{}|{}",name(key.0),key.1,key.2);let q=&self.queues[key];let total=q.sum(|c|c.n);ni+=total;stations.set(&key.2.to_string(),n(stations.zero(&key.2.to_string())+total));let mut row=if full{V::Object(vec![])}else{obj(&[("total",n(total))])};if full{for(t,c)in q.rows.iter().flatten(){let tok=token(*t);row.set(&tok,n(c.n));if let Some(since)=c.since{wait.set(&format!("{}#{}",k,tok),n(since));}}}queues.set(&k,row);}
         for(id,q)in &self.outside{let total=q.sum(|c|c.n);no+=total;let mut row=if full{V::Object(vec![])}else{obj(&[("total",n(total))])};if full{for(t,c)in q.rows.iter().flatten(){let tok=token(*t);row.set(&tok,n(c.n));if let Some(since)=c.since{outside_since.set(&format!("{}#{}",id,tok),n(since));}}}outside.set(&id.to_string(),row);}
-        let transfers=self.transfers.iter().map(|x|{nt+=x.n;stations.set(&x._station.to_string(),n(stations.zero(&x._station.to_string())+x.n));obj(&[("journey",n(x.j as f64)),("leg",n(x.leg as f64)),("amount",n(x.n)),("ready",n(x.ready)),("station",n(x._station as f64))])}).collect();
+        let mut transfers=vec![];for x in &self.transfers{nt+=x.n;let station=x._station.to_string();stations.set(&station,n(stations.zero(&station)+x.n));if full{transfers.push(obj(&[("journey",n(x.j as f64)),("leg",n(x.leg as f64)),("amount",n(x.n)),("ready",n(x.ready)),("station",n(x._station as f64))]));}}
         let trains=self.trains.iter().map(|(&uid,t)|{nb+=t.onboard;let mut passengers=V::Object(vec![]);if full{for(tok,v)in t.passengers.rows.iter().flatten(){passengers.set(&token(*tok),n(*v));}}obj(&[("uid",n(uid as f64)),("id",text(ids.get(&uid).map_or("",|s|s.as_str()))),("service",text(&name(t.service))),("parentLine",text(&name(t.parent))),("capacity",n(t.capacity)),("onboard",n(t.onboard)),("dir",n(t.dir as f64)),("loop",boolean(t.is_loop)),("stops",arr(t.stops.iter().map(|i|n(*i as f64)).collect())),("callStops",arr(t.stops.iter().filter(|id|t.calls.contains(*id)).map(|i|n(*i as f64)).collect())),("passengers",passengers)])}).collect();
         result.set("trains",arr(trains));result.set("stationOccupancy",V::Object(self.occupancy.iter().map(|(id,v)|(id.to_string(),n(*v))).collect()));
         if full{result.set("queues",queues);result.set("waitSince",wait);result.set("outside",outside);result.set("outsideSince",outside_since);result.set("transfers",arr(transfers));let mut definitions=vec![];for id in 0..self.defs.len(){let Some(j)=self.defs.get(&id)else{continue};let by_line=V::Object(j.byline.iter().map(|(id,v)|(name(*id),n(f64::from_bits(*v)))).collect());let legs=j.legs.iter().map(|l|obj(&[("service",text(&name(l.service))),("dir",n(l.dir as f64)),("from",n(l.from as f64)),("to",n(l.to as f64))])).collect();let mut row=obj(&[("id",n(id as f64)),("legs",arr(legs)),("daily",n(0.0)),("fare",n(j.fare)),("purpose",text(["work","shopping","leisure"][j.purpose])),("lineIds",arr(j.line_ids.iter().map(|id|text(&name(*id))).collect())),("byLine",by_line)]);if let Some(c)=&j.contract{row.set("from",n(c.from));row.set("to",n(c.to));row.set("back",boolean(c.back));row.set("hub",c.hub.map_or(V::Null,|i|text(&name(i))));row.set("externalKind",c.kind.map_or(V::Null,|i|text(&name(i))));}definitions.push(row);}result.set("defs",arr(definitions));}
@@ -1584,6 +1598,22 @@ impl Queues{
 #[cfg(test)]
 mod projection_tests{
     use super::*;use crate::{editor_support::*,value::{self,Value as V}};
+    #[test]
+    fn arena_compaction_preserves_order_ages_transfers_and_cargo(){
+        let mut q=Queues::new(1.0);for id in 0..3{q.defs.insert(id,Journey{contract:None,fare:180.0+id as f64,purpose:0,byline:Rc::from(vec![]),line_ids:Rc::from(vec![0]),legs:Rc::from(vec![Leg{service:0,dir:1,from:1,to:2,valid:true}])});}
+        let first=Token{j:1,leg:0,stamp:10};let second=Token{j:2,leg:0,stamp:10};let mut inside=Ordered::new();inside.set(first,Cohort{n:4.0,since:Some(9.5)});q.queue_order.push((0,1,1));q.queues.insert((0,1,1),inside);
+        let mut outside=Ordered::new();outside.set(second,Cohort{n:2.0,since:Some(8.5)});q.outside.insert(1,outside);q.transfers.push(Transfer{j:2,leg:0,n:3.0,ready:12.0,_station:1});let mut cargo=Ordered::new();cargo.set(second,5.0);
+        q.trains.insert(1,Cargo{service:0,parent:0,capacity:800.0,dir:1,is_loop:false,stops:vec![1,2],calls:[1,2].into_iter().collect(),onboard:5.0,cars:8.0,passengers:cargo});q.counters[0]=14.0;
+        let summary=q.summary_projection();assert_eq!(q.compact_active(),vec![None,Some(0),Some(1)]);assert_eq!(q.defs.len(),2);assert_eq!(q.defs[&0].fare,181.0);assert_eq!(q.defs[&1].fare,182.0);
+        assert_eq!(q.queues[&(0,1,1)].get(Token{j:0,..first}).unwrap().since,Some(9.5));assert_eq!(q.outside[&1].get(Token{j:1,..second}).unwrap().since,Some(8.5));assert_eq!(q.trains[&1].passengers.get(Token{j:1,..second}),Some(5.0));assert_eq!(q.transfers[0].j,1);assert_eq!(q.transfers[0].ready,12.0);assert_eq!(value::write(&summary),value::write(&q.summary_projection()));
+    }
+    #[test]
+    fn compact_transfer_view_aggregates_without_expanding_cohorts(){
+        let mut q=Queues::new(1.0);q.transfers=(0..10000).map(|j|Transfer{j,leg:0,n:1.0,ready:10.0,_station:1}).collect();
+        let names=vec![];let ids=std::collections::HashMap::new();let compact=q.object_view(&names,&ids,false);let native=compact.get("nativeView");
+        assert_eq!(native.get("transfers").array().len(),0);assert_eq!(native.get("stations").num("1"),10000.0);assert_eq!(native.get("summary").num("transferring"),10000.0);
+        assert_eq!(q.object_view(&names,&ids,true).get("transfers").array().len(),10000);assert_eq!(value::write(&q.native_view(&names)),value::write(native));
+    }
     #[test]
     fn targeted_projections_match_complete_views_and_include_transferring_line(){
         let mut q=Queues::new(1.0);let token=Token{j:0,leg:0,stamp:-1};

@@ -68,7 +68,7 @@ impl Runtime{
         self.project_world();self.revision+=u64::from(elapsed>0.0);let reason=result.wire[3]as usize;
         if reason==5{return Err("RUNTIME_CATALOG_METADATA_MISSING".into());}if reason==6{return Err("RUNTIME_STATISTICS_CLOCK".into());}
         self.compact_active(forecasts)?;
-        Ok(obj(&[("running",boolean(reason!=2)),("remaining",n(result.wire[2].max(0.0))),("steps",n(result.wire[1])),("consumed",n(elapsed)),("reason",text(match reason{1=>"boundary",2=>"blocked",4=>"time",_=>if result.wire[2]<=1e-8{"complete"}else{"steps"}})),("boundary",boolean(result.minute>=barrier-1e-8)),("events",arr(result.spawned.iter().map(|(uid,_,ordinal)|obj(&[("kind",text("TrainCreated")),("uid",n(*uid as f64)),("ordinal",n(*ordinal as f64))])).collect()))]))
+        Ok(obj(&[("running",boolean(reason!=2)),("remaining",n(result.wire[2].max(0.0))),("steps",n(result.wire[1])),("consumed",n(elapsed)),("reason",text(match reason{1=>"boundary",2=>"blocked",4=>"time",_=>if result.wire[2]<=1e-9{"complete"}else{"steps"}})),("boundary",boolean(result.minute>=barrier-1e-8)),("events",arr(result.spawned.iter().map(|(uid,_,ordinal)|obj(&[("kind",text("TrainCreated")),("uid",n(*uid as f64)),("ordinal",n(*ordinal as f64))])).collect()))]))
     }
     fn refresh_models(&mut self){
         let feedback=self.seed.feedback();self.arena.calendar.as_mut().unwrap().replace_feedback(feedback);
@@ -88,17 +88,20 @@ impl Runtime{
         if warming{return self.run_slice(minutes,max,budget,forecasts,true);}
         if !minutes.is_finite()||minutes<0.0||minutes>1e8||max==0||max>10000||budget.is_nan()||budget<0.0{return Err("INVALID_RUNTIME_BUDGET".into());}
         let started=crate::engine::monotonic();let mut remaining=minutes;let mut steps=0usize;let mut events=vec![];
+        if budget>0.0&&self.arena.bank.as_ref().unwrap().economy[8]!=0.0{
+            let q=self.arena.queues.as_mut().unwrap();let mut frame=self.finance.clone();frame[3]=self.seed.runtime.num("minute");frame[4]=minutes;frame[5]=0.0;frame[6]=self.seed.runtime.zero("demandCarry");frame[7]=q.counter(6);frame[8]=q.counter(7);frame[15]=self.seed.world.get("ridership").get("current").zero("operating");crate::engine::settle_blocked(&frame,self.arena.bank.as_mut().unwrap(),q);self.project_world();
+        }
         let running=!self.seed.world.get("economy").get("blocked").truth();
-        let mut batch=obj(&[("running",boolean(running)),("reason",text(if !running{"blocked"}else if minutes<=1e-8{"complete"}else if budget==0.0{"time"}else{"complete"})),("remaining",n(minutes)),("consumed",n(0.0)),("steps",n(0.0)),("boundary",boolean(false)),("events",arr(vec![]))]);
-        if !running||minutes<=1e-8||budget==0.0{return Ok(batch);}
+        let mut batch=obj(&[("running",boolean(running)),("reason",text(if !running{"blocked"}else if minutes<=1e-9{"complete"}else if budget==0.0{"time"}else{"complete"})),("remaining",n(minutes)),("consumed",n(0.0)),("steps",n(0.0)),("boundary",boolean(false)),("events",arr(vec![]))]);
+        if !running||minutes<=1e-9||budget==0.0{return Ok(batch);}
         self.due_business()?;
-        while remaining>1e-8&&steps<max{
+        while remaining>1e-9&&steps<max{
             let left=budget-(crate::engine::monotonic()-started);if left<=0.0{batch.set("reason",text("time"));break;}
             let next=self.run_slice(remaining,max-steps,left,forecasts,false)?;let before=remaining;remaining=next.num("remaining");steps+=next.num("steps")as usize;events.extend_from_slice(next.get("events").array());let boundary=next.get("boundary").truth();batch=next;
             self.due_business()?;
-            if !batch.get("running").truth()||(!boundary&&remaining>1e-8)||before-remaining<1e-9{break;}
+            if !batch.get("running").truth()||(!boundary&&remaining>1e-9)||before-remaining<1e-9{break;}
         }
-        if batch.get("running").truth(){if remaining>1e-8&&steps>=max{batch.set("reason",text("steps"));}else if remaining<=1e-8{batch.set("reason",text("complete"));}}
+        if batch.get("running").truth(){if remaining>1e-9&&steps>=max{batch.set("reason",text("steps"));}else if remaining<=1e-9{batch.set("reason",text("complete"));}}
         batch.set("remaining",n(remaining));batch.set("consumed",n(minutes-remaining));batch.set("steps",n(steps as f64));batch.set("boundary",boolean(false));batch.set("events",arr(events));Ok(batch)
     }
     fn publish(&mut self,out:&mut V){
@@ -202,6 +205,7 @@ impl Runtime{
         let mut candidate=candidate?;if let Some((routes,trees))=route_cache{candidate.arena.queues.as_mut().unwrap().seed_routes(&routes,&trees);}
         if !cash.is_finite()||(candidate.seed.world.get("economy").num("cash")-cash).abs()>0.01{forecasts.release_owned(candidate.seed.catalog);return Err("RUNTIME_MIGRATION_ACCOUNTS".into());}
         for event in rejected.array(){let ids=event.get("journey").get("lineIds").array().iter().map(|id|candidate.seed.name(id)).collect::<Vec<_>>();if let Some(stats)=candidate.arena.queues.as_mut().and_then(|q|q.finance_stats()){stats.event(4,&ids,0.0,&[],event.num("count"),0.0,None,None);}}
+        if let Some(stats)=candidate.arena.queues.as_mut().and_then(|q|q.finance_stats()){stats.finish();}
         // All fallible staging is over. Checkpoint/catalog ownership moves at this one commit point.
         let checkpoint=if action=="command"&&v.get("undo").truth(){forecasts.retain(self.seed.catalog)?;Some(Checkpoint{token:serial as u64,world:before,saved,catalog:self.seed.catalog})}else{None};
         self.replace(candidate,forecasts);
@@ -212,11 +216,12 @@ impl Runtime{
         self.receipts.push_back((serial as u64,fingerprint,receipt.clone()));while self.receipts.len()>128{self.receipts.pop_front();}
         Ok(self.transaction_view(&receipt))
     }
-    fn compact_active(&mut self,forecasts:&mut crate::forecast_session::ForecastOwner)->Result<(),String>{
+    fn compact_active(&mut self,_forecasts:&mut crate::forecast_session::ForecastOwner)->Result<(),String>{
         let now=self.seed.runtime.num("minute");let size=self.arena.queues.as_ref().unwrap().definition_count();
         if size<=45000||now-self.seed.runtime.get("lastDefCompact").n()<5.0{return Ok(());}
-        let mut saved=self.view(true).get("runtime").clone();crate::migration::compact(&mut saved);saved.set("urbanDefs",saved.get("defs").clone());saved.set("lastDefCompact",n(now));
-        let next=self.candidate(self.seed.world.clone(),saved,self.seed.catalog,forecasts)?;let revision=self.edit_revision;self.replace(next,forecasts);self.edit_revision=revision;Ok(())
+        let queues=self.arena.queues.as_mut().unwrap();let cycle=self.arena.cycle.as_mut().unwrap();cycle.collect_keys(queues);let mapping=queues.compact_active();if mapping.iter().enumerate().all(|(id,next)|*next==Some(id)){self.seed.runtime.set("lastDefCompact",n(now));return Ok(());}cycle.compact_ids(&mapping);
+        self.actual_daily=std::mem::take(&mut self.actual_daily).into_iter().filter_map(|(id,daily)|mapping.get(id).and_then(|id|id.map(|id|(id,daily)))).collect();
+        self.seed.runtime.set("lastDefCompact",n(now));Ok(())
     }
 
 }
@@ -224,7 +229,7 @@ impl Runtime{
 pub(super) struct RuntimeOwner{next:u64,arenas:HashMap<u64,Runtime>}
 impl RuntimeOwner{
     pub(super) fn request(&mut self,v:&V,forecasts:&mut crate::forecast_session::ForecastOwner)->V{
-        let result=(||->Result<V,String>{let action=v.get("action").text();if action=="create"{self.next+=1;let mut runtime=Runtime::new(v,self.next,forecasts)?;let rt=runtime.view(false).get("runtime").clone();if runtime.seed.world.get("operationsReview").truth(){crate::runtime_edit::review(&mut runtime.seed.world,&rt,"reviewReady",obj(&[("minute",rt.get("minute").clone())]));}let mut out=runtime.view(true);runtime.publish(&mut out);out.set("id",n(self.next as f64));self.arenas.insert(self.next,runtime);return Ok(out);}
+        let result=(||->Result<V,String>{let action=v.get("action").text();if action=="create"{self.next+=1;let mut runtime=Runtime::new(v,self.next,forecasts)?;let rt=runtime.view(false).get("runtime").clone();if runtime.seed.world.get("operationsReview").truth(){crate::runtime_edit::review(&mut runtime.seed.world,&rt,"reviewReady",obj(&[("minute",rt.get("minute").clone())]));}let mut out=runtime.view(false);runtime.publish(&mut out);out.set("id",n(self.next as f64));self.arenas.insert(self.next,runtime);return Ok(out);}
             let id=v.num("id");if !id.is_finite()||id<1.0||id.fract()!=0.0{return Err("INVALID_RUNTIME_HANDLE".into());}let id=id as u64;
             if action=="close"{if let Some(runtime)=self.arenas.remove(&id){forecasts.release_owned(runtime.seed.catalog);if let Some(undo)=runtime.undo{forecasts.release_owned(undo.catalog);}}return Ok(V::Null);}
             let runtime=self.arenas.get_mut(&id).ok_or("RUNTIME_EXPIRED")?;
@@ -257,7 +262,7 @@ impl RuntimeOwner{
                     let mut economy=e.clone();for(i,key)in ECONOMY.iter().enumerate(){economy.set(key,if *key=="blocked"{boolean(out[8+i]!=0.0)}else{n(out[8+i])});}let mut at=18;let mut loans=vec![];for _ in 0..out[17]as usize{let ix=out[at];let mut row=if ix<0.0{obj(&[("id",e.get("nextLoan").clone()),("initial",n(amount))])}else{e.get("loans").array()[ix as usize].clone()};for(i,key)in ["principal","interest","installment","nextDue"].iter().enumerate(){row.set(key,n(out[at+1+i]));}loans.push(row);at+=5;}economy.set("loans",arr(loans));let payments=out[at]as usize;let bills=out[at+1..at+1+payments].to_vec();at+=1+payments;let allocation=out[at]as usize;at+=1+allocation;let error=out[at];let available=out[at+1];let amount=out[at+2];if error==0.0&&action!=0.0{economy.set("nextLoan",n(out[at+3]));let minute=economy.get("minute").clone();economy.get_mut("ledger").array_mut().insert(0,obj(&[("minute",minute),("type",text(if action==1.0{"贷款到账"}else{"提前结清贷款"})),("amount",n(amount))]));}for bill in bills{let minute=economy.get("minute").clone();economy.get_mut("ledger").array_mut().insert(0,obj(&[("minute",minute),("type",text("每日偿还贷款本息")),("amount",n(-bill))]));}economy.get_mut("ledger").array_mut().truncate(80);runtime.seed.world.set("economy",economy);let frame=runtime.seed.finance(runtime.token);crate::engine::read(&frame,&mut runtime.arena.bank);runtime.arena.bank.as_mut().unwrap().loan_views=runtime.seed.world.get("economy").get("loans").array().to_vec();runtime.arena.bank.as_mut().unwrap().ledger=runtime.seed.world.get("economy").get("ledger").array().to_vec();runtime.finance=frame[..16].to_vec();runtime.finance[2]=0.0;if error==0.0&&action!=0.0{runtime.clock.reset();}let mut view=runtime.view(false);view.set("credit",obj(&[("error",n(error)),("available",n(available))]));Ok(view)
                 },
                 "daily"=>{let out=forecasts.handle(&obj(&[("action",text("setDaily")),("id",n(runtime.seed.catalog as f64)),("index",v.get("index").clone()),("value",v.get("value").clone())]));if out.get("error").truth(){return Err(out.get("error").text().into());}Ok(out)},
-                "advanceAll"=>{let requested=v.num("minutes");if !requested.is_finite()||requested<0.0||requested>1e8{return Err("INVALID_RUNTIME_BUDGET".into());}let mut remaining=requested;let mut steps=0.0;let mut events=vec![];let mut result=runtime.advance(0.0,10000,f64::INFINITY,forecasts,false)?;while remaining>1e-8&&result.get("running").truth(){result=runtime.advance(remaining,10000,f64::INFINITY,forecasts,false)?;events.extend_from_slice(result.get("events").array());let left=result.num("remaining");steps+=result.num("steps");if result.get("boundary").truth()||!result.get("running").truth()||left>=remaining-1e-9{remaining=left;break;}remaining=left;}result.set("remaining",n(remaining));result.set("steps",n(steps));result.set("consumed",n(requested-remaining));result.set("events",arr(events));let mut view=runtime.view(true);view.set("batch",result);Ok(view)},
+                "advanceAll"=>{let requested=v.num("minutes");if !requested.is_finite()||requested<0.0||requested>1e8{return Err("INVALID_RUNTIME_BUDGET".into());}let mut remaining=requested;let mut steps=0.0;let mut events=vec![];let mut result=runtime.advance(0.0,10000,f64::INFINITY,forecasts,false)?;while remaining>1e-9&&result.get("running").truth(){result=runtime.advance(remaining,10000,f64::INFINITY,forecasts,false)?;events.extend_from_slice(result.get("events").array());let left=result.num("remaining");steps+=result.num("steps");if result.get("boundary").truth()||!result.get("running").truth()||left>=remaining-1e-9{remaining=left;break;}remaining=left;}result.set("remaining",n(remaining));result.set("steps",n(steps));result.set("consumed",n(requested-remaining));result.set("events",arr(events));let mut view=runtime.view(true);view.set("batch",result);Ok(view)},
                 "advance"=>{let max=v.num("maxSteps");if !max.is_finite()||max.fract()!=0.0||max<1.0||max>10000.0{return Err("INVALID_RUNTIME_BUDGET".into());}let batch=runtime.advance(v.num("minutes"),max as usize,v.num("budget"),forecasts,false)?;let mut view=runtime.view(false);view.set("batch",batch);Ok(view)},
                 "pulse"=>{let start=crate::engine::monotonic();let control=runtime.clock.begin(v).map_err(str::to_string)?;let request=control.get("request");let mut batch=V::Missing;if request.truth(){batch=match runtime.advance(request.num("minutes"),request.num("maxSteps")as usize,request.num("budget"),forecasts,false){Ok(batch)=>batch,Err(error)=>{let _=runtime.clock.fail(&obj(&[("ticket",request.get("ticket").clone()),("fault",text(&error))]));return Err(error);}};runtime.clock.complete(&obj(&[("ticket",request.get("ticket").clone()),("result",batch.clone()),("ms",n(crate::engine::monotonic()-start))])).map_err(str::to_string)?;}let mut view=runtime.view(false);view.set("clock",runtime.clock.status());view.set("batch",batch);Ok(view)},
                 _=>Err("UNKNOWN_RUNTIME_ACTION".into())

@@ -65,8 +65,13 @@ function checkpoint(actual,expected,legacyDefs,state,label='complete checkpoint'
   for(const [key,schedule]of Object.entries(out.departures||{}))if(!activeRuns.has(key.slice(0,key.lastIndexOf('|')))){
    assert(typeof schedule.next==='number'&&typeof schedule.headway==='number'&&!Number.isNaN(schedule.next)&&!Number.isNaN(schedule.headway),'retired schedule remains numeric');delete out.departures[key];
   }
-  for(const key of Object.keys(out.blocks))if(out.blocks[key]===0)delete out.blocks[key];
+  const activeTracks=new Set([...(state.tracks||[]).map(t=>t.id),...out.trains.flatMap(t=>t.trackIds||[])]);
+  for(const key of Object.keys(out.blocks))if(out.blocks[key]===0||(!activeTracks.has(key.slice(0,key.lastIndexOf('|')))&&out.blocks[key]<=out.minute+EPS))delete out.blocks[key];
+  const activeStations=new Set(require('../../rail/service-plan').expand(state).services.flatMap(l=>l.callStops||l.stops));
   for(const [id,row]of Object.entries(out.stationLimits)){
+   if(!activeStations.has(+id)&&!out.stationOccupancy?.[id]&&!Object.values(out.outside?.[id]||{}).some(n=>n>0)&&!out.transfers.some(t=>t.station===+id)){
+    assert(Number.isFinite(row.capacity)&&row.capacity>=0&&Number.isFinite(row.outsideCapacity)&&row.outsideCapacity>=0,'unused station capacity remains valid');delete out.stationLimits[id];continue;
+   }
    if('area' in row){const geometry=Q.limits(state,+id);for(const field of ['area','length','platforms','spacePerPerson','usableWidth'])assert.equal(geometry[field],row[field],'derived station '+id+'/'+field);}
    out.stationLimits[id]={capacity:row.capacity,outsideCapacity:row.outsideCapacity};
   }

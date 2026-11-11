@@ -473,6 +473,11 @@ pub(super) fn execute(
 }
 
 impl Cycle{
+    pub(super) fn compact_ids(&mut self,mapping:&[Option<usize>]){
+        self.keys.retain(|_,id|if let Some(Some(next))=mapping.get(*id){*id=*next;true}else{false});
+        self.profiles.retain(|_,profile|{if let Some(old)=profile.id{if let Some(Some(next))=mapping.get(old){profile.id=Some(*next);}else{return false;}}true});
+        self.count=mapping.iter().flatten().count();
+    }
     pub(super) fn owned(token:f64,catalog:f64,count:usize,next:usize,arrival:[f64;3],carry:f64,keys:Vec<(Rc<str>,usize)>)->Self{
         Self{token,catalog,count,next,arrival,carry,loaded:true,keys:keys.into_iter().collect(),profiles:Profiles::default(),pending:None,metadata_batches:0}
     }
@@ -499,4 +504,15 @@ mod arrival_buffer_tests{
         assert_eq!(tail,vec![2.0,11.0,12.0,0.0,2.5,4.0,0.0,2.5,1.0,7.0]);assert_eq!(tail.as_ptr(),ptr);
         assert_eq!(arrival_tail(Vec::new(),&[],0.0),vec![0.0,0.0,0.0]);
     }
+}
+
+#[cfg(test)]
+mod compaction_tests{
+ use super::*;
+ #[test]
+ fn remapped_profiles_reload_retired_ids_and_keep_prepared_metadata(){
+  let mut c=Cycle::owned(1.0,1.0,3,1,[0.0,0.0,1.0],0.0,vec![(Rc::from("a"),0),(Rc::from("b"),1),(Rc::from("c"),2)]);
+  for(index,id)in [(0,Some(0)),(1,Some(1)),(2,None)]{c.profiles.insert(index,Profile{key:Rc::from("profile"),service:0.0,id,owned:true,data:vec![],lines:vec![]});}
+  c.compact_ids(&[None,Some(0),Some(1)]);assert_eq!(c.count,2);assert!(!c.keys.contains_key("a"));assert_eq!(c.keys["b"],0);assert_eq!(c.keys["c"],1);assert!(c.profiles.get(&0).is_none());assert_eq!(c.profiles[&1].id,Some(0));assert_eq!(c.profiles[&2].id,None);assert_eq!(c.profiles.len(),2);
+ }
 }

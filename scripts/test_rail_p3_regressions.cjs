@@ -8,7 +8,10 @@ const legacy=M.init(N.emptyWorld('tokyo'));legacy.routeModel=1;N.addLine(legacy,
 // New routes start cultivation at the requested session clock; existing opening
 // dates survive both cold initialization and checkpoint restore.
 {const world=M.init(N.emptyWorld('gba'));N.addLine(world,[{x:600,y:500},{x:640,y:500}]);const id=world.services[0].id,rt=P.create(world,{flows:[]},479.9,false);assert.equal(world.ridership.lines[id].opened,479.9);const saved=P.snapshot(rt),copy=structuredClone(world),restored=P.restore(copy,{flows:[]},saved);assert(restored);assert.equal(copy.ridership.lines[id].opened,479.9);P.dispose(rt);P.dispose(restored);}
+{const world=M.init(N.emptyWorld('gba'));world.economy.cash=99;world.economy.arrears=500;world.economy.blocked=true;const rt=P.create(world,{flows:[]},480,false);try{assert.equal(M.advance(world,rt,0),false);assert.equal(world.economy.cash,0);assert.equal(world.economy.arrears,401);assert.deepEqual(world.ridership.current.lines,{},'settling old bills creates no operating statistics');assert.equal(rt.minute,480,'blocked settlement does not advance time');}finally{P.dispose(rt);}}
+{const world=create(2),rt=P.create(world,{flows:[]},480,false);try{M.advance(world,rt,1e-9);assert.equal(rt.minute,480);M.advance(world,rt,1.1e-9);assert(rt.minute>480);assert(world.economy.operating>0,'sub-microsecond accepted intervals retain their actual operating charge');}finally{P.dispose(rt);}}
 const s=create(2),f=forecast(s),input=structuredClone(f),rt=P.create(s,f,480,false);
+assert(!rt.defs?.length&&!Object.keys(rt.queues||{}).length&&!rt.transfers?.length,'session creation publishes a compact display, not a full checkpoint');
 assert.deepEqual(f,input,'attaching a legacy forecast leaves the caller DTO cloneable and unchanged');
 assert.equal(rt.demandStatus.profiles,1,'prepared definitions are retained even without full flows');
 for(let i=0;i<4;i++)M.advance(s,rt,10);
@@ -58,7 +61,9 @@ console.log('P3 regressions passed: queue wire ordering, prepared catalogs, immu
   assert.equal(P.restore(structuredClone(world),f,saved),null,'public checkpoints retain the 420-minute lower bound');world.economy.cash=1;
   try{await M.advanceBudgetAsync(world,rt,1,{budget:1e6,maxSteps:10000});assert(rt.minute>=start+1-1e-8);assert(world.economy.cash>1,'handoff uses the native bank, not a modified JS view');assert(world.economy.cash<=cash);}finally{P.dispose(rt);}
  }
- const s=create(2),f=forecast(s),rt=P.create(s,f,480,false);let restored;
+ {const world=M.init(N.emptyWorld('gba'));world.economy.cash=99;world.economy.arrears=500;world.economy.blocked=true;const rt=P.create(world,{flows:[]},480,false);try{assert.equal(M.advance(world,rt,0),false);assert.equal(world.economy.cash,0);assert.equal(world.economy.arrears,401);assert.deepEqual(world.ridership.current.lines,{},'settling old bills creates no operating statistics');assert.equal(rt.minute,480,'blocked settlement does not advance time');}finally{P.dispose(rt);}}
+{const world=create(2),rt=P.create(world,{flows:[]},480,false);try{M.advance(world,rt,1e-9);assert.equal(rt.minute,480);M.advance(world,rt,1.1e-9);assert(rt.minute>480);assert(world.economy.operating>0,'sub-microsecond accepted intervals retain their actual operating charge');}finally{P.dispose(rt);}}
+const s=create(2),f=forecast(s),rt=P.create(s,f,480,false);let restored;
  try{
   await M.advanceBudgetAsync(s,rt,12,{budget:1e6,maxSteps:10000});
   assert(require('../rail/runtime-wasm').usesWorker(rt),'normal handoff actually reaches the Worker');

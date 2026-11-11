@@ -5,7 +5,8 @@ const Perf=require('../rail/performance'),OldPerf=require('./fixtures/rail-map50
 const U=require('../rail/urban-growth'),RV=require('../rail/operations-review'),Core=require('../rail/routing-wasm');
 const {create}=require('./fixtures/rail-memory-grid.cjs');
 const exact=(a,b)=>{assert.deepEqual(a,b);assert.equal(JSON.stringify(a),JSON.stringify(b));};
-let checks=0;
+let checks=0,multiStepBatches=0,executedSteps=0;const nativeAdvance=M.advanceBudget;
+M.advanceBudget=(...args)=>{const batch=nativeAdvance(...args);executedSteps+=batch.steps;if(batch.steps>1)multiStepBatches++;return batch;};
 function forecast(s) {
   const cells = s.nodes.map((n, i) => ({
     id: 'c' + i,
@@ -84,5 +85,5 @@ for(const mode of ['time','steps']){
  compare(p);checks++;close(p);
 }
 for(const bad of [-1,NaN,Infinity,1e8+1]) assert.throws(()=>M.advanceBudget(create(2),{},bad));
-assert(Core.status().loopSteps>0,'Rust must execute actual multiple-step continuations');
+assert(multiStepBatches>0&&executedSteps>multiStepBatches,'owned Rust RPC must execute actual multiple-step batches');
 console.log(`MAP51 budget: ${checks} complete frozen MAP50 clock/state checks; frame remainders, minute/peak/debt/day/city/review boundaries, edits, pause/step/cancel yields and cash-stop continuity.`);

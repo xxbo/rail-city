@@ -43,6 +43,10 @@ pub(super) fn read(frame: &[f64], state: &mut Option<Settlement>) {
         frame[1]
     );
 }
+// Blocked preflight settles existing bills without creating operating rows.
+pub(super) fn settle_blocked(frame:&[f64],state:&mut Settlement,queue:&mut crate::queues::Queues){
+    let statistics=state.statistics;state.statistics=false;settle(frame,state,queue);state.statistics=statistics;
+}
 pub(super) fn settle(
     frame: &[f64],
     state: &mut Settlement,

@@ -181,91 +181,18 @@ function forecast(s) {
   });
 }
 
-function pair(start = 480, weighted = false) {
-  const a = create(3),
-    b = structuredClone(a),
-    f = forecast(a),
-    ra = P.create(a, f, start, false),
-    rb = OldP.create(b, f, start, false);
-  if (weighted) ra.arrivalMode = rb.arrivalMode = 'weighted';
-  return {
-    a,
-    b,
-    f,
-    ra,
-    rb
-  };
+const H=require('./helpers/session-oracle.cjs');
+function pair(start=480,weighted=false,prepare=()=>{}){return H.pair(()=>create(3),forecast,OldP,start,weighted,prepare);}
+function check(p,dt,managed=true){H.advance(p,OldM,dt);checks++;}
+function dispatch(p,values){for(const line of [...p.a.services])H.edit(p,OldM,{kind:'network',op:'configure',args:{id:line.id,values:{dispatch:values}}});}
+for(const weighted of [false,true]){
+ const p=pair(419.9,weighted);for(let i=0;i<40;i++)check(p,.2,i%2===0);
+ dispatch(p,{mode:'auto',manual:8,offPeak:4,peak:8});for(let i=0;i<30;i++)check(p,.3);
+ H.fixture(p,state=>{delete state.ridership.model;for(const row of Object.values(state.ridership.lines)){row.awareness=.43;row.trust=.7;}});check(p,70);
+ const loaded=LS.parse(JSON.stringify(LS.pack(p.a,P.snapshot(p.ra)))),restored=P.restore(loaded.state,p.f,loaded.runtime);assert(restored);P.dispose(restored);H.close(p);
 }
-
-function check(p, dt, managed = true) {
-  if (managed) assert.equal(M.advance(p.a, p.ra, dt), OldM.advance(p.b, p.rb, dt));
-  else {
-    P.advance(p.ra, p.a, dt);
-    OldP.advance(p.rb, p.b, dt);
-  }
-  exact(P.snapshot(p.ra), OldP.snapshot(p.rb));
-  exact(p.a, p.b);
-  exact(p.ra.defs, p.rb.defs);
-  checks++;
-}
-for (const weighted of [false, true]) {
-  const p = pair(419.9, weighted);
-  for (let i = 0; i < 40; i++) check(p, .2, i % 2 === 0);
-  for (const s of [p.a, p.b])
-    for (const l of s.services) assert(!N.configure(s, l.id, {
-      dispatch: {
-        mode: 'auto',
-        manual: 8,
-        offPeak: 4,
-        peak: 8
-      }
-    }).error);
-  P.reconcile(p.ra, p.a);
-  OldP.reconcile(p.rb, p.b);
-  for (let i = 0; i < 30; i++) check(p, .3);
-  for (const q of [p.a, p.b]) {
-    delete q.ridership.model;
-    for (const r of Object.values(q.ridership.lines)) {
-      r.awareness = .43;
-      r.trust = .7;
-    }
-  }
-  check(p, 70);
-  const loaded = LS.parse(JSON.stringify(LS.pack(p.a, P.snapshot(p.ra))));
-  assert(P.restore(loaded.state, p.f, loaded.runtime));
-}
-for (const start of [539.9, 1019.9, 1139.9, 1379.9, 1439.9, 1859.9]) {
-  const p = pair(start);
-  for (const s of [p.a, p.b])
-    for (const l of s.services) assert(!N.configure(s, l.id, {
-      dispatch: {
-        mode: 'auto',
-        manual: 8,
-        offPeak: 4,
-        peak: 8
-      }
-    }).error);
-  P.reconcile(p.ra, p.a);
-  OldP.reconcile(p.rb, p.b);
-  for (let i = 0; i < 15; i++) check(p, .1);
-}
-// Zero off-peak service retires existing trains without breaking passengers or departure recovery.
-for (const start of [419.9, 1139.9]) {
-  const p = pair(start);
-  for (const state of [p.a, p.b])
-    for (const line of state.services)
-      assert(!N.configure(state, line.id, {
-        dispatch: {
-          mode: 'auto',
-          manual: 8,
-          offPeak: 0,
-          peak: 8
-        }
-      }).error);
-  P.reconcile(p.ra, p.a);
-  OldP.reconcile(p.rb, p.b);
-  for (let i = 0; i < 20; i++) check(p, .2);
-}
+for(const start of [539.9,1019.9,1139.9,1379.9,1439.9,1859.9]){const p=pair(start);dispatch(p,{mode:'auto',manual:8,offPeak:4,peak:8});for(let i=0;i<15;i++)check(p,.1);H.close(p);}
+for(const start of [419.9,1139.9]){const p=pair(start,false,state=>{for(const line of state.services)assert(!N.configure(state,line.id,{dispatch:{mode:'auto',manual:8,offPeak:0,peak:8}}).error);});for(let i=0;i<20;i++)check(p,.2);H.close(p);}
 // A previously absent line can become available without rebuilding group metadata.
 s.ridership = {
   model: 22,
@@ -280,12 +207,12 @@ s.ridership = {
 exact(SIM.timedArrivals(catalog, s, 1020, 1, .2, 99, true), OldSIM.arrivals(catalog, j => OldQ
   .factor(s, j), j => OldC.profile(j.purpose, j.back, 1020, j.externalKind), .2, 99));
 const bytes = fs.readFileSync(path.join(__dirname, '../rail/wasm/rail-core-v33.wasm'));
-Core.create(bytes, {
+H.closeAll();Core.create(bytes, {
   recycleBytes: 0
 });
 const recovery = pair();
 for (let i = 0; i < 10; i++) check(recovery, .2);
-Core.create(bytes, {
+H.closeAll();Core.create(bytes, {
   recycleBytes: 64 * 1024 * 1024
 });
 assert.equal(Core.status().temporalAbi, 1);
@@ -307,3 +234,5 @@ assert(memory.arrayBufferGrowth <= memory.profiles * 20 + 65536,
 console.log(
   `MAP48 passed: ${profiles} exact profile comparisons, ${fleets} fleet phases, ${samples} fused samplers, ${checks} complete frozen MAP47 checkpoints; auto/manual shifts, legacy factors, weighted/integer flows, mutable daily demand, save restore and native recovery.`
 );
+
+H.closeAll();
