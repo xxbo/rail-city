@@ -729,5 +729,22 @@
     "ciRuntime": "Node 20",
     "outcomesCompared": 171,
     "matched": true
+  },
+  "pendingSourceBatch": {
+    "source": "eba3ce0c542cd147dff11ccee9296a2733a9a4af",
+    "phase": "source-only; validation deferred at user request",
+    "validated": false,
+    "ciTriggered": false,
+    "lastVerifiedNodePassed": 63,
+    "lastVerifiedNodeFailed": 28,
+    "changes": [
+      "reuse arrival wire buffers",
+      "avoid duplicate full-checkpoint train trees",
+      "atomic budget rejection and complete no-work batches",
+      "validate full advance inputs and retain all batch events",
+      "authoritative checkpoint rebinding",
+      "native retirement commands and per-session reroute counters"
+    ],
+    "note": "Existing complete-world/checkpoint/business assertions retained. No new passing-suite count is claimed."
   }
 }
