@@ -1,6 +1,6 @@
 /* Deterministic presentation fixture; never loaded by the game. */
 const N = require('../../rail/network'),
-  M = require('../../rail/management'),
+  M = require('../helpers/management-compat.cjs'),
   F = require('../../rail/fleet'),
   Q = require('../../rail/ridership'),
   X = require('../../rail/service-plan'),

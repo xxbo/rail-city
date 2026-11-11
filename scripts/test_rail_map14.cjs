@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),N=require('../rail/network'),C=require('../rail/city'),Q=require('../rail/ridership'),P=require('../rail/passengers'),R=require('../rail/engine'),H=require('../rail/hubs'),M=require('../rail/management');
+const assert=require('node:assert/strict'),N=require('../rail/network'),C=require('../rail/city'),Q=require('../rail/ridership'),P=require('../rail/passengers'),R=require('../rail/engine'),H=require('../rail/hubs'),M=require('./helpers/management-compat.cjs');
 const near=(a,b,t=1e-6)=>assert(Math.abs(a-b)<t,`${a} != ${b}`);
 const state=N.emptyWorld();Q.init(state);N.addLine(state,[{x:1168,y:920},{x:1202,y:934},{x:1230,y:948}]);Q.sync(state);const line=state.services[0];near(Q.line(state,line.id).factor,.55);
 const base=C.evaluate(state),route=base.flows.find(f=>f.purpose==='work'),forecast={flows:[{...route,trips:5000,demandTrips:5000,purpose:'work',back:false}]};const rt=P.create(state,forecast,420,false),days=[];

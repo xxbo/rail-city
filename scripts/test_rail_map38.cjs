@@ -1,7 +1,7 @@
 /* Refactoring contracts: exact old formulas, transport parity and failed-job cleanup. */
 const assert = require('node:assert/strict');
 const N = require('../rail/network'),
-  M = require('../rail/management');
+  M = require('./helpers/management-compat.cjs');
 const X = require('../rail/service-plan'),
   Q = require('../rail/ridership');
 const OC = require('../rail/operations-center'),

@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),C=require('../rail/city'),P=require('../rail/passengers'),M=require('../rail/management');
+const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),C=require('../rail/city'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs');
 const near=(a,b,t=.1)=>assert(Math.abs(a-b)<t,`${a} != ${b}`);
 const city=C.create();assert(city.cells.length>5000);assert(city.cells.every(c=>c.people>=0&&c.jobs>=0&&c.shops>=0&&c.industry>=0));assert.equal(city.totals.people,city.metadata.populationSum);assert.equal(city.demand.profiles.length,3);const origin=city.cells.find(c=>c.people>0),purpose=city.demand.profiles[0];near(city.cells.reduce((sum,c)=>sum+city.demand.trips(origin,c,purpose),0),origin.people*purpose.rate,1e-6);
 for(const purpose of ['work','shopping','leisure'])for(const back of [false,true])near(Array.from({length:1440},(_,m)=>C.profile(purpose,back,m)).reduce((a,b)=>a+b,0),1,1e-9);

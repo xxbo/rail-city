@@ -2,12 +2,12 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const audit=require('./audit_rail_p3.cjs');
 (async()=>{
- const inventory=await audit.check();assert.equal(Object.keys(inventory.files).length,78);assert.equal(inventory.workerEntries.length,5);
- for(const worker of ['save','simulation','demand','operations','vector'])assert(inventory.workerEntries.includes('rail/'+worker+'-worker.js'));
+ const inventory=await audit.check();assert.equal(Object.keys(inventory.files).length,80);assert.equal(inventory.workerEntries.length,3);
+ for(const worker of ['simulation','demand','vector'])assert(inventory.workerEntries.includes('rail/'+worker+'-worker.js'));
  let count=0;for(const [file,row]of Object.entries(inventory.files)){assert(row.sha256&&row.owner&&row.phase,file);for(const f of row.functions){assert(f.owner&&f.phase&&f.sha256&&f.line<=f.end,file+' '+f.id);count++;}}
- assert(count>1000);assert.equal(inventory.files['rail/passengers.js'].functions.find(f=>f.name==='compactDefinitions').phase,'P3-4');
+ assert(count>1000);assert.equal(inventory.files['rail/passengers.js'].functions.find(f=>f.name==='rebase').phase,'P3-6 bridge');
  assert.equal(inventory.files['rail/ui.js'].functions.find(f=>f.name==='saveNow').phase,'P3-7');
- assert.equal(inventory.files['rail/currency.js'].functions.find(f=>f.name==='fromCNY').phase,'P3-4');
+ assert.equal(inventory.files['rail/currency.js'].functions.find(f=>f.name==='fromCNY').phase,'P3-8 bridge');
  assert.equal(inventory.files['rail/review-view.js'].role,'mixed');
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'rail-p3-boundary-'));
  try{
@@ -22,5 +22,5 @@ const audit=require('./audit_rail_p3.cjs');
   fs.writeFileSync(path.join(temp,'rail/new-business.js'),'const hidden = () => 2;');await assert.rejects(audit.check(temp));fs.unlinkSync(path.join(temp,'rail/new-business.js'));
   await audit.check(temp);
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
- console.log(`P3-0 boundary: ${count} functions, 78 modules, page and five workers; new rules, unknown files, dynamic workers and unreviewed entries rejected.`);
+ console.log(`P3-0 boundary: ${count} functions, 80 modules, page and three referenced workers; new rules, unknown files, dynamic workers and unreviewed entries rejected.`);
 })().catch(e=>{console.error(e);process.exitCode=1;});

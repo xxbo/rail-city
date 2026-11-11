@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=require('../rail/management'),{create}=require('./fixtures/rail-memory-grid.cjs');
+const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),{create}=require('./fixtures/rail-memory-grid.cjs');
 (async()=>{
  const s=create(2),l=s.services[0],legs=[{service:l.id,dir:1,from:l.stops[0],to:l.stops.at(-1)}],lineIds=[l.id],byLine={[l.id]:1};
  const catalog=Array.from({length:151056},(_,id)=>({id,legs,daily:0,fare:180,purpose:'work',back:false,hub:null,externalKind:null,from:l.stops[0],to:l.stops.at(-1),lineIds,byLine}));

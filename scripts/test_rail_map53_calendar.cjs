@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=require('../rail/management'),N=require('../rail/network'),F=require('../rail/fleet'),C=require('../rail/city'),Q=require('../rail/ridership');
+const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),N=require('../rail/network'),F=require('../rail/fleet'),C=require('../rail/city'),Q=require('../rail/ridership');
 const OldP=require('./fixtures/rail-map52-passengers.cjs'),OldM=require('./fixtures/rail-map52-management.cjs');
 const options={budget:1e6,maxSteps:10000,now:()=>0};
 function scene(managed,direction) {

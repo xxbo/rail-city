@@ -28,12 +28,14 @@
     "rail/city-development.js": {
       "role": "platform",
       "phase": "P3-6 bridge",
-      "owner": "Rust budgets, allocation, initialization and development summaries"
+      "owner": "Rust budgets, allocation, initialization and development summaries",
+      "bridgeDisposition": "Native development requests and detached summary decoding only; module constants identify display categories."
     },
     "rail/city.js": {
       "role": "platform",
       "phase": "P3-6 bridge",
-      "owner": "Rust legacy_city.rs plus modern native demand modules; Map/view decoding only"
+      "owner": "Rust legacy_city.rs plus modern native demand modules; Map/view decoding only",
+      "bridgeDisposition": "Legacy and modern forecast requests, native catalog adoption and Map decoding; no host OD construction."
     },
     "rail/connection-model.js": {
       "role": "domain",
@@ -112,7 +114,8 @@
     "rail/engine.js": {
       "role": "platform",
       "phase": "P3-6 bridge",
-      "owner": "Rust legacy.rs; API forwarding and generic detached-view application"
+      "owner": "Rust legacy.rs; API forwarding and generic detached-view application",
+      "bridgeDisposition": "Compatibility RPC, JSON clone and detached object application; native modules validate and calculate edits."
     },
     "rail/fleet.js": {
       "role": "platform",
@@ -168,7 +171,8 @@
     "rail/management.js": {
       "role": "platform",
       "phase": "P3-6 bridge",
-      "owner": "Rust RuntimeOwner for all continuous models; structured cold asset and credit transport"
+      "owner": "Rust RuntimeOwner for all continuous models; structured cold asset and credit transport",
+      "bridgeDisposition": "Native command, credit and runtime RPC only; exported balance constants preserve public interfaces."
     },
     "rail/map-detail.js": {
       "role": "ui",
@@ -224,7 +228,8 @@
     "rail/passengers.js": {
       "role": "platform",
       "phase": "P3-6 bridge",
-      "owner": "Rust RuntimeOwner for all supported passenger models, cohorts and queries"
+      "owner": "Rust RuntimeOwner for all supported passenger models, cohorts and queries",
+      "bridgeDisposition": "Native cohort/query forwarding, detached station display cache and geometry delegation; no host cohort mutations."
     },
     "rail/performance.js": {
       "role": "mixed",

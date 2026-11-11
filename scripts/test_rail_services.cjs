@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),X=require('../rail/service-plan'),P=require('../rail/passengers'),M=require('../rail/management'),C=require('../rail/city');
+const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),X=require('../rail/service-plan'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),C=require('../rail/city');
 const near=(a,b,t=1e-5)=>assert(Math.abs(a-b)<t,`${a} != ${b}`);
 const s=M.init(N.emptyWorld()),result=N.addLine(s,[{x:1168,y:920},{x:1180,y:900,waypoint:true},{x:1202,y:934},{x:1230,y:948},{x:1255,y:960}]);assert(!result.error);const l=s.services[0];assert.equal(s.nodes.length,4);assert.equal(s.tracks[0].bends.length,1);assert(s.tracks[0].km>R.distance(s.nodes[0],s.nodes[1]));assert(N.validate(s));const clone=JSON.parse(JSON.stringify(s));assert(N.validate(clone));clone.tracks[0].km=.1;assert(!N.validate(clone));
 const t=s.tracks[0],pos=P.position(s,{status:'moving',segment:{from:0,to:1,track:t.id},progress:.5},0),expected=X.along(X.trackPoints(s,t),.5);near(pos.x,expected.x);near(pos.y,expected.y);

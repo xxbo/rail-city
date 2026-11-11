@@ -3,7 +3,7 @@
 function create(options){
  const B=()=>node?require('./bootstrap-wasm'):root.RailBootstrap;
  const id=B().platform('create',{timeout:options.timeout||30000,stateful:!!options.stateful});
- const call=(action,args={})=>B().platform(action,{id,...args});
+ const call=(action,args={})=>{try{return B().platform(action,{id,...args});}catch(error){if(error.message==='RPC_DISPOSED')throw Object.assign(Error('后台客户端已关闭。'),{code:'RPC_DISPOSED'});throw error;}};
  const schedule=options.setTimer||setTimeout,cancel=options.clearTimer||clearTimeout;
  const jobs=new Map();let worker=null,epoch;
  function remove(ticket){const job=jobs.get(ticket);if(job){cancel(job.timer);jobs.delete(ticket);}return job;}

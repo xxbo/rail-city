@@ -9,7 +9,7 @@ const Sim = require('../rail/simulation-wasm'),
 const D = require('../rail/demand-model'),
   N = require('../rail/network'),
   F = require('../rail/fleet'),
-  M = require('../rail/management');
+  M = require('./helpers/management-compat.cjs');
 const {
   create
 } = require('./fixtures/rail-memory-grid.cjs');

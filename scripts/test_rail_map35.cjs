@@ -1,5 +1,5 @@
 /* Development opportunity, regional conservation, migration and actual passenger continuity. */
-const assert=require('node:assert/strict'),N=require('../rail/network'),M=require('../rail/management'),U=require('../rail/urban-growth'),D=require('../rail/city-development'),C=require('../rail/city'),Names=require('../rail/place-names'),F=require('../rail/fleet'),Q=require('../rail/ridership'),P=require('../rail/passengers'),LS=require('../rail/local-save');
+const assert=require('node:assert/strict'),N=require('../rail/network'),M=require('./helpers/management-compat.cjs'),U=require('../rail/urban-growth'),D=require('../rail/city-development'),C=require('../rail/city'),Names=require('../rail/place-names'),F=require('../rail/fleet'),Q=require('../rail/ridership'),P=require('../rail/passengers'),LS=require('../rail/local-save');
 function create(region='gba'){const s=M.init(N.upgrade(N.emptyWorld(region)));U.init(s);U.enableAutomatic(s,C.create(region),Names.places(region));Q.enableSatisfaction(s);return s;}
 function enable(s){U.enableDevelopment(s,C.create(s.region),Names.places(s.region));return s;}
 function add(s,p){assert(!N.addLine(s,[{x:p.x-25,y:p.y},{x:p.x,y:p.y},{x:p.x+25,y:p.y}],{stockSpec:'6B'}).error);assert(!F.purchase(s,'6B',6).error);assert(!N.configure(s,s.services.at(-1).id,{dispatch:{mode:'manual',manual:6,offPeak:6,peak:6}}).error);Q.sync(s);}

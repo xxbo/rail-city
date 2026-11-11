@@ -275,7 +275,7 @@ impl Statistics {
         self.stations.clear();
         self.dirty_lines.clear();
         self.dirty_stations.clear();
-        self.slot = ((now - 420.0 - (day - 1.0) * 1440.0) / 15.0).floor();
+        self.slot = ((now - 420.0 - (day - 1.0) * 1440.0 + 1e-7) / 15.0).floor();
         if self.slot < 0.0 || self.slot >= 96.0 {
             self.slot = -1.0;
         }
@@ -301,7 +301,7 @@ impl Statistics {
     // records and ordered line/station rows in place instead of reloading them.
     pub(super) fn can_advance_slot(&self, now: f64) -> bool {
         let start = 420.0 + (self.day - 1.0) * 1440.0;
-        let slot = ((now - start) / 15.0).floor();
+        let slot = ((now - start + 1e-7) / 15.0).floor();
         slot >= 0.0
             && slot < 96.0
             && slot >= self.slot
@@ -309,7 +309,7 @@ impl Statistics {
     }
     pub(super) fn advance_slot(&mut self, now: f64) {
         let start = 420.0 + (self.day - 1.0) * 1440.0;
-        let slot = ((now - start) / 15.0).floor();
+        let slot = ((now - start + 1e-7) / 15.0).floor();
         assert!(
             slot >= 0.0 && slot < 96.0,
             "day rollover requires host archive"
@@ -764,6 +764,17 @@ mod tests {
     #[should_panic(expected = "day rollover requires host archive")]
     fn slot_rollover_keeps_day_archive_barrier() {
         sample().advance_slot(1860.0);
+    }
+    #[test]
+    fn rounded_day_boundary_accepts_the_new_day_first_slot() {
+        let mut s=sample();
+        s.day=2.0;
+        s.slot=0.0;
+        let rounded=1860.0-2e-10;
+        assert_eq!(crate::history::day(rounded),2.0);
+        assert!(s.can_advance_slot(rounded));
+        s.advance_slot(rounded);
+        assert_eq!(s.slot,0.0);
     }
     #[test]
     fn row_preserves_first_field_order_and_js_missing_values() {

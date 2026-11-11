@@ -118,7 +118,8 @@
       const n=r.f();for(let i=0;i<n;i++){const id=r.f();base[key][ids[id]]=r.f();}
     }
     const nf=r.f(),flowStart=r.position();let railDemand=0;
-    if(context.compact){const owned=(node?require('./forecast-catalog'):root.RailForecastCatalog).attachOutput(base,{count:nf,graph:{services:graph.services,lines:graph.lines,edges:graph.edges},hubs:hubs.map(h=>h.id),effective},data.subarray(flowStart));r.take(owned.flowLength);railDemand=owned.railDemand;}
+    const owned=(node?require('./forecast-catalog'):root.RailForecastCatalog).attachOutput(base,{count:nf,graph:{services:graph.services,lines:graph.lines,edges:graph.edges},hubs:hubs.map(h=>h.id),effective},data.subarray(flowStart),!context.compact);
+    if(context.compact){r.take(owned.flowLength);railDemand=owned.railDemand;}
     else for(let i=0;i<nf;i++){
       const [from,to,purpose,back,trips,demandTrips,population,walk,rail,road,hub,kind,routeOptions]=r.take(13);
       const [service,dir,lastLine,fareKm,board,cost,minutes,fare,km,transfers,ne]=r.take(11);

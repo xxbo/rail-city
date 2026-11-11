@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),A=require('../rail/gba-data'),B=require('../rail/regions'),N=require('../rail/network'),C=require('../rail/city'),H=require('../rail/hubs'),G=require('../rail/street-map'),V=require('../rail/view'),P=require('../rail/passengers'),M=require('../rail/management'),Q=require('../rail/ridership');
+const assert=require('node:assert/strict'),A=require('../rail/gba-data'),B=require('../rail/regions'),N=require('../rail/network'),C=require('../rail/city'),H=require('../rail/hubs'),G=require('../rail/street-map'),V=require('../rail/view'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),Q=require('../rail/ridership');
 const near=(a,b,t=1e-5)=>assert(Math.abs(a-b)<t,`${a} != ${b}`);
 const city=C.create('gba');assert.equal(city.cells.length,36330);assert.equal(city.metadata.modelled,true);near(city.totals.people,87515000,.01);assert.equal(A.cities.length,11);
 for(const c of A.cities)near(city.byCity[c.name],c.population,.001);

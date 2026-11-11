@@ -18,7 +18,7 @@ threads.Worker = class extends Base {
     return super.postMessage(data, ...args);
   }
 };
-const P = require('../rail/passengers'), M = require('../rail/management'), D = require('../rail/demand-model');
+const P = require('../rail/passengers'), M = require('./helpers/management-compat.cjs'), D = require('../rail/demand-model');
 const OldP = require('./fixtures/rail-map52-passengers.cjs'), OldM = require('./fixtures/rail-map52-management.cjs');
 const {create} = require('./fixtures/rail-memory-grid.cjs');
 const FLOW = require('../rail/flow-history');

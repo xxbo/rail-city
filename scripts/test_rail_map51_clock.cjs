@@ -20,7 +20,7 @@ const turn=()=>new Promise(resolve=>setImmediate(resolve));
   invalid.runAsync(.1,6,6,async()=>({remaining:100,steps:1,running:true}),()=>0);
   await turn();assert.throws(()=>invalid.runAsync(0,6,6,advance,()=>0));
   // Same Rust kernel in environments without Worker. No alternative simulation algorithm.
-  const P=require('../rail/passengers'),M=require('../rail/management'),{create}=require('./fixtures/rail-memory-grid.cjs');
+  const P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),{create}=require('./fixtures/rail-memory-grid.cjs');
   const state=create(2),rt=P.create(state,{preparedDefinitions:[]},480,false);
   let captured;const kernel=Core.kernel;
   Core.kernel=(name,input,...args)=>{

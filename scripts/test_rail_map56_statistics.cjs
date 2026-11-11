@@ -1,6 +1,6 @@
 /* Native statistics lifetime and minute-window projections against frozen MAP55. */
 const assert=require('node:assert/strict');
-const P=require('../rail/passengers'),M=require('../rail/management'),Q=require('../rail/ridership'),D=require('../rail/demand-model');
+const P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),Q=require('../rail/ridership'),D=require('../rail/demand-model');
 const OldP=require('./fixtures/rail-map55-passengers.cjs'),OldM=require('./fixtures/rail-map55-management.cjs'),OldQ=require('./fixtures/rail-map55-ridership.cjs');
 const {create}=require('./fixtures/rail-memory-grid.cjs');
 const options={budget:1e6,maxSteps:10000,now:()=>0};

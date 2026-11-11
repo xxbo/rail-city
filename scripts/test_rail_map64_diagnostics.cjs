@@ -28,8 +28,8 @@ for(let i=0;i<4;i++){mutable.flows[0].trips*=1.3;mutable.population=(mutable.pop
 // Compact data is not reconstructed into full OD objects, even when cultivation changes.
 const reads=Compact.status(compact),token=Core.diagnosticToken();OC.bundle(s,compact,{minute:480,trains:[]});const after=Core.diagnosticToken();assert(after);s.ridership.lines[s.services[0].id].satisfaction=.1;exact(OC.bundle(s,compact,{minute:480,trains:[]}),{rows:OldOC.analyze(s,compact,{minute:480,trains:[]}),metrics:OldMetrics.summary(s,compact)},'compact changed cultivation');assert.equal(Core.diagnosticToken(),after);
 // A compact diagnostic must work while every full-flow getter is forbidden.
-const descriptor=Object.getOwnPropertyDescriptor(compact,'flows');Object.defineProperty(compact,'flows',{configurable:true,get(){throw Error('full OD view read');}});
-try{OC.bundle(s,compact,{minute:480,trains:[]});Stats.all(s,compact);Metrics.summary(s,compact);checks+=3;}finally{Object.defineProperty(compact,'flows',descriptor);}
+const guarded=Compact.adopt({...compact},Compact.source(compact));Object.defineProperty(guarded,'flows',{get(){throw Error('full OD view read');}});
+OC.bundle(s,guarded,{minute:480,trains:[]});Stats.all(s,guarded);Metrics.summary(s,guarded);checks+=3;
 const lengths=[],kernel=Core.kernel;Core.kernel=(name,input,...args)=>{if(name==='diagnostic_run')lengths.push({total:input.length,metadata:1+input[0]});return kernel(name,input,...args);};
 try{OC.bundle(s,compact,{minute:480,trains:[]});Core.recycleSimulation();OC.bundle(s,compact,{minute:480,trains:[]});}finally{Core.kernel=kernel;}
 assert.equal(lengths[0].total,lengths[0].metadata);assert(lengths[1].total>lengths[1].metadata);checks+=2;

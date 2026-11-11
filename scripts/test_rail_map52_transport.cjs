@@ -1,6 +1,6 @@
 /* Cold metadata must not rescan/retransmit sampling or return native-only arrival events. */
 const assert=require('node:assert/strict');
-const P=require('../rail/passengers'),M=require('../rail/management'),Core=require('../rail/routing-wasm');
+const P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),Core=require('../rail/routing-wasm');
 const {create}=require('./fixtures/rail-memory-grid.cjs');
 const s=create(2),line=s.services[0];let reads=0;
 const catalog=Array.from({length:2600},(_,id)=>({id,legs:[{service:line.id,dir:1,from:line.stops[0],to:line.stops.at(-1)}],

@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),U=require('../rail/urban-growth'),C=require('../rail/city'),N=require('../rail/network'),M=require('../rail/management'),F=require('../rail/fleet'),P=require('../rail/passengers'),B=require('../rail/regions'),H=require('../rail/hubs');
+const assert=require('node:assert/strict'),U=require('../rail/urban-growth'),C=require('../rail/city'),N=require('../rail/network'),M=require('./helpers/management-compat.cjs'),F=require('../rail/fleet'),P=require('../rail/passengers'),B=require('../rail/regions'),H=require('../rail/hubs');
 const near=(a,b,t=.01)=>assert(Math.abs(a-b)<t,`${a} != ${b}`),point=(lat,lon)=>B.project(lat,lon,'gba');
 function city(region='gba'){const s=M.init(N.upgrade(N.emptyWorld(region)));U.init(s);return s;}
 const s=city(),base=C.create('gba'),blank=JSON.stringify(base.totals);assert.deepEqual(C.world(s).totals,{people:0,jobs:0,shops:0,industry:0,leisure:0});assert.equal(C.evaluate(s).riders,0);assert(U.validate(s));U.advance(s,base,420+1440*3);assert.equal(C.world(s).totals.people,0);assert.equal(Object.keys(s.urban.cells).length,0);assert.equal(JSON.stringify(base.totals),blank);

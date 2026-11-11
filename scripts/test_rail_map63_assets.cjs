@@ -1,5 +1,5 @@
 /* P2-2 full state, accounting, native command boundaries and failure atomicity. */
-const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),M=require('../rail/management'),F=require('../rail/fleet'),U=require('../rail/urban-growth'),C=require('../rail/city'),Names=require('../rail/place-names'),A=require('../rail/assets-wasm'),Core=require('../rail/routing-wasm');
+const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),M=require('./helpers/management-compat.cjs'),F=require('../rail/fleet'),U=require('../rail/urban-growth'),C=require('../rail/city'),Names=require('../rail/place-names'),A=require('../rail/assets-wasm'),Core=require('../rail/routing-wasm');
 const OldM=require('./fixtures/rail-map62-management.cjs'),OldF=require('./fixtures/rail-map62-fleet.cjs'),OldU=require('./fixtures/rail-map62-urban-growth.cjs');
 const clone=structuredClone;let checks=0;
 function exact(a,b,label){assert.deepEqual(a,b,label);assert.equal(JSON.stringify(a),JSON.stringify(b),label+' field order');checks++;}
@@ -63,7 +63,7 @@ for(const region of ['tokyo','gba']){
  // Every preview and actual user command crosses one native boundary for editing, quoting and cash.
  const beforeCalls=Core.status(),a=clone(s),out=M.preview(a,M.command('network','addLine',{points:points(700),options:{stockSpec:'8A'}})),afterCalls=Core.status();assert(!out.error);
  assert.equal(afterCalls.coldCalls-beforeCalls.coldCalls,1);assert.equal(afterCalls.editorCalls-beforeCalls.editorCalls,0);assert.equal(JSON.stringify(a),JSON.stringify(s));checks++;
- const mark=Core.status();assert(!M.change(a,M.command('network','addLine',{points:points(700),options:{stockSpec:'8A'}})).error);assert.equal(Core.status().coldCalls-mark.coldCalls,1);assert.equal(Core.status().editorCalls-mark.editorCalls,0);checks++;
+ const mark=Core.status();assert(!M.change(a,M.command('network','addLine',{points:points(700),options:{stockSpec:'8A'}})).error);assert.equal(Core.status().workspaceCalls-mark.workspaceCalls,1);assert.equal(Core.status().editorCalls-mark.editorCalls,0);checks++;
  // Force WASM recycling and repeat asset rules with reloaded configuration.
  const saved=Core.status();Core.recycleSimulation();assert.equal(Core.status().recycles,saved.recycles+1);exact(A.query(s,'vehicleValue'),OldF.value(s),'post recycle value');
 }

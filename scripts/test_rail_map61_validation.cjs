@@ -4,7 +4,7 @@ const X = require('../rail/service-plan'),
   Old = require('./fixtures/rail-map60-service-plan.cjs');
 const N = require('../rail/network'),
   OldN = require('./fixtures/rail-map60-network.cjs'),
-  M = require('../rail/management');
+  M = require('./helpers/management-compat.cjs');
 const Core = require('../rail/routing-wasm');
 const {
   world

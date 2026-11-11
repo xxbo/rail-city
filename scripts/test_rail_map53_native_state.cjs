@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const P=require('../rail/passengers'),M=require('../rail/management'),N=require('../rail/network'),Core=require('../rail/routing-wasm');
+const P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),N=require('../rail/network'),Core=require('../rail/routing-wasm');
 const OldP=require('./fixtures/rail-map52-passengers.cjs'),OldM=require('./fixtures/rail-map52-management.cjs');
 const {create}=require('./fixtures/rail-memory-grid.cjs');
 const opts={budget:1e6,maxSteps:10000,now:()=>0};

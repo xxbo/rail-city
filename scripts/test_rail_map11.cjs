@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),X=require('../rail/service-plan'),P=require('../rail/passengers'),M=require('../rail/management'),V=require('../rail/vector-map');
+const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),X=require('../rail/service-plan'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),V=require('../rail/vector-map');
 const close=(a,b)=>assert(Math.abs(a-b)<1e-5,`${a} != ${b}`);
 const s=N.emptyWorld();assert(!N.addLine(s,[{x:1200,y:900},{x:1220,y:900},{x:1220,y:920},{x:1200,y:920},{x:1200.5,y:900.2}]).error);const ring=s.services[0];assert.equal(s.nodes.length,4);assert.equal(ring.stops[0],ring.stops.at(-1));assert(N.validate(s));
 for(const t of s.tracks){assert(t.curve);const a=X.trackPoints(s,t),b=X.rawTrackPoints(s,t);assert(a.length>b.length);close(X.sum(a),t.km);close(a[0].x,s.nodes[t.a].x);close(a.at(-1).x,s.nodes[t.b].x);}

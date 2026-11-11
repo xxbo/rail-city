@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),N=require('../rail/network'),X=require('../rail/service-plan'),C=require('../rail/city'),D=require('../rail/demand-model'),H=require('../rail/hubs'),P=require('../rail/passengers'),M=require('../rail/management'),V=require('../rail/vector-map');
+const assert=require('node:assert/strict'),N=require('../rail/network'),X=require('../rail/service-plan'),C=require('../rail/city'),D=require('../rail/demand-model'),H=require('../rail/hubs'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),V=require('../rail/vector-map');
 const close=(a,b,t=1e-5)=>assert(Math.abs(a-b)<t,`${a} != ${b}`);
 const fitted=D.ipf([1,2,3,4],[30,70],[40,60],2);assert(fitted.error<1e-6);close(fitted.matrix[0]+fitted.matrix[1],30,.0001);close(fitted.matrix[0]+fitted.matrix[2],40,.0001);
 const city=C.create(),s=N.emptyWorld(),h=H.list.find(h=>h.id==='tokyo');assert(!N.addLine(s,[{x:h.x,y:h.y},{x:h.x-18,y:h.y-9},{x:h.x-42,y:h.y-18},{x:h.x-80,y:h.y-25}]).error);

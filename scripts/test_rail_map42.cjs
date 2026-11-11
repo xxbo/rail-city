@@ -9,7 +9,7 @@ const Router = require('../rail/routing-wasm'),
 const N = require('../rail/network'),
   F = require('../rail/fleet'),
   P = require('../rail/passengers'),
-  M = require('../rail/management'),
+  M = require('./helpers/management-compat.cjs'),
   LS = require('../rail/local-save');
 const {
   create

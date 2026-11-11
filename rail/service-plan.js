@@ -85,7 +85,9 @@
 
   function serviceOwner(action,s,minute,line,p,index,strict=false){
     const node=typeof module!=='undefined'&&module.exports,B=node?require('./bootstrap-wasm'):root.RailBootstrap;
-    const frame=B.forecast(action,{state:{services:s.services},minute,line,sourceIndex:line?s.services.indexOf(line):0,pattern:p,index,strict});
+    const pattern=p=>p&&({...p,...(Array.isArray(p.calls)?{calls:p.calls.filter(()=>true)}:{})});
+    const packet=l=>l&&({...l,...(Array.isArray(l.patterns)?{patterns:l.patterns.map(pattern)}:{})});
+    const frame=B.forecast(action,{state:{services:s.services.map(packet)},minute,line:packet(line),sourceIndex:line?s.services.indexOf(line):0,pattern:pattern(p),index,strict});
     frame.input=Float64Array.from(frame.input);frame.trackIndex=new Map(frame.trackNames.map((id,i)=>[id,i]));return frame;
   }
   function serviceFrame(s,minute,line=null,p=null,index,strict=false){return serviceOwner('serviceFrame',s,minute,line,p,index,strict);}

@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const D=require('../rail/demand-model'),Old=require('./fixtures/rail-map42-demand.cjs');
 const K=require('../rail/connection-model'),OK=require('./fixtures/rail-map42-connections.cjs');
 const H=require('../rail/hubs'),OH=require('./fixtures/rail-map42-hubs.cjs');
-const Core=require('../rail/routing-wasm'),N=require('../rail/network'),M=require('../rail/management'),F=require('../rail/fleet');
+const Core=require('../rail/routing-wasm'),N=require('../rail/network'),M=require('./helpers/management-compat.cjs'),F=require('../rail/fleet');
 const {create}=require('./fixtures/rail-memory-grid.cjs');
 const fields=['people','jobs','shops','industry','leisure'];
 const clean=v=>JSON.parse(JSON.stringify(v,(k,x)=>['memory','calculationMs'].includes(k)?undefined:x));

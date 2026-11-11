@@ -159,9 +159,9 @@ impl SessionHost {
             return error("UNSUPPORTED_PROTOCOL", 0, 0);
         }
         if input.get("op").text()=="platform"||input.get("op").text()=="viewModel"{let result=if input.get("op").text()=="platform"{self.platform.request(input)}else{crate::view_model::query(input)};if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
-        if input.get("op").text()=="persistence"{let result=self.persistence.request(input);if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
+        if input.get("op").text()=="persistence"{let result=self.persistence.request(input);if matches!(result.get("error"),V::String(_)){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
         if input.get("op").text()=="legacyOperations"{let result=self.legacy_operations.request(input);if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,0,0,result);}
-        if input.get("op").text()=="compat"{return envelope(true,0,0,crate::legacy::run(input));}
+        if input.get("op").text()=="compat"{let mut out=crate::legacy::run(input);if input.get("action").text()=="cityEvaluate"{let catalog=self.forecasts.handle(&obj(&[("action",text("attachLegacy")),("state",input.get("state").clone()),("forecast",out.get("result").clone())]));if catalog.get("error").truth(){return error(catalog.get("error").text(),0,0);}out.get_mut("result").set("nativeCatalog",catalog);}return envelope(true,0,0,out);}
         if input.get("op").text()=="runtime"||input.get("op").text()=="clock"{
             let result=if input.get("op").text()=="runtime"{self.runtimes.request(input,&mut self.forecasts)}else{self.clocks.request(input)};
             if result.get("error").truth(){return error(result.get("error").text(),0,0);}return envelope(true,self.state.as_ref().map_or(0,|s|s.id),self.state.as_ref().map_or(0,|s|s.revision),result);

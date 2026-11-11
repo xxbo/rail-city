@@ -196,7 +196,7 @@ for (const index of [undefined, null, '1', '01', -1, 1.5]) {
     };
   assert.deepEqual(current.compile(s, s.services[0], p), old.compile(s, s.services[0], p));
 }
-assert(core.status().serviceCalls > 0);
+assert(core.status().workspaceCalls > 0);
 console.log(
   `MAP60: ${checks} frozen service comparisons, peak boundaries, five patterns, cross/loop errors, fleet allocation and immutable inputs passed.`
 );

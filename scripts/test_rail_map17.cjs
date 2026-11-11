@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),B=require('../rail/regions'),N=require('../rail/network'),C=require('../rail/city'),H=require('../rail/hubs'),M=require('../rail/management'),P=require('../rail/passengers'),Q=require('../rail/ridership'),R=require('../rail/engine'),F=require('../rail/currency'),BAL=require('../rail/game-balance');
+const assert=require('node:assert/strict'),B=require('../rail/regions'),N=require('../rail/network'),C=require('../rail/city'),H=require('../rail/hubs'),M=require('./helpers/management-compat.cjs'),P=require('../rail/passengers'),Q=require('../rail/ridership'),R=require('../rail/engine'),F=require('../rail/currency'),BAL=require('../rail/game-balance');
 const near=(a,b,t=.01)=>assert(Math.abs(a-b)<t,`${a} != ${b}`);
 function corridor(region,id,targets){const s=M.init(N.emptyWorld(region)),h=H.forRegion(region).find(h=>h.id===id),build=M.change(s,x=>N.addLine(x,[h,...targets.map(([lon,lat])=>B.project(lat,lon,region))]));assert(!build.error);return {s,h,m:C.evaluate(s),build};}
 const {s,h,m,build}=corridor('gba','szx',[[113.88,22.59],[113.94,22.54]]),st=m.hubStats.szx;

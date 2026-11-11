@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),U=require('../rail/urban-growth'),Old=require('./fixtures/rail-map57-urban-growth.cjs'),N=require('../rail/network'),M=require('../rail/management'),C=require('../rail/city'),Names=require('../rail/place-names');
+const assert=require('node:assert/strict'),U=require('../rail/urban-growth'),Old=require('./fixtures/rail-map57-urban-growth.cjs'),N=require('../rail/network'),M=require('./helpers/management-compat.cjs'),C=require('../rail/city'),Names=require('../rail/place-names');
 let checks=0;
 const exact=(a,b,label)=>{function diff(a,b,path){if(Object.is(a,b))return;if(a&&b&&typeof a==='object'&&typeof b==='object'){const ak=Object.keys(a),bk=Object.keys(b);if(JSON.stringify(ak)!==JSON.stringify(bk))return `${path} keys ${ak.slice(0,20)} vs ${bk.slice(0,20)}`;for(const k of ak){const d=diff(a[k],b[k],path+'.'+k);if(d)return d;}}else return `${path}: ${a} vs ${b}`;}const d=diff(a,b,label);if(d)throw Error(d);};
 for(const region of ['gba','tokyo'])for(const automatic of [false,true]){

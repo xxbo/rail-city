@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=require('../rail/management'),N=require('../rail/network'),Q=require('../rail/ridership');
+const assert=require('node:assert/strict'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),N=require('../rail/network'),Q=require('../rail/ridership');
 const OldP=require('./fixtures/rail-map56-passengers.cjs'),OldM=require('./fixtures/rail-map56-management.cjs');
 const options={budget:1e6,maxSteps:10000,now:()=>0};
 (async()=>{

@@ -35,7 +35,7 @@
     recycles = 0;
   let transactionDepth=0;
   let remoteTokens=null,workerStatus=null;
-  let runtimePinned=false;
+  let runtimePinned=false,workspaceCalls=0;
   let loopCalls=0,loopSteps=0,cycleCalls=0;
   let kernelNow=()=>performance.now();
   let recycleBytes = 64 * 1024 * 1024;
@@ -365,7 +365,7 @@
     createWorkspace:()=>{
       let e;const Wire=node?require('./value-wire'):root.RailValueWire;
       const module=new WebAssembly.Instance(compiled,{rail_math:{cos:Math.cos,exp:Math.exp,log:Math.log,hypot:Math.hypot,sin:Math.sin,acos:Math.acos,atan2:Math.atan2,random:()=>Math.random(),log1p:Math.log1p,pow:Math.pow,now:()=>performance.now()}});e=module.exports;
-      return {kernel:(name,values,bytes)=>{if(!['bootstrap_run','session_contract','bootstrap_packed','session_packed','forecast_numeric'].includes(name))throw Error('Unknown initialization operation');const p=e.input_resize(values.length);new Float64Array(e.memory.buffer,p,values.length).set(values);if(bytes){const b=e.cycle_bytes_resize(bytes.length);new Uint8Array(e.memory.buffer,b,bytes.length).set(bytes);}const at=e[name](),out=new Float64Array(e.memory.buffer,at,e.output_len()).slice();const result=bytes?{values:out,bytes:new Uint8Array(e.memory.buffer,e.bootstrap_bytes_ptr(),e.bootstrap_bytes_len()).slice()}:out;e.output_clear();return result;},memoryBytes:()=>e.memory.buffer.byteLength};
+      return {kernel:(name,values,bytes)=>{if(!['bootstrap_run','session_contract','bootstrap_packed','session_packed','forecast_numeric'].includes(name))throw Error('Unknown initialization operation');workspaceCalls++;const p=e.input_resize(values.length);new Float64Array(e.memory.buffer,p,values.length).set(values);if(bytes){const b=e.cycle_bytes_resize(bytes.length);new Uint8Array(e.memory.buffer,b,bytes.length).set(bytes);}const at=e[name](),out=new Float64Array(e.memory.buffer,at,e.output_len()).slice();const result=bytes?{values:out,bytes:new Uint8Array(e.memory.buffer,e.bootstrap_bytes_ptr(),e.bootstrap_bytes_len()).slice()}:out;e.output_clear();return result;},memoryBytes:()=>e.memory.buffer.byteLength};
     },
     catalogViewToken:()=>exports().catalog_view_token(),
     pathsFromFrame:(values,graph)=>{const data=Float64Array.from(values),tree=new Array(data[1]);for(let i=0;i<tree.length;i++)if(data[8+i*STRIDE]!==-1)tree[i]=i;Object.defineProperty(tree,'routingData',{value:{data,graph}});return tree.map((_,id)=>pathAt(tree,id));},
@@ -425,7 +425,7 @@
       operationsAbi: 1,
       temporalAbi: 1,
       temporalCalls,
-      historyCalls,bootstrapCalls,coldCalls,catalogCalls,serviceCalls,editorCalls,geometryCalls,
+      historyCalls,bootstrapCalls,coldCalls,catalogCalls,serviceCalls,editorCalls,geometryCalls,workspaceCalls,
       timedArrivalCalls,
       operationsCalls,
       queueAbi: 1,
