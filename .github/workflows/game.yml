@@ -84,6 +84,8 @@ jobs:
           path: |
             ${{ runner.temp }}/rail-p3-browser-results.json
             ${{ runner.temp }}/rail-release-browser.json
+            ${{ runner.temp }}/*-construction.png
+            ${{ runner.temp }}/*-line.png
           if-no-files-found: ignore
           retention-days: 14
   verify:
