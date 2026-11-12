@@ -63,17 +63,24 @@
     function operationControls(s, l) {
       const fares = X.bands ? X.bands(l) : l.fareBands || X.PRICES,
         patterns = X.patterns(l);
-      return `${ringControls(s,l)}<div class="section-title">里程票价<small>人民币 · 元</small></div><div class="fare-grid">${X.LIMITS.map((limit,i)=>`<label>${i?X.LIMITS[i-1]+1:1}—${i===5?'更远':limit} km<input type="number" min="1" max="150" step="0.05" data-fare-band="${i}" aria-label="第 ${i+1} 档票价" value="${currency.toCNY(fares[i])}"></label>`).join('')}</div><button id="save-fares">应用票价</button><p class="station-note">按实际轨道里程向上取整分档计价；跨线分段合计。客流通过广义成本 Logit 模型比较票价、候车、行车、换乘与步行时间。参数为游戏设定，非真实客流预测。</p><div class="section-title">交路与停站规则</div><p class="station-note">全程普通车是大交路；区间车是小交路。快速可勾选停站，直达仅停起终点，跨线需共用车站。各交路共享本线预留车辆，配额合计不得超过 ${l.fleet} 列；平峰按配额比例分配，间隔由车辆数自动计算。</p><div id="pattern-list">${patterns.map((p,i)=>patternCard(s,l,p,i)).join('')}</div><div class="plan-actions"><select id="new-pattern-kind" aria-label="新增交路类型">${Object.entries(X.KINDS).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}</select><button id="add-pattern">增加交路</button></div><div class="plan-actions"><button id="save-patterns">应用运营规则</button><button id="reset-patterns">恢复普通交路</button></div>`;
+      return `${ringControls(s,l)}<div class="section-title">里程票价<small>人民币 · 元</small></div><div class="fare-grid">${X.LIMITS.map((limit,i)=>`<label>${i?X.LIMITS[i-1]+1:1}—${i===5?'更远':limit} km<input type="number" min="1" max="150" step="0.05" data-fare-band="${i}" aria-label="第 ${i+1} 档票价" value="${currency.toCNY(fares[i])}"></label>`).join('')}</div><button id="save-fares">应用票价</button><p class="station-note">按实际轨道里程向上取整分档计价；跨线分段合计。客流通过广义成本 Logit 模型比较票价、候车、行车、换乘与步行时间。参数为游戏设定，非真实客流预测。</p><div class="section-title">交路与停站规则</div><p class="station-note">全程普通车是大交路；区间车是小交路。快速可勾选停站，直达仅停起终点，跨线需共用车站。各交路共享本线预留车辆，配额合计不得超过 ${l.fleet} 列；平峰按配额比例分配，间隔由车辆数自动计算。</p><div id="pattern-list">${patternCards(s,l,patterns)}</div><div class="plan-actions"><select id="new-pattern-kind" aria-label="新增交路类型">${Object.entries(X.KINDS).map(([id,name])=>`<option value="${id}">${name}</option>`).join('')}</select><button id="add-pattern">增加交路</button></div><div class="plan-actions"><button id="save-patterns">应用运营规则</button><button id="reset-patterns">恢复普通交路</button></div>`;
     }
 
-    function patternCard(s, l, p, i) {
-      let actual = '应用后计算';
-      try {
-        actual = '当前 ' + fmtHeadway(X.headway(s, X.compile(s, l, p, i)));
-      } catch {}
-      const other = s.services.find(x => x.id === p.target),
-        validTargets = s.services.filter(x => x.id !== l.id && x.stops.some(n => l.stops.includes(n)));
-      return `<fieldset class="pattern-card" data-pattern-index="${i}" data-kind="${p.kind}"><legend>${i+1}. ${X.KINDS[p.kind]}</legend><div class="plan-actions"><label>起点<select data-field="from">${stopOptions(s,l,p.from)}</select></label><label>${p.kind==='cross'?'接轨站':'终点'}<select data-field="to">${stopOptions(s,l,p.to)}</select></label></div><div class="plan-actions"><label>高峰配额<input type="number" min="2" max="80" step="2" data-field="fleet" value="${p.fleet}"></label><label>自动间隔<output>${frequency(s,l,p,i)}</output></label></div>${p.kind==='cross'?`<label>接续线路<select data-field="target">${validTargets.map(x=>`<option value="${x.id}" ${p.target===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label><label>跨线终点<select data-field="targetEnd">${other?stopOptions(s,other,p.targetEnd):''}</select></label>`:''}${p.kind==='express'?`<div class="call-options">${l.stops.map((id,j)=>`<label><input type="checkbox" data-call="${id}" ${p.calls?.includes(id)?'checked':''}>${esc(s.nodes[id].name)}</label>`).join('')}</div>`:''}<p class="pattern-frequency">${actual}</p><button data-drop-pattern="${i}">删除此交路</button></fieldset>`;
+    function patternCards(s, l, patterns, draft=false) {
+      if(draft){
+        l={...l,patterns};
+        s={...s,services:s.services.map(line=>line.id===l.id?l:line)};
+      }
+      const targets=patterns.some(p=>p.kind==='cross')?X.patternDraft(s,l.id,'targets'):[];
+      return patterns.map((p,i)=>patternCard(s,l,p,i,targets,draft)).join('');
+    }
+
+    function patternCard(s, l, p, i, targets, draft=false) {
+      const headway=frequency(s,l,p,i);
+      const actual=headway==='应用后计算'?headway:(draft?'草案 ':'当前 ')+headway;
+      const other=s.services.find(x=>x.id===p.target);
+      const validTargets=targets??(p.kind==='cross'?X.patternDraft(s,l.id,'targets'):[]);
+      return `<fieldset class="pattern-card" data-pattern-index="${i}" data-kind="${p.kind}" data-headway="${p.headway??l.headway??''}"><legend>${i+1}. ${X.KINDS[p.kind]}</legend><div class="plan-actions"><label>起点<select data-field="from">${stopOptions(s,l,p.from)}</select></label><label>${p.kind==='cross'?'接轨站':'终点'}<select data-field="to">${stopOptions(s,l,p.to)}</select></label></div><div class="plan-actions"><label>高峰配额<input type="number" min="2" max="80" step="2" data-field="fleet" value="${p.fleet}"></label><label>自动间隔<output>${headway}</output></label></div>${p.kind==='cross'?`<label>接续线路<select data-field="target">${validTargets.map(x=>`<option value="${esc(x.target)}" data-from="${x.from}" data-to="${x.to}" data-end="${x.targetEnd}" ${p.target===x.target?'selected':''}>${esc(s.services.find(line=>line.id===x.target).name)}</option>`).join('')}</select></label><label>跨线终点<select data-field="targetEnd">${other?stopOptions(s,other,p.targetEnd):''}</select></label>`:''}${p.kind==='express'?`<div class="call-options">${l.stops.map((id,j)=>`<label><input type="checkbox" data-call="${id}" ${p.calls?.includes(id)?'checked':''}>${esc(s.nodes[id].name)}</label>`).join('')}</div>`:''}<p class="pattern-frequency">${actual}</p><button data-drop-pattern="${i}">删除此交路</button></fieldset>`;
     }
 
     function lineTabs() {
@@ -137,6 +144,7 @@
       specOptions,
       trainOptions,
       patternCard,
+      patternCards,
       stopOptions
     };
   }

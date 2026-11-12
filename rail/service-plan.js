@@ -66,15 +66,17 @@
     return index < 0 ? 0 : bands(l)[index];
   }
 
+  const planningView=()=>typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap;
   function patterns(l) {
-    return l.patterns || [{
-      kind: 'local',
-      from: 0,
-      to: l.stops.length - 1,
-      calls: [...new Set(l.stops)],
-      fleet: l.fleet,
-      headway: l.headway
-    }];
+    if(l.patterns)return l.patterns;
+    const [p]=planningView().viewModel('defaultPatterns',{line:{stops:l.stops,fleet:l.fleet,headway:l.headway}});
+    return [{...p,calls:[...p.calls]}];
+  }
+
+  function patternDraft(s, lineId, operation, args={}) {
+    const services=s.services.map(({id,stops,trackIds,fleet,fleetManaged,stockSpec,headway,dispatch})=>
+      ({id,stops,trackIds,fleet,fleetManaged,stockSpec,headway,dispatch}));
+    return planningView().viewModel('patternDraft',{state:{services},lineId,operation,...args});
   }
 
   const COMPILE_ERRORS = ['', '跨线目标不存在。', '两条线路必须在同一座车站连接。', '跨线目标不能是本线路。', '跨线交路需要相同车型与编组。',
@@ -293,6 +295,7 @@
     draftLegs,
     fare,
     patterns,
+    patternDraft,
     compile,
     expand,
     duration,

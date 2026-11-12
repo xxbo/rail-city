@@ -344,7 +344,7 @@ impl RuntimeOwner{
             let runtime=self.arenas.get_mut(&id).ok_or("RUNTIME_EXPIRED")?;
             if runtime.import_fence{
                 if action=="pulse"{let mut out=runtime.view(false);out.set("clock",runtime.clock.status());return Ok(out);}
-                if !matches!(action,"importCancel"|"importCommitted"|"query"|"snapshot"|"snapshotPage"|"handoff"|"view"|"diagnose"|"forecastQuery"|"intent"|"resetClock"){return Err("RESTORE_COMMIT_PENDING".into());}
+                if !matches!(action,"importCancel"|"importCommitted"|"query"|"snapshot"|"snapshotPage"|"handoff"|"view"|"diagnose"|"forecastQuery"|"dispatchRecommendation"|"intent"|"resetClock"){return Err("RESTORE_COMMIT_PENDING".into());}
             }
             if matches!(action,"command"|"demand"|"undo"|"setDaily"|"observe"|"syncBank"|"credit"|"daily"|"advanceAll"|"advance"){runtime.persistence_epoch+=1;}
             if action=="pulse"&&v.get("playing").truth(){runtime.persistence_epoch+=1;}
@@ -363,6 +363,12 @@ impl RuntimeOwner{
                 "forecastInvalidate"=>{runtime.forecast_work.dirty=true;Ok(runtime.forecast_work.status(&runtime.seed.world,runtime.edit_revision))},
                 "forecastBegin"=>{runtime.project_world();Ok(runtime.forecast_work.begin(&runtime.seed.world,runtime.edit_revision,v.get("blocked").truth()))},
                 "forecastFinish"=>Ok(runtime.forecast_work.finish(v.num("ticket"),v.get("success").truth())),
+                "dispatchRecommendation"=>{
+                    runtime.project_world();
+                    let plan=forecasts.dispatch_recommendation(runtime.seed.catalog,&runtime.seed.world,
+                        v.get("lineId"),v.get("stations"))?;
+                    Ok(obj(&[("plan",plan),("editRevision",n(runtime.edit_revision as f64))]))
+                },
                 "diagnose"=>{let op=if v.get("query").text()=="alerts"{"alerts"}else{"diagnose"};Ok(runtime.diagnostic(forecasts,op))},
                 "observe"=>{let rt=runtime.view(false).get("runtime").clone();let event=crate::runtime_edit::review(&mut runtime.seed.world,&rt,"reviewObserve",obj(&[("id",v.get("eventId").clone())]));if runtime.forecast_work.ready(){crate::runtime_edit::review(&mut runtime.seed.world,&rt,"reviewReady",obj(&[("minute",rt.get("minute").clone())]));}let mut out=runtime.view(false);out.set("event",event);Ok(out)},
                 "forecastQuery"=>{let query=v.get("query").text();if !matches!(query,"summary"|"connections"|"daily"|"definition"|"status"){return Err("UNKNOWN_FORECAST_QUERY".into());}let mut input=obj(&[("action",text(query)),("id",n(runtime.seed.catalog as f64)),("ridership",runtime.seed.world.get("ridership").clone()),("services",runtime.seed.world.get("services").clone()),("stations",v.get("stations").clone()),("index",v.get("index").clone())]);input.set("revision",n(runtime.revision as f64));Ok(obj(&[("projection",forecasts.handle(&input)),("revision",n(runtime.revision as f64)),("editRevision",n(runtime.edit_revision as f64)),("cityRevision",runtime.seed.world.get("urban").get("revision").clone())]))},
