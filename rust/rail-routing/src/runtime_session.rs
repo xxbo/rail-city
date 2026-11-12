@@ -14,13 +14,30 @@ struct Runtime{
 }
 fn key(j:&V)->Rc<str>{crate::journey::key(j)}
 impl Runtime{
-    fn new(v:&V,id:u64,forecasts:&mut crate::forecast_session::ForecastOwner)->Result<Self,String>{
-        let mut world=v.get("world").clone();crate::assets::init(&mut world,&crate::bootstrap::config());
-        let start=if has(v,"start"){v.num("start")}else{420.0};if !start.is_finite(){return Err("INVALID_RUNTIME_START".into());}
-        let catalog=v.num("catalog")as u64;forecasts.retain(catalog)?;
+    fn seed(v:&V, forecasts:&mut crate::forecast_session::ForecastOwner) -> Result<Seed,String> {
+        let mut world=v.get("world").clone();
+        crate::assets::init(&mut world,&crate::bootstrap::config());
+        let start=if has(v,"start"){v.num("start")}else{420.0};
+        if !start.is_finite(){return Err("INVALID_RUNTIME_START".into());}
+        let catalog=v.num("catalog") as u64;
+        forecasts.retain(catalog)?;
         let warm=v.get("warm").truth()&&!v.get("saved").truth();
-        let mut seed=match Seed::new(world,v.get("saved").clone(),catalog,forecasts,start,warm){Ok(s)=>s,Err(e)=>{forecasts.release_owned(catalog);return Err(e);}};
-        if v.get("saved").truth(){let mut validation=seed.runtime.clone();if v.get("saved").get("urbanDefs").truth(){validation.set("hasUrbanDefs",boolean(true));}let valid=crate::save::run(&obj(&[("op",text(if v.get("transfer").truth(){"restoreTransfer"}else{"restore"})),("state",seed.world.clone()),("plan",seed.plan.clone()),("saved",validation),("defs",arr(seed.definitions.clone()))]),&crate::bootstrap::config());if !valid.truth(){forecasts.release_owned(catalog);return Err("INVALID_RUNTIME_CHECKPOINT".into());}}
+        Seed::new(world,v.get("saved").clone(),catalog,forecasts,start,warm)
+            .inspect_err(|_|forecasts.release_owned(catalog))
+    }
+    fn new(v:&V,id:u64,forecasts:&mut crate::forecast_session::ForecastOwner)->Result<Self,String>{
+        let mut seed=Self::seed(v,forecasts)?;
+        let catalog=seed.catalog;
+        let warm=v.get("warm").truth()&&!v.get("saved").truth();
+        if v.get("saved").truth(){
+            if v.get("saved").get("urbanDefs").truth(){seed.runtime.set("hasUrbanDefs",boolean(true));}
+            let defs=V::Array(std::mem::take(&mut seed.definitions));
+            let ok=crate::save::restore_at(&seed.world,&seed.plan,&seed.runtime,&defs,&crate::bootstrap::config(),
+                if v.get("transfer").truth(){390.0}else{420.0});
+            if let V::Array(rows)=defs{seed.definitions=rows;}
+            del(&mut seed.runtime,"hasUrbanDefs");
+            if !ok {forecasts.release_owned(catalog);return Err("INVALID_RUNTIME_CHECKPOINT".into());}
+        }
         if has(v,"initial"){
             let initial=v.get("initial");let mode=initial.get("arrivalMode");
             if v.get("saved").truth()||initial.entries().iter().any(|(key,_)|key!="arrivalMode")||!matches!(mode.text(),"integer"|"weighted"){
@@ -29,16 +46,36 @@ impl Runtime{
             seed.runtime.set("arrivalMode",mode.clone());
         }
         if has(v,"forecastView"){seed.runtime.set("forecastView",v.get("forecastView").clone());}
+        Self::from_seed(seed,id,warm,forecasts,None)
+    }
+    fn from_seed(mut seed:Seed,id:u64,warm:bool,forecasts:&mut crate::forecast_session::ForecastOwner,
+        restored:Option<SavedDirectory>)->Result<Self,String>{
+        let catalog=seed.catalog;
+        let edit_revision=seed.runtime.zero("nativeEditRevision") as u64;
+        let command_serial=seed.runtime.zero("nativeCommandSerial") as u64;
+        let cohorts=restored.as_ref().map(|_|crate::queues::SavedCohorts::take(&mut seed.runtime));
         let token=id as f64;let mut arena=Arena::default();let mut calendar=seed.calendar(token,token,token);arena.motion=Some(seed.motion(token));calendar[5]=seed.blocks.len()as f64;arena.calendar=Some(crate::calendar::Calendar::read(&calendar,&mut arena.sampling));drop(calendar);seed.sampling=V::Missing;
         let queue=seed.queue(token);crate::queues::install(&queue,&mut arena.motion,&mut arena.queues);arena.queues.as_mut().unwrap().native_owner();drop(queue);seed.graph=V::Missing;
-        let keys=seed.definitions.iter().enumerate().map(|(i,j)|(key(j),i)).collect();arena.cycle=Some(crate::cycle::Cycle::owned(token,catalog as f64,seed.definitions.len(),seed.runtime.num("nextId")as usize,[seed.runtime.zero("expectedGenerated"),seed.runtime.zero("arrivalRemainder"),seed.runtime.num("rngState")],seed.runtime.zero("demandCarry"),keys));
+        if let Some(cohorts)=cohorts {cohorts.install(arena.queues.as_mut().unwrap(),&mut seed);}
+        let (keys,actual_daily,count) = if let Some(saved)=restored {
+            let count=saved.queues.definition_count();
+            arena.queues.as_mut().unwrap().take_directory(saved.queues);
+            (saved.keys,saved.daily,count)
+        } else {
+            let keys=seed.definitions.iter().enumerate().map(|(i,j)|(key(j),i)).collect();
+            let daily=seed.definitions.iter().enumerate().filter_map(|(i,j)|{
+                let value=j.num("daily"); (value.to_bits()!=0).then_some((i,value))
+            }).collect();
+            (keys,daily,seed.definitions.len())
+        };
+        arena.cycle=Some(crate::cycle::Cycle::owned(token,catalog as f64,count,seed.runtime.num("nextId")as usize,[seed.runtime.zero("expectedGenerated"),seed.runtime.zero("arrivalRemainder"),seed.runtime.num("rngState")],seed.runtime.zero("demandCarry"),keys));
         let mut finance=seed.finance(token);crate::engine::read(&finance,&mut arena.bank);arena.bank.as_mut().unwrap().loan_views=seed.world.get("economy").get("loans").array().to_vec();arena.bank.as_mut().unwrap().ledger=seed.world.get("economy").get("ledger").array().to_vec();finance.truncate(16);finance[2]=0.0;
-        let train_ids=seed.runtime.get("trains").array().iter().enumerate().map(|(i,t)|(i+1,t.get("id").text().to_string())).collect();let actual_daily=seed.definitions.iter().enumerate().map(|(i,j)|(i,j.num("daily"))).collect();
+        let train_ids=seed.runtime.get("trains").array().iter().enumerate().map(|(i,t)|(i+1,t.get("id").text().to_string())).collect();
         // Parsed checkpoint trees are construction inputs. Queues retain the authoritative state.
         seed.definitions.clear();seed.definitions.shrink_to_fit();
         for key in ["queues","outside","transfers","waitSince","outsideSince","stationOccupancy"]{del(&mut seed.runtime,key);}
         for train in seed.runtime.get_mut("trains").array_mut(){del(train,"passengers");}
-        let mut runtime=Self{record_lengths:None,persistence_epoch:0,import_serial:0,pending_import:None,import_fence:false,seed,arena,token,finance,clock:crate::runtime_control::Clock::new(),train_ids,actual_daily,revision:0,daily_revision:0,edit_revision:v.get("saved").zero("nativeEditRevision")as u64,command_serial:v.get("saved").zero("nativeCommandSerial")as u64,receipts:VecDeque::new(),undo:None,forecast_work:crate::runtime_business::ForecastWork::default(),published_city:None,published_review:None};
+        let mut runtime=Self{record_lengths:None,persistence_epoch:0,import_serial:0,pending_import:None,import_fence:false,seed,arena,token,finance,clock:crate::runtime_control::Clock::new(),train_ids,actual_daily,revision:0,daily_revision:0,edit_revision,command_serial,receipts:VecDeque::new(),undo:None,forecast_work:crate::runtime_business::ForecastWork::default(),published_city:None,published_review:None};
         if warm{
             // Warm passenger queues without charging a second set of startup accounts.
             let economy=runtime.seed.world.get("economy").clone();let operating=runtime.seed.world.get("ridership").get("current").zero("operating");
@@ -61,7 +98,7 @@ impl Runtime{
             for index in indices{let j=forecasts.handle(&obj(&[("action",text("definition")),("id",n(catalog as f64)),("index",n(*index as f64))]));if j.get("error").truth(){return false;}let data=seed.definition(&j);let service=j.get("legs").array().first().map_or(-1.0,|e|seed.name(e.get("service"))as f64);cycle.install_owned_profile(*index,key(&j),service,data,queues);}cycle.metadata_batch();true
         };
         let result=crate::calendar::run_owned(crate::calendar::Batch{token:self.token,time:now,remaining:minutes,max_steps:max,budget,barrier,finance:&self.finance,trace:false},&mut self.arena.calendar,&mut self.arena.cycle,&[],&mut self.arena.sampling,&mut self.arena.feedback,&mut self.arena.motion,&mut self.arena.queues,&mut self.arena.bank,provider);
-        for(_,id)in result.definitions{self.actual_daily.insert(id,0.0);}for(uid,_,ordinal)in &result.spawned{self.train_ids.insert(*uid,format!("T{:04}",ordinal));}
+        for(uid,_,ordinal)in &result.spawned{self.train_ids.insert(*uid,format!("T{:04}",ordinal));}
         let elapsed=minutes-result.wire[2];self.seed.runtime.set("minute",n(result.minute));let clock=self.arena.calendar.as_ref().unwrap().clock_view();for(k,v)in [("demandCarry",clock.0),("arrivalRemainder",clock.1),("rngState",clock.2),("expectedGenerated",clock.3),("nativeSerial",clock.5 as f64),("nextId",clock.6 as f64),("fleetMinute",result.minute.floor())]{self.seed.runtime.set(k,n(v));}
         if self.seed.world.get("ridership").truth(){self.seed.world.get_mut("ridership").set("lastMinute",n(clock.4));}self.seed.runtime.set("departures",self.arena.calendar.as_ref().unwrap().departures_view(&self.seed.names));
         for(id,fleet)in self.arena.calendar.as_ref().unwrap().fleets(){if let Some(l)=self.seed.plan.get_mut("services").array_mut().iter_mut().find(|l|l.get("id").text()==self.seed.names[id]){l.set("fleet",n(fleet));}}
@@ -127,6 +164,15 @@ impl Runtime{
         let records=crate::persistence::merge(&[self.seed.runtime.get("personalRecords").clone(),self.record_lengths.as_ref().unwrap().clone(),self.seed.world.get("ridership").get("records").clone(),obj(&[("bestRevenue",self.seed.world.get("economy").get("revenue").clone())])]);
         self.seed.runtime.set("personalRecords",records.clone());runtime.set("personalRecords",records);
         obj(&[("editRevision",n(self.edit_revision as f64)),("revision",n(self.revision as f64)),("worldPatch",obj(&[("economy",self.seed.world.get("economy").clone()),("ridership",self.seed.world.get("ridership").clone())])),("runtime",runtime)])
+    }
+    fn snapshot_view(&mut self, request: &V) -> V {
+        if request.get("paged").truth() && self.arena.queues.as_ref().unwrap().definition_count() > 2048 {
+            let mut out = self.view(false);
+            out.set("pagedSnapshot", boolean(true));
+            out
+        } else {
+            self.view(true)
+        }
     }
     fn checkpoint(&mut self,settings:&V,at:&V)->Result<V,String>{
         let saved=self.view(true).get("runtime").clone();
@@ -225,17 +271,80 @@ impl Runtime{
     }
 
 }
+struct SavedDirectory {
+    queues: crate::queues::Queues,
+    keys: Vec<(Rc<str>,usize)>,
+    daily: HashMap<usize,f64>,
+}
+struct RestoreStage {
+    seed: Seed,
+    directory: SavedDirectory,
+    count: usize,
+    earliest: f64,
+}
 #[derive(Default)]
-pub(super) struct RuntimeOwner{next:u64,arenas:HashMap<u64,Runtime>}
+pub(super) struct RuntimeOwner{next:u64,arenas:HashMap<u64,Runtime>,restores:HashMap<u64,RestoreStage>}
 impl RuntimeOwner{
+    fn publish_new(&mut self, id:u64, mut runtime:Runtime) -> V {
+        if runtime.seed.world.get("operationsReview").truth(){
+            let rt=runtime.view(false).get("runtime").clone();
+            crate::runtime_edit::review(&mut runtime.seed.world,&rt,"reviewReady",obj(&[("minute",rt.get("minute").clone())]));
+        }
+        let mut out=runtime.view(false);
+        runtime.publish(&mut out);out.set("id",n(id as f64));self.arenas.insert(id,runtime);out
+    }
     pub(super) fn request(&mut self,v:&V,forecasts:&mut crate::forecast_session::ForecastOwner)->V{
-        let result=(||->Result<V,String>{let action=v.get("action").text();if action=="create"{self.next+=1;let mut runtime=Runtime::new(v,self.next,forecasts)?;let rt=runtime.view(false).get("runtime").clone();if runtime.seed.world.get("operationsReview").truth(){crate::runtime_edit::review(&mut runtime.seed.world,&rt,"reviewReady",obj(&[("minute",rt.get("minute").clone())]));}let mut out=runtime.view(false);runtime.publish(&mut out);out.set("id",n(self.next as f64));self.arenas.insert(self.next,runtime);return Ok(out);}
+        let result=(||->Result<V,String>{let action=v.get("action").text();
+            if action=="create"{self.next+=1;let runtime=Runtime::new(v,self.next,forecasts)?;return Ok(self.publish_new(self.next,runtime));}
+            if action=="restoreBegin" {
+                let count=v.num("count");
+                if !count.is_finite() || count.fract()!=0.0 || !(1.0..=300000.0).contains(&count)
+                    || !v.get("saved").truth() || has(v,"initial") { return Err("INVALID_RUNTIME_CHECKPOINT".into()); }
+                let earliest=if v.get("transfer").truth(){390.0}else{420.0};
+                if !crate::save::header_at(v.get("world"),v.get("saved"),earliest){return Err("INVALID_RUNTIME_CHECKPOINT".into());}
+                let seed=Runtime::seed(v,forecasts)?;
+                self.next+=1;
+                let directory=SavedDirectory{queues:crate::queues::Queues::restore_directory(self.next as f64),keys:Vec::new(),daily:HashMap::new()};
+                self.restores.insert(self.next,RestoreStage{seed,directory,count:count as usize,earliest});
+                return Ok(n(self.next as f64));
+            }
+            if matches!(action,"restorePage"|"restoreFinish"|"restoreCancel"){
+                let handle=v.num("id");
+                if !handle.is_finite() || handle < 1.0 || handle.fract()!=0.0 {return Err("INVALID_RUNTIME_HANDLE".into());}
+                let id=handle as u64;
+                if action=="restoreCancel"{
+                    if let Some(stage)=self.restores.remove(&id){forecasts.release_owned(stage.seed.catalog);}
+                    return Ok(V::Null);
+                }
+                let stage=self.restores.get_mut(&id).ok_or("RESTORE_EXPIRED")?;
+                let offset=stage.directory.keys.len();
+                if action=="restorePage" {
+                    let rows=v.get("rows").array();
+                    if v.num("offset")!=offset as f64 || rows.is_empty() || rows.len()>1024 || offset+rows.len()>stage.count
+                        || !rows.iter().enumerate().all(|(i,row)|matches!(row,V::Object(_)) && crate::save::valid_saved_definition(&stage.seed.world,&stage.seed.plan,offset+i,row))
+                        {return Err("INVALID_RUNTIME_CHECKPOINT".into());}
+                    for (i,row) in rows.iter().enumerate(){
+                        let id=offset+i;
+                        stage.directory.queues.insert_saved_definition(&stage.seed.definition(row));
+                        stage.directory.keys.push((key(row),id));
+                        if row.num("daily").to_bits()!=0 {stage.directory.daily.insert(id,row.num("daily"));}
+                    }
+                    return Ok(V::Null);
+                }
+                if offset!=stage.count || !crate::save::validate_cohorts(&stage.seed.world,&stage.seed.plan,&stage.seed.runtime,
+                    &crate::bootstrap::config(),stage.earliest,|id,leg|stage.directory.queues.leg_from(id,leg)) {
+                    return Err("INVALID_RUNTIME_CHECKPOINT".into());
+                }
+                let stage=self.restores.remove(&id).unwrap();
+                let runtime=Runtime::from_seed(stage.seed,id,false,forecasts,Some(stage.directory))?;
+                return Ok(self.publish_new(id,runtime));
+            }
             let id=v.num("id");if !id.is_finite()||id<1.0||id.fract()!=0.0{return Err("INVALID_RUNTIME_HANDLE".into());}let id=id as u64;
             if action=="close"{if let Some(runtime)=self.arenas.remove(&id){forecasts.release_owned(runtime.seed.catalog);if let Some(undo)=runtime.undo{forecasts.release_owned(undo.catalog);}}return Ok(V::Null);}
             let runtime=self.arenas.get_mut(&id).ok_or("RUNTIME_EXPIRED")?;
             if runtime.import_fence{
                 if action=="pulse"{let mut out=runtime.view(false);out.set("clock",runtime.clock.status());return Ok(out);}
-                if !matches!(action,"importCancel"|"importCommitted"|"query"|"snapshot"|"handoff"|"view"|"diagnose"|"forecastQuery"|"intent"|"resetClock"){return Err("RESTORE_COMMIT_PENDING".into());}
+                if !matches!(action,"importCancel"|"importCommitted"|"query"|"snapshot"|"snapshotPage"|"handoff"|"view"|"diagnose"|"forecastQuery"|"intent"|"resetClock"){return Err("RESTORE_COMMIT_PENDING".into());}
             }
             if matches!(action,"command"|"demand"|"undo"|"setDaily"|"observe"|"syncBank"|"credit"|"daily"|"advanceAll"|"advance"){runtime.persistence_epoch+=1;}
             if action=="pulse"&&v.get("playing").truth(){runtime.persistence_epoch+=1;}
@@ -246,7 +355,8 @@ impl RuntimeOwner{
                 "importCancel"|"importCommitted"=>{if let Some((token,_,_))=&runtime.pending_import{if v.num("token")!=*token as f64{return Err("RESTORE_TOKEN_MISMATCH".into());}}runtime.pending_import=None;runtime.import_fence=action=="importCommitted";Ok(V::Null)},
                 "command"|"preview"|"demand"|"undo"=>runtime.edit(v,forecasts),
                 "intent"=>{if v.get("reset").truth(){runtime.clock.reset();}runtime.clock.observe(v).map_err(str::to_string)?;Ok(runtime.clock.status())},
-                "handoff"=>{let mut view=runtime.view(true);view.set("world",runtime.seed.world.clone());Ok(view)},"snapshot"=>Ok(runtime.view(true)),"view"=>Ok(runtime.view(false)),
+                "handoff"=>{let mut view=runtime.snapshot_view(v);view.set("world",runtime.seed.world.clone());Ok(view)},"snapshot"=>Ok(runtime.snapshot_view(v)),
+                "snapshotPage"=>runtime.arena.queues.as_ref().unwrap().snapshot_page(&runtime.seed.names,&runtime.train_ids,&runtime.actual_daily,v),"view"=>Ok(runtime.view(false)),
                 "resetClock"=>{runtime.clock.reset();Ok(runtime.clock.status())},
                 "query"=>{runtime.project_world();let q=runtime.arena.queues.as_ref().unwrap();let result=match v.get("query").text(){"storage"=>{let storage=runtime.arena.cycle.as_ref().unwrap().storage();obj(&[("cachedProfiles",n(storage[0]as f64)),("metadataBatches",n(storage[1]as f64)),("preparedDefinitions",n(q.prepared_count()as f64)),("storedDefinitions",n(q.definition_count()as f64)),("hostCommandValues",n(q.host_command_values()as f64)),("nativeReroutes",n(q.native_reroutes()as f64)),("statisticsFullFrames",n(q.statistics_full_frames()as f64))])},"history"=>obj(&[("current",runtime.seed.world.get("ridership").get("current").clone()),("history",runtime.seed.world.get("ridership").get("history").clone())]),"summary"=>q.summary_projection(),"train"=>{let id=runtime.train_ids.iter().find(|(_,name)|name.as_str()==v.get("target").text()).map_or(usize::MAX,|(id,_)|*id);q.train_projection(id)},_=>q.station_projection(&runtime.seed.world,v.num("target")as usize,&runtime.seed.names)};Ok(obj(&[("projection",result)]))},
                 "setDaily"=>{let result=forecasts.handle(&obj(&[("action",text("setDaily")),("id",n(runtime.seed.catalog as f64)),("index",v.get("index").clone()),("value",v.get("value").clone())]));if result.get("error").truth(){return Err(result.get("error").text().into());}runtime.sync_daily(forecasts)?;Ok(runtime.view(false))},
@@ -262,7 +372,7 @@ impl RuntimeOwner{
                     let mut economy=e.clone();for(i,key)in ECONOMY.iter().enumerate(){economy.set(key,if *key=="blocked"{boolean(out[8+i]!=0.0)}else{n(out[8+i])});}let mut at=18;let mut loans=vec![];for _ in 0..out[17]as usize{let ix=out[at];let mut row=if ix<0.0{obj(&[("id",e.get("nextLoan").clone()),("initial",n(amount))])}else{e.get("loans").array()[ix as usize].clone()};for(i,key)in ["principal","interest","installment","nextDue"].iter().enumerate(){row.set(key,n(out[at+1+i]));}loans.push(row);at+=5;}economy.set("loans",arr(loans));let payments=out[at]as usize;let bills=out[at+1..at+1+payments].to_vec();at+=1+payments;let allocation=out[at]as usize;at+=1+allocation;let error=out[at];let available=out[at+1];let amount=out[at+2];if error==0.0&&action!=0.0{economy.set("nextLoan",n(out[at+3]));let minute=economy.get("minute").clone();economy.get_mut("ledger").array_mut().insert(0,obj(&[("minute",minute),("type",text(if action==1.0{"贷款到账"}else{"提前结清贷款"})),("amount",n(amount))]));}for bill in bills{let minute=economy.get("minute").clone();economy.get_mut("ledger").array_mut().insert(0,obj(&[("minute",minute),("type",text("每日偿还贷款本息")),("amount",n(-bill))]));}economy.get_mut("ledger").array_mut().truncate(80);runtime.seed.world.set("economy",economy);let frame=runtime.seed.finance(runtime.token);crate::engine::read(&frame,&mut runtime.arena.bank);runtime.arena.bank.as_mut().unwrap().loan_views=runtime.seed.world.get("economy").get("loans").array().to_vec();runtime.arena.bank.as_mut().unwrap().ledger=runtime.seed.world.get("economy").get("ledger").array().to_vec();runtime.finance=frame[..16].to_vec();runtime.finance[2]=0.0;if error==0.0&&action!=0.0{runtime.clock.reset();}let mut view=runtime.view(false);view.set("credit",obj(&[("error",n(error)),("available",n(available))]));Ok(view)
                 },
                 "daily"=>{let out=forecasts.handle(&obj(&[("action",text("setDaily")),("id",n(runtime.seed.catalog as f64)),("index",v.get("index").clone()),("value",v.get("value").clone())]));if out.get("error").truth(){return Err(out.get("error").text().into());}Ok(out)},
-                "advanceAll"=>{let requested=v.num("minutes");if !requested.is_finite()||requested<0.0||requested>1e8{return Err("INVALID_RUNTIME_BUDGET".into());}let mut remaining=requested;let mut steps=0.0;let mut events=vec![];let mut result=runtime.advance(0.0,10000,f64::INFINITY,forecasts,false)?;while remaining>1e-9&&result.get("running").truth(){result=runtime.advance(remaining,10000,f64::INFINITY,forecasts,false)?;events.extend_from_slice(result.get("events").array());let left=result.num("remaining");steps+=result.num("steps");if result.get("boundary").truth()||!result.get("running").truth()||left>=remaining-1e-9{remaining=left;break;}remaining=left;}result.set("remaining",n(remaining));result.set("steps",n(steps));result.set("consumed",n(requested-remaining));result.set("events",arr(events));let mut view=runtime.view(true);view.set("batch",result);Ok(view)},
+                "advanceAll"=>{let requested=v.num("minutes");if !requested.is_finite()||requested<0.0||requested>1e8{return Err("INVALID_RUNTIME_BUDGET".into());}let mut remaining=requested;let mut steps=0.0;let mut events=vec![];let mut result=runtime.advance(0.0,10000,f64::INFINITY,forecasts,false)?;while remaining>1e-9&&result.get("running").truth(){result=runtime.advance(remaining,10000,f64::INFINITY,forecasts,false)?;events.extend_from_slice(result.get("events").array());let left=result.num("remaining");steps+=result.num("steps");if result.get("boundary").truth()||!result.get("running").truth()||left>=remaining-1e-9{remaining=left;break;}remaining=left;}result.set("remaining",n(remaining));result.set("steps",n(steps));result.set("consumed",n(requested-remaining));result.set("events",arr(events));let mut view=runtime.snapshot_view(v);view.set("batch",result);Ok(view)},
                 "advance"=>{let max=v.num("maxSteps");if !max.is_finite()||max.fract()!=0.0||max<1.0||max>10000.0{return Err("INVALID_RUNTIME_BUDGET".into());}let batch=runtime.advance(v.num("minutes"),max as usize,v.num("budget"),forecasts,false)?;let mut view=runtime.view(false);view.set("batch",batch);Ok(view)},
                 "pulse"=>{let start=crate::engine::monotonic();let control=runtime.clock.begin(v).map_err(str::to_string)?;let request=control.get("request");let mut batch=V::Missing;if request.truth(){batch=match runtime.advance(request.num("minutes"),request.num("maxSteps")as usize,request.num("budget"),forecasts,false){Ok(batch)=>batch,Err(error)=>{let _=runtime.clock.fail(&obj(&[("ticket",request.get("ticket").clone()),("fault",text(&error))]));return Err(error);}};runtime.clock.complete(&obj(&[("ticket",request.get("ticket").clone()),("result",batch.clone()),("ms",n(crate::engine::monotonic()-start))])).map_err(str::to_string)?;}let mut view=runtime.view(false);view.set("clock",runtime.clock.status());view.set("batch",batch);Ok(view)},
                 _=>Err("UNKNOWN_RUNTIME_ACTION".into())

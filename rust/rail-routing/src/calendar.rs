@@ -456,7 +456,7 @@ pub(super) fn run(
     run_owned(Batch{token:input[0],time:input[1],remaining:input[2],max_steps:int(input[3]),budget:input[4],barrier:input[5],finance:&input[8..8+nf],trace:true},calendar_state,cycle_state,cycle_bytes,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state,&mut |_,_,_,_|false).wire
 }
 pub(super) struct Batch<'a>{pub token:f64,pub time:f64,pub remaining:f64,pub max_steps:usize,pub budget:f64,pub barrier:f64,pub finance:&'a[f64],pub trace:bool}
-pub(super) struct BatchResult{pub minute:f64,pub wire:Vec<f64>,pub definitions:Vec<(usize,usize)>,pub spawned:Vec<(usize,usize,usize)>}
+pub(super) struct BatchResult{pub minute:f64,pub wire:Vec<f64>,pub spawned:Vec<(usize,usize,usize)>}
 pub(super) fn run_owned(
     request:Batch<'_>,calendar_state:&mut Option<Calendar>,cycle_state:&mut Option<crate::cycle::Cycle>,cycle_bytes:&[u8],sampling_state:&mut Option<crate::simulation::Sampling>,feedback_cache:&mut crate::operations::CoverageCache,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<crate::queues::Queues>,settlement_state:&mut Option<crate::engine::Settlement>,profiles:&mut impl FnMut(&mut crate::cycle::Cycle,&mut crate::queues::Queues,&[usize],bool)->bool
 )->BatchResult{
@@ -471,7 +471,7 @@ pub(super) fn run_owned(
         let start = crate::engine::monotonic();
         let mut steps = 0;
         let mut reason = 0.0;
-        let mut chunks = vec![];let mut definitions=vec![];let mut spawned=vec![];
+        let mut chunks = vec![];let mut spawned=vec![];
         let mut quantum_left=remaining.min(0.1);
         while remaining > 1e-9 && steps < max {
             if if request.trace{time+quantum_left>=barrier-1e-8}else{time>=barrier-1e-8} {
@@ -672,7 +672,7 @@ pub(super) fn run_owned(
                 reason = 5.0;
                 break;
             }
-            let mut entry=11+int(result[3]);for _ in 0..int(result[4]){definitions.push((int(result[entry]),int(result[entry+1])));entry+=2;}for _ in 0..int(result[5]){spawned.push((int(result[entry]),int(result[entry+1]),int(result[entry+2])));entry+=3;}
+            let mut entry=11+int(result[3])+int(result[4])*2;for _ in 0..int(result[5]){spawned.push((int(result[entry]),int(result[entry+1]),int(result[entry+2])));entry+=3;}
             let p = 11 + int(result[3]) + int(result[4]) * 2 + int(result[5]) * 3;
             let prepared = &result[p..p + int(result[8])];
             cal.save_feedback(prepared, next);
@@ -742,7 +742,7 @@ pub(super) fn run_owned(
         let mut output = vec![1.0, steps as f64, remaining, reason, view.len() as f64];
         output.extend(chunks);
         output.extend(view);
-        BatchResult{minute:time,wire:output,definitions,spawned}
+        BatchResult{minute:time,wire:output,spawned}
 
 }
 

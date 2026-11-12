@@ -151,6 +151,64 @@ impl<'a> Read<'a> {
         )
     }
 }
+/// A validated checkpoint's variable-sized tables move into the arena bucket by bucket.
+pub(super) struct SavedCohorts {
+    queues: crate::value::Value,
+    outside: crate::value::Value,
+    wait_since: crate::value::Value,
+    outside_since: crate::value::Value,
+    transfers: crate::value::Value,
+    passengers: Vec<crate::value::Value>,
+}
+
+impl SavedCohorts {
+    pub(super) fn take(rt: &mut crate::value::Value) -> Self {
+        let passengers=rt.get_mut("trains").array_mut().iter_mut()
+            .map(|t| std::mem::take(t.get_mut("passengers"))).collect();
+        Self {
+            queues:std::mem::take(rt.get_mut("queues")), outside:std::mem::take(rt.get_mut("outside")),
+            wait_since:std::mem::take(rt.get_mut("waitSince")), outside_since:std::mem::take(rt.get_mut("outsideSince")),
+            transfers:std::mem::take(rt.get_mut("transfers")), passengers,
+        }
+    }
+    pub(super) fn install(self, q: &mut Queues, seed: &mut crate::runtime_seed::Seed) {
+        use crate::value::Value as V;
+        let entries=|v:V| match v { V::Object(rows)=>rows,_=>Vec::new() };
+        let token=|key:&str|{
+            let mut parts=key.split(':');
+            Token { j:parts.next().unwrap().parse().unwrap(),leg:parts.next().unwrap().parse().unwrap(),
+                    stamp:parts.next().map_or(-1,|s|s.parse::<usize>().unwrap() as i64) }
+        };
+        for (i,rows) in self.passengers.into_iter().enumerate() {
+            let target=&mut q.trains.get_mut(&(i+1)).unwrap().passengers;
+            for (key,count) in entries(rows) {target.set(token(&key),count.n());}
+        }
+        for (inside, buckets, timestamps) in [(true,self.queues,self.wait_since),(false,self.outside,self.outside_since)] {
+            let ages:std::collections::HashMap<_,_>=entries(timestamps).into_iter().map(|(k,v)|(k,v.n())).collect();
+            for (key,rows) in entries(buckets) {
+                let target=if inside {
+                    let mut parts=key.split('|');
+                    let service=seed.name(&V::String(parts.next().unwrap().to_owned()));
+                    q.queue((service,parts.next().unwrap().parse().unwrap(),parts.next().unwrap().parse().unwrap()))
+                } else {
+                    q.outside.entry(key.parse().unwrap()).or_insert_with(Ordered::new)
+                };
+                for (k,value) in entries(rows) {
+                    let since=ages.get(&format!("{key}#{k}")).copied().filter(|v|!v.is_nan());
+                    target.set(token(&k),Cohort{n:value.n(),since});
+                }
+            }
+        }
+        if let V::Array(rows)=self.transfers {
+            q.transfers.reserve(rows.len());
+            for t in rows {
+                q.transfers.push(Transfer { j:t.num("journey") as usize,leg:t.num("leg") as usize,
+                    n:t.num("amount"),ready:t.num("ready"),_station:t.num("station") as usize });
+            }
+        }
+    }
+}
+
 pub(super) struct Queues {
     token: f64,
     stats_protocol: bool,
@@ -233,6 +291,25 @@ impl Queues {
         }
     }
     pub(super) fn prepared_count(&self)->usize{self.prepared.len()}
+    pub(super) fn restore_directory(token: f64) -> Self {
+        let mut q = Self::new(token);
+        q.stats_protocol = true;
+        q.native_routes = true;
+        q
+    }
+    pub(super) fn insert_saved_definition(&mut self, data: &[f64]) {
+        let (id,journey) = self.read_definition(&mut Read { v: data, at: 0 });
+        self.defs.insert(id,journey);
+    }
+    pub(super) fn leg_from(&self,id:usize,leg:usize) -> Option<f64> {
+        Some(self.defs.get(&id)?.legs.get(leg)?.from as f64)
+    }
+    pub(super) fn take_directory(&mut self, other: Self) {
+        self.defs = other.defs;
+        self.leg_pool = other.leg_pool;
+        self.share_pool = other.share_pool;
+        self.line_pool = other.line_pool;
+    }
     pub(super) fn definition_count(&self) -> usize {
         self.defs.len()
     }
@@ -1221,7 +1298,7 @@ fn execute(
     execute_internal(input,None,simulation_state,queue_state,prefix,feedback,compact,initialize_only)
 }
 #[derive(Clone,Copy)]
-pub(super) struct Packet<'a>{pub header:&'a[f64],pub motion:&'a[f64],pub definitions:&'a[f64],pub limits:&'a[f64],pub trains:&'a[f64],pub snapshot:&'a[f64],pub tail:&'a[f64],pub statistics:&'a[f64]}
+pub(super) struct Packet<'a>{pub header:&'a[f64],pub motion:&'a[f64],pub definitions:&'a[f64],pub limits:&'a[f64],pub trains:&'a[f64],pub snapshot:&'a[f64],pub order:&'a[f64],pub arrivals:&'a crate::cycle::Arrivals<'a>,pub statistics:&'a[f64]}
 pub(super) fn run_parts(packet:Packet<'_>,motion:&mut Option<crate::simulation::MotionState>,queues:&mut Option<Queues>,feedback:&[(usize,[f64;4])])->Vec<f64>{execute_internal(packet.header,Some(packet),motion,queues,0,feedback,true,false)}
 fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut Option<crate::simulation::MotionState>,queue_state:&mut Option<Queues>,prefix:usize,feedback:&[(usize,[f64;4])],compact:bool,initialize_only:bool)->Vec<f64>{
     let mut r = Read { v: input, at: 0 };
@@ -1272,17 +1349,21 @@ fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut 
     if let Some(p)=parts{r=Read{v:p.trains,at:0};}
     q.read_trains(&mut r);
     if load {if let Some(p)=parts{r=Read{v:p.snapshot,at:0};}q.load(&mut r);}
-    if let Some(p)=parts{r=Read{v:p.tail,at:0};}
-    let norder = r.u();
-    let order = (0..norder).map(|_| r.u()).collect::<Vec<_>>();
-    let nop = r.u();
-    let mut ops = (0..nop)
-        .map(|_| [r.f(), r.f(), r.f(), r.f()])
-        .collect::<Vec<_>>();
-    let na = r.u();
-    let arrival_start=r.at;
-    for _ in 0..na { r.at+=3;if q.stats_protocol {let count=r.u();r.at+=count;} }
-    let arrivals=&r.v[arrival_start..r.at];
+    let (order, mut ops, na, arrivals) = if let Some(packet) = parts {
+        (packet.order.iter().map(|&id| int(id)).collect::<Vec<_>>(), Vec::new(), 0, &[][..])
+    } else {
+        let count = r.u();
+        let order = (0..count).map(|_| r.u()).collect();
+        let count = r.u();
+        let ops = (0..count).map(|_| [r.f(), r.f(), r.f(), r.f()]).collect();
+        let count = r.u();
+        let start = r.at;
+        for _ in 0..count {
+            r.at += 3;
+            if q.stats_protocol { let lines = r.u(); r.at += lines; }
+        }
+        (order, ops, count, &r.v[start..r.at])
+    };
     if let Some(p)=parts{r=Read{v:p.statistics,at:0};}
     if q.stats_protocol {
         let mode = r.f();
@@ -1344,21 +1425,30 @@ fn execute_internal(input:&[f64],parts:Option<Packet<'_>>,simulation_state:&mut 
         if gates {
             q.gates();
         }
-        let mut arrival_reader=Read{v:arrivals,at:0};
-        for _ in 0..na {
-            let a=[arrival_reader.f(),arrival_reader.f(),arrival_reader.f()];
-            let lines=if q.stats_protocol {let count=arrival_reader.u();let lines=&arrival_reader.v[arrival_reader.at..arrival_reader.at+count];arrival_reader.at+=count;lines}else{&[]};
-            if a[2] <= 0.0 {
-                continue;
-            }
-            q.inc(0, a[2]);
-            if q.stats_protocol {
-                if let Some(stats)=&mut q.stats {let lines=lines.iter().map(|id|int(*id)).collect::<Vec<_>>();stats.event(0,&lines,0.0,&[],a[2],0.0,None,None);}
-            }else{q.cmd(1.0,&[0.0,a[1],a[2],0.0,-1.0,-1.0]);}
-            if a[0] < 0.0 {
-                q.inc(4, a[2]);
+        let stats_protocol = q.stats_protocol;
+        let mut admit = |journey: f64, index: f64, amount: f64, lines: &[f64]| {
+            if amount <= 0.0 { return; }
+            q.inc(0, amount);
+            if stats_protocol {
+                if let Some(stats) = &mut q.stats {
+                    let lines = lines.iter().map(|&id| int(id)).collect::<Vec<_>>();
+                    stats.event(0, &lines, 0.0, &[], amount, 0.0, None, None);
+                }
             } else {
-                q.admit(int(a[0]), 0, a[2], false);
+                q.cmd(1.0, &[0.0, index, amount, 0.0, -1.0, -1.0]);
+            }
+            if journey < 0.0 { q.inc(4, amount); } else { q.admit(int(journey), 0, amount, false); }
+        };
+        if let Some(packet) = parts {
+            packet.arrivals.visit(|journey,index,amount,lines| admit(journey,index as f64,amount,lines));
+        } else {
+            let mut r = Read { v: arrivals, at: 0 };
+            for _ in 0..na {
+                let (journey, index, amount) = (r.f(), r.f(), r.f());
+                let count = if stats_protocol { r.u() } else { 0 };
+                let lines = &r.v[r.at..r.at + count];
+                r.at += count;
+                admit(journey, index, amount, lines);
             }
         }
         for (&id, row) in order.iter().zip(motion.chunks_exact(8)) {
@@ -1556,6 +1646,70 @@ impl Queues{
         let onboard=self.trains.values().fold(0.0,|sum,t|sum+t.onboard);
         obj(&[("minute",n(self.now)),("summary",obj(&[("waiting",n(inside+external+transferring)),("inside",n(inside+transferring)),("outside",n(external)),("transferring",n(transferring)),("onboard",n(onboard))])),("queues",queues),("outside",outside),("transfers",arr(transfers)),("stations",stations)])
     }
+    pub(super) fn definition_view(&self, names: &[String], id: usize) -> crate::value::Value {
+        use crate::editor_support::*;
+        use crate::value::Value as V;
+        let j = &self.defs[&id];
+        let name = |index: usize| names.get(index).cloned().unwrap_or_default();
+        let by_line=V::Object(j.byline.iter().map(|(id,v)|(name(*id),n(f64::from_bits(*v)))).collect());let legs=j.legs.iter().map(|l|obj(&[("service",text(&name(l.service))),("dir",n(l.dir as f64)),("from",n(l.from as f64)),("to",n(l.to as f64))])).collect();let mut row=obj(&[("id",n(id as f64)),("legs",arr(legs)),("daily",n(0.0)),("fare",n(j.fare)),("purpose",text(["work","shopping","leisure"][j.purpose])),("lineIds",arr(j.line_ids.iter().map(|id|text(&name(*id))).collect())),("byLine",by_line)]);if let Some(c)=&j.contract{row.set("from",n(c.from));row.set("to",n(c.to));row.set("back",boolean(c.back));row.set("hub",c.hub.map_or(V::Null,|i|text(&name(i))));row.set("externalKind",c.kind.map_or(V::Null,|i|text(&name(i))));}row
+    }
+
+    pub(super) fn snapshot_page(&self, names: &[String], trains: &std::collections::HashMap<usize,String>,
+        daily: &std::collections::HashMap<usize,f64>, input: &crate::value::Value) -> Result<crate::value::Value,String> {
+        use crate::editor_support::*;
+        use crate::value::Value as V;
+        let start = input.num("offset");
+        if !start.is_finite() || start < 0.0 || start.fract() != 0.0 { return Err("INVALID_PAGE_OFFSET".into()); }
+        let start = start as usize;
+        let limit = 1024;
+        let key = input.get("key").text();
+        let token = |t: Token| if t.stamp >= 0 { format!("{}:{}:{}",t.j,t.leg,t.stamp) } else { format!("{}:{}",t.j,t.leg) };
+        let mut rows = Vec::new();
+        let len = match input.get("field").text() {
+            "defs" => {
+                let len = self.defs.len();
+                for id in start..len.min(start.saturating_add(limit)) {
+                    let mut row = self.definition_view(names,id);
+                    row.set("daily", n(daily.get(&id).copied().unwrap_or(0.0)));
+                    rows.push(row);
+                }
+                len
+            }
+            "transfers" => {
+                for t in self.transfers.iter().skip(start).take(limit) {
+                    rows.push(obj(&[("journey",n(t.j as f64)),("leg",n(t.leg as f64)),("amount",n(t.n)),("ready",n(t.ready)),("station",n(t._station as f64))]));
+                }
+                self.transfers.len()
+            }
+            "passengers" => {
+                let uid = trains.iter().find(|(_,name)|name.as_str()==key).map(|(uid,_)|uid).ok_or("UNKNOWN_TRAIN")?;
+                let cargo = self.trains.get(uid).ok_or("UNKNOWN_TRAIN")?;
+                for (t,amount) in cargo.passengers.rows.iter().skip(start).take(limit).flatten() {
+                    rows.push(arr(vec![text(&token(*t)),n(*amount)]));
+                }
+                cargo.passengers.rows.len()
+            }
+            field @ ("queues" | "outside") => {
+                let bucket = if field=="outside" {
+                    key.parse().ok().and_then(|station|self.outside.get(&station))
+                } else {
+                    let mut parts = key.rsplitn(3,'|');
+                    let station = parts.next().and_then(|s|s.parse().ok());
+                    let dir = parts.next().and_then(|s|s.parse().ok());
+                    let line = parts.next().and_then(|s|names.iter().position(|name|name==s));
+                    line.zip(dir).zip(station).and_then(|((l,d),s)|self.queues.get(&(l,d,s)))
+                }.ok_or("UNKNOWN_PASSENGER_QUEUE")?;
+                for (t,c) in bucket.rows.iter().skip(start).take(limit).flatten() {
+                    rows.push(arr(vec![text(&token(*t)),n(c.n),c.since.map_or(V::Null,n)]));
+                }
+                bucket.rows.len()
+            }
+            _ => return Err("UNKNOWN_SNAPSHOT_FIELD".into()),
+        };
+        let end = start.saturating_add(limit).min(len);
+        Ok(crate::value::object([("rows",arr(rows)),("next",if end<len { n(end as f64) } else { V::Null })]))
+    }
+
     pub(super) fn object_view(&self,names:&[String],ids:&std::collections::HashMap<usize,String>,full:bool)->crate::value::Value{
         use crate::editor_support::*;use crate::value::Value as V;
         let name=|id:usize|names.get(id).cloned().unwrap_or_default();let token=|t:Token|if t.stamp>=0{format!("{}:{}:{}",t.j,t.leg,t.stamp)}else{format!("{}:{}",t.j,t.leg)};
@@ -1567,7 +1721,7 @@ impl Queues{
         let mut transfers=vec![];for x in &self.transfers{nt+=x.n;let station=x._station.to_string();stations.set(&station,n(stations.zero(&station)+x.n));if full{transfers.push(obj(&[("journey",n(x.j as f64)),("leg",n(x.leg as f64)),("amount",n(x.n)),("ready",n(x.ready)),("station",n(x._station as f64))]));}}
         let trains=self.trains.iter().map(|(&uid,t)|{nb+=t.onboard;let mut passengers=V::Object(vec![]);if full{for(tok,v)in t.passengers.rows.iter().flatten(){passengers.set(&token(*tok),n(*v));}}obj(&[("uid",n(uid as f64)),("id",text(ids.get(&uid).map_or("",|s|s.as_str()))),("service",text(&name(t.service))),("parentLine",text(&name(t.parent))),("capacity",n(t.capacity)),("onboard",n(t.onboard)),("dir",n(t.dir as f64)),("loop",boolean(t.is_loop)),("stops",arr(t.stops.iter().map(|i|n(*i as f64)).collect())),("callStops",arr(t.stops.iter().filter(|id|t.calls.contains(*id)).map(|i|n(*i as f64)).collect())),("passengers",passengers)])}).collect();
         result.set("trains",arr(trains));result.set("stationOccupancy",V::Object(self.occupancy.iter().map(|(id,v)|(id.to_string(),n(*v))).collect()));
-        if full{result.set("queues",queues);result.set("waitSince",wait);result.set("outside",outside);result.set("outsideSince",outside_since);result.set("transfers",arr(transfers));let mut definitions=vec![];for id in 0..self.defs.len(){let Some(j)=self.defs.get(&id)else{continue};let by_line=V::Object(j.byline.iter().map(|(id,v)|(name(*id),n(f64::from_bits(*v)))).collect());let legs=j.legs.iter().map(|l|obj(&[("service",text(&name(l.service))),("dir",n(l.dir as f64)),("from",n(l.from as f64)),("to",n(l.to as f64))])).collect();let mut row=obj(&[("id",n(id as f64)),("legs",arr(legs)),("daily",n(0.0)),("fare",n(j.fare)),("purpose",text(["work","shopping","leisure"][j.purpose])),("lineIds",arr(j.line_ids.iter().map(|id|text(&name(*id))).collect())),("byLine",by_line)]);if let Some(c)=&j.contract{row.set("from",n(c.from));row.set("to",n(c.to));row.set("back",boolean(c.back));row.set("hub",c.hub.map_or(V::Null,|i|text(&name(i))));row.set("externalKind",c.kind.map_or(V::Null,|i|text(&name(i))));}definitions.push(row);}result.set("defs",arr(definitions));}
+        if full{result.set("queues",queues);result.set("waitSince",wait);result.set("outside",outside);result.set("outsideSince",outside_since);result.set("transfers",arr(transfers));let definitions=(0..self.defs.len()).map(|id|self.definition_view(names,id)).collect();result.set("defs",arr(definitions));}
         else{result.set("nativeView",obj(&[("minute",n(self.now)),("summary",obj(&[("waiting",n(ni+no+nt)),("inside",n(ni+nt)),("outside",n(no)),("transferring",n(nt)),("onboard",n(nb))])),("queues",queues),("outside",outside),("transfers",arr(transfers)),("stations",stations)]));}
         result
     }
@@ -1598,6 +1752,27 @@ impl Queues{
 #[cfg(test)]
 mod projection_tests{
     use super::*;use crate::{editor_support::*,value::{self,Value as V}};
+    #[test]
+    fn snapshot_pages_preserve_sparse_queue_slots_and_wait_timestamps() {
+        let mut q = Queues::new(1.0);
+        let queue = q.queue((0,1,4));
+        for j in 0..1027 {
+            queue.set(Token{j,leg:1,stamp:7}, Cohort{n:j as f64 + 0.5,since:Some(6.0)});
+        }
+        queue.remove(Token{j:10,leg:1,stamp:7});
+        let names = vec!["s0".to_string()];
+        let page = |offset| q.snapshot_page(&names,&Default::default(),&Default::default(),
+            &obj(&[("field",text("queues")),("key",text("s0|1|4")),("offset",n(offset))])).unwrap();
+        let first=page(0.0);
+        assert_eq!(first.get("rows").array().len(),1023);
+        let last=page(first.num("next"));
+        assert!(matches!(last.get("next"),V::Null));
+        let row=&last.get("rows").array()[0];
+        assert_eq!(row.array()[0].text(),"1024:1:7");
+        assert_eq!((row.array()[1].n(),row.array()[2].n()),(1024.5,6.0));
+        assert_eq!(last.get("rows").array().len(),3);
+    }
+
     #[test]
     fn arena_compaction_preserves_order_ages_transfers_and_cargo(){
         let mut q=Queues::new(1.0);for id in 0..3{q.defs.insert(id,Journey{contract:None,fare:180.0+id as f64,purpose:0,byline:Rc::from(vec![]),line_ids:Rc::from(vec![0]),legs:Rc::from(vec![Leg{service:0,dir:1,from:1,to:2,valid:true}])});}

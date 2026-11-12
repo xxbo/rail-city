@@ -300,10 +300,6 @@ fn field<'a>(v: &'a V, key: &str, index: usize) -> &'a V {
 fn legs(j: &V) -> &V {
     field(j, "legs", 3)
 }
-fn journey<'a>(defs: &'a V, k: &str) -> Option<(&'a V, Vec<usize>)> {
-    let a = token(k)?;
-    Some((defs.array().get(a[0])?, a))
-}
 fn queue_key(k: &str) -> Option<usize> {
     let a = k.split('|').collect::<Vec<_>>();
     if a.len() != 3 || !matches!(a[1], "1" | "-1") {
@@ -408,7 +404,7 @@ pub(super) fn mass(r: &V) -> bool {
 }
 // Header checks are also usable before a forecast has been reconstructed.
 fn header(s: &V,r: &V)->bool{header_at(s,r,420.0)}
-fn header_at(s: &V, r: &V, earliest:f64) -> bool {
+pub(super) fn header_at(s: &V, r: &V, earliest:f64) -> bool {
     if !object(r)
         || !finite(r.get("minute"))
         || r.num("minute") < earliest
@@ -478,12 +474,32 @@ fn header_at(s: &V, r: &V, earliest:f64) -> bool {
     mass(r)
 }
 fn restore(s:&V,plan:&V,r:&V,defs:&V,cfg:&V)->bool{restore_at(s,plan,r,defs,cfg,420.0)}
-fn restore_at(s: &V, plan: &V, r: &V, defs: &V, cfg: &V, earliest:f64) -> bool {
-    if !header_at(s, r, earliest) {
-        return false;
-    }
+pub(super) fn valid_saved_definition(s: &V, plan: &V, i: usize, j: &V) -> bool {
     let services = plan.get("services").array();
-    let archives = r.get("routeArchives");
+    field(j, "id", 0).n() == i as f64
+        && positive(field(j, "daily", 1))
+        && positive(field(j, "fare", 2))
+        && array(legs(j))
+        && !legs(j).array().is_empty()
+        && legs(j).array().iter().all(|e| {
+            [1.0, -1.0].contains(&field(e, "dir", 1).n())
+                && node(s, field(e, "from", 2))
+                && node(s, field(e, "to", 3))
+                && (field(j, "daily", 1).n() <= 0.0
+                    || services.iter().any(|l| {
+                        eq(l.get("id"), field(e, "service", 0))
+                            && l.get("stops")
+                                .array()
+                                .iter()
+                                .any(|n| eq(n, field(e, "from", 2)))
+                            && l.get("stops")
+                                .array()
+                                .iter()
+                                .any(|n| eq(n, field(e, "to", 3)))
+                    }))
+        })
+}
+pub(super) fn restore_at(s: &V, plan: &V, r: &V, defs: &V, cfg: &V, earliest:f64) -> bool {
     let saved_defs = r.get("urbanDefs");
     let native_defs =
         s.get("urban").truth() && (saved_defs.truth() || r.get("hasUrbanDefs").truth());
@@ -493,35 +509,22 @@ fn restore_at(s: &V, plan: &V, r: &V, defs: &V, cfg: &V, earliest:f64) -> bool {
         defs
     };
     if native_defs
-        && (!array(defs)
-            || defs.array().len() > 300000
-            || !defs.array().iter().enumerate().all(|(i, j)| {
-                field(j, "id", 0).n() == i as f64
-                    && positive(field(j, "daily", 1))
-                    && positive(field(j, "fare", 2))
-                    && array(legs(j))
-                    && !legs(j).array().is_empty()
-                    && legs(j).array().iter().all(|e| {
-                        [1.0, -1.0].contains(&field(e, "dir", 1).n())
-                            && node(s, field(e, "from", 2))
-                            && node(s, field(e, "to", 3))
-                            && (field(j, "daily", 1).n() <= 0.0
-                                || services.iter().any(|l| {
-                                    eq(l.get("id"), field(e, "service", 0))
-                                        && l.get("stops")
-                                            .array()
-                                            .iter()
-                                            .any(|n| eq(n, field(e, "from", 2)))
-                                        && l.get("stops")
-                                            .array()
-                                            .iter()
-                                            .any(|n| eq(n, field(e, "to", 3)))
-                                }))
-                    })
-            }))
+        && (!array(defs) || defs.array().len() > 300000
+            || !defs.array().iter().enumerate().all(|(i,j)| valid_saved_definition(s,plan,i,j)))
     {
         return false;
     }
+    validate_cohorts(s,plan,r,cfg,earliest,|id,leg| {
+        let row = defs.array().get(id)?;
+        let stop = legs(row).array().get(leg)?;
+        Some(field(stop,"from",2).n())
+    })
+}
+pub(super) fn validate_cohorts(s: &V, plan: &V, r: &V, cfg: &V, earliest: f64,
+    leg_from: impl Fn(usize,usize) -> Option<f64>) -> bool {
+    if !header_at(s,r,earliest) { return false; }
+    let services = plan.get("services").array();
+    let archives = r.get("routeArchives");
     let mut onboard = 0.0;
     for t in r.get("trains").array() {
         let l = if t.get("retiringRun").truth() {
@@ -590,7 +593,7 @@ fn restore_at(s: &V, plan: &V, r: &V, defs: &V, cfg: &V, earliest:f64) -> bool {
             return false;
         }
         for (k, _) in t.get("passengers").entries() {
-            if !journey(defs, k).is_some_and(|(j, t)| t[1] < legs(j).array().len()) {
+            if !token(k).is_some_and(|t| leg_from(t[0],t[1]).is_some()) {
                 return false;
             }
         }
@@ -606,7 +609,7 @@ fn restore_at(s: &V, plan: &V, r: &V, defs: &V, cfg: &V, earliest:f64) -> bool {
             return false;
         }
         for (k, n) in q.entries() {
-            if !journey(defs, k).is_some_and(|(j, t)| t[1] < legs(j).array().len()) || !positive(n)
+            if !token(k).is_some_and(|t| leg_from(t[0],t[1]).is_some()) || !positive(n)
             {
                 return false;
             }
@@ -615,8 +618,8 @@ fn restore_at(s: &V, plan: &V, r: &V, defs: &V, cfg: &V, earliest:f64) -> bool {
         }
     }
     for x in r.get("transfers").array() {
-        let j = at(defs, x.get("journey"));
-        if !at(legs(j), x.get("leg")).truth()
+        if !integer(x.get("journey")) || x.num("journey") < 0.0 || !integer(x.get("leg")) || x.num("leg") < 0.0
+            || leg_from(x.num("journey") as usize,x.num("leg") as usize).is_none()
             || !positive(x.get("amount"))
             || !finite(x.get("ready"))
             || !node(s, x.get("station"))
@@ -635,13 +638,8 @@ fn restore_at(s: &V, plan: &V, r: &V, defs: &V, cfg: &V, earliest:f64) -> bool {
         }
         let mut count = 0.0;
         for (k, value) in q.entries() {
-            let Some((j, t)) = journey(defs, k) else {
-                return false;
-            };
-            if !eq(
-                field(at(legs(j), &n(t[1] as f64)), "from", 2),
-                &n(id_num as f64),
-            ) || !positive(value)
+            let Some(t) = token(k) else { return false; };
+            if leg_from(t[0],t[1]) != Some(id_num as f64) || !positive(value)
                 || !finite(r.get("outsideSince").get(&format!("{id}#{k}")))
             {
                 return false;

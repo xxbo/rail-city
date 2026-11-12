@@ -1009,7 +1009,7 @@
       ]
     },
     "rail/bootstrap-wasm.js": {
-      "sha256": "a33f10eb3db3d93beabfd6ebfbfaf22424f271e00f70bd7101703bee5058f8f7",
+      "sha256": "5bb820c0b9d6420692527336fc743d831437e0e31b699d9f1b9faad01072ff14",
       "role": "platform",
       "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
       "phase": "P3-7 bridge",
@@ -1063,8 +1063,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 14,
-          "sha256": "bcdbc3a2951cd41b9e6ebd1c0a61ee10c6a548c7d490cb32b46f93c100b24402",
+          "end": 66,
+          "sha256": "816480bf13d73e2be0f4896331dfc83e60cb6aadce0322058abe82fcc8bdbc92",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -1314,110 +1314,26 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/platform@12:20",
-          "name": "platform",
+          "id": "<iife>/runtimeCall@12:0",
+          "name": "runtimeCall",
           "line": 12,
-          "end": 12,
-          "sha256": "757418859bf755fd825b8628d477b78ad727b2b39cf619fd3ae659a3f02d1bb3",
+          "end": 16,
+          "sha256": "72be69eac3202443e91b3044a124a61f246abb3e87c38341231fbf15d5c36f43",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
           "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": true,
-          "productionReferenceCandidates": [
-            "rail/ui.js",
-            "rail/worker-client.js"
-          ],
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/viewModel@12:192",
-          "name": "viewModel",
-          "line": 12,
-          "end": 12,
-          "sha256": "1ea929ccecbd09e890ef8457783791ee279fdb9c1c431beece3bd46232a29c14",
-          "scope": [],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": true,
-          "productionReferenceCandidates": [
-            "rail/currency.js",
-            "rail/view-model.js"
-          ],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/persistence@12:373",
-          "name": "persistence",
-          "line": 12,
-          "end": 12,
-          "sha256": "06b9b0997d208b74af87d66da872c06151772ea1d989b494cf0f10b1e103dbe5",
-          "scope": [],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": true,
-          "productionReferenceCandidates": [
-            "rail/local-save.js",
-            "rail/ridership.js",
-            "rail/save-queue.js",
-            "rail/save-store.js",
-            "rail/save-worker.js",
-            "rail/ui.js"
-          ],
-          "testReferenceCandidates": [
-            "scripts/test_rail_p3_regressions.cjs"
-          ],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/legacyOperations@12:555",
-          "name": "legacyOperations",
-          "line": 12,
-          "end": 12,
-          "sha256": "547e01a49f699cce9a5ff60016e433be431c63b2947bd027cc04203dc45be38d",
-          "scope": [],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": true,
-          "productionReferenceCandidates": [
-            "rail/operations.js"
-          ],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/compat@12:729",
-          "name": "compat",
-          "line": 12,
-          "end": 12,
-          "sha256": "c5eafff128e6132126b09f68717d16b666eca83bca91269a2541fb005b48a9d7",
-          "scope": [],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": true,
-          "productionReferenceCandidates": [
-            "rail/city-development.js",
-            "rail/city.js",
-            "rail/engine.js",
-            "rail/management.js",
-            "rail/operations.js",
-            "rail/urban-growth.js"
-          ],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/runtime@12:909",
+          "id": "<iife>/runtime@17:0",
           "name": "runtime",
-          "line": 12,
-          "end": 12,
-          "sha256": "056b54c68ef945d66e5557bc64ade9000c8ca054905976b09b500f0a6e3bb69b",
+          "line": 17,
+          "end": 63,
+          "sha256": "8ebf3b7f80abcdccf771a02c26d713960e93658a4a63391a49b15f711875878a",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -1447,10 +1363,204 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/clock@12:1076",
+          "id": "<iife>/runtime/read@38:1",
+          "name": "read",
+          "line": 38,
+          "end": 45,
+          "sha256": "d193707e7a0ceb027f614f376a60cbfa54474ba693459ed418cd92fcd2024b8f",
+          "scope": [
+            "runtime"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [
+            "rail/routing-wasm.js",
+            "rail/save-store.js",
+            "rail/tokyo-data.js",
+            "rail/ui.js",
+            "rail/value-wire.js"
+          ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_map25.cjs",
+            "scripts/test_rail_map34.cjs",
+            "scripts/test_rail_map40.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/runtime/<callback:46:29>@46:29",
+          "name": "<callback:46:29>",
+          "line": 46,
+          "end": 46,
+          "sha256": "06fff32961c573b4c62e93a44874229d8b7baec3a79bdd8463546f58babb4df2",
+          "scope": [
+            "runtime"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/runtime/<callback:47:39>@47:39",
+          "name": "<callback:47:39>",
+          "line": 47,
+          "end": 47,
+          "sha256": "acc4921d0ebc1a6dd6fc550f7d8960d10a9ef225723f4241386cb6c596750bd8",
+          "scope": [
+            "runtime"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/runtime/<callback:52:18>@52:18",
+          "name": "<callback:52:18>",
+          "line": 52,
+          "end": 55,
+          "sha256": "04d5ae5a0e0eb822d1901d4ed9637864bf3dbeae75165666f93c5b0b2c24b721",
+          "scope": [
+            "runtime"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/runtime/<callback:59:49>@59:49",
+          "name": "<callback:59:49>",
+          "line": 59,
+          "end": 59,
+          "sha256": "b01ce644e872d519087b10f074d0eba6dc493e64f19cc5b13e08fe5448350e76",
+          "scope": [
+            "runtime"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/platform@64:20",
+          "name": "platform",
+          "line": 64,
+          "end": 64,
+          "sha256": "757418859bf755fd825b8628d477b78ad727b2b39cf619fd3ae659a3f02d1bb3",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/ui.js",
+            "rail/worker-client.js"
+          ],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/viewModel@64:192",
+          "name": "viewModel",
+          "line": 64,
+          "end": 64,
+          "sha256": "1ea929ccecbd09e890ef8457783791ee279fdb9c1c431beece3bd46232a29c14",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/currency.js",
+            "rail/view-model.js"
+          ],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/persistence@64:373",
+          "name": "persistence",
+          "line": 64,
+          "end": 64,
+          "sha256": "06b9b0997d208b74af87d66da872c06151772ea1d989b494cf0f10b1e103dbe5",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/local-save.js",
+            "rail/ridership.js",
+            "rail/save-queue.js",
+            "rail/save-store.js",
+            "rail/save-worker.js",
+            "rail/ui.js"
+          ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_p3_regressions.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/legacyOperations@64:555",
+          "name": "legacyOperations",
+          "line": 64,
+          "end": 64,
+          "sha256": "547e01a49f699cce9a5ff60016e433be431c63b2947bd027cc04203dc45be38d",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/operations.js"
+          ],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/compat@64:729",
+          "name": "compat",
+          "line": 64,
+          "end": 64,
+          "sha256": "c5eafff128e6132126b09f68717d16b666eca83bca91269a2541fb005b48a9d7",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/city-development.js",
+            "rail/city.js",
+            "rail/engine.js",
+            "rail/management.js",
+            "rail/operations.js",
+            "rail/urban-growth.js"
+          ],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/clock@64:915",
           "name": "clock",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "1eda27b330b997f563c2874a7eb526549b9c40ee0bba7cd6c8720bcbd28f18aa",
           "scope": [],
           "role": "platform",
@@ -1472,10 +1582,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecast@12:1272",
+          "id": "<iife>/forecast@64:1111",
           "name": "forecast",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "2a988961fe06ff4cfd3ad7920f7d25dd0c09c3f61a9ebb253c416b9c82cb7cbe",
           "scope": [],
           "role": "platform",
@@ -1528,10 +1638,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/prepareStart@12:1474",
+          "id": "<iife>/prepareStart@64:1313",
           "name": "prepareStart",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "a2bdf876942f6563dacfbe46db4c7a71facfd32e2eaba815feff6fcec3e3204e",
           "scope": [],
           "role": "platform",
@@ -1547,10 +1657,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/commitStart@12:1522",
+          "id": "<iife>/commitStart@64:1361",
           "name": "commitStart",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "9b7571234ca92e9242e90f5474ee2e5c71ec7c58dbf9be088eec9d82c9b0a9da",
           "scope": [],
           "role": "platform",
@@ -1566,10 +1676,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cancelStart@12:1573",
+          "id": "<iife>/cancelStart@64:1412",
           "name": "cancelStart",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "a20f22b65a929992db140ead43f33d2e1ebca2f726252de5ac20b4c8e3271ed1",
           "scope": [],
           "role": "platform",
@@ -1585,10 +1695,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/geo@12:1616",
+          "id": "<iife>/geo@64:1455",
           "name": "geo",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "1a276a9b35f04c1d2e120c7a4aa264c920889ab22e653f96c7b1a773fa2fddff",
           "scope": [],
           "role": "platform",
@@ -1603,10 +1713,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/start@12:1681",
+          "id": "<iife>/start@64:1520",
           "name": "start",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "fe6711926b92bf4d35cb34b923a70ba473e16f3e64e2169fdf1c60f2e9f4a501",
           "scope": [],
           "role": "platform",
@@ -1638,10 +1748,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/query@12:1878",
+          "id": "<iife>/query@64:1717",
           "name": "query",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "b8f38b461707bbcbc147941b3fbb830e017aeea3d792dd97b7915184a57a2d65",
           "scope": [],
           "role": "platform",
@@ -1680,10 +1790,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/decode@12:1955",
+          "id": "<iife>/decode@64:1794",
           "name": "decode",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "5e21c90ede2262677ab556fb62a31669a0d7879de317ba0f82d0c63f9fe632af",
           "scope": [],
           "role": "platform",
@@ -1708,10 +1818,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/memoryBytes@12:2006",
+          "id": "<iife>/memoryBytes@64:1845",
           "name": "memoryBytes",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "bae6c5e35614c12204cd6bdd461918f096204fa57b091d112897c9cd3e5ec4f2",
           "scope": [],
           "role": "platform",
@@ -1727,10 +1837,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/ensure@12:2045",
+          "id": "<iife>/ensure@64:1884",
           "name": "ensure",
-          "line": 12,
-          "end": 12,
+          "line": 64,
+          "end": 64,
           "sha256": "0d3a35cb8ee1ca2e6ed9f8dc663ab6583cbc69b09f7fe54073c67bc3ee3ea86e",
           "scope": [],
           "role": "platform",
@@ -9634,6 +9744,7 @@
           "owner": "Rust ForecastOwner; opaque handles and immutable projections",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
+            "rail/bootstrap-wasm.js",
             "rail/city.js"
           ],
           "testReferenceCandidates": [],
@@ -12614,6 +12725,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/assets-wasm.js",
+            "rail/bootstrap-wasm.js",
             "rail/bounded-cache.js",
             "rail/city-development.js",
             "rail/demand-kernels.js",
@@ -12824,6 +12936,7 @@
           "owner": "Interface, visual geometry and private display preferences",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
+            "rail/bootstrap-wasm.js",
             "rail/diagnostic-snapshot.js",
             "rail/diagnostics-wasm.js",
             "rail/history-wasm.js",
@@ -23119,6 +23232,7 @@
           "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
+            "rail/bootstrap-wasm.js",
             "rail/routing-wasm.js",
             "rail/tokyo-data.js",
             "rail/ui.js",
@@ -25043,6 +25157,7 @@
           "productionReferenceCandidates": [
             "rail/alerts.js",
             "rail/assets-wasm.js",
+            "rail/bootstrap-wasm.js",
             "rail/city.js",
             "rail/connection-model.js",
             "rail/demand-kernels.js",
@@ -26717,6 +26832,7 @@
           "owner": "Rust configuration/geography initialization; compatibility view accessor",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
+            "rail/bootstrap-wasm.js",
             "rail/routing-wasm.js",
             "rail/save-store.js",
             "rail/ui.js",
@@ -29563,6 +29679,7 @@
           "productionReferenceCandidates": [
             "rail/alerts.js",
             "rail/assets-wasm.js",
+            "rail/bootstrap-wasm.js",
             "rail/bounded-cache.js",
             "rail/diagnostics-wasm.js",
             "rail/editor-wasm.js",
@@ -36754,6 +36871,7 @@
           "owner": "Rust codecs and ABI",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
+            "rail/bootstrap-wasm.js",
             "rail/routing-wasm.js",
             "rail/save-store.js",
             "rail/tokyo-data.js",
