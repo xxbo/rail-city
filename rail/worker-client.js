@@ -31,8 +31,8 @@ function create(options){
   }
   return current;
  }
- function request(payload){let current,job;try{current=start();job=call('request');}catch(error){return Promise.reject(error);}
-  return new Promise((resolve,reject)=>{const timer=schedule(()=>stop('timeout',Error(options.timeoutMessage||'后台任务超时。'),job.epoch,job.ticket),job.timeout);jobs.set(job.ticket,{resolve,reject,timer});try{current.postMessage({...payload,id:job.ticket});}catch(error){if(call('settle',{epoch:job.epoch,ticket:job.ticket}))remove(job.ticket)?.reject(error);}});
+ function request(payload,transfer=[]){let current,job;try{current=start();job=call('request');}catch(error){return Promise.reject(error);}
+  return new Promise((resolve,reject)=>{const timer=schedule(()=>stop('timeout',Error(options.timeoutMessage||'后台任务超时。'),job.epoch,job.ticket),job.timeout);jobs.set(job.ticket,{resolve,reject,timer});try{current.postMessage({...payload,id:job.ticket},transfer);}catch(error){if(call('settle',{epoch:job.epoch,ticket:job.ticket}))remove(job.ticket)?.reject(error);}});
  }
  return {request,start,offer:()=>call('offer'),get active(){return call('status').active;},get pending(){return call('status').pending;},dispose(){stop('dispose',Error('后台客户端已关闭。'));}};
 }

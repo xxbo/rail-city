@@ -3,7 +3,30 @@
 const modules=()=>({Core:node?require('./routing-wasm'):root.RailRouting,Wire:node?require('./value-wire'):root.RailValueWire});
 function session(op,args){const out=call('session_contract',{protocolVersion:1,op,...args});if(!out.ok)throw Error(out.error.code);return {...out.result,sessionId:out.sessionId,revision:out.revision};}
 let workspace;function call(name,value){const{Core,Wire}=modules();workspace||=Core.createWorkspace();const packet=Wire.encodePacked(value);return Wire.decodePacked(workspace.kernel(name==='bootstrap_run'?'bootstrap_packed':'session_packed',packet.values,packet.bytes)).value;}
-function forecastExport(id,flowOnly=false){const{Core,Wire}=modules();workspace||=Core.createWorkspace();const packet=workspace.kernel('forecast_numeric_export',Float64Array.of(id,+flowOnly),new Uint8Array(0)),split=1+packet.values[0],dto=Wire.decodePacked({values:packet.values.subarray(1,split),bytes:packet.bytes}).value;if(dto.error)throw Error(dto.error);const tail=packet.values.subarray(split);dto.flowData=tail.subarray(0,dto.flowLength);dto.contractData=tail.subarray(dto.flowLength);delete dto.flowLength;return dto;}
+function forecastPage(id, revision, table, offset) {
+ const {Core}=modules();
+ workspace ||= Core.createWorkspace();
+ const page=workspace.kernel('forecast_numeric_page',Float64Array.of(id,revision,table,offset));
+ if(!page.length)throw Error('INVALID_FORECAST_PAGE');
+ return page;
+}
+// Flat arrays remain part of the legacy diagnostic API. Assemble them on the
+// host without allocating a second full catalog in the source WASM instance.
+function forecastExport(id,flowOnly=false) {
+ const manifest=api.forecast('exportManifest',{id});
+ function read(table,length) {
+  const data=new Float64Array(length);
+  for(let at=0;at<length;) {
+   const page=forecastPage(id,manifest.revision,table,at);
+   data.set(page,at);
+   at+=page.length;
+  }
+  return data;
+ }
+ const {count,graph,hubs,effective}=manifest;
+ return {count,graph,hubs,effective,flowData:read(0,manifest.flowLength),
+  contractData:read(1,flowOnly?0:manifest.contractLength)};
+}
 function forecastBulk(action,args,values){const{Core,Wire}=modules();workspace||=Core.createWorkspace();const packet=Wire.encodePacked({action,...args}),frame=new Float64Array(1+packet.values.length+values.length);frame[0]=packet.values.length;frame.set(packet.values,1);frame.set(values,1+packet.values.length);const out=Wire.decodePacked(workspace.kernel('forecast_numeric',frame,packet.bytes)).value;if(out?.error)throw Error(out.error);return out;}
 function run(op,args={}){const out=call('bootstrap_run',{op,...args});if(out?.error)throw Error(out.error);return out;}
 function readonly(v){if(!v||typeof v!=='object'||ArrayBuffer.isView(v)||Object.isFrozen(v))return v;for(const d of Object.values(Object.getOwnPropertyDescriptors(v)))if(Object.hasOwn(d,'value'))readonly(d.value);return Object.freeze(v);}
@@ -61,6 +84,6 @@ function runtime(action,args={}){
  delete result.pagedSnapshot;
  return result;
 }
-const api={platform:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'platform',action,...args});if(!out.ok)throw Error(out.error.code);return out.result;},viewModel:(kind,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'viewModel',kind,...args});if(!out.ok)throw Error(out.error.code);return readonly(out.result);},persistence:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'persistence',action,...args});if(!out.ok)throw Error(out.error.code);return out.result;},legacyOperations:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'legacyOperations',action,args});if(!out.ok)throw Error(out.error.code);return out.result;},compat:(action,args={},state={})=>{const out=call('session_contract',{protocolVersion:1,op:'compat',action,args,state});if(!out.ok)throw Error(out.error.code);return out.result;},runtime,clock:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'clock',action,...args});if(!out.ok)throw Error(out.error.code);return out.result;},forecastExport,forecastBulk,forecast:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'forecast',action,...args});if(!out.ok)throw Error(out.error.code);return out.result;},run,settings,view,readonly,prepareStart:args=>session('prepare_start',args),commitStart:token=>session('commit_start',{token}),cancelStart:token=>session('cancel_start',{token}),geo:base=>geoViews.has(base)?{geoId:geoViews.get(base)}:{base},start:args=>{const out=call('session_contract',{protocolVersion:1,op:'start',...args});if(!out.ok)throw Error(out.error.code);return {...out.result,sessionId:out.sessionId,revision:out.revision};},query:args=>call('session_contract',{protocolVersion:1,op:'query',...args}),decode:text=>api.persistence('decode',{text}),memoryBytes:()=>workspace?.memoryBytes()||0,ensure:()=>{const{Core,Wire}=modules();if(!Core.editorReady())Core.kernel('bootstrap_run',Wire.encode({op:'installConfig'}));}};
+const api={platform:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'platform',action,...args});if(!out.ok)throw Error(out.error.code);return out.result;},viewModel:(kind,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'viewModel',kind,...args});if(!out.ok)throw Error(out.error.code);return readonly(out.result);},persistence:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'persistence',action,...args});if(!out.ok)throw Error(out.error.code);return out.result;},legacyOperations:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'legacyOperations',action,args});if(!out.ok)throw Error(out.error.code);return out.result;},compat:(action,args={},state={})=>{const out=call('session_contract',{protocolVersion:1,op:'compat',action,args,state});if(!out.ok)throw Error(out.error.code);return out.result;},runtime,clock:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'clock',action,...args});if(!out.ok)throw Error(out.error.code);return out.result;},forecastPage,forecastExport,forecastBulk,forecast:(action,args={})=>{const out=call('session_contract',{protocolVersion:1,op:'forecast',action,...args});if(!out.ok)throw Error(out.error.code);return out.result;},run,settings,view,readonly,prepareStart:args=>session('prepare_start',args),commitStart:token=>session('commit_start',{token}),cancelStart:token=>session('cancel_start',{token}),geo:base=>geoViews.has(base)?{geoId:geoViews.get(base)}:{base},start:args=>{const out=call('session_contract',{protocolVersion:1,op:'start',...args});if(!out.ok)throw Error(out.error.code);return {...out.result,sessionId:out.sessionId,revision:out.revision};},query:args=>call('session_contract',{protocolVersion:1,op:'query',...args}),decode:text=>api.persistence('decode',{text}),memoryBytes:()=>workspace?.memoryBytes()||0,ensure:()=>{const{Core,Wire}=modules();if(!Core.editorReady())Core.kernel('bootstrap_run',Wire.encode({op:'installConfig'}));}};
 if(node)module.exports=api;else root.RailBootstrap=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

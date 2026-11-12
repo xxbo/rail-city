@@ -225,7 +225,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=73') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=74') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -234,10 +234,10 @@
     }
   });
 
-  function calculate(state,snapshot) {
+  function calculate(state,snapshot,handoff='withView') {
     return demandClient.request({
-      state: snapshot || RailDemandSnapshot.capture(state)
-    }).then(message => RailForecastCatalog.hydrate(message.result));
+      handoff, state: snapshot || RailDemandSnapshot.capture(state)
+    }).then(message => RailForecastCatalog.hydrate(message.result,message.handoff));
   }
   let forecast;
   try{forecast=await calculate(s);}catch(error){const loading=$('game-loading');loading.replaceChildren();const title=document.createElement('b'),detail=document.createElement('span'),retry=document.createElement('button');title.textContent='需求线程启动失败';detail.textContent=error.message;retry.textContent='重新加载';retry.onclick=()=>location.reload();loading.append(title,detail,retry);return;}
@@ -790,7 +790,7 @@
   }
   async function refreshUrbanDemand() {
     forecastTimer=null;
-    const identity=traffic;let job,submitted=false;urbanJob=true;
+    const identity=traffic;let job,next,submitted=false;urbanJob=true;
     try{job=await M.forecastBeginAsync(identity,calculating||importing);}catch(error){urbanJob=false;demandState.status="error";demandState.error=error.message;return;}
     if(!job.needed||identity!==traffic){urbanJob=false;return;}
     memoryAudit.record('demand-start', s, forecast, traffic, saveQueue);
@@ -798,7 +798,7 @@
     $('calculation-status').hidden = false;
     $('calculation-status').textContent = '需求后台更新中' + (playing ? ' · 运营继续' : '');
     try {
-      const next = await calculate(s,job.snapshot);
+      next = await calculate(s,job.snapshot);
       await M.whenIdle(traffic);
       if(identity!==traffic)return;
       await M.replaceDemandAsync(traffic,next,job.expectedEditRevision,job.ticket);
@@ -829,6 +829,7 @@
         scheduleForecast();
       }, 10000);
     } finally {
+      if(next)RailForecastCatalog.discardHandoff(next);
       let completion={dirty:false};if(identity===traffic)try{completion=await M.forecastFinishAsync(identity,job.ticket,submitted);}catch(error){demandState.status="error";demandState.error=error.message;}
       urbanJob = false;
       if (!calculating) $('calculation-status').hidden = true;
@@ -2996,11 +2997,12 @@
     calculating=true;
     $('calculation-status').textContent='正在校验并恢复存档…';
     $('calculation-status').hidden=false;
-    let prepared,committed=false;
+    let next,prepared,committed=false;
     try{
       await saveQueue.flush();
       await M.whenIdle(identity);
-      const next=await calculate(c.state),target=B.get(c.region);
+      next=await calculate(c.state,undefined,'runtimeOnly');
+      const target=B.get(c.region);
       const previous=await DB.read(target.saveKey);
       // The worker validates the retained candidate and freezes its origin
       // before returning bytes. UI copies never become the restore authority.
@@ -3014,7 +3016,7 @@
     }catch(error){
       if(!committed&&prepared)try{await RailRuntime.cancelImport(identity,c.token);}catch{}
       importError=RailLocalSave.errorMessage(error);calculating=false;$('calculation-status').hidden=true;renderActivity();
-    }
+    }finally{if(next)RailForecastCatalog.discardHandoff(next);}
   }
 
   function patchInsightNode(old, next) {

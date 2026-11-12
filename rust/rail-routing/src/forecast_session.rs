@@ -3,6 +3,7 @@
 use crate::{editor_support::*, value::{self, Value as V}};
 use std::{collections::{BTreeMap, HashMap, VecDeque}, rc::Rc};
 const PAGE: usize = 256;
+const TRANSFER_VALUES: usize = 32 * 1024;
 const MAX_SAFE: u64 = 9_007_199_254_740_991;
 const PURPOSES: [&str; 3] = ["work", "shopping", "leisure"];
 const KINDS: [&str; 6] = ["visitor-arrival", "visitor-return", "staff-outbound", "staff-homebound", "local-departure", "local-return"];
@@ -133,11 +134,59 @@ impl Catalog {
 }
 struct Job{stamp:Vec<u64>,epoch:u64,background:bool,snapshot:Rc<V>}
 struct LegacyBuild{world:V,catalog:Option<Catalog>}
+struct IncomingCatalog {
+    manifest: V,
+    flows: Vec<f64>,
+    contracts: Vec<f64>,
+    flow_len: usize,
+    contract_len: usize,
+}
+
+impl IncomingCatalog {
+    fn begin(manifest: &V) -> Option<Self> {
+        let count = unsigned(manifest.get("count"))?;
+        let flow_len = unsigned(manifest.get("flowLength"))?;
+        let contract_len = unsigned(manifest.get("contractLength"))?;
+        if manifest.num("format") != 1.0 || count > 2_000_000
+            || flow_len < count.checked_mul(25)?
+            || contract_len < count.checked_mul(12)?.checked_add(1)?
+            || (count == 0 && (flow_len != 0 || contract_len != 1)) {
+            return None;
+        }
+        let mut flows = Vec::new();
+        let mut contracts = Vec::new();
+        flows.try_reserve_exact(flow_len).ok()?;
+        contracts.try_reserve_exact(contract_len).ok()?;
+        Some(Self { manifest: manifest.clone(), flows, contracts, flow_len, contract_len })
+    }
+
+    fn append(&mut self, table: &str, offset: usize, values: &[f64]) -> bool {
+        let (dst, length) = match table {
+            "flows" => (&mut self.flows, self.flow_len),
+            "contracts" if self.flows.len() == self.flow_len => (&mut self.contracts, self.contract_len),
+            _ => return false,
+        };
+        if offset != dst.len() || values.is_empty() || values.len() > TRANSFER_VALUES
+            || values.len() > length.saturating_sub(offset) {
+            return false;
+        }
+        dst.extend_from_slice(values);
+        true
+    }
+
+    fn finish(self) -> Option<Catalog> {
+        if self.flows.len() != self.flow_len || self.contracts.len() != self.contract_len {
+            return None;
+        }
+        Catalog::from_tables(&self.manifest, self.flows, Some(self.contracts))
+    }
+}
 struct Live { definitions:Vec<V>, index:HashMap<Vec<u64>,usize> }
 fn journey_text(j:&V)->String{crate::diagnostics::json(&arr(["legs","from","to","purpose","back","hub","externalKind","fare","byLine"].iter().map(|k|j.get(k).clone()).collect()))}
 fn journey_key(j:&V)->Vec<u64>{journey_text(j).encode_utf16().map(|c|c as u64).collect()}
 #[derive(Default)]
 pub(super) struct ForecastOwner {
+    incoming: HashMap<u64, IncomingCatalog>,
     serial:u64, builders:HashMap<u64,LegacyBuild>,catalogs:HashMap<u64,Catalog>, live:HashMap<u64,Live>,
     graphs:HashMap<u64,Rc<V>>,
     pins:HashMap<u64,usize>, deferred_release:std::collections::HashSet<u64>,
@@ -145,6 +194,21 @@ pub(super) struct ForecastOwner {
     service_cache:VecDeque<(Vec<u64>,Vec<f64>)>,
 }
 impl ForecastOwner {
+    // A reader never borrows across the WASM boundary. A daily edit invalidates
+    // the manifest so a receiver cannot mix pages from two revisions.
+    pub(super) fn transfer_page(&self, args: &[f64]) -> Option<Vec<f64>> {
+        let &[id, revision, table, offset] = args else { return None };
+        if ![id, revision, offset].iter().all(|x| x.is_finite() && *x >= 0.0 && x.fract() == 0.0)
+            || offset > usize::MAX as f64 {
+            return None;
+        }
+        let c = self.catalogs.get(&(id as u64))?;
+        if revision != c.revision as f64 { return None; }
+        let values = if table == 0.0 { &c.flows } else if table == 1.0 { &c.contracts } else { return None };
+        let offset = offset as usize;
+        if offset >= values.len() { return None; }
+        Some(values[offset..offset.saturating_add(TRANSFER_VALUES).min(values.len())].to_vec())
+    }
     pub(super) fn legacy_groups(&self,state:&V,id:u64)->V{
         let Some(c)=self.catalogs.get(&id)else{return fault("FORECAST_EXPIRED")};let mut rows:Vec<V>=vec![];let mut indices=HashMap::new();
         for &at in &c.cp{let daily=c.contracts[at+1];let mut p=at+10;for _ in 0..c.contracts[at+9]as usize{let service=named(c.graph.get("services"),c.contracts[p]);let dir=c.contracts[p+1];let from=c.contracts[p+2];let to=c.contracts[p+3];p+=4;
@@ -176,6 +240,14 @@ impl ForecastOwner {
     pub(super) fn advance_epoch(&mut self){self.epoch+=1;self.jobs.clear();self.pending=None;self.dirty=false;self.service_cache.clear();}
     pub(super) fn handle_numeric(&mut self,input:&V,data:&[f64])->V {
         let action=input.get("action").text();let dto=input.get("dto");
+        if action == "importPage" {
+            let Some(id) = unsigned(input.get("id")).map(|x| x as u64) else { return fault("INVALID_FORECAST_HANDLE") };
+            let Some(offset) = unsigned(input.get("offset")) else { return fault("INVALID_FORECAST_PAGE") };
+            if self.incoming.get_mut(&id).is_some_and(|build| build.append(input.get("table").text(), offset, data)) {
+                return V::Null;
+            }
+            return fault("INVALID_FORECAST_PAGE");
+        }
         if action!="attach"&&action!="attachOutput"{return fault("UNKNOWN_FORECAST_NUMERIC_OPERATION");}
         let Some(count)=unsigned(dto.get("count"))else{return fault("INVALID_FORECAST_CATALOG")};
         if count>2_000_000{return fault("INVALID_FORECAST_CATALOG");}
@@ -195,6 +267,12 @@ impl ForecastOwner {
     }
     pub(super) fn handle(&mut self,input:&V)->V {
         let op=input.get("action").text();
+        if op == "importBegin" {
+            let Some(build) = IncomingCatalog::begin(input.get("manifest")) else { return fault("INVALID_FORECAST_MANIFEST") };
+            let Some(id) = self.next() else { return fault("FORECAST_TOKEN_LIMIT") };
+            self.incoming.insert(id, build);
+            return obj(&[("id", n(id as f64)), ("pageValues", n(TRANSFER_VALUES as f64))]);
+        }
         if op=="cityIdentity"{return self.next().map_or_else(||fault("FORECAST_TOKEN_LIMIT"),|id|n(id as f64));}
         if op=="journeyKey"{return text(&journey_text(input.get("journey")));}
         if op=="graphFrame"{let frame=graph_frame(input);if frame.get("error").truth(){return frame;}let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let mut out=frame.clone();out.set("id",n(id as f64));self.graphs.insert(id,Rc::new(frame));return out;}
@@ -237,6 +315,13 @@ impl ForecastOwner {
             let definitions=input.get("definitions").array().to_vec();let index=definitions.iter().enumerate().map(|(i,j)|(journey_key(j),i)).collect();let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};self.live.insert(id,Live{definitions,index});return n(id as f64);
         }
         let Some(id)=unsigned(input.get("id")).map(|x|x as u64)else{return fault("INVALID_FORECAST_HANDLE")};
+        if op == "importCancel" { self.incoming.remove(&id); return V::Null; }
+        if op == "importFinish" {
+            let Some(catalog) = self.incoming.remove(&id).and_then(IncomingCatalog::finish) else { return fault("INVALID_FORECAST_CATALOG") };
+            let descriptor = catalog.descriptor(id);
+            self.catalogs.insert(id, catalog);
+            return descriptor;
+        }
         if op=="release"{if self.pins.get(&id).copied().unwrap_or(0)>0{self.deferred_release.insert(id);return boolean(true);}self.catalogs.remove(&id);self.live.remove(&id);self.graphs.remove(&id);return boolean(true);}
         if op=="graphPrices"{let Some(g)=self.graphs.get(&id)else{return fault("GRAPH_EXPIRED")};return graph_prices(input.get("state"),g.get("lines"));}
         if op=="materialize"{
@@ -251,6 +336,11 @@ impl ForecastOwner {
         }
         let Some(c)=self.catalogs.get_mut(&id)else{return fault("FORECAST_EXPIRED")};
         match op {
+            "exportManifest" => obj(&[
+                ("format", n(1.0)), ("count", n(c.count() as f64)), ("revision", n(c.revision as f64)),
+                ("graph", (*c.graph).clone()), ("hubs", (*c.hubs).clone()), ("effective", boolean(c.effective)),
+                ("flowLength", n(c.flows.len() as f64)), ("contractLength", n(c.contracts.len() as f64)),
+            ]),
             "export"=>c.dto(),
             "summary"=>c.summary(input.get("ridership")),
             "connections"=>c.connections(input),
@@ -313,6 +403,31 @@ mod transport_tests{
     fn journey(service:&str,hub:&str,lines:&[&str])->V{
         obj(&[("id",n(0.0)),("legs",arr(vec![obj(&[("service",text(service)),("dir",n(1.0)),("from",n(0.0)),("to",n(1.0))])])),("daily",n(15.0)),("fare",n(180.0)),("purpose",text("work")),("back",boolean(false)),("hub",text(hub)),("externalKind",V::Null),("from",n(0.0)),("to",n(1.0)),("lineIds",arr(lines.iter().map(|s|text(s)).collect())),("byLine",V::Object(lines.iter().map(|s|(s.to_string(),n(0.5))).collect()))])
     }
+    #[test]
+    fn paged_import_publishes_only_complete_ordered_tables() {
+        let mut owner = ForecastOwner::default();
+        let manifest = obj(&[("format", n(1.0)), ("count", n(0.0)), ("flowLength", n(0.0)), ("contractLength", n(1.0))]);
+        let begin = obj(&[("action", text("importBegin")), ("manifest", manifest)]);
+        let stage = owner.handle(&begin).num("id");
+        let command = |action: &str, id: f64| obj(&[("action", text(action)), ("id", n(id))]);
+        let page = |id: f64, offset: f64| obj(&[("action", text("importPage")), ("id", n(id)), ("table", text("contracts")), ("offset", n(offset))]);
+        assert!(owner.handle_numeric(&page(stage, 1.0), &[0.0]).get("error").truth());
+        assert!(owner.handle(&command("importFinish", stage)).get("error").truth());
+        assert!(!owner.catalogs.contains_key(&(stage as u64)));
+
+        let stage = owner.handle(&begin).num("id");
+        assert!(!owner.handle_numeric(&page(stage, 0.0), &[0.0]).get("error").truth());
+        assert!(owner.handle_numeric(&page(stage, 0.0), &[0.0]).get("error").truth());
+        owner.handle(&command("importCancel", stage));
+        assert!(owner.handle(&command("importFinish", stage)).get("error").truth());
+
+        let stage = owner.handle(&begin).num("id");
+        owner.handle_numeric(&page(stage, 0.0), &[0.0]);
+        assert_eq!(owner.handle(&command("importFinish", stage)).num("id"), stage);
+        assert_eq!(owner.transfer_page(&[stage, 0.0, 1.0, 0.0]), Some(vec![0.0]));
+        assert!(owner.transfer_page(&[stage, 1.0, 1.0, 0.0]).is_none());
+    }
+
     #[test]
     fn chunked_catalog_remaps_names_and_numeric_export_round_trips(){
         let mut owner=ForecastOwner::default();let state=obj(&[("services",arr(vec![]))]);
