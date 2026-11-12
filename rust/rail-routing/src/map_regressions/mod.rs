@@ -1,7 +1,7 @@
 //! Historical MAP59/60/62 answers, replayed through the native production owners.
 //! The JSON is data only. Pool references share repeated worlds, line definitions
 //! and account balances. Tagged scalars preserve absent values, NaN and signed zero.
-use crate::{assets, bootstrap, editor, editor_support::*, forecast_session::ForecastOwner,
+use crate::{assets, bootstrap, diagnostics::clone_json, editor, editor_support::*, forecast_session::ForecastOwner,
     json_codec, legacy, runtime_edit, value::Value as V};
 
 fn expand_fixture(value: &V, pool: &[V]) -> V {
@@ -55,7 +55,7 @@ fn exact(actual: &V, expected: &V, path: &str, ordered: bool) {
         (V::Object(a), V::Object(b)) => {
             assert_eq!(a.len(), b.len(), "{path}: object size");
             if ordered {
-                assert!(a.iter().map(|r| &r.0).eq(b.iter().map(|r| &r.0)), "{path}: field order {a:?} vs {b:?}");
+                assert_eq!(a.iter().map(|r| &r.0).collect::<Vec<_>>(), b.iter().map(|r| &r.0).collect::<Vec<_>>(), "{path}: field order");
             }
             for (key, val) in b {
                 assert!(has(actual, key), "{path}: missing {key}");
@@ -173,16 +173,16 @@ fn map63_asset_transactions_match_frozen_receipts_and_complete_worlds() {
             "finalize" | "rejectFinalize" => {
                 // Historical editor callbacks stage their result before ledger settlement.
                 let (mut staged, receipt) = if op == "finalize" {
-                    let edit = editor::run(obj(&[("op", cmd.get("op").clone()), ("state", state.clone()),
+                    let mut staged = clone_json(state);
+                    let edit = editor::run(obj(&[("op", cmd.get("op").clone()), ("state", staged.clone()),
                         ("args", cmd.get("args").clone())]), &cfg);
-                    let mut staged = state.clone();
                     runtime_edit::apply(&mut staged, edit.get("patch"));
                     (staged, edit.get("result").clone())
                 } else {
                     (case.get("staged").clone(), case.get("result").clone())
                 };
                 let out = assets::run(&obj(&[("op", text("finalize")), ("state", state.clone()),
-                    ("after", staged.clone()), ("accounts", state.get("economy").clone()),
+                    ("after", staged.clone()), ("accounts", clone_json(state.get("economy"))),
                     ("commit", boolean(true)), ("result", receipt.clone())]), &cfg);
                 if out.get("result").get("error").truth() {
                     out.get("result").clone()
