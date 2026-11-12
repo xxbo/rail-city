@@ -53,6 +53,12 @@ body.console-ui.schematic-mode #stage {
   paint-order: stroke;
 }
 .console-ui #map .city-anchor circle {fill: #bbd2db; stroke: #283a44}
+.console-ui #map .facility-marker circle {fill: #263741}
+.console-ui #map .facility-marker text, .console-ui #map .hub-icon {fill: #e3eaee}
+.console-ui #map .transport-hub circle {fill: #293b46; stroke: #98afbc}
+.console-ui #map .transport-hub.linked circle {stroke: #77d3b8}
+.console-ui #map .transport-hub:is(:hover, :focus-visible) circle {stroke: var(--accent)}
+.console-ui #map:not([data-detail="full"]) .facility-level {visibility: hidden}
 .console-ui #map .draft-line, .console-ui #map .preview-track {stroke: var(--accent)}
 .console-ui #map .draft-line ~ circle[data-screen-radius], .console-ui #map .preview-station {stroke: var(--accent)}
 .console-ui #map .draft-label {fill: #ffe0a6; stroke: #29343c; paint-order: stroke}
@@ -173,6 +179,7 @@ body.console-ui #console-nav .console-nav-button {
   inset: auto !important;
   flex: none;
   width: 47px;
+  max-width: none !important;
   height: 48px;
   display: flex !important;
   flex-direction: column;
@@ -227,7 +234,7 @@ body.console-ui > aside[hidden] {display: none !important}
   flex: none;
   margin: 0;
   padding: 15px 17px !important;
-  background: var(--chrome);
+  background: var(--chrome) !important;
   color: white;
   border: 0;
 }
@@ -308,6 +315,7 @@ body.console-ui > aside[hidden] {display: none !important}
   overflow: auto;
   border-radius: 7px;
 }
+body.console-ui.drawer-open #interface-shell > .shell-popover:not([hidden]) {display: block !important}
 .console-ui #manage-groups {display: grid; gap: 3px}
 .console-ui #manage-groups > button {display: block; text-align: left; padding: 10px; border: 0; background: #eef2f4; border-radius: 4px; color: var(--ink)}
 .console-ui #manage-groups #new-game {color: #9b402a}
@@ -407,6 +415,19 @@ body.console-ui.drawer-open #interface-shell > #game-guide:not([hidden]) {displa
   .console-balance b, body.console-ui #today-flow-card > strong {font-size: 12px}
   .console-ui .map-scale, .console-ui.drawer-open .map-scale {top: 76px}
   .console-ui #map-detail-status, .console-ui.drawer-open #map-detail-status {top: 76px !important}
+}
+@media (max-width: 560px) and (orientation: portrait) {
+  body.console-ui {--panel-bottom: calc(97px + var(--dock-bottom))}
+  #console-nav {display: grid; grid-template-columns: repeat(6, 1fr); width: calc(100vw - 2 * var(--edge)); gap: 1px; overflow: visible}
+  #console-primary {grid-area: 1 / 1 / 2 / 7; display: grid; grid-template-columns: repeat(5, 1fr); padding-bottom: 2px; border-bottom: 1px solid var(--chrome-line)}
+  .console-nav-spacer {display: none}
+  .console-emblem {grid-area: 2 / 1}
+  #console-find {grid-area: 2 / 2}
+  #console-secondary {grid-area: 2 / 3 / 3 / 7; display: grid; grid-template-columns: repeat(4, 1fr)}
+  body.console-ui #console-nav .console-nav-button {width: 100%; height: 42px}
+  body.console-ui #console-nav :is(#console-find, #console-secondary .console-nav-button) {height: 35px; flex-direction: row; gap: 2px; font-size: 10px}
+  #console-secondary svg, #console-find svg {width: 14px; height: 14px}
+  .console-emblem svg {width: 18px; height: 18px}
 }
 @media (max-height: 520px) and (max-width: 950px) and (orientation: landscape) {
   body.console-ui {--panel-top: 66px; --panel-bottom: 62px; --drawer-width: clamp(260px, 42vw, 370px)}

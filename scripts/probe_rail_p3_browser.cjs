@@ -12,6 +12,16 @@ async function buildFromMap(page, region, screenshotDirectory) {
  assert.equal(bounds.height, viewport.height);
  await page.locator('#add-line').click();
  await page.locator('#edit-bar').waitFor();
+ const heading = page.locator('#edit-bar .panel-header');
+ assert(await heading.evaluate(el => getComputedStyle(el).backgroundColor === getComputedStyle(document.querySelector('#console-nav')).backgroundColor),
+  'The white inspector title needs the dark toolbar background');
+ if (mobile) {
+  const allVisible=await page.locator('#console-nav button').evaluateAll(buttons => buttons.every(button => {
+   const rect=button.getBoundingClientRect();
+   return rect.width>=32 && rect.left>=0 && rect.right<=innerWidth && rect.bottom<=innerHeight;
+  }));
+  assert(allVisible,'All phone toolbar actions must fit on screen');
+ }
  const points = await map.evaluate(svg => {
   const rect = svg.getBoundingClientRect();
   const step = Math.min(55, svg.getScreenCTM().a * 19);
