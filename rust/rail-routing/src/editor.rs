@@ -545,23 +545,26 @@ pub(super) fn count(v: &V) -> bool {
     integer(v) && v.n() >= 0.0 && v.n() <= 80.0 && v.n() % 2.0 == 0.0
 }
 pub(super) fn valid_fleet_line(l: &V, cfg: &V) -> bool {
+    valid_dispatch(l, l.get("fleet"), l.get("dispatch"), cfg)
+}
+
+pub(super) fn valid_dispatch(l: &V, fleet: &V, d: &V, cfg: &V) -> bool {
     if !l.get("fleetManaged").truth() {
         return true;
     }
     let spec = cfg.get("specs").get(l.get("stockSpec").text());
-    let d = l.get("dispatch");
     let minimum = 2.0 * max(1.0, l.get("patterns").array().len() as f64);
     let mode = d.get("mode").text();
     spec.truth()
         && eq(l.get("cars"), spec.get("cars"))
-        && count(l.get("fleet"))
+        && count(fleet)
         && d.truth()
         && ["manual", "auto"].contains(&mode)
         && ["manual", "offPeak", "peak"]
             .iter()
             .all(|k| count(d.get(k)))
         && d.num("peak") >= d.num("offPeak")
-        && l.num("fleet")
+        && fleet.n()
             == if mode == "auto" {
                 max(d.num("peak"), d.num("offPeak"))
             } else {

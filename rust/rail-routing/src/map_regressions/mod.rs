@@ -239,8 +239,15 @@ fn map63_construction_stock_dispatch_facility_and_failed_purchase() {
     let cfg = bootstrap::config();
     let mut state = compat("managementInit", &bootstrap::empty("gba"), &V::Missing).get("state").clone();
     let args = json_codec::parse(r#"{"points":[{"x":600,"y":500,"nameSeed":0.1},{"x":640,"y":500,"nameSeed":0.2}],"options":{"stockSpec":"6B"}}"#).unwrap();
+    let original = state.clone();
+    let command = obj(&[("kind", text("network")), ("op", text("addLine")), ("args", args.clone())]);
+    let preview = assets::run(&obj(&[("op", text("transaction")), ("state", state.clone()),
+        ("command", command), ("commit", boolean(false))]), &cfg);
+    assert!(!preview.get("result").get("error").truth());
+    exact(&state, &original, "construction preview", true);
     let add = change(&mut state, "network", "addLine", args);
     assert!(!add.get("error").truth(), "{add:?}");
+    assert_eq!(add.get("quote").num("net"), preview.get("quote").num("net"));
     let cash = state.get("economy").num("cash");
     let buy = obj(&[("spec", text("6B")), ("count", n(4.0))]);
     assert!(!change(&mut state, "fleet", "purchase", buy).get("error").truth());
@@ -261,4 +268,12 @@ fn map63_construction_stock_dispatch_facility_and_failed_purchase() {
     assert_eq!(cash - state.get("economy").num("cash"), price);
     assert_eq!(state.get("urban").get("facilities").array()[0].get("kind").text(), "school");
     assert!(editor::validate(&state, &cfg) && editor::valid_fleet(&state, &cfg) && assets::economy_valid(&state));
+    // A fresh thread owns a fresh configuration cache. Reload the depot as a saved world.
+    let saved = json_codec::encode(&state).unwrap();
+    let reloaded_value = std::thread::spawn(move || {
+        let restored = json_codec::parse(&saved).unwrap();
+        asset_request(&restored, "vehicleValue", &V::Missing).num("result")
+    }).join().unwrap();
+    assert_eq!(reloaded_value, 4.0 * cfg.get("specs").get("6B").num("price"));
+
 }
