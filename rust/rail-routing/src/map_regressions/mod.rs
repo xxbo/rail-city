@@ -143,15 +143,17 @@ fn asset_request(state: &V, op: &str, args: &V) -> V {
 }
 
 // The browser imported Math.hypot for curve lengths; native Rust calls libm.
-// Compare new segment lengths within two ULPs, and all other editor fields exactly.
+// Compare recomputed segment lengths within two ULPs, and all other editor fields exactly.
 // Accounting below receives the frozen staged geometry and must match bit for bit.
 fn check_staged_edit(mut actual: V, frozen: &V, before: &V, name: &str) {
     for (track, target) in actual.get_mut("tracks").array_mut().iter_mut().zip(frozen.get("tracks").array()) {
-        if index_id(before.get("tracks"), track.get("id")).is_none() {
+        let old_km = target.num("km");
+        let prior = before.get("tracks").array().iter().find(|t| eq(t.get("id"), target.get("id")));
+        // Inserting a station also changes the curve of the adjacent, existing track.
+        if prior.is_none_or(|t| t.num("km").to_bits() != old_km.to_bits()) {
             let km = track.num("km");
-            let old_km = target.num("km");
             assert!(km.is_finite() && old_km.is_finite() && km >= 0.0 && old_km >= 0.0
-                && km.to_bits().abs_diff(old_km.to_bits()) <= 2, "{name}: new track length {km:?} vs {old_km:?}");
+                && km.to_bits().abs_diff(old_km.to_bits()) <= 2, "{name}: recomputed track length {km:?} vs {old_km:?}");
             track.set("km", target.get("km").clone());
         }
     }
