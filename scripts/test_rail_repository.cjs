@@ -6,5 +6,4 @@ assert.deepEqual(fs.readdirSync(path.join(root,'.github/workflows')).sort(),['co
 assert(fs.readdirSync(path.join(root,'scripts')).every(file=>file==='fixtures'||file==='helpers'||file==='test-results'||file.includes('rail')));
 assert(fs.readdirSync(path.join(root,'scripts/fixtures')).every(file=>file.startsWith('rail-')));
 const workflow=fs.readFileSync(path.join(root,'.github/workflows/game.yml'),'utf8');assert(!workflow.includes('update_data.py'));assert(!workflow.includes('dashboard-public'));assert(workflow.includes('run_rail_tests.cjs'));
-assert(fs.readFileSync(path.join(root,'rail/save-store.js'),'utf8').includes('guanchao-rail-checkpoints'));
 console.log('Repository boundary: no news pages/data/collectors/tests/workflows; game-only CI and historical storage names retained.');

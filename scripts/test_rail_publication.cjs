@@ -17,7 +17,6 @@ try{
  const unsafe=path.join(tmp,'unsafe');fs.mkdirSync(path.join(unsafe,'rail'),{recursive:true});fs.writeFileSync(path.join(unsafe,'rail/index.html'),'game');fs.symlinkSync(path.join(out,'index.html'),path.join(unsafe,'rail/link'));
  assert.throws(()=>stage(unsafe,path.join(tmp,'bad')),/symlink/);
  const workflow=fs.readFileSync(path.join(root,'.github/workflows/game.yml'),'utf8');assert(workflow.includes('needs: verify'));assert(workflow.includes("github.event_name != 'pull_request'"));assert(!workflow.includes('Refresh dashboard'));assert(!workflow.includes('select_publication'));
- const old=new URL('https://xxbo.github.io/rail/'),next=new URL('https://xxbo.github.io/rail-city/');assert.equal(old.origin,next.origin);
  assert(fs.readFileSync(path.join(root,'rail/save-store.js'),'utf8').includes("idb.open('guanchao-rail-checkpoints', 1)"));
  console.log('Standalone game publication: exact game bytes, project-root assets/workers, same-origin saves, isolated artifact, PR deploy guard and symlink rejection passed.');
 }finally{fs.rmSync(tmp,{recursive:true,force:true});}

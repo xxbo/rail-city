@@ -12,7 +12,6 @@
     return;
   }
   const UI_VERSION = '46';
-  'use strict';
   const DETAIL = RailMapDetail;
   let lodLevel = null,
     viewCache = null,
@@ -66,8 +65,7 @@
   let centerFilter = 'all',
     centerQuery = '',
     centerReview = null,
-    centerAnalysis = null,
-    centerReturn = false;
+    centerAnalysis = null;
   const F = RailFleet,
     A = RailAlerts;
   const BAL = RailBalance,
@@ -96,7 +94,6 @@
     "'": '&#39;'
   } [c]));
   const num = n => Math.round(n).toLocaleString('zh-CN'),
-    cash = n => n >= 10000 ? (n / 10000).toFixed(1) : Math.round(n).toLocaleString('zh-CN'),
     clock = m => String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(Math.floor(m) % 60)
     .padStart(2, '0');
   const money = RailCurrency.format;
@@ -145,8 +142,7 @@
     num,
     esc
   });
-  let resumeAfterEdit = false,
-    lastForecastRefresh = 0,
+  let lastForecastRefresh = 0,
     draftSpec = '6B',
     depotSpec = '6B',
     depotQty = 2,
@@ -207,7 +203,6 @@
       y: 940
     },
     drag = null,
-    lastFrame = 0,
     lastHUD = 0,
     toastTimer, storageOK = true,
     focusTimer, cameraTween = null;
@@ -230,7 +225,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=73') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=74') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -239,10 +234,10 @@
     }
   });
 
-  function calculate(state,snapshot) {
+  function calculate(state,snapshot,handoff='withView') {
     return demandClient.request({
-      state: snapshot || RailDemandSnapshot.capture(state)
-    }).then(message => RailForecastCatalog.hydrate(message.result));
+      handoff, state: snapshot || RailDemandSnapshot.capture(state)
+    }).then(message => RailForecastCatalog.hydrate(message.result,message.handoff));
   }
   let forecast;
   try{forecast=await calculate(s);}catch(error){const loading=$('game-loading');loading.replaceChildren();const title=document.createElement('b'),detail=document.createElement('span'),retry=document.createElement('button');title.textContent='需求线程启动失败';detail.textContent=error.message;retry.textContent='重新加载';retry.onclick=()=>location.reload();loading.append(title,detail,retry);return;}
@@ -252,7 +247,6 @@
   if(runtimePolicy.rebase)await M.replaceDemandAsync(traffic,forecast);
   delete forecast.preparedDefinitions;
 
-  let urbanForecastRevision = s.urban.revision;
   let cityCells = C.world(s).cells.map(c => ({
     ...c,
     display: G.display(c),
@@ -371,13 +365,6 @@
   try {
     localStorage.setItem('guanchao-rail-last-map', region);
   } catch {}
-
-  function world() {
-    return s.world || {
-      width: 1040,
-      height: 740
-    };
-  }
 
   function viewSpan() {
     const rect = $('map').getBoundingClientRect(),
@@ -623,7 +610,6 @@
     }
     playing = on;
     M.runtimeIntent(traffic,{at:performance.now(),speed,playing,visible:!document.hidden,reset:true});
-    lastFrame = 0;
     $('play').textContent = on ? 'Ⅱ' : '▶ 开始运营';
     document.body.classList.toggle('simulation-paused', !on);
     $('play').setAttribute('aria-label', on ? '暂停运行' : '开始运行');
@@ -804,16 +790,15 @@
   }
   async function refreshUrbanDemand() {
     forecastTimer=null;
-    const identity=traffic;let job,submitted=false;urbanJob=true;
+    const identity=traffic;let job,next,submitted=false;urbanJob=true;
     try{job=await M.forecastBeginAsync(identity,calculating||importing);}catch(error){urbanJob=false;demandState.status="error";demandState.error=error.message;return;}
     if(!job.needed||identity!==traffic){urbanJob=false;return;}
     memoryAudit.record('demand-start', s, forecast, traffic, saveQueue);
-    const urbanRevision=s.urban.revision;
     demandState.status = 'updating';
     $('calculation-status').hidden = false;
     $('calculation-status').textContent = '需求后台更新中' + (playing ? ' · 运营继续' : '');
     try {
-      const next = await calculate(s,job.snapshot);
+      next = await calculate(s,job.snapshot);
       await M.whenIdle(traffic);
       if(identity!==traffic)return;
       await M.replaceDemandAsync(traffic,next,job.expectedEditRevision,job.ticket);
@@ -824,7 +809,6 @@
       demandState.updatedAt = traffic.minute;
       forecast = next;
       memoryAudit.record('demand-end', s, forecast, traffic, saveQueue);
-      urbanForecastRevision = urbanRevision;
       centerAnalysis = null;
       centerRendered = null;
       save();
@@ -845,6 +829,7 @@
         scheduleForecast();
       }, 10000);
     } finally {
+      if(next)RailForecastCatalog.discardHandoff(next);
       let completion={dirty:false};if(identity===traffic)try{completion=await M.forecastFinishAsync(identity,job.ticket,submitted);}catch(error){demandState.status="error";demandState.error=error.message;}
       urbanJob = false;
       if (!calculating) $('calculation-status').hidden = true;
@@ -881,12 +866,7 @@
   }
 
   function facilityListContent() {
-    const t = C.world(s).totals,
-      rows = destinationRows(),
-      linked = rows.filter(a => a.connected),
-      unserved = rows.filter(a => !a.connected),
-      total = rows.reduce((v, a) => v + a.demand, 0),
-      coverage = total ? linked.reduce((v, a) => v + a.demand, 0) / total : 0;
+    const rows = destinationRows();
     return `<div class="section-title">优先接驳清单<small>综合到访需求与接驳距离排序</small></div><div class="destination-list">${rows.map(a=>{const f=a.f,t=U.TYPES[f.kind];return `<button data-destination="${f.id}" class="destination-card ${a.connected?'connected':''}" style="--facility:${t.color}"><i>${t.icon}</i><span><b>${esc(f.name||t.name)}</b><small>Lv.${f.level} · 潜在到访 ${num(a.demand)} 人次/日</small><small>${a.nearest?'最近站步行 '+a.nearest.walk.toFixed(2)+' km':'附近暂无车站'}</small></span><em>${a.status} ↗</em></button>`;}).join('')}</div><p class="station-note">以800米步行接驳、1.25倍绕行判断；有车站且已计划投放列车才计入覆盖。潜在到访＝设施到访权重＋岗位通勤权重，是规划指标，实际乘车还取决于出发地、票价、运营与满意度，不保证全部转化为客流。</p><details class="map-source"><summary>城市如何自动建设</summary><p>设施为按地区地理与地名生成的游戏目的地，非现实POI实测。初始分布覆盖多个片区，人口增长后系统继续新增并按周边人口升级；市政投资与维护由城市承担。住宅、商业和工业仍随交通及设施服务逐步发展。</p></details>`;
   }
   let urbanTab = 'development';
@@ -941,10 +921,6 @@
 
   function specOptions(value) {
     return lineView.specOptions(value);
-  }
-
-  function trainOptions(value) {
-    return lineView.trainOptions(value);
   }
 
   function markDispatchDirty() {
@@ -1370,15 +1346,6 @@
     renderActivity();
     if (account) updateAccountLive();
     if (stationMenu) updateStationRows();
-    for (const [id, value] of Object.entries({
-        'audit-generated': traffic.generated,
-        'audit-boarded': traffic.boarded,
-        'audit-completed': traffic.completed
-      })) {
-      if ($(id)) $(id).textContent = num(value);
-    }
-    const status = $('audit-status');
-    if (status) status.textContent = playing ? '正在运营' : '已暂停 · 点击右上角开始运营';
     DOM.text($('network-wait-count'), num(hudSummary.waiting));
     updateQueueLabels();
   }
@@ -1547,7 +1514,6 @@
   }
 
   function selectLine(id) {
-    if (overview) centerReturn = true;
     utilityPanel = null;
     hoverPoint = null;
     stationMenu = false;
@@ -1564,7 +1530,6 @@
   }
 
   function begin(kind) {
-    if (!mode) resumeAfterEdit = playing;
     utilityPanel = null;
     hoverPoint = null;
     clearTimeout(focusTimer);
@@ -1911,7 +1876,6 @@
         mode = null;
         inspection = null;
         overview = true;
-        centerReturn = false;
         centerReview = null;
         render();
         break;
@@ -2166,7 +2130,6 @@
       case 'close-panel':
         selected = null;
         mode = null;
-        centerReturn = false;
         render();
         break;
       case 'add-station':
@@ -2529,7 +2492,6 @@
   });
   document.addEventListener('visibilitychange', () => {
     M.runtimeIntent(traffic,{at:performance.now(),speed,playing,visible:!document.hidden});
-    lastFrame = 0;
     if (document.hidden) save();
   });
   window.addEventListener('pagehide', save);
@@ -2537,7 +2499,6 @@
   function frame(now) {
     const perf = PERF.resolve(interfacePrefs, traffic.trains.length);
     if (document.hidden) {
-      lastFrame = 0;
       requestAnimationFrame(frame);
       return;
     }
@@ -2562,7 +2523,6 @@
       lastDots = now;
     }
     if (saveQueue.observe(now)) save();
-    lastFrame = now;
     if (now - lastHUD > perf.hud) {
       updateHUD();
       lastHUD = now;
@@ -2859,17 +2819,11 @@
     return `<div class="achievement-hero"><span>本地图 · 个人里程碑</span><strong>${done}<small> / ${all.length}</small></strong><div class="achievement-overall"><i style="width:${done/all.length*100}%"></i></div><p>已达成</p></div><div class="achievement-filters">${['全部','客流','运输','线网','收入','未达成'].map(c=>`<button data-achievement-filter="${c}" class="${achievementFilter===c?'active':''}">${c}</button>`).join('')}</div><div class="milestone-grid">${items.map(a=>`<article data-milestone="${a.id}" class="milestone ${a.unlocked?'unlocked':''}"><header><i>${a.unlocked?'✦':'◇'}</i><span>${a.category}</span><b>${a.unlocked?'已达成':Math.floor(a.progress*100)+'%'}</b></header><h3>${a.name}</h3><p>${a.unit} ${format(a.displayTarget)} ${a.suffix}</p><div class="milestone-track"><i style="width:${a.progress*100}%"></i></div><footer>${format(Math.min(a.displayValue,a.displayTarget))} / ${format(a.displayTarget)} ${a.suffix}</footer></article>`).join('')||'<div class="insight-empty">这一分类已全部达成</div>'}</div><p class="station-note">成就按本地图历史最高纪录解锁，开始新游戏不会清除。客流、周转量与票款使用单局累计最高；线网按物理轨道去重，单线按线路实际路径。客运周转量按真实乘车人数×行驶公里累计，旧存档从升级后开始；收入仅计实际票款，不计发展金、借款或资产回收。既有客流成就及纪录保留。</p><div class="insight-actions"><button id="daily-open">今日客流</button><button id="records-open">线网客流</button></div>`;
   }
 
-  function recordMini() {
-    const r = personalRecords;
-    return `<div class="record-mini"><span>单日最高<b>${num(r.bestDay||0)}</b></span><span>连续60分钟最高<b>${num(r.bestHour||0)}</b></span><button id="records-open">线网客流 →</button></div>`;
-  }
-
   function legacyRecordDetails() {
     const q = s.ridership,
       r = personalRecords,
       days = [...(q?.history || []), q?.current].filter(Boolean).slice(-14),
-      max = Math.max(1, ...days.map(d => d.completed)),
-      awards = Q.awards(r);
+      max = Math.max(1, ...days.map(d => d.completed));
     return `<div class="record-hero"><span>个人最高 · 实际完成出行</span><strong>${num(r.bestDay||0)}<small> 人次 / 游戏日</small></strong><div>连续60分钟最高 <b>${num(r.bestHour||0)}</b> 人次</div></div><div class="section-title">本局运营</div><div class="stat-grid"><div><span>今天完成出行</span><strong data-today-completed>${num(q?.current.completed||0)}</strong></div><div><span>今天站满 / 超时退出</span><strong>${num(q?.current.rejected||0)}</strong></div></div><div class="section-title">近 ${days.length} 个运营日</div><div class="ridership-history" role="img" aria-label="最近运营日实际完成出行趋势">${days.map((d,i)=>`<div title="第${d.number}天 · ${num(d.completed)}人次"><b>${days.length<=7||i%3===0||i===days.length-1?num(d.completed):''}</b><i style="height:${Math.max(0,d.completed/max*90)}px"></i><small>${d.number}日</small></div>`).join('')}</div><button id="achievements-open" class="insight-link">查看全部成就 →</button><p class="station-note">只统计成功抵达的完整出行，换乘不重复；预测值、排队和放弃人数不能刷纪录。每游戏日07:00结算，当前日也可刷新最高纪录。本地图个人最高保存在本机，开始新游戏仍保留；旧版本没有逐日历史，从本版本开始记录。</p>`;
   }
   let flowDay = 'today',
@@ -2941,12 +2895,6 @@
       metric = flowNames[flowMetric],
       peak = v.peak;
     return `<div class="flow-controls"><label>运营日<select id="flow-day" aria-label="客流运营日"><option value="today"${flowDay==='today'?' selected':''}>今天 · 第 ${q.current.number} 天</option>${days.filter(d=>d!==q.current).reverse().map(d=>`<option value="${d.number}"${+flowDay===d.number?' selected':''}>第 ${d.number} 天${!d.flow?' · 无分时记录':''}</option>`).join('')}</select></label><label>指标<select id="flow-metric" aria-label="客流指标">${Object.entries(flowNames).map(([k,name])=>`<option value="${k}"${flowMetric===k?' selected':''}>${name}${k==='boarded'?' · 含换乘':''}</option>`).join('')}</select></label><label>时段<select id="flow-interval" aria-label="客流时间粒度">${[15,30,60].map(n=>`<option value="${n}"${flowInterval===n?' selected':''}>${n} 分钟</option>`).join('')}</select></label></div><div class="flow-live"><div class="flow-day-heading"><span>第 ${d.number} 天 · ${metric}客流</span><small>07:00 — 次日07:00</small></div><div class="flow-summary"><div><span>${v.partial?'已记录':'当日'}${metric}</span><strong>${v.available?num(v.total):'—'}<small> 人次</small></strong></div><div><span>最高${flowInterval}分钟${peak?.partial?' · 部分时段':''}</span><strong>${peak?num(peak.value):'—'}<small> 人次</small></strong></div></div><section class="flow-chart-card"><header><b>分时客流</b><span>人次 / ${flowInterval}分钟</span></header>${flowChart(v)}<output id="flow-readout">${esc(flowHovered|| (peak?`峰值时段 ${flowTime(peak.start,RailFlowHistory.start(d))}—${flowTime(peak.end,RailFlowHistory.start(d))}`:'暂无分时记录'))}</output></section>${!v.available?'<div class="metrics-notice">该运营日没有分时记录。升级后开始采集，历史曲线不补造。</div>':`<div class="flow-coverage">记录范围 ${flowTime(v.since,RailFlowHistory.start(d))}—${flowTime(v.through,RailFlowHistory.start(d))}${v.partial?' · 从本版本启用时起记录':''} · 空白为尚未记录时段</div>`}<p class="station-note">曲线统计真实事件发生时段，非累计曲线；进站不重复统计站内换乘，上车包含换乘，完成出行按抵达目的地计一次。每运营日07:00切换，保留最近30天及今天。鼠标悬停或键盘聚焦曲线可查看时段数值；尚未记录的时段留空。</p></div><div class="flow-records"><details class="flow-history-details"><summary>历史纪录与每日总量</summary>${legacyRecordDetails()}</details></div>`;
-  }
-
-  function demandAudit() {
-    const d = forecast.diagnostics || {},
-      expected = RailForecastCatalog.summary(forecast,s)?.expected ?? forecast.flows.reduce((v, f) => v + (f.demandTrips ?? f.trips) * Q.factor(s, f), 0);
-    return `<details class="demand-audit"><summary>客流核算</summary><p id="audit-status">${playing?'正在运营':'已暂停 · 点击右上角开始运营'}</p><div class="detail-row"><span>有轨道路径的候选出行</span><b>${num(d.connectedDemand||0)} 人次/日</b></div><div class="detail-row"><span>满意度调整后的日需求</span><b>${num(expected)} 人次/日</b></div><div class="detail-row"><span>基础日客流预测</span><b>${num(forecast.riders)} 人次/日</b></div><div class="detail-row"><span>本局实际到站</span><b id="audit-generated">${num(traffic.generated)}</b></div><div class="detail-row"><span>本局累计上车 · 含换乘</span><b id="audit-boarded">${num(traffic.boarded)}</b></div><div class="detail-row"><span>本局完成出行</span><b id="audit-completed">${num(traffic.completed)}</b></div><p class="station-note">日预测与当前候车人数不同；到站后可能已经上车或抵达。实际运营使用整数乘客，小概率 OD 在全网累积后抽取，不逐条舍入。</p></details>`;
   }
 
   function geography() {
@@ -3049,11 +2997,12 @@
     calculating=true;
     $('calculation-status').textContent='正在校验并恢复存档…';
     $('calculation-status').hidden=false;
-    let prepared,committed=false;
+    let next,prepared,committed=false;
     try{
       await saveQueue.flush();
       await M.whenIdle(identity);
-      const next=await calculate(c.state),target=B.get(c.region);
+      next=await calculate(c.state,undefined,'runtimeOnly');
+      const target=B.get(c.region);
       const previous=await DB.read(target.saveKey);
       // The worker validates the retained candidate and freezes its origin
       // before returning bytes. UI copies never become the restore authority.
@@ -3067,7 +3016,7 @@
     }catch(error){
       if(!committed&&prepared)try{await RailRuntime.cancelImport(identity,c.token);}catch{}
       importError=RailLocalSave.errorMessage(error);calculating=false;$('calculation-status').hidden=true;renderActivity();
-    }
+    }finally{if(next)RailForecastCatalog.discardHandoff(next);}
   }
 
   function patchInsightNode(old, next) {
@@ -3431,7 +3380,6 @@
     s=nextState;forecast=nextForecast;traffic=nextTraffic;
     urbanDrawRevision = -1;
     densityField = null;
-    urbanForecastRevision = s.urban.revision;
     refreshUrbanMap();
     selected = null;
     overview = false;

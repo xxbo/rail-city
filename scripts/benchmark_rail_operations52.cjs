@@ -89,7 +89,6 @@ if (!['map51', 'map52'].includes(process.argv[2])) {
   s.economy.minute = 480;
   M.advance(s, rt, 30);
   global.gc();
-  const statusStart=require('../rail/routing-wasm').status();
   const ms = [];
   for (let i = 0; i < 5; i++) {
     const start = performance.now();

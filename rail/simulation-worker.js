@@ -9,7 +9,7 @@
     send=(data,transfer)=>parentPort.postMessage(data,transfer);
     listen=fn=>parentPort.on('message',fn);
   }else{
-    importScripts('value-wire.js?v=67', 'bootstrap-wasm.js?v=73','routing-wasm.js?v=73','forecast-catalog.js?v=73');Core=self.RailRouting;Bootstrap=self.RailBootstrap;Catalog=self.RailForecastCatalog;
+    importScripts('value-wire.js?v=67', 'bootstrap-wasm.js?v=74','routing-wasm.js?v=74','forecast-catalog.js?v=74');Core=self.RailRouting;Bootstrap=self.RailBootstrap;Catalog=self.RailForecastCatalog;
     send=(data,transfer)=>self.postMessage(data,transfer);
     listen=fn=>{self.onmessage=e=>fn(e.data);};
   }
@@ -20,8 +20,17 @@
       await Core.init();
       if(request.kind==='session'){
         const args=request.args||{};let result;
-        if(request.action==='create'){const forecast=Catalog.hydrate(args.forecast);result=Bootstrap.runtime('create',{world:args.world,saved:args.saved,start:args.start,warm:args.warm,transfer:true,catalog:Catalog.source(forecast).id,forecastView:{population:forecast.population,covered:forecast.catchment?.covered||0}});}
-        else if(['demand','prepareImport'].includes(request.action)){const {forecast:transport,...command}=args;const forecast=Catalog.hydrate(transport),catalog=Catalog.source(forecast).id;try{result=Bootstrap.runtime(request.action,{...command,catalog,forecastView:{population:forecast.population,covered:forecast.catchment?.covered||0}});}finally{Bootstrap.forecast('release',{id:catalog});}}
+        if(['create','demand','prepareImport'].includes(request.action)){
+          const {forecast,...command}=args;
+          const handle=await Catalog.receiveCatalog(forecast);
+          try {
+            const forecastView={population:forecast.population,covered:forecast.catchment?.covered||0};
+            if(request.action==='create')command.transfer=true;
+            result=Bootstrap.runtime(request.action,{...command,catalog:handle.id,forecastView});
+          } finally {
+            Bootstrap.forecast('release',{id:handle.id});
+          }
+        }
         else result=Bootstrap.runtime(request.action,args);
         send({id:request.id,result});return;
       }

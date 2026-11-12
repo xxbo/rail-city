@@ -571,6 +571,16 @@ pub extern "C" fn forecast_numeric() -> *const f64 {
 
 // Opaque table transport: no generic Value tree for millions of numeric cells.
 #[no_mangle]
+pub extern "C" fn forecast_numeric_page() -> *const f64 {
+    CORE.with(|cell| {
+        let mut core = cell.borrow_mut();
+        let page = HOST.with(|host| host.borrow().forecasts.transfer_page(&core.input));
+        core.output = page.unwrap_or_default();
+        core.output.as_ptr()
+    })
+}
+
+#[no_mangle]
 pub extern "C" fn forecast_numeric_export()->*const f64{
     let(id,flow_only)=CORE.with(|c|{let c=c.borrow();(c.input.first().copied().unwrap_or(0.0),c.input.get(1).copied()==Some(1.0))});
     let(values,bytes)=HOST.with(|host|host.borrow().forecasts.export_numeric(if id.is_finite()&&id>0.0&&id.fract()==0.0{id as u64}else{0},flow_only));

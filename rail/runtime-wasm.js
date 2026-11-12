@@ -12,13 +12,62 @@ function create(world,forecast,start=420,warm=true,saved,initial){const handle=C
 function worker(entry){if(entry.worker||entry.localOnly||entry.disposed)return;const snapshot=B().runtime('handoff',{id:entry.id});
  const Client=node?require('./worker-client'):root.RailWorkerClient;
  entry.worker=Client.create({stateful:true,timeout:45000,timeoutMessage:'运行会话响应超时，进度等待恢复。',errorMessage:'运行线程异常',
-  createWorker:()=>node?new (require('node:worker_threads').Worker)(require('node:path').join(__dirname,'simulation-worker.js')):new Worker(new URL('simulation-worker.js?v=73',root.location.href)),
+  createWorker:()=>node?new (require('node:worker_threads').Worker)(require('node:path').join(__dirname,'simulation-worker.js')):new Worker(new URL('simulation-worker.js?v=74',root.location.href)),
   onFault:error=>{entry.closed=true;entry.failure=error;}});
- entry.ready=send(entry,'create',{world:snapshot.world,forecast:C().transport(entry.forecast),saved:snapshot.runtime,start:snapshot.runtime.minute,warm:false}).then(result=>{entry.workerId=result.id;if(!entry.mainClosed){B().runtime('close',{id:entry.id});entry.mainClosed=true;released?.unregister(entry.rt);}return apply(entry,result);}).catch(error=>{if(entry.disposed||entry.mainClosed)throw error;entry.worker.dispose();entry.worker=null;entry.localOnly=true;entry.workerError=error;entry.failure=null;entry.closed=false;});
+ async function startWorker() {
+  const forecast=C().runtimePacket(entry.forecast);
+  const result=await send(entry,'create',{world:snapshot.world,forecast,saved:snapshot.runtime,start:snapshot.runtime.minute,warm:false});
+  entry.workerId=result.id;
+  if(!entry.mainClosed) {
+   B().runtime('close',{id:entry.id});
+   entry.mainClosed=true;
+   released?.unregister(entry.rt);
+  }
+  return apply(entry,result);
+ }
+ entry.ready=startWorker().catch(error=>{
+  if(entry.disposed||entry.mainClosed)throw error;
+  entry.worker.dispose();
+  entry.worker=null;
+  entry.localOnly=true;
+  entry.workerError=error;
+  entry.failure=null;
+  entry.closed=false;
+ });
  entry.ready.catch(()=>{});
 }
-function send(entry,action,args){return entry.worker.request({kind:'session',action,args}).then(message=>message.result);}
-function enqueue(entry,action,args={},project=apply){const task=entry.tail.then(async()=>{if(entry.worker)await entry.ready;if(entry.closed)throw entry.failure||Error('运行会话已关闭');if(['command','preview','demand','undo'].includes(action)&&args.expectedEditRevision===undefined)args={...args,expectedEditRevision:entry.editRevision};if(['demand','prepareImport'].includes(action)&&!entry.worker&&args.forecast){const{forecast,...rest}=args;args={...rest,catalog:C().source(forecast).id,forecastView:{population:forecast.population,covered:forecast.catchment?.covered||0}};}if(!entry.worker)return project(entry,B().runtime(action,{id:entry.id,...args}));await entry.ready;if(['demand','prepareImport'].includes(action)&&args.forecast)args={...args,forecast:C().transport(args.forecast)};return project(entry,await send(entry,action,{id:entry.workerId,...args}));});entry.tail=task.then(()=>{},()=>{});return task;}
+async function send(entry,action,args) {
+ const packet=args.forecast;
+ try {
+  const message=await entry.worker.request({kind:'session',action,args},C().transfers(packet));
+  return message.result;
+ }catch(error){
+  C().cancelPort(packet?.compactForecast?.port);
+  throw error;
+ }
+}
+function enqueue(entry,action,args={},project=apply) {
+ const task=entry.tail.then(async()=>{
+  if(entry.worker)await entry.ready;
+  if(entry.closed)throw entry.failure||Error('运行会话已关闭');
+  if(['command','preview','demand','undo'].includes(action)&&args.expectedEditRevision===undefined)
+   args={...args,expectedEditRevision:entry.editRevision};
+  if(['demand','prepareImport'].includes(action)&&args.forecast) {
+   const {forecast,...rest}=args;
+   if(entry.worker)args={...rest,forecast:C().runtimePacket(forecast)};
+   else {
+    const handle=await C().localCatalog(forecast);
+    if(entry.closed)throw entry.failure||Error('运行会话已关闭');
+    args={...rest,catalog:handle.id,forecastView:{population:forecast.population,covered:forecast.catchment?.covered||0}};
+   }
+  }
+  const result=entry.worker ? await send(entry,action,{id:entry.workerId,...args})
+                            : B().runtime(action,{id:entry.id,...args});
+  return project(entry,result);
+ });
+ entry.tail=task.then(()=>{},()=>{});
+ return task;
+}
 function advance(world,rt,minutes,options={}){const entry=entries.get(rt);if(entry.worker)throw Error('运行线程会话使用异步推进接口');return apply(entry,B().runtime(options.full?'advanceAll':'advance',{id:entry.id,minutes,budget:options.budget??1e9,maxSteps:options.maxSteps??10000})).batch;}
 function advanceAsync(world,rt,minutes,options={}){const entry=entries.get(rt);if(options.worker!==false)worker(entry);return enqueue(entry,'advance',{minutes,budget:options.budget??6,maxSteps:options.maxSteps??100}).then(result=>result.batch);}
 function pulse(world,rt,intent){const entry=entries.get(rt);if(entry.closed&&entry.mainClosed)return Promise.reject(entry.failure||Error('运行会话已关闭'));worker(entry);return Promise.resolve(entry.ready).then(()=>{if(entry.closed)throw entry.failure||Error('运行会话已关闭');if(entry.worker&&!entry.worker.offer())return{clock:rt.nativeClock};return enqueue(entry,'pulse',intent);});}

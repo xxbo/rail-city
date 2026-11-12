@@ -1,6 +1,6 @@
 /* Historical suites stage explicit native commands and detached cold fixtures.
  * The reference keeps its frozen simulation; production never executes it. */
-const assert=require('node:assert/strict'),P=require('../../rail/passengers'),Runtime=require('../../rail/runtime-wasm'),N=require('../../rail/network'),Oracle=require('./native-oracle.cjs'),RV=require('../../rail/operations-review');
+const assert=require('node:assert/strict'),P=require('../../rail/passengers'),Runtime=require('../../rail/runtime-wasm'),Oracle=require('./native-oracle.cjs'),RV=require('../../rail/operations-review');
 const scenes=new Set(),metrics={nativeReroutes:0};
 function pair(make,forecast,OldP,start=480,weighted=false,prepare=()=>{}){
  const a=make();a.economy.minute=start;prepare(a);const b=structuredClone(a),f=forecast(a),ra=Oracle.create(P,a,f,start,weighted),rb=OldP.create(b,f,start,false);if(weighted)rb.arrivalMode='weighted';

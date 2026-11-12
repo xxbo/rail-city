@@ -234,13 +234,25 @@ pub(super) fn run(
     assert_eq!(r.at, input.len());
     execute(state,int(input[4]),int(input[5]),if input[0]==2.0{Some(input[29])}else{None},sparse,&ids,templates,rules,prep,finance,&parts,sampling_state,feedback_cache,simulation_state,queue_state,settlement_state)
 }
-// Reuse the arrival allocation for its wire envelope. Large weighted batches
-// previously kept a second complete arrival vector alive while building tail.
-fn arrival_tail(mut arrivals:Vec<f64>,order:&[f64],total:f64)->Vec<f64>{
-    let prefix=order.len()+3;let old=arrivals.len();
-    arrivals.reserve(prefix);arrivals.resize(old+prefix,0.0);arrivals.copy_within(0..old,prefix);
-    arrivals[0]=order.len()as f64;arrivals[1..1+order.len()].copy_from_slice(order);
-    arrivals[1+order.len()]=0.0;arrivals[2+order.len()]=total;arrivals
+/// The sampled pairs and resolved profiles already contain every arrival field.
+pub(super) struct Arrivals<'a> {
+    pairs: &'a [f64],
+    profiles: &'a Profiles,
+    open: &'a HashSet<usize>,
+}
+
+impl Arrivals<'_> {
+    pub(super) fn visit(&self, mut admit: impl FnMut(f64, usize, f64, &[f64])) {
+        for (index, pair) in self.pairs.chunks_exact(2).enumerate() {
+            let profile = &self.profiles[&int(pair[0])];
+            let journey = if profile.service >= 0.0 && self.open.contains(&int(profile.service)) {
+                profile.id.expect("unresolved arrival profile") as f64
+            } else {
+                -1.0
+            };
+            admit(journey, index, pair[1], &profile.lines);
+        }
+    }
 }
 pub(super) fn execute(
     state:&mut Cycle,serial:usize,next:usize,legacy_carry:Option<f64>,sparse:bool,ids:&[usize],templates:&[f64],rules:&[f64],prep:&[f64],finance:&[f64],parts:&[&[f64]],
@@ -307,43 +319,35 @@ pub(super) fn execute(
     }
     let mut new = vec![];
     let mut definitions = vec![parts[2][0]];
-    let arrival_values:usize=if ns>0{sample[4..].chunks_exact(2).map(|row|4+state.profiles.get(&int(row[0])).unwrap().lines.len()).sum()}else{0};
-    // At most one train can spawn per template; reserve the future envelope too.
-    let mut arrivals=Vec::with_capacity(arrival_values+int(parts[6][0])+int(templates[0])+3);
+    let pairs = if ns > 0 { &sample[4..] } else { &[] };
     if ns > 0 {
-        for (i, row) in sample[4..].chunks_exact(2).enumerate() {
+        assert_eq!(int(sample[3]) * 2, pairs.len());
+        for row in pairs.chunks_exact(2) {
             let p = int(row[0]);
             let profile = state.profiles.get_mut(&p).unwrap();
             let available = profile.service >= 0.0 && open.contains(&int(profile.service));
-            let id = if available {
-                if profile.id.is_none() {
-                    let id = if let Some(&id) = state.keys.get(&profile.key) {
-                        if profile.owned { queue_state.as_mut().unwrap().discard_definition(p); }
-                        id
+            if available && profile.id.is_none() {
+                let id = if let Some(&id) = state.keys.get(&profile.key) {
+                    if profile.owned { queue_state.as_mut().unwrap().discard_definition(p); }
+                    id
+                } else {
+                    let id = state.count;
+                    state.count += 1;
+                    state.keys.insert(profile.key.clone(), id);
+                    if profile.owned {
+                        queue_state.as_mut().unwrap().commit_definition(p, id);
                     } else {
-                        let id = state.count;
-                        state.count += 1;
-                        state.keys.insert(profile.key.clone(), id);
-                        if profile.owned {
-                            queue_state.as_mut().unwrap().commit_definition(p, id);
-                        } else {
-                            let mut data = std::mem::take(&mut profile.data);
-                            data[0] = id as f64;
-                            definitions[0] += 1.0;
-                            definitions.extend(data);
-                        }
-                        new.push((p, id));
-                        id
-                    };
-                    profile.id = Some(id);
-                    profile.data = vec![];
-                }
-                profile.id.unwrap() as f64
-            } else {
-                -1.0
-            };
-            arrivals.extend_from_slice(&[id, i as f64, row[1], profile.lines.len() as f64]);
-            arrivals.extend_from_slice(&profile.lines);
+                        let mut data = std::mem::take(&mut profile.data);
+                        data[0] = id as f64;
+                        definitions[0] += 1.0;
+                        definitions.extend(data);
+                    }
+                    new.push((p, id));
+                    id
+                };
+                profile.id = Some(id);
+                profile.data = vec![];
+            }
         }
     }
     let mut tr = Read {
@@ -397,8 +401,7 @@ pub(super) fn execute(
     motion.extend(new_motion);
     let mut header = parts[0].to_vec();
     header[13] = motion.len() as f64;
-    let tail=arrival_tail(arrivals,&order,if ns>0{sample[3]}else{0.0});
-    drop(order);
+    let arrivals = Arrivals { pairs, profiles: &state.profiles, open: &open };
     let mut all_definitions=vec![definitions[0]];all_definitions.extend_from_slice(&parts[2][1..]);all_definitions.extend_from_slice(&definitions[1..]);drop(definitions);
     let mut patch = vec![];
     let mut maturity = vec![];
@@ -422,7 +425,7 @@ pub(super) fn execute(
     if !finance.is_empty() {
         crate::engine::read(finance, settlement_state);
     }
-    let mut queue = crate::queues::run_parts(crate::queues::Packet{header:&header,motion:&motion,definitions:&all_definitions,limits:parts[3],trains:&train_data,snapshot:parts[5],tail:&tail,statistics:parts[7]},simulation_state,queue_state,&patch);
+    let mut queue = crate::queues::run_parts(crate::queues::Packet{header:&header,motion:&motion,definitions:&all_definitions,limits:parts[3],trains:&train_data,snapshot:parts[5],order:&order,arrivals:&arrivals,statistics:parts[7]},simulation_state,queue_state,&patch);
     if let Some(stats) = queue_state.as_mut().unwrap().finance_stats() {
         for (id, a, t) in maturity {
             stats.maturity(id, a, t);
@@ -495,14 +498,22 @@ impl Cycle{
 impl Cycle{pub(super) fn collect_keys(&mut self,q:&mut crate::queues::Queues){for(key,id)in q.take_keys(){self.keys.insert(key,id);self.count=self.count.max(id+1);}}}
 
 #[cfg(test)]
-mod arrival_buffer_tests{
-    use super::arrival_tail;
+mod arrival_tests {
+    use super::*;
+
     #[test]
-    fn envelope_preserves_wire_and_reuses_reserved_arrival_buffer(){
-        let mut rows=Vec::with_capacity(32);rows.extend_from_slice(&[4.0,0.0,2.5,1.0,7.0]);let ptr=rows.as_ptr();
-        let tail=arrival_tail(rows,&[11.0,12.0],2.5);
-        assert_eq!(tail,vec![2.0,11.0,12.0,0.0,2.5,4.0,0.0,2.5,1.0,7.0]);assert_eq!(tail.as_ptr(),ptr);
-        assert_eq!(arrival_tail(Vec::new(),&[],0.0),vec![0.0,0.0,0.0]);
+    fn streamed_arrivals_keep_order_amounts_and_closed_service_lines() {
+        let mut profiles = Profiles::default();
+        for (index, service) in [(7, 1.0), (2, 2.0)] {
+            profiles.insert(index, Profile { key: Rc::from("k"), service, id: Some(index + 10),
+                owned: true, data: vec![], lines: vec![service, 5.0] });
+        }
+        let open = HashSet::from([1]);
+        let arrivals = Arrivals { pairs: &[7.0, 1.5, 2.0, 4.0, 7.0, 0.25], profiles: &profiles, open: &open };
+        let mut rows = vec![];
+        arrivals.visit(|id, i, amount, lines| rows.push((id, i, amount, lines.to_vec())));
+        assert_eq!(rows, [(17.0, 0, 1.5, vec![1.0,5.0]), (-1.0, 1, 4.0, vec![2.0,5.0]),
+                          (17.0, 2, 0.25, vec![1.0,5.0])]);
     }
 }
 

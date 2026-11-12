@@ -2,7 +2,6 @@
 (function(root) {
   'use strict';
   const node = typeof module !== 'undefined' && module.exports,
-    R = node ? require('./engine') : root.RailSim,
     G = node ? require('./street-map') : root.StreetMap,
     N = node ? require('./network') : root.RailNetwork;
 

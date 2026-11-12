@@ -3,22 +3,14 @@ const assert = require('node:assert/strict'),
   fs = require('node:fs');
 const P = require('../rail/passengers'),
   Old = require('./fixtures/rail-map48-passengers.cjs');
-const M = require('./helpers/management-compat.cjs'),
-  OldM = require('./fixtures/rail-map48-management.cjs');
-const N = require('../rail/network'),
-  D = require('../rail/demand-model'),
+const OldM = require('./fixtures/rail-map48-management.cjs');
+const D = require('../rail/demand-model'),
   Core = require('../rail/routing-wasm');
 const {
   create
 } = require('./fixtures/rail-memory-grid.cjs');
-const H=require('./helpers/session-oracle.cjs'),Oracle=require('./helpers/native-oracle.cjs');
-let checkpoints = 0,
-  resumes = 0;
-const kernel = Core.kernel;
-Core.kernel = function(name, input, ...rest) {
-  if (name === 'engine_step' && input[4] === 1) resumes++;
-  return kernel(name, input, ...rest);
-};
+const H=require('./helpers/session-oracle.cjs');
+let checkpoints = 0;
 
 function forecast(s) {
   const cells = s.nodes.map((n, i) => ({

@@ -4,7 +4,7 @@ const OldLS=require('./fixtures/rail-map64-local-save.cjs'),OldP=require('./fixt
 let checks=0;const clone=structuredClone;function exact(a,b,label){assert.deepEqual(a,b,label);assert.equal(JSON.stringify(a),JSON.stringify(b),label+' order');checks++;}
 // Pin the historical management loop to its matching passenger implementation;
 // its original CommonJS import otherwise resolves today's detached native facade.
-const Module=require('node:module'),fs=require('node:fs'),path=require('node:path');
+const Module=require('node:module'),fs=require('node:fs');
 const oldManagementPath=require.resolve('./fixtures/rail-map64-management.cjs'),frozenModule=new Module(oldManagementPath,module);
 frozenModule.filename=oldManagementPath;frozenModule.paths=module.paths;
 frozenModule._compile(fs.readFileSync(oldManagementPath,'utf8').replace("require('../../rail/passengers')","require('./rail-map64-passengers.cjs')"),oldManagementPath);
