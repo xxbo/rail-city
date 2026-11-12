@@ -77,6 +77,10 @@ jobs:
           "$RUNNER_TEMP/rail-p3-browser/node_modules/.bin/playwright" install --with-deps chromium
           NODE_PATH="$RUNNER_TEMP/rail-p3-browser/node_modules" node scripts/probe_rail_p3_browser.cjs "$RUNNER_TEMP/rail-p3-browser-results.json"
           NODE_PATH="$RUNNER_TEMP/rail-p3-browser/node_modules" RAIL_ACCEPTANCE_SOURCE="$GITHUB_SHA" RAIL_BROWSER_EVIDENCE="$RUNNER_TEMP/rail-release-browser.json" node scripts/probe_rail_release.cjs
+      - name: Play the offline Tokyo scenario in Chromium
+        run: |
+          node experiments/tokyo-play/build.cjs "$RUNNER_TEMP/RailCity-Tokyo-East.html"
+          NODE_PATH="$RUNNER_TEMP/rail-p3-browser/node_modules" node experiments/tokyo-play/check.cjs "$RUNNER_TEMP/RailCity-Tokyo-East.html"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
