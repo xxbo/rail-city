@@ -7,9 +7,9 @@ on:
 permissions:
   contents: read
 jobs:
-  verify:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,10 +26,51 @@ jobs:
           node scripts/build_rail_session_contract.cjs --check
       - name: Verify Rust unit tests after compilation
         run: cargo +1.99.1 test --locked --features session-contract --manifest-path rust/rail-routing/Cargo.toml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rail-build
+          path: |
+            rail/wasm/rail-core-v33.wasm
+            scripts/fixtures/rail-session-contract-v9.wasm
+          if-no-files-found: error
+          retention-days: 3
+  regressions:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: rail-build
+          path: .
       - name: Verify simulation and standalone publication
         run: node scripts/run_rail_tests.cjs
       - name: Verify current release function boundary
         run: node scripts/audit_rail_release.cjs --output="$RUNNER_TEMP/rail-release-boundary.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rail-release-boundary
+          path: ${{ runner.temp }}/rail-release-boundary.json
+          if-no-files-found: ignore
+          retention-days: 14
+  browser:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: rail-build
+          path: .
       - name: Verify Rust session and game in Chromium
         run: |
           npm install --prefix "$RUNNER_TEMP/rail-p3-browser" --no-save --package-lock=false playwright@1.62.1
@@ -43,9 +84,21 @@ jobs:
           path: |
             ${{ runner.temp }}/rail-p3-browser-results.json
             ${{ runner.temp }}/rail-release-browser.json
-            ${{ runner.temp }}/rail-release-boundary.json
           if-no-files-found: ignore
           retention-days: 14
+  verify:
+    needs: [regressions, browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: rail-build
+          path: .
       - name: Stage verified game
         run: node scripts/publish_rail.cjs . _site
       - uses: actions/upload-artifact@v4
