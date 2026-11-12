@@ -1,15 +1,13 @@
 /* Infrastructure geometry, distance tariffs and stop-pattern services. No UI dependencies. */
 (function(root) {
   'use strict';
-  const LIMITS = [6, 11, 19, 27, 40, 999],
-    PRICES = [180, 210, 260, 300, 330, 400],
-    KINDS = {
-      local: '普通·大交路',
-      short: '区间·小交路',
-      express: '快速',
-      direct: '直达',
-      cross: '跨线'
-    };
+  const KINDS = {
+    local: '普通·大交路',
+    short: '区间·小交路',
+    express: '快速',
+    direct: '直达',
+    cross: '跨线'
+  };
   const Editor = typeof module !== 'undefined' && module.exports ? require('./editor-wasm') : root
     .RailEditor;
   const TRANSFER = 4;
@@ -57,20 +55,21 @@
     points
   });
 
-  function bands(l) {
-    return l.fareBands || PRICES;
-  }
-
-  function fare(l, km) {
-    const index = Editor.numeric(7, [km])[1];
-    return index < 0 ? 0 : bands(l)[index];
-  }
-
   const planningView=()=>typeof module!=='undefined'&&module.exports?require('./bootstrap-wasm'):root.RailBootstrap;
+  function lineSettings(l) {
+    const {stops,fleet,headway,patterns,fareBands}=l;
+    return planningView().viewModel('lineSettings',{line:{stops,fleet,headway,patterns,fareBands}});
+  }
+  function fare(l, km) {
+    return planningView().viewModel('distanceFare',{line:{fareBands:l.fareBands},km});
+  }
+  function feedbackFares(l,length) {
+    return planningView().viewModel('feedbackFares',{line:{fareBands:l.fareBands},length});
+  }
   function patterns(l) {
     if(l.patterns)return l.patterns;
-    const [p]=planningView().viewModel('defaultPatterns',{line:{stops:l.stops,fleet:l.fleet,headway:l.headway}});
-    return [{...p,calls:[...p.calls]}];
+    // A caller may edit this draft before applying the configuration.
+    return lineSettings(l).patterns.map(p=>({...p,calls:[...p.calls]}));
   }
 
   function patternDraft(s, lineId, operation, args={}) {
@@ -79,91 +78,20 @@
     return planningView().viewModel('patternDraft',{state:{services},lineId,operation,...args});
   }
 
-  const COMPILE_ERRORS = ['', '跨线目标不存在。', '两条线路必须在同一座车站连接。', '跨线目标不能是本线路。', '跨线交路需要相同车型与编组。',
-    '交路不能重复经过同一车站。',
-    '直达交路的起终点必须不同。', '交路端点无效。', '交路车队分配无效。'
-  ];
-
   function serviceOwner(action,s,minute,line,p,index,strict=false){
     const node=typeof module!=='undefined'&&module.exports,B=node?require('./bootstrap-wasm'):root.RailBootstrap;
     const pattern=p=>p&&({...p,...(Array.isArray(p.calls)?{calls:p.calls.filter(()=>true)}:{})});
     const packet=l=>l&&({...l,...(Array.isArray(l.patterns)?{patterns:l.patterns.map(pattern)}:{})});
-    const frame=B.forecast(action,{state:{services:s.services.map(packet)},minute,line:packet(line),sourceIndex:line?s.services.indexOf(line):0,pattern:pattern(p),index,strict});
-    frame.input=Float64Array.from(frame.input);frame.trackIndex=new Map(frame.trackNames.map((id,i)=>[id,i]));return frame;
+    return B.forecast(action,{state:{services:s.services.map(packet)},minute,line:packet(line),
+      sourceIndex:line?s.services.indexOf(line):0,pattern:pattern(p),index,strict});
   }
-  function serviceFrame(s,minute,line=null,p=null,index,strict=false){return serviceOwner('serviceFrame',s,minute,line,p,index,strict);}
+  function serviceFrame(s,minute){
+    const frame=serviceOwner('serviceFrame',s,minute,null,null,undefined,true);
+    frame.trackIndex=new Map(frame.trackNames.map((id,i)=>[id,i]));
+    return frame;
+  }
   function compileServices(s,minute,line=null,p=null,index){
-    const frame=serviceOwner('serviceCompile',s,minute,line,p,index),data=Float64Array.from(frame.data);
-    if (data[0] !== 1) throw Error('交路编译接口版本不匹配');
-    if (data[1]) throw Error(COMPILE_ERRORS[data[1]] || '交路配置无效。');
-    const render = row => {
-      const {
-        source,
-        ordinal: nativeOrdinal,
-        isDefault,
-        fleetMode,
-        allocated,
-        stops,
-        trackIds,
-        fareLines,
-        callStops
-      } = row, ordinal = line ? index : nativeOrdinal, l = frame.sources[source], pattern = p || (!
-          isDefault ?
-          l.patterns[ordinal] : null), kind =
-        isDefault ? 'local' : pattern.kind;
-      return {
-        ...l,
-        id: ordinal ? l.id + 'p' + ordinal : l.id,
-        parentLine: l.id,
-        patternIndex: ordinal,
-        patternKind: kind,
-        name: l.name + ' · ' + KINDS[kind],
-        stops: stops.slice(),
-        trackIds: trackIds.map(i => frame.trackNames[i]),
-        fareLines: fareLines.map(i => frame.sources[i].id),
-        callStops: callStops.slice(),
-        fleet: [l.fleet, pattern?.fleet, allocated, undefined][fleetMode],
-        dispatchCompiled: !!l.fleetManaged,
-        headway: isDefault ? l.headway : pattern.headway,
-        through: false,
-        operators: undefined,
-        parents: undefined
-      };
-    };
-    const rows = [];
-    let at = 3;
-    for (let n = 0; n < data[2]; n++) {
-      const size = data[at++],
-        end = at + size,
-        source = data[at++],
-        ordinal = data[at++],
-        isDefault = data[at++],
-        fleetMode = data[at++],
-        allocated = data[at++];
-      const stops = Array.from(data.subarray(at + 1, at + 1 + data[at]));
-      at += 1 + data[at];
-      const count = data[at++],
-        trackIds = Array.from(data.subarray(at, at + count), i => i);
-      at += count;
-      const fareLines = Array.from(data.subarray(at, at + count), i => i);
-      at += count;
-      const callStops = Array.from(data.subarray(at + 1, at + 1 + data[at]));
-      at += 1 + data[at];
-      if (at !== end) throw Error('交路编译结果长度错误');
-      rows.push({
-        source,
-        ordinal,
-        isDefault,
-        fleetMode,
-        allocated,
-        stops,
-        trackIds,
-        fareLines,
-        callStops
-      });
-    }
-    if (at !== data.length) throw Error('交路编译结果含多余数据');
-    return rows.map(render);
+    return serviceOwner('compiledServices',s,minute,line,p,index);
   }
 
   function compile(s, line, p, index, minute = s.economy?.minute ?? 420) {
@@ -194,9 +122,9 @@
 
   function validate(s) {
     try {
-      const frame = serviceFrame(s, s.economy?.minute ?? 420, null, null, undefined, true);
+      const frame = serviceFrame(s, s.economy?.minute ?? 420);
       const num = v => typeof v === 'number' ? v : NaN;
-      const values = [1, frame.input.length, ...frame.input, +(s.routeModel === 9 && !s.operatingPlan), +!!s
+      const values = [2, frame.input.length, ...frame.input, +(s.routeModel === 9 && !s.operatingPlan), +!!s
         .world, Number(s.world?.width), Number(s.world?.height), frame.trackNames.length, s.tracks.length
       ];
       for (const t of s.tracks) {
@@ -221,9 +149,7 @@
           1,
           Number(l.headway), Number(l.callStops ? l.callStops.length : l.stops.length), +!!l
           .dispatchCompiled);
-        for (const p of l.patterns || [{
-            headway: l.headway
-          }]) values.push(num(p.headway), +Array.isArray(p.calls));
+        for (const p of l.patterns || []) values.push(num(p.headway), +Array.isArray(p.calls));
       }
       const result = ROUTING.kernel('service_validate', Float64Array.from(values));
       return result[0] === 1 && result[1] === 1;
@@ -283,8 +209,11 @@
     geometry,
     directions,
     TRANSFER,
-    LIMITS,
-    PRICES,
+    get tariffs(){return planningView().settings().tariffs;},
+    get LIMITS(){return planningView().settings().tariffs.limits;},
+    get PRICES(){return planningView().settings().tariffs.prices;},
+    lineSettings,
+    feedbackFares,
     KINDS,
     VOT,
     distance,

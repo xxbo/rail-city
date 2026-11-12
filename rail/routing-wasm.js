@@ -45,7 +45,7 @@
     peakMemoryBytes = 0;
   const recycleLimit = () => recycleBytes === 0 ? 0 : Math.max(recycleBytes,
     simulationRecycleBytes);
-  const asset = node ? null : new URL('wasm/rail-core-v33.wasm?v=76',
+  const asset = node ? null : new URL('wasm/rail-core-v33.wasm?v=77',
     root.document?.currentScript?.src || root.location.href).href;
 
   function install(module) {
@@ -369,6 +369,7 @@
     },
     catalogViewToken:()=>exports().catalog_view_token(),
     pathsFromFrame:(values,graph)=>{const data=Float64Array.from(values),tree=new Array(data[1]);for(let i=0;i<tree.length;i++)if(data[8+i*STRIDE]!==-1)tree[i]=i;Object.defineProperty(tree,'routingData',{value:{data,graph}});return tree.map((_,id)=>pathAt(tree,id));},
+    forecastGraphId:(state,adj)=>(GRAPH.get(adj)||prepare(state,adj)).id,
     graphFrame:(state,adj)=>{const g=GRAPH.get(adj)||prepare(state,adj);return {data:Array.from(g.data),prices:Array.from(prices(state,g)),services:g.services,lines:g.lines,edges:g.edges};},
     init,
     pinRuntime:value=>{runtimePinned=!!value;},

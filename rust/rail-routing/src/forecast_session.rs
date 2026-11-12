@@ -284,11 +284,20 @@ impl ForecastOwner {
             self.incoming.insert(id, build);
             return obj(&[("id", n(id as f64)), ("pageValues", n(TRANSFER_VALUES as f64))]);
         }
+        if op == "worldInput" {
+            let graph = if matches!(input.get("graphId"), V::Missing | V::Null) { None } else {
+                let id = input.get("graphId");
+                if !integer(id) || id.n() < 1.0 { return fault("GRAPH_EXPIRED"); }
+                let Some(g) = self.graphs.get(&(id.n() as u64)) else { return fault("GRAPH_EXPIRED") };
+                Some(g.as_ref())
+            };
+            return crate::forecast_input::frame(input, graph).unwrap_or_else(|e| fault(&e));
+        }
         if op=="cityIdentity"{return self.next().map_or_else(||fault("FORECAST_TOKEN_LIMIT"),|id|n(id as f64));}
         if op=="journeyKey"{return text(&journey_text(input.get("journey")));}
         if op=="graphFrame"{let frame=graph_frame(input);if frame.get("error").truth(){return frame;}let Some(id)=self.next()else{return fault("FORECAST_TOKEN_LIMIT")};let mut out=frame.clone();out.set("id",n(id as f64));self.graphs.insert(id,Rc::new(frame));return out;}
         if op=="snapshot"{return snapshot(input.get("state"));}
-        if op=="serviceFrame"||op=="serviceCompile"{return self.services(input,op=="serviceCompile");}
+        if matches!(op, "serviceFrame" | "serviceCompile" | "compiledServices") { return self.services(input, op); }
         if op=="invalidate"{self.dirty=true;return boolean(true);}
         if op=="jobStatus"{return obj(&[("pending",boolean(self.pending.is_some())),("dirty",boolean(self.dirty))]);}
         if op=="begin" {
@@ -368,15 +377,36 @@ impl ForecastOwner {
             _=>fault("UNKNOWN_FORECAST_OPERATION"),
         }
     }
-    fn services(&mut self,input:&V,compile:bool)->V {
+    fn services(&mut self,input:&V,op:&str)->V {
+        let compile = op != "serviceFrame";
         let mut state=input.get("state").clone();let line=input.get("line");let single=line.truth();let mut source=0;
         let targets=state.get("services").array().to_vec();
         if single{if let Some(i)=unsigned(input.get("sourceIndex")).filter(|i|*i<targets.len()){source=i;}else{source=targets.len();state.get_mut("services").array_mut().push(line.clone());}}
         let minute=input.num("minute");let minute=if compile{if crate::temporal::peak(minute){480.0}else{600.0}}else{minute};
         let (mut frame,tracks)=crate::editor_support::service_frame_with_targets(&state,minute,input.get("strict").truth(),&targets);
         if single{frame[1]=1.0;frame[3]=source as f64;frame[4]=match input.get("index"){V::Number(v)=>*v,V::String(s)=>s.parse::<f64>().ok().filter(|n|n.to_string()==*s).unwrap_or(f64::NAN),_=>f64::NAN};frame.extend(crate::editor_support::pattern_values(input.get("pattern"),&targets,input.get("strict").truth()));}
-        let mut out=obj(&[("input",numeric(&frame)),("trackNames",arr(tracks)),("sources",state.get("services").clone())]);
-        if compile{let key=frame.iter().map(|n|n.to_bits()).collect::<Vec<_>>();let data=if let Some(i)=self.service_cache.iter().position(|(k,_)|*k==key){let item=self.service_cache.remove(i).unwrap();let data=item.1.clone();self.service_cache.push_front(item);data}else{let data=crate::services::run(&frame);self.service_cache.push_front((key,data.clone()));self.service_cache.truncate(2);data};out.set("data",numeric(&data));}out
+        let compatibility_frame = || obj(&[("input", numeric(&frame)), ("trackNames", arr(tracks.clone())),
+            ("sources", state.get("services").clone())]);
+        if !compile { return compatibility_frame(); }
+        let key = frame.iter().map(|x| x.to_bits()).collect::<Vec<_>>();
+        let data = if let Some(i) = self.service_cache.iter().position(|(k, _)| *k == key) {
+            let entry = self.service_cache.remove(i).unwrap();
+            let data = entry.1.clone();
+            self.service_cache.push_front(entry);
+            data
+        } else {
+            let data = crate::services::run(&frame);
+            self.service_cache.push_front((key, data.clone()));
+            self.service_cache.truncate(2);
+            data
+        };
+        if op == "serviceCompile" {
+            let mut out = compatibility_frame();
+            out.set("data", numeric(&data));
+            return out;
+        }
+        let selected = single.then(|| (input.get("pattern"), input.get("index")));
+        crate::editor_support::render_services(&state, &tracks, &data, selected).unwrap_or_else(|e| fault(&e))
     }
 }
 pub(super) fn snapshot(state:&V)->V {
@@ -386,8 +416,15 @@ pub(super) fn snapshot(state:&V)->V {
 }
 
 pub(super) fn graph_prices(state:&V,lines:&V)->V{
-    let mut values=vec![];let defaults=[180.0,210.0,260.0,300.0,330.0,400.0];
-    for id in lines.array(){let source=state.get("services").array().iter().find(|s|eq(s.get("id"),id));for i in 0..6{let value=if let Some(source)=source{if source.get("fareBands").truth(){source.get("fareBands").array().get(i).map_or(f64::NAN,V::n)}else{defaults[i]}}else{defaults[i]};if !value.is_finite(){return fault("INVALID_ROUTING_NUMBER");}values.push(n(value));}}
+    let mut values = vec![];
+    for id in lines.array() {
+        let line = state.get("services").array().iter().find(|s| eq(s.get("id"), id)).unwrap_or(&V::Missing);
+        for i in 0..crate::tariffs::PRICES.len() {
+            let price = crate::tariffs::price(line, i).n();
+            if !price.is_finite() { return fault("INVALID_ROUTING_NUMBER"); }
+            values.push(n(price));
+        }
+    }
     for c in state.get("companies").array(){let value=if matches!(c.get("fare"),V::Missing){0.0}else{c.num("fare")};if !value.is_finite(){return fault("INVALID_ROUTING_NUMBER");}values.push(n(value));}arr(values)
 }
 pub(super) fn graph_frame(input:&V)->V{

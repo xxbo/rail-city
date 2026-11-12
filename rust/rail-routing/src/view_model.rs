@@ -16,6 +16,9 @@ fn awards(records:&V)->V{
  arr(rows)
 }
 pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
+ "lineSettings"=>obj(&[("fareBands",crate::tariffs::bands(v.get("line"))),("patterns",crate::diagnostics::patterns(v.get("line")))]),
+ "distanceFare"=>crate::tariffs::quote(v.get("line"),num(v.get("km"))),
+ "feedbackFares"=>arr(crate::tariffs::feedback(v.get("line"),v.num("length")).map(n).to_vec()),
  "defaultPatterns"=>crate::diagnostics::patterns(v.get("line")),
  "patternDraft"=>crate::line_planning::query(s,v).unwrap_or_else(|e|obj(&[("error",text(e))])),
  "currencyTo"=>n(round(v.num("value")*0.05*100.0)/100.0),"currencyFrom"=>n(round(v.num("value")/0.05)),

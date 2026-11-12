@@ -40,11 +40,10 @@
     const d = l.fleetManaged ? l.dispatch : null;
     return [!!l.fleetManaged, d?.mode === 'auto', d?.manual, d?.offPeak, d?.peak, l.fleet];
   }
-  const same = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+  const same = (a, b) => a === b || (a && b && a.length === b.length && a.every((v, i) => v === b[i]));
 
   function encode(c, weights) {
-    return [1, 1, +c[0], +c[1], Number(c[2]), Number(c[3]), Number(c[4]), Number(c[5]), weights
-      .length, ...weights
+    return [1, 1, +c[0], +c[1], Number(c[2]), Number(c[3]), Number(c[4]), Number(c[5]), weights?.length ?? -1, ...(weights || [])
     ];
   }
 
@@ -69,9 +68,7 @@
 
   function allocate(l, minute) {
     const cfg = config(l),
-      weights = (l.patterns || [{
-        fleet: l.fleet
-      }]).map(p => p.fleet);
+      weights = l.patterns ? l.patterns.map(p => p.fleet) : null;
     let p = allocations.get(l);
     if (!p || !same(p.cfg, cfg) || !same(p.weights, weights)) {
       p = {
@@ -81,8 +78,8 @@
       };
       allocations.set(l, p);
     }
-    const at = 4 + (peak(minute) ? weights.length : 0);
-    return Array.from(p.values.subarray(at, at + weights.length));
+    const count=p.values[3], at=4+(peak(minute)?count:0);
+    return Array.from(p.values.subarray(at, at+count));
   }
 
   function refreshFleet(rt) {
@@ -96,9 +93,7 @@
     for (const l of runs) {
       const base = bases.get(l.parentLine),
         cfg = config(base),
-        weights = (base.patterns || [{
-          fleet: base.fleet
-        }]).map(p => p.fleet);
+        weights = base.patterns ? base.patterns.map(p => p.fleet) : null;
       input.push(...encode(cfg, weights).slice(2));
       const dirs = X.directions(l),
         ds = dirs.map(dir => rt.departures[l.id + '|' + dir]);

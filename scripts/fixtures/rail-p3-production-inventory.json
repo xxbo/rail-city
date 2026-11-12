@@ -1312,6 +1312,7 @@
             "rail/performance.js",
             "rail/regions.js",
             "rail/runtime-wasm.js",
+            "rail/service-plan.js",
             "rail/shell-ui.js",
             "rail/ui.js",
             "rail/urban-growth.js"
@@ -1775,6 +1776,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/demand-worker.js",
+            "rail/demand-world.js",
             "rail/flow-history.js",
             "rail/forecast-catalog.js",
             "rail/history-wasm.js",
@@ -3609,6 +3611,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/assets-wasm.js",
+            "rail/demand-world.js",
             "rail/editor-wasm.js",
             "rail/management.js",
             "rail/network.js",
@@ -4727,7 +4730,7 @@
       ]
     },
     "rail/demand-worker.js": {
-      "sha256": "afeb0ac510e003f6f0e596672c31b00a2ef98407cf127dd3db8fde28a785bdc2",
+      "sha256": "b3dbda7f33683123538d415d3eee288bdcdaca2548134bd53dd6a49a31cfa386",
       "role": "platform",
       "owner": "Rust task/revision/timeout/worker ownership",
       "phase": "P3-8",
@@ -5035,7 +5038,7 @@
       ]
     },
     "rail/demand-world.js": {
-      "sha256": "52e030162b06ce7adae8e868e82f6b3ac5d750cd895a68d0daa1cf4937bf089d",
+      "sha256": "fc63a76f29006d3bdf9f94c51846b0bcd0d43c29be23ed4ab2748c5165611d73",
       "role": "domain",
       "owner": "Rust graph/forecast/directory/cache",
       "phase": "P3-2",
@@ -5057,27 +5060,12 @@
         {
           "kind": "require",
           "target": "rail/bootstrap-wasm.js",
-          "line": 18
-        },
-        {
-          "kind": "require",
-          "target": "rail/engine.js",
           "line": 7
         },
         {
           "kind": "require",
           "target": "rail/forecast-catalog.js",
-          "line": 121
-        },
-        {
-          "kind": "require",
-          "target": "rail/game-balance.js",
-          "line": 9
-        },
-        {
-          "kind": "require",
-          "target": "rail/hubs.js",
-          "line": 8
+          "line": 120
         },
         {
           "kind": "require",
@@ -5095,8 +5083,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 143,
-          "sha256": "cc83960f4cde1770b0c91b652b3a0cd4d2fb86ca7ec1f2f1a5447e88a3937efd",
+          "end": 142,
+          "sha256": "9aa3bf4e9e1055662265ac09c4c0d1a0cf007a5f91fe891b8420413ba5106ddc",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -5107,47 +5095,30 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cellValues@14:2",
-          "name": "cellValues",
+          "id": "<iife>/writeCells@14:2",
+          "name": "writeCells",
           "line": 14,
-          "end": 16,
-          "sha256": "05b354cde44c0dbd71766769cd5f9137e67ff650d86a23090ab955eeb916e16c",
+          "end": 20,
+          "sha256": "4daefc97f1a5531649df323903d984063a061960d5ef29e7afd988d439e148da",
           "scope": [],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust forecast input assembly; JS copies city cell columns and passes graph handles",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cellValues/<callback:15:49>@15:49",
-          "name": "<callback:15:49>",
-          "line": 15,
-          "end": 15,
-          "sha256": "001ddaba691004215f9143c49585d64a3a1eb44052baa4600ea27cab3cb5be5c",
-          "scope": [
-            "cellValues"
-          ],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/encode@17:2",
+          "id": "<iife>/encode@21:2",
           "name": "encode",
-          "line": 17,
-          "end": 42,
-          "sha256": "db0c70f48f5d9c0db8467ba40bebbf14a68af67ed56cda3c351f2ddbef0cd5d4",
+          "line": 21,
+          "end": 39,
+          "sha256": "f5191a926dbef10c36491ab32a2028f5ffc04d1ea0e894855236e079032bd042",
           "scope": [],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust forecast input assembly; JS copies city cell columns and passes graph handles",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/bootstrap-wasm.js",
@@ -5163,129 +5134,61 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/encode/<callback:20:49>@20:49",
-          "name": "<callback:20:49>",
-          "line": 20,
-          "end": 20,
-          "sha256": "3e6833ddc8a17884b14f067ba759bae36049985a102d0ef5f708c72597eaff9a",
+          "id": "<iife>/encode/<callback:26:76>@26:76",
+          "name": "<callback:26:76>",
+          "line": 26,
+          "end": 26,
+          "sha256": "ae1cb71e392330d9306dfd4ebd3c1dc8274c6da60f1f14fb985e04016e9d59f7",
           "scope": [
             "encode"
           ],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust forecast input assembly; JS copies city cell columns and passes graph handles",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/encode/<callback:20:89>@20:89",
-          "name": "<callback:20:89>",
-          "line": 20,
-          "end": 20,
-          "sha256": "9b9e11fc1c249b7be24e8b6b5f56d838e9dc86c310fb36a6628f26f1b3498d4d",
+          "id": "<iife>/encode/<callback:27:32>@27:32",
+          "name": "<callback:27:32>",
+          "line": 27,
+          "end": 27,
+          "sha256": "857acea7f0cc9f0402e9413d4f9532a2011eb67c44f8e05f4fcbe6689a5ca4f5",
           "scope": [
             "encode"
           ],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust forecast input assembly; JS copies city cell columns and passes graph handles",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/encode/<callback:21:70>@21:70",
-          "name": "<callback:21:70>",
-          "line": 21,
-          "end": 21,
+          "id": "<iife>/encode/<callback:38:59>@38:59",
+          "name": "<callback:38:59>",
+          "line": 38,
+          "end": 38,
           "sha256": "554d1853354ad6ecd5481d50ce4ba9560e615f36b1e5938ad07c318050799f44",
           "scope": [
             "encode"
           ],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust forecast input assembly; JS copies city cell columns and passes graph handles",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/encode/<callback:21:110>@21:110",
-          "name": "<callback:21:110>",
-          "line": 21,
-          "end": 21,
-          "sha256": "ab70fa40230c0d604e17d05489d544f12facff30982a11d30d2ccd6dc85bb8e4",
-          "scope": [
-            "encode"
-          ],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/encode/<callback:25:20>@25:20",
-          "name": "<callback:25:20>",
-          "line": 25,
-          "end": 25,
-          "sha256": "0404e3a21fdf7752c027974ffe17951dbe31a35643ca2895a3f2ca04d94381e5",
-          "scope": [
-            "encode"
-          ],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/encode/<callback:34:46>@34:46",
-          "name": "<callback:34:46>",
-          "line": 34,
-          "end": 34,
-          "sha256": "7b145ef4efd7d30ebef28018d3bd533140d018dd420282f72e94397aa79722f9",
-          "scope": [
-            "encode"
-          ],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/encode/<callback:38:43>@38:43",
-          "name": "<callback:38:43>",
-          "line": 38,
-          "end": 38,
-          "sha256": "7b145ef4efd7d30ebef28018d3bd533140d018dd420282f72e94397aa79722f9",
-          "scope": [
-            "encode"
-          ],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/cursor@43:2",
+          "id": "<iife>/cursor@41:2",
           "name": "cursor",
-          "line": 43,
-          "end": 48,
+          "line": 41,
+          "end": 46,
           "sha256": "9d1fd4206dd4f0d3316462d988cf5ef671beb96e155f9491c7685ca32499d140",
           "scope": [],
           "role": "domain",
@@ -5299,10 +5202,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cursor/f@45:13",
+          "id": "<iife>/cursor/f@43:13",
           "name": "f",
-          "line": 45,
-          "end": 45,
+          "line": 43,
+          "end": 43,
           "sha256": "f3d0b6ef0ac9ae7b28f35708a432f714ad1e98a539cd73257fb64553a3512639",
           "scope": [
             "cursor"
@@ -5329,10 +5232,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cursor/take@46:10",
+          "id": "<iife>/cursor/take@44:10",
           "name": "take",
-          "line": 46,
-          "end": 46,
+          "line": 44,
+          "end": 44,
           "sha256": "b848490fe00c06ad732561b8e48d38919c262980c1f9fd2c2aea84674ae8389b",
           "scope": [
             "cursor"
@@ -5346,10 +5249,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cursor/position@47:14",
+          "id": "<iife>/cursor/position@45:14",
           "name": "position",
-          "line": 47,
-          "end": 47,
+          "line": 45,
+          "end": 45,
           "sha256": "f0a361d5c2e5e23e0ffa396ec2cb4c4e6a8a5c97c4d2bb2f08f6454700c9bfc1",
           "scope": [
             "cursor"
@@ -5373,10 +5276,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cursor/done@47:33",
+          "id": "<iife>/cursor/done@45:33",
           "name": "done",
-          "line": 47,
-          "end": 47,
+          "line": 45,
+          "end": 45,
           "sha256": "3e34e5a8fda09a21d7e6e0f1ef7cabfe053c5c90b6957946067ff8c523ec034c",
           "scope": [
             "cursor"
@@ -5394,10 +5297,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/fields@49:2",
+          "id": "<iife>/fields@47:2",
           "name": "fields",
-          "line": 49,
-          "end": 49,
+          "line": 47,
+          "end": 47,
           "sha256": "558ec509e2bf3a9594631c3a60df94df072c7cc7d4a82d7bb0fb06621304d173",
           "scope": [],
           "role": "domain",
@@ -5414,10 +5317,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/fields/<callback:49:61>@49:61",
-          "name": "<callback:49:61>",
-          "line": 49,
-          "end": 49,
+          "id": "<iife>/fields/<callback:47:61>@47:61",
+          "name": "<callback:47:61>",
+          "line": 47,
+          "end": 47,
           "sha256": "f38936ab5abbf9c500dbcce36248c461caffb8d1f636aa546fd02672f27dad40",
           "scope": [
             "fields"
@@ -5431,10 +5334,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readCatchment@50:2",
+          "id": "<iife>/readCatchment@48:2",
           "name": "readCatchment",
-          "line": 50,
-          "end": 63,
+          "line": 48,
+          "end": 61,
           "sha256": "66469d79aa193ec3c8d27775f8254fe48bf9b45b1b10c675c998dc83853e9e28",
           "scope": [],
           "role": "domain",
@@ -5446,10 +5349,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readBudgets@64:2",
+          "id": "<iife>/readBudgets@62:2",
           "name": "readBudgets",
-          "line": 64,
-          "end": 66,
+          "line": 62,
+          "end": 64,
           "sha256": "3cfa5bfe7efa7d1af1ba7c8ce0504ced4e08c0a09a590f90367de892828014e1",
           "scope": [],
           "role": "domain",
@@ -5461,10 +5364,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readBudgets/<callback:65:43>@65:43",
-          "name": "<callback:65:43>",
-          "line": 65,
-          "end": 65,
+          "id": "<iife>/readBudgets/<callback:63:43>@63:43",
+          "name": "<callback:63:43>",
+          "line": 63,
+          "end": 63,
           "sha256": "c6ef44638874d3369ee4cdebcc054bceed69773f50a856a0611abb74cb9faa37",
           "scope": [
             "readBudgets"
@@ -5478,11 +5381,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/assign@67:2",
+          "id": "<iife>/assign@65:2",
           "name": "assign",
-          "line": 67,
-          "end": 70,
-          "sha256": "42bd23c24890953e6e742ab72d1e30167924ebf8705c124a78134f0dbea7c6ae",
+          "line": 65,
+          "end": 68,
+          "sha256": "1c26ae037909d60379569acb707d39ed35c29162387491f01ac92b9d6d6f3172",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -5509,10 +5412,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/choices@71:2",
+          "id": "<iife>/choices@69:2",
           "name": "choices",
-          "line": 71,
-          "end": 80,
+          "line": 69,
+          "end": 78,
           "sha256": "d6062850025214a8cd439868b7f833c1841e87d2a0899bcb7abad2e4b5baf3fc",
           "scope": [],
           "role": "domain",
@@ -5528,11 +5431,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/local@81:2",
+          "id": "<iife>/local@79:2",
           "name": "local",
-          "line": 81,
-          "end": 86,
-          "sha256": "90b78f4ff5d61a54a8b98f79c4de3c3b144995609eab47f9bc41cb19582c9321",
+          "line": 79,
+          "end": 85,
+          "sha256": "b4aa0feae3a40aa8ada09d7004ffaa567318442a677e2e197cd7432631dee548",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -5550,11 +5453,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/distribution@87:2",
+          "id": "<iife>/distribution@86:2",
           "name": "distribution",
-          "line": 87,
-          "end": 98,
-          "sha256": "a20426321ff5e99eed8cf6dd644bbebe1879104f2429c1fb762f3ef6ed6922f7",
+          "line": 86,
+          "end": 97,
+          "sha256": "df5f7135f4a89dca194887552bd3256072a4dc4487cc14a5d5bdf0ad7867c76e",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -5572,10 +5475,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/distribution/<callback:92:39>@92:39",
-          "name": "<callback:92:39>",
-          "line": 92,
-          "end": 92,
+          "id": "<iife>/distribution/<callback:91:39>@91:39",
+          "name": "<callback:91:39>",
+          "line": 91,
+          "end": 91,
           "sha256": "397787200be15142894d8ba47eb3f538e23454c4d530be4a0b85f4e817244863",
           "scope": [
             "distribution"
@@ -5589,10 +5492,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/distribution/<callback:95:51>@95:51",
-          "name": "<callback:95:51>",
-          "line": 95,
-          "end": 95,
+          "id": "<iife>/distribution/<callback:94:51>@94:51",
+          "name": "<callback:94:51>",
+          "line": 94,
+          "end": 94,
           "sha256": "002eb557f3ea681b2d82218760b1d3e9d48089fc489c9ee6eda8ff6dafdac557",
           "scope": [
             "distribution"
@@ -5606,10 +5509,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readStats@99:2",
+          "id": "<iife>/readStats@98:2",
           "name": "readStats",
-          "line": 99,
-          "end": 99,
+          "line": 98,
+          "end": 98,
           "sha256": "109e3dc882e642f1dc54543eba516d0b97801ddfb377bf0a73442ca97a236aad",
           "scope": [],
           "role": "domain",
@@ -5621,11 +5524,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readForecast@100:2",
+          "id": "<iife>/readForecast@99:2",
           "name": "readForecast",
-          "line": 100,
-          "end": 139,
-          "sha256": "ace0cfd65c49e72aefe0ecc1f69e65ff409e80b6db04f9759d56bbc3d8f6868e",
+          "line": 99,
+          "end": 138,
+          "sha256": "f59499583c59cfd1e6f0b9a3c38c8d2d519e3aa4976436bbc99ec16704c8d4b6",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -5636,10 +5539,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readForecast/<callback:121:188>@121:188",
-          "name": "<callback:121:188>",
-          "line": 121,
-          "end": 121,
+          "id": "<iife>/readForecast/<callback:120:188>@120:188",
+          "name": "<callback:120:188>",
+          "line": 120,
+          "end": 120,
           "sha256": "01ef2889d3dec9c9bcc8dd0cf2e48c60e20796fef8cd287d23fa0cca148637f2",
           "scope": [
             "readForecast"
@@ -5653,10 +5556,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readForecast/<callback:126:40>@126:40",
-          "name": "<callback:126:40>",
-          "line": 126,
-          "end": 126,
+          "id": "<iife>/readForecast/<callback:125:40>@125:40",
+          "name": "<callback:125:40>",
+          "line": 125,
+          "end": 125,
           "sha256": "29e987bad5c53cad8d7e82a0c8e1af0561726fe2c331a5e3cb11b07cb0bd7623",
           "scope": [
             "readForecast"
@@ -5670,10 +5573,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/evaluate@140:2",
+          "id": "<iife>/evaluate@139:2",
           "name": "evaluate",
-          "line": 140,
-          "end": 140,
+          "line": 139,
+          "end": 139,
           "sha256": "62f31b47bae109a04b84f5bffffdc534ce48ced3375cefe5eceb6b3ebcb14ed0",
           "scope": [],
           "role": "domain",
@@ -7174,6 +7077,7 @@
           "productionReferenceCandidates": [
             "rail/assets-wasm.js",
             "rail/console-ui.js",
+            "rail/demand-world.js",
             "rail/management.js",
             "rail/network.js",
             "rail/runtime-wasm.js",
@@ -7428,6 +7332,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/gba-data.js",
             "rail/hubs.js",
             "rail/passengers.js",
@@ -8094,7 +7999,6 @@
           "productionReferenceCandidates": [
             "rail/flow-history.js",
             "rail/history-wasm.js",
-            "rail/service-plan.js",
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
@@ -8207,6 +8111,7 @@
             "rail/demand-world.js",
             "rail/operations-wasm.js",
             "rail/shell-ui.js",
+            "rail/ui-line-view.js",
             "rail/urban-growth.js"
           ],
           "testReferenceCandidates": [
@@ -8828,6 +8733,7 @@
           "productionReferenceCandidates": [
             "rail/bootstrap-wasm.js",
             "rail/demand-worker.js",
+            "rail/demand-world.js",
             "rail/forecast-catalog.js",
             "rail/history-wasm.js",
             "rail/operations-worker.js",
@@ -10410,7 +10316,6 @@
             "rail/operations.js",
             "rail/passengers.js",
             "rail/runtime-wasm.js",
-            "rail/service-plan.js",
             "rail/street-map.js",
             "rail/ui-dom.js",
             "rail/ui.js"
@@ -10644,6 +10549,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/hubs.js",
             "rail/passengers.js",
@@ -11329,6 +11235,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/gba-data.js",
             "rail/passengers.js",
@@ -11362,7 +11269,6 @@
           "owner": "Rust configuration/geography initialization; compatibility view accessor",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
-            "rail/demand-world.js",
             "rail/ui.js",
             "rail/urban-growth.js"
           ],
@@ -11390,7 +11296,6 @@
           "productionReferenceCandidates": [
             "rail/console-ui.js",
             "rail/demand-kernels.js",
-            "rail/demand-world.js",
             "rail/history-wasm.js",
             "rail/ui.js"
           ],
@@ -12202,6 +12107,7 @@
           "productionReferenceCandidates": [
             "rail/assets-wasm.js",
             "rail/console-ui.js",
+            "rail/demand-world.js",
             "rail/editor-wasm.js",
             "rail/network.js",
             "rail/runtime-wasm.js",
@@ -12228,7 +12134,6 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/demand-kernels.js",
-            "rail/demand-world.js",
             "rail/diagnostics-wasm.js",
             "rail/network.js",
             "rail/operations-wasm.js",
@@ -15642,7 +15547,7 @@
       ]
     },
     "rail/operations-wasm.js": {
-      "sha256": "f1ca2e53294cc146db0c4ad0d949839d4070bbfd359f641143852c466935f1ce",
+      "sha256": "f1f7dcae8a323f841baa9bc42b5f502a794bbc63cc340e78b4d1b1aed230ad42",
       "role": "domain",
       "owner": "Rust city/statistics/observation",
       "phase": "P3-5",
@@ -15696,8 +15601,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 212,
-          "sha256": "ebb98b1449472c0300f4bd5301a5c4411869326410211d94f990d1641d51e43f",
+          "end": 209,
+          "sha256": "a92e6f94e98b79d928d1eea43e4cf2285fcc983b1edebe8f997e0ae04bd1573b",
           "scope": [],
           "role": "domain",
           "phase": "P3-5",
@@ -15766,8 +15671,8 @@
           "id": "<iife>/feedbackFrame@16:2",
           "name": "feedbackFrame",
           "line": 16,
-          "end": 64,
-          "sha256": "d319a8d13f9439f1b2d01137c0fe0c7cb6a59cbb1937e265bf0bd1e9e3ce8c9a",
+          "end": 61,
+          "sha256": "01708ad7d7fc5720f64b60e6efa50c96de210aa9dc2712d6786e3dba8ca7630d",
           "scope": [],
           "role": "domain",
           "phase": "P3-5",
@@ -15846,10 +15751,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/feedback@65:2",
+          "id": "<iife>/feedback@62:2",
           "name": "feedback",
-          "line": 65,
-          "end": 68,
+          "line": 62,
+          "end": 65,
           "sha256": "374c07dd95b5ce37d59c152a7940c7a052333b800fa2685294e0f11115d43709",
           "scope": [],
           "role": "domain",
@@ -15864,10 +15769,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/projectFeedback@69:2",
+          "id": "<iife>/projectFeedback@66:2",
           "name": "projectFeedback",
-          "line": 69,
-          "end": 111,
+          "line": 66,
+          "end": 108,
           "sha256": "5791d0ebbba8f791b69bd03b473022961c39934b4f5ae3224cc2c013368a6244",
           "scope": [],
           "role": "domain",
@@ -15879,10 +15784,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/projectFeedback/<callback:81:51>@81:51",
-          "name": "<callback:81:51>",
-          "line": 81,
-          "end": 81,
+          "id": "<iife>/projectFeedback/<callback:78:51>@78:51",
+          "name": "<callback:78:51>",
+          "line": 78,
+          "end": 78,
           "sha256": "29cf3f768de52392b460cff5b7d16082e00934dfb397c70d51e4244265a9fcf4",
           "scope": [
             "projectFeedback"
@@ -15896,10 +15801,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/accounts@113:2",
+          "id": "<iife>/accounts@110:2",
           "name": "accounts",
-          "line": 113,
-          "end": 126,
+          "line": 110,
+          "end": 123,
           "sha256": "0e35617317eeea6c5b14acd82e4a740fba31654a93fc80082dbeb48f457f2107",
           "scope": [],
           "role": "domain",
@@ -15914,10 +15819,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/projectAccounts@128:2",
+          "id": "<iife>/projectAccounts@125:2",
           "name": "projectAccounts",
-          "line": 128,
-          "end": 182,
+          "line": 125,
+          "end": 179,
           "sha256": "a908319e6cc4e63485df7df04517a813b983a8663c729c45936418dbda9526d4",
           "scope": [],
           "role": "domain",
@@ -15929,10 +15834,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/credit@184:2",
+          "id": "<iife>/credit@181:2",
           "name": "credit",
-          "line": 184,
-          "end": 188,
+          "line": 181,
+          "end": 185,
           "sha256": "57be8963f56b87304752bfce2e077d3331f2ccc47aeffbab767c88c7b0b7291c",
           "scope": [],
           "role": "domain",
@@ -15947,10 +15852,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/clock@190:2",
+          "id": "<iife>/clock@187:2",
           "name": "clock",
-          "line": 190,
-          "end": 192,
+          "line": 187,
+          "end": 189,
           "sha256": "ba30dfaff905199c006dd89366ca83bbbc60d70ea6733075b193f569d7575db0",
           "scope": [],
           "role": "domain",
@@ -15972,10 +15877,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/allocation@194:2",
+          "id": "<iife>/allocation@191:2",
           "name": "allocation",
-          "line": 194,
-          "end": 198,
+          "line": 191,
+          "end": 195,
           "sha256": "b7058d6337af413d3f7815df6355249d75d54f01bb592b98ddfd5e35b651ecb6",
           "scope": [],
           "role": "domain",
@@ -15989,7 +15894,7 @@
       ]
     },
     "rail/operations-worker.js": {
-      "sha256": "257165151a053f46a3d86ce8fbc8b33c7658cc15cdd708a3f1156bac112812ed",
+      "sha256": "957fed52b0be501ff36899ceeb9edd836be594efc5b1c25b761208e1abfb7a9c",
       "role": "platform",
       "owner": "Rust task/revision/timeout/worker ownership",
       "phase": "P3-8",
@@ -17658,6 +17563,7 @@
             "rail/local-save.js",
             "rail/regions.js",
             "rail/runtime-wasm.js",
+            "rail/service-plan.js",
             "rail/shell-ui.js",
             "rail/ui.js",
             "rail/urban-growth.js"
@@ -17739,6 +17645,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/gba-data.js",
             "rail/hubs.js",
@@ -18125,6 +18032,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/gba-data.js",
             "rail/hubs.js",
@@ -18316,6 +18224,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/gba-data.js",
             "rail/hubs.js",
@@ -19105,6 +19014,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/gba-data.js",
             "rail/hubs.js",
@@ -19261,6 +19171,8 @@
           "owner": "Rust view_model.rs; frozen mutation helpers are Node-only development fixtures",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
+            "rail/service-plan.js",
+            "rail/ui-line-view.js",
             "rail/ui.js",
             "rail/value-wire.js"
           ],
@@ -19425,7 +19337,7 @@
       ]
     },
     "rail/routing-wasm.js": {
-      "sha256": "cad3958abed1bc21e97566bd941825619dc077e6c410c28d2e4783cdb7f7fbeb",
+      "sha256": "7af29d4f2b3f5b30a9209a2cd85602820f3523ac0be2b48ce5ef8c023747aa18",
       "role": "domain",
       "owner": "Rust graph/forecast/directory/cache",
       "phase": "P3-2",
@@ -19448,6 +19360,7 @@
         "diagnosticToken",
         "editorReady",
         "engineToken",
+        "forecastGraphId",
         "forecastKernel",
         "graphFrame",
         "init",
@@ -19496,8 +19409,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 464,
-          "sha256": "7fd295438064b1c233b53b8202aa907c8af42c381fe59d07972ea0c3b0b94c79",
+          "end": 465,
+          "sha256": "daadad23a6a8d3c13c1fd73eca2e16a278af5d7f38544ab72986f202799c8488",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -19892,7 +19805,9 @@
           "phase": "P3-2 bridge",
           "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering",
           "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
+          "productionReferenceCandidates": [
+            "rail/service-plan.js"
+          ],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -20348,10 +20263,27 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/graphFrame@372:15",
-          "name": "graphFrame",
+          "id": "<iife>/forecastGraphId@372:20",
+          "name": "forecastGraphId",
           "line": 372,
           "end": 372,
+          "sha256": "0ca1e6327d623b4b2df032108b9f0e354795ba629b480e6f240558dde666ee60",
+          "scope": [],
+          "role": "domain",
+          "phase": "P3-2",
+          "owner": "Rust graph/forecast/directory/cache",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/demand-world.js"
+          ],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/graphFrame@373:15",
+          "name": "graphFrame",
+          "line": 373,
+          "end": 373,
           "sha256": "c645094caa1610a5b48310bc591682435e71ac3da34860cc6379989359ce87a3",
           "scope": [],
           "role": "domain",
@@ -20363,10 +20295,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/pinRuntime@374:15",
+          "id": "<iife>/pinRuntime@375:15",
           "name": "pinRuntime",
-          "line": 374,
-          "end": 374,
+          "line": 375,
+          "end": 375,
           "sha256": "f90693c263584433be567d084e8904f8cb89c18360bc3bdf191333a41ff98af5",
           "scope": [],
           "role": "domain",
@@ -20380,10 +20312,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/reportWorkerStatus@375:23",
+          "id": "<iife>/reportWorkerStatus@376:23",
           "name": "reportWorkerStatus",
-          "line": 375,
-          "end": 375,
+          "line": 376,
+          "end": 376,
           "sha256": "39ec8e024b8a688ed7502f16486bc6b007f4ad2007f1a67625e28153625edc3b",
           "scope": [],
           "role": "domain",
@@ -20395,10 +20327,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/withTokens@376:15",
+          "id": "<iife>/withTokens@377:15",
           "name": "withTokens",
-          "line": 376,
-          "end": 376,
+          "line": 377,
+          "end": 377,
           "sha256": "4b23c2d77acdfc8f94008a3fb579797ba2f208448ce0891657fb460eb0d99217",
           "scope": [],
           "role": "domain",
@@ -20410,10 +20342,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/withClock@377:14",
+          "id": "<iife>/withClock@378:14",
           "name": "withClock",
-          "line": 377,
-          "end": 377,
+          "line": 378,
+          "end": 378,
           "sha256": "e6364aa8a25420a3c9354f2994cba657deabe3c9224a7ec16d2ec3a7abe85c93",
           "scope": [],
           "role": "domain",
@@ -20425,10 +20357,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/transaction@378:17",
+          "id": "<iife>/transaction@379:17",
           "name": "transaction",
-          "line": 378,
-          "end": 386,
+          "line": 379,
+          "end": 387,
           "sha256": "4e35f9563d931315425d0adcdb2b54283e72e333f961b316d8b373275bb7ce1f",
           "scope": [],
           "role": "domain",
@@ -20445,10 +20377,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/simulationToken@389:21",
+          "id": "<iife>/simulationToken@390:21",
           "name": "simulationToken",
-          "line": 389,
-          "end": 389,
+          "line": 390,
+          "end": 390,
           "sha256": "461621f2c8078df7d2e9130f27a42eabfba971d5fc8a8141db50c4f0124c3c6b",
           "scope": [],
           "role": "domain",
@@ -20462,10 +20394,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/queueToken@390:16",
+          "id": "<iife>/queueToken@391:16",
           "name": "queueToken",
-          "line": 390,
-          "end": 390,
+          "line": 391,
+          "end": 391,
           "sha256": "cb1bfd05789384ea1feabfc3af15fff28e412f3f0bb0e2e7b78a829e20a160ae",
           "scope": [],
           "role": "domain",
@@ -20481,10 +20413,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/engineToken@391:17",
+          "id": "<iife>/engineToken@392:17",
           "name": "engineToken",
-          "line": 391,
-          "end": 391,
+          "line": 392,
+          "end": 392,
           "sha256": "936c3f0f125db6e9c9578c798587d78bbf68abc1d216b24c88f915f46e3d4b37",
           "scope": [],
           "role": "domain",
@@ -20498,10 +20430,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/allocateToken@392:19",
+          "id": "<iife>/allocateToken@393:19",
           "name": "allocateToken",
-          "line": 392,
-          "end": 392,
+          "line": 393,
+          "end": 393,
           "sha256": "8a3c57f5ee21d86477b9f22feb348544df5d0ebb7438c823a18206b6372134c2",
           "scope": [],
           "role": "domain",
@@ -20518,10 +20450,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/samplingToken@393:19",
+          "id": "<iife>/samplingToken@394:19",
           "name": "samplingToken",
-          "line": 393,
-          "end": 393,
+          "line": 394,
+          "end": 394,
           "sha256": "5f063614105c9241fbf2034337adbb57e3da7fa7b3e1fc3186b2716307b6985f",
           "scope": [],
           "role": "domain",
@@ -20535,10 +20467,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cycleToken@394:16",
+          "id": "<iife>/cycleToken@395:16",
           "name": "cycleToken",
-          "line": 394,
-          "end": 394,
+          "line": 395,
+          "end": 395,
           "sha256": "53c7d295a5af4a10b81f25a96bb7a5ea71c68a9f800f575a8ecac67e0e799ccc",
           "scope": [],
           "role": "domain",
@@ -20552,10 +20484,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/recycleSimulation@395:23",
+          "id": "<iife>/recycleSimulation@396:23",
           "name": "recycleSimulation",
-          "line": 395,
-          "end": 399,
+          "line": 396,
+          "end": 400,
           "sha256": "d5e5c3adaaa5d440430bf737b3826532e3ead89205d835a4545b9f543ba49746",
           "scope": [],
           "role": "domain",
@@ -20579,10 +20511,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/status@405:12",
+          "id": "<iife>/status@406:12",
           "name": "status",
-          "line": 405,
-          "end": 443,
+          "line": 406,
+          "end": 444,
           "sha256": "f9724a32718877b20bcb45fb9d97fe09427bae9e71929fa26e31930d66fa1bad",
           "scope": [],
           "role": "domain",
@@ -20626,10 +20558,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create@445:12",
+          "id": "<iife>/create@446:12",
           "name": "create",
-          "line": 445,
-          "end": 450,
+          "line": 446,
+          "end": 451,
           "sha256": "9af8c1fd194d0b043e09fe4265ff7d094cc245d50176e6c0fe0a5803a0e64862",
           "scope": [],
           "role": "domain",
@@ -20737,10 +20669,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:462:32>@462:32",
-          "name": "<callback:462:32>",
-          "line": 462,
-          "end": 462,
+          "id": "<iife>/<callback:463:32>@463:32",
+          "name": "<callback:463:32>",
+          "line": 463,
+          "end": 463,
           "sha256": "5fa8c711247d70f5c653bac436acb6b2959231e50344d054ff9cf6093cc71a2c",
           "scope": [],
           "role": "domain",
@@ -20754,7 +20686,7 @@
       ]
     },
     "rail/runtime-wasm.js": {
-      "sha256": "1c00f733b3876e3f1ede37a779d2df883f67cd111049b33b8e1a6cfdf9706d5c",
+      "sha256": "623d7bffff930dbba18735282e77094e359ba394b0f88f2d91b89c96f7080f1e",
       "role": "platform",
       "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
       "phase": "P3-8 bridge",
@@ -20836,7 +20768,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 91,
-          "sha256": "e317c485ffe540a1134eef8483fe845989f3d143f39102bff0c938ab99207dd4",
+          "sha256": "21441e6fcbeef097515a90c42904dd795cddd867cedfa76bd2260aa7903a8495",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -20859,6 +20791,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/gba-data.js",
             "rail/hubs.js",
@@ -21180,7 +21113,7 @@
           "name": "worker",
           "line": 12,
           "end": 39,
-          "sha256": "18198e95f4e99bcd9f4903326d5fb2f528186b2b58e0bf9cb190858aa1d1bcca",
+          "sha256": "9b13fbcc736a7ebf922c3c72c76cbdf5c28562ba9ab8b2834602972bfd39d3f4",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -21203,7 +21136,7 @@
           "name": "createWorker",
           "line": 15,
           "end": 15,
-          "sha256": "556668ec4e0c5f8e988f1feb155218fc4a363beaedcc7e37de8fa3648c3733ea",
+          "sha256": "f6991b43b868e625180d9bc598e1f0a3702e1bb6e7d28739d4b4756dded3dc28",
           "scope": [
             "worker"
           ],
@@ -22300,6 +22233,7 @@
           "productionReferenceCandidates": [
             "rail/assets-wasm.js",
             "rail/console-ui.js",
+            "rail/demand-world.js",
             "rail/editor-wasm.js",
             "rail/management.js",
             "rail/network.js",
@@ -22821,6 +22755,7 @@
           "productionReferenceCandidates": [
             "rail/bootstrap-wasm.js",
             "rail/demand-worker.js",
+            "rail/demand-world.js",
             "rail/flow-history.js",
             "rail/forecast-catalog.js",
             "rail/history-wasm.js",
@@ -24028,7 +23963,7 @@
       ]
     },
     "rail/save-worker.js": {
-      "sha256": "cd1278964d395a41b1341f68f8067459dd50391012450cb65f83f221cffa000a",
+      "sha256": "774745b8b7b87d1680e7f323b6e264900d767a6d6214bf54302de0155fd6da0c",
       "role": "platform",
       "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
       "phase": "P3-7 bridge",
@@ -24085,7 +24020,7 @@
       ]
     },
     "rail/service-plan.js": {
-      "sha256": "c44a2f13f0616f6ddd3f28b3501020dea60e5bf83f53be2970794b7409aaebaa",
+      "sha256": "779517df47b64a000cd2ecbd6382efc434d5d8d011babccafd3bb7bab4f0a6c8",
       "role": "domain",
       "owner": "Rust graph/forecast/directory/cache",
       "phase": "P3-2",
@@ -24112,9 +24047,11 @@
         "duration",
         "expand",
         "fare",
+        "feedbackFares",
         "geometry",
         "headway",
         "linePoints",
+        "lineSettings",
         "loopDwell",
         "modeShare",
         "network",
@@ -24126,6 +24063,7 @@
         "routingStatus",
         "smooth",
         "sum",
+        "tariffs",
         "trackPoints",
         "validate"
       ],
@@ -24133,17 +24071,17 @@
         {
           "kind": "require",
           "target": "rail/bootstrap-wasm.js",
-          "line": 88
+          "line": 82
         },
         {
           "kind": "require",
           "target": "rail/editor-wasm.js",
-          "line": 13
+          "line": 11
         },
         {
           "kind": "require",
           "target": "rail/routing-wasm.js",
-          "line": 242
+          "line": 168
         }
       ],
       "functions": [
@@ -24151,8 +24089,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 313,
-          "sha256": "dfff42443437d53a514eb57592a7b171f17043b3c7ca542d9601f890cce552d9",
+          "end": 242,
+          "sha256": "09761340da9528a7015450f7f00b83fe68ec27db0bc710509ee7fe4879be7271",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -24163,10 +24101,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/distance@16:19",
+          "id": "<iife>/distance@14:19",
           "name": "distance",
-          "line": 16,
-          "end": 16,
+          "line": 14,
+          "end": 14,
           "sha256": "164131bfd132be89ddaf622d0f44ff930609fce38dd0e4291fe9321015c5370f",
           "scope": [],
           "role": "domain",
@@ -24184,10 +24122,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/sum@17:14",
+          "id": "<iife>/sum@15:14",
           "name": "sum",
-          "line": 17,
-          "end": 17,
+          "line": 15,
+          "end": 15,
           "sha256": "d0f1a9c93152b4a4e19d515c01ab1352709627c7c0fc9568198d9f7671733768",
           "scope": [],
           "role": "domain",
@@ -24207,10 +24145,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/smooth@18:17",
+          "id": "<iife>/smooth@16:17",
           "name": "smooth",
-          "line": 18,
-          "end": 19,
+          "line": 16,
+          "end": 17,
           "sha256": "573853cd24f0c48361709cb43303b218e40142d6d6055c769c90bc6868243385",
           "scope": [],
           "role": "domain",
@@ -24229,10 +24167,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/rawTrackPoints@21:2",
+          "id": "<iife>/rawTrackPoints@19:2",
           "name": "rawTrackPoints",
-          "line": 21,
-          "end": 24,
+          "line": 19,
+          "end": 22,
           "sha256": "9cc38d7a9fbab00f661da1e4f4054378da81bdc03d89065bc18a9bcd39b981eb",
           "scope": [],
           "role": "domain",
@@ -24247,10 +24185,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/trackPoints@26:2",
+          "id": "<iife>/trackPoints@24:2",
           "name": "trackPoints",
-          "line": 26,
-          "end": 30,
+          "line": 24,
+          "end": 28,
           "sha256": "52be513017a78ef2de6aaff47841a2a3b292b7bc68d7b914bbd50d15066491e5",
           "scope": [],
           "role": "domain",
@@ -24269,10 +24207,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/geometry@31:19",
+          "id": "<iife>/geometry@29:19",
           "name": "geometry",
-          "line": 31,
-          "end": 34,
+          "line": 29,
+          "end": 32,
           "sha256": "a0d560a6469441df60fbb4169139f2d1afa3169be0532262f9ddd5d7f9cbcf4d",
           "scope": [],
           "role": "domain",
@@ -24289,10 +24227,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/linePoints@36:2",
+          "id": "<iife>/linePoints@34:2",
           "name": "linePoints",
-          "line": 36,
-          "end": 43,
+          "line": 34,
+          "end": 41,
           "sha256": "926a05bba1474afd0607bf5f27c48b4e1777dbf1e80f76bc52ed8bd6cd71a7a6",
           "scope": [],
           "role": "domain",
@@ -24306,10 +24244,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/linePoints/<callback:39:50>@39:50",
-          "name": "<callback:39:50>",
-          "line": 39,
-          "end": 39,
+          "id": "<iife>/linePoints/<callback:37:50>@37:50",
+          "name": "<callback:37:50>",
+          "line": 37,
+          "end": 37,
           "sha256": "854d8367038764ab073d4b866270334a36fb89ef9f8b356858eed3fc1d68e893",
           "scope": [
             "linePoints"
@@ -24323,10 +24261,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/along@45:2",
+          "id": "<iife>/along@43:2",
           "name": "along",
-          "line": 45,
-          "end": 55,
+          "line": 43,
+          "end": 53,
           "sha256": "a1ef08a22dd63e10febf63d0e0cc916a0a09a4490433153ae917b91d5076c803",
           "scope": [],
           "role": "domain",
@@ -24344,10 +24282,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/draftLegs@56:20",
+          "id": "<iife>/draftLegs@54:20",
           "name": "draftLegs",
-          "line": 56,
-          "end": 58,
+          "line": 54,
+          "end": 56,
           "sha256": "dcd2204f10ebc2948c7b4428b9cbbce9172d0ef0f0ccdabf205fa7df05fff544",
           "scope": [],
           "role": "domain",
@@ -24364,39 +24302,55 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/bands@60:2",
-          "name": "bands",
-          "line": 60,
-          "end": 62,
-          "sha256": "ab996e1a36cd209fbc0bd04ebc50b4f8ef41263e0683915ccb4247602859738d",
+          "id": "<iife>/planningView@58:21",
+          "name": "planningView",
+          "line": 58,
+          "end": 58,
+          "sha256": "9c2c363ddf7a484afb38c1598dd8bb4b194035c74e849c0b1c914d84c8f32295",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
           "owner": "Rust graph/forecast/directory/cache",
           "exportNameCandidate": false,
-          "productionReferenceCandidates": [
-            "rail/ui-line-view.js"
-          ],
+          "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/fare@64:2",
-          "name": "fare",
-          "line": 64,
-          "end": 67,
-          "sha256": "09e16bafb418919291d8979bc8f8b4fa11046edbc99f392c88cc05eb7ea9a9cb",
+          "id": "<iife>/lineSettings@59:2",
+          "name": "lineSettings",
+          "line": 59,
+          "end": 62,
+          "sha256": "c5b41d8b8e1705db2be7e812532c5290600929d4f8f3864e0981f9d4cfe22bb5",
           "scope": [],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/ui-line-view.js"
+          ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_services.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/fare@63:2",
+          "name": "fare",
+          "line": 63,
+          "end": 65,
+          "sha256": "e25781724907858f72ed7e3366ac678618469ad5fbbf038f380a14757ce9a9fc",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/demand-kernels.js",
             "rail/demand-world.js",
             "rail/diagnostics-wasm.js",
             "rail/engine.js",
-            "rail/operations-wasm.js",
             "rail/routing-wasm.js",
             "rail/statistics-wasm.js",
             "rail/ui-line-view.js",
@@ -24409,30 +24363,34 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/planningView@69:21",
-          "name": "planningView",
-          "line": 69,
-          "end": 69,
-          "sha256": "9c2c363ddf7a484afb38c1598dd8bb4b194035c74e849c0b1c914d84c8f32295",
+          "id": "<iife>/feedbackFares@66:2",
+          "name": "feedbackFares",
+          "line": 66,
+          "end": 68,
+          "sha256": "a620bded3c30134ed6f058b1047ba61c20536b8f8b10988c20772591f3150149",
           "scope": [],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/operations-wasm.js"
+          ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_services.cjs"
+          ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/patterns@70:2",
+          "id": "<iife>/patterns@69:2",
           "name": "patterns",
-          "line": 70,
-          "end": 74,
-          "sha256": "046110113afb934242b14651556f5a5102cad1df79666770b4b751baf74b8232",
+          "line": 69,
+          "end": 73,
+          "sha256": "7d21134e4e96a890ff1f0d92ff55fbc13d029e82a5a09e6fa6467993e2980432",
           "scope": [],
-          "role": "domain",
-          "phase": "P3-2",
-          "owner": "Rust graph/forecast/directory/cache",
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/operations-center.js",
@@ -24441,14 +24399,33 @@
             "rail/ui-line-view.js",
             "rail/ui.js"
           ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_services.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/patterns/<callback:72:40>@72:40",
+          "name": "<callback:72:40>",
+          "line": 72,
+          "end": 72,
+          "sha256": "f4414aa80bfd0e8158db696af3c43e47547863d7e25a22830c8893b5db678b38",
+          "scope": [
+            "patterns"
+          ],
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/patternDraft@76:2",
+          "id": "<iife>/patternDraft@75:2",
           "name": "patternDraft",
-          "line": 76,
-          "end": 80,
+          "line": 75,
+          "end": 79,
           "sha256": "fa4c4ba36f61dbb711aa4e893ce73052c650e7d4cdcf66938197c559cba63427",
           "scope": [],
           "role": "domain",
@@ -24463,10 +24440,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/patternDraft/<callback:77:34>@77:34",
-          "name": "<callback:77:34>",
-          "line": 77,
-          "end": 78,
+          "id": "<iife>/patternDraft/<callback:76:34>@76:34",
+          "name": "<callback:76:34>",
+          "line": 76,
+          "end": 77,
           "sha256": "f7f4ca3286be0c5870d72360eac245d5506a3bfc5b9adc381207ee504936a046",
           "scope": [
             "patternDraft"
@@ -24480,11 +24457,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/serviceOwner@87:2",
+          "id": "<iife>/serviceOwner@81:2",
           "name": "serviceOwner",
-          "line": 87,
-          "end": 93,
-          "sha256": "74b528dfc547f5a8d52a4313461868102acb25305aec2b8bdf0e7207e50e5cbb",
+          "line": 81,
+          "end": 87,
+          "sha256": "0971486bad8a9fe695b1549909e08faf5bca6ec067ccfffcbfa210682746dc6d",
           "scope": [],
           "role": "platform",
           "phase": "P3-2 bridge",
@@ -24495,10 +24472,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/serviceOwner/pattern@89:18",
+          "id": "<iife>/serviceOwner/pattern@83:18",
           "name": "pattern",
-          "line": 89,
-          "end": 89,
+          "line": 83,
+          "end": 83,
           "sha256": "efd85da88cf23c63e3b8663b6275ed185f7499ac244c778b901058127816e92c",
           "scope": [
             "serviceOwner"
@@ -24515,10 +24492,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/serviceOwner/pattern/<callback:89:80>@89:80",
-          "name": "<callback:89:80>",
-          "line": 89,
-          "end": 89,
+          "id": "<iife>/serviceOwner/pattern/<callback:83:80>@83:80",
+          "name": "<callback:83:80>",
+          "line": 83,
+          "end": 83,
           "sha256": "5964273a0c5cca18e84c31d23706e13f29eb87f04245edcd2ea5d34256a963c3",
           "scope": [
             "serviceOwner",
@@ -24533,10 +24510,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/serviceOwner/packet@90:17",
+          "id": "<iife>/serviceOwner/packet@84:17",
           "name": "packet",
-          "line": 90,
-          "end": 90,
+          "line": 84,
+          "end": 84,
           "sha256": "39b5bf27a8a7c20d71d0faa24e3a5c24ecc135b72e8284c2141150b2be1fd96d",
           "scope": [
             "serviceOwner"
@@ -24555,13 +24532,28 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/serviceOwner/<callback:92:93>@92:93",
-          "name": "<callback:92:93>",
-          "line": 92,
+          "id": "<iife>/serviceFrame@88:2",
+          "name": "serviceFrame",
+          "line": 88,
           "end": 92,
+          "sha256": "9e845404c98365bb7d6cb27e7f67337250620d02ecf232221e2fef9c176c5b56",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/serviceFrame/<callback:90:50>@90:50",
+          "name": "<callback:90:50>",
+          "line": 90,
+          "end": 90,
           "sha256": "ab70fa40230c0d604e17d05489d544f12facff30982a11d30d2ccd6dc85bb8e4",
           "scope": [
-            "serviceOwner"
+            "serviceFrame"
           ],
           "role": "platform",
           "phase": "P3-2 bridge",
@@ -24572,26 +24564,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/serviceFrame@94:2",
-          "name": "serviceFrame",
-          "line": 94,
-          "end": 94,
-          "sha256": "5f7508cc37471ba964f053b6373a7d29b9af9c6b667883ee7ed9c8953a6148d5",
-          "scope": [],
-          "role": "platform",
-          "phase": "P3-2 bridge",
-          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/compileServices@95:2",
+          "id": "<iife>/compileServices@93:2",
           "name": "compileServices",
-          "line": 95,
-          "end": 167,
-          "sha256": "2e863d4fc8425e8f4843cd631e1595f8bc12fcc8ddd554458cb6ca9889e48101",
+          "line": 93,
+          "end": 95,
+          "sha256": "a6cfa37877b6da9d6a35e4dc5e8d19b41406e049d88736b176dc73822e8d2aa7",
           "scope": [],
           "role": "platform",
           "phase": "P3-2 bridge",
@@ -24602,99 +24579,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/compileServices/render@99:19",
-          "name": "render",
-          "line": 99,
-          "end": 132,
-          "sha256": "e444be950aa5d111571f9fea57273f9ad1a9a405f34f0f88d77f97d1de2a1a62",
-          "scope": [
-            "compileServices"
-          ],
-          "role": "platform",
-          "phase": "P3-2 bridge",
-          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [
-            "rail/ui.js"
-          ],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/compileServices/render/<callback:122:31>@122:31",
-          "name": "<callback:122:31>",
-          "line": 122,
-          "end": 122,
-          "sha256": "dcfd792fcc813b47a27ae5e2c067abb13f8f0bb07cd46f684a260728f03036ae",
-          "scope": [
-            "compileServices",
-            "render"
-          ],
-          "role": "platform",
-          "phase": "P3-2 bridge",
-          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/compileServices/render/<callback:123:33>@123:33",
-          "name": "<callback:123:33>",
-          "line": 123,
-          "end": 123,
-          "sha256": "da1ca424b439d1e8c2ce01ba783984adacecd27b826429a650adb58fbcda209f",
-          "scope": [
-            "compileServices",
-            "render"
-          ],
-          "role": "platform",
-          "phase": "P3-2 bridge",
-          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/compileServices/<callback:146:61>@146:61",
-          "name": "<callback:146:61>",
-          "line": 146,
-          "end": 146,
-          "sha256": "e88c1cff2f8e9a10a55196e00529b4fff0fad43d5342765373f799dfe7c6cfdd",
-          "scope": [
-            "compileServices"
-          ],
-          "role": "platform",
-          "phase": "P3-2 bridge",
-          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/compileServices/<callback:148:66>@148:66",
-          "name": "<callback:148:66>",
-          "line": 148,
-          "end": 148,
-          "sha256": "e88c1cff2f8e9a10a55196e00529b4fff0fad43d5342765373f799dfe7c6cfdd",
-          "scope": [
-            "compileServices"
-          ],
-          "role": "platform",
-          "phase": "P3-2 bridge",
-          "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/compile@169:2",
+          "id": "<iife>/compile@97:2",
           "name": "compile",
-          "line": 169,
-          "end": 171,
+          "line": 97,
+          "end": 99,
           "sha256": "119210f0195227b139c971720f935813ec5b1c60060068125d19621304055d8a",
           "scope": [],
           "role": "domain",
@@ -24711,10 +24599,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/expand@173:2",
+          "id": "<iife>/expand@101:2",
           "name": "expand",
-          "line": 173,
-          "end": 181,
+          "line": 101,
+          "end": 109,
           "sha256": "a711f79e9c6128d06e8f2e60639aac397de7019c0a6dbca770071a5beca196a3",
           "scope": [],
           "role": "domain",
@@ -24722,7 +24610,6 @@
           "owner": "Rust graph/forecast/directory/cache",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
-            "rail/demand-world.js",
             "rail/operations-wasm.js"
           ],
           "testReferenceCandidates": [
@@ -24747,10 +24634,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/duration@183:19",
+          "id": "<iife>/duration@111:19",
           "name": "duration",
-          "line": 183,
-          "end": 183,
+          "line": 111,
+          "end": 111,
           "sha256": "64657f439d8a9edd910f8519b3d77a5d3a648f43685b6077800378ae17baad1c",
           "scope": [],
           "role": "domain",
@@ -24770,10 +24657,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/headway@184:18",
+          "id": "<iife>/headway@112:18",
           "name": "headway",
-          "line": 184,
-          "end": 184,
+          "line": 112,
+          "end": 112,
           "sha256": "989544031187036081ac7bbc2a7369d6731d1edb4ef8ac8abd2d7d989151c387",
           "scope": [],
           "role": "domain",
@@ -24782,7 +24669,6 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/demand-kernels.js",
-            "rail/demand-world.js",
             "rail/editor-wasm.js",
             "rail/engine.js",
             "rail/operations-wasm.js",
@@ -24801,10 +24687,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/loopDwell@185:20",
+          "id": "<iife>/loopDwell@113:20",
           "name": "loopDwell",
-          "line": 185,
-          "end": 185,
+          "line": 113,
+          "end": 113,
           "sha256": "8d6987e407374d3662d1dc5320ebc44966d057637540d5c060e03916699394af",
           "scope": [],
           "role": "domain",
@@ -24821,10 +24707,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/directions@188:2",
+          "id": "<iife>/directions@116:2",
           "name": "directions",
-          "line": 188,
-          "end": 188,
+          "line": 116,
+          "end": 116,
           "sha256": "627d82c899f9c50f18ced3ccb548231d461fff615775b175aab3f0f9a1e67a63",
           "scope": [],
           "role": "domain",
@@ -24839,10 +24725,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/directionName@190:2",
+          "id": "<iife>/directionName@118:2",
           "name": "directionName",
-          "line": 190,
-          "end": 193,
+          "line": 118,
+          "end": 121,
           "sha256": "e535002ba5ed53c6593cb46b846134065273cc96f58a9697adc3a13d9e480312",
           "scope": [],
           "role": "domain",
@@ -24857,10 +24743,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/directionName/<callback:191:31>@191:31",
-          "name": "<callback:191:31>",
-          "line": 191,
-          "end": 191,
+          "id": "<iife>/directionName/<callback:119:31>@119:31",
+          "name": "<callback:119:31>",
+          "line": 119,
+          "end": 119,
           "sha256": "d36c2d9dd9cfabf0bef5d6a46a579c4b84baf9373c0d409aaabba8cba75c9f93",
           "scope": [
             "directionName"
@@ -24874,11 +24760,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/validate@195:2",
+          "id": "<iife>/validate@123:2",
           "name": "validate",
-          "line": 195,
-          "end": 233,
-          "sha256": "f4f22aaefed6e1f7bc24e1375fdebc3f08d5d29d2cc4ecc1828c6747b5eea078",
+          "line": 123,
+          "end": 159,
+          "sha256": "d741fb96233c474074b61895909eafa6466b71772af002667c9f534cc5ba74b3",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -24920,10 +24806,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/validate/num@198:18",
+          "id": "<iife>/validate/num@126:18",
           "name": "num",
-          "line": 198,
-          "end": 198,
+          "line": 126,
+          "end": 126,
           "sha256": "d5af7d5e2de6326010739df428d321ea17baa9a5f6c3aaccc0012b70be06a0d6",
           "scope": [
             "validate"
@@ -24944,10 +24830,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/validate/<callback:209:55>@209:55",
-          "name": "<callback:209:55>",
-          "line": 209,
-          "end": 209,
+          "id": "<iife>/validate/<callback:137:55>@137:55",
+          "name": "<callback:137:55>",
+          "line": 137,
+          "end": 137,
           "sha256": "2514aac809cba4d120d1a27aad6787c8d8e63792c7b22741ff0533e4985baca1",
           "scope": [
             "validate"
@@ -24961,10 +24847,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/network@235:2",
+          "id": "<iife>/network@161:2",
           "name": "network",
-          "line": 235,
-          "end": 239,
+          "line": 161,
+          "end": 165,
           "sha256": "5f2b8ad2e7ec2162efcc3ac116d65e5f11dd7a76ab947e4c8a27ba19136dd3a4",
           "scope": [],
           "role": "domain",
@@ -24988,10 +24874,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/paths@245:2",
+          "id": "<iife>/paths@171:2",
           "name": "paths",
-          "line": 245,
-          "end": 247,
+          "line": 171,
+          "end": 173,
           "sha256": "ba11b0cd81b995164bd868bc7cbd4440e8a4c229db38552cb962b3e01718d1b6",
           "scope": [],
           "role": "domain",
@@ -25015,10 +24901,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/compactPaths@249:2",
+          "id": "<iife>/compactPaths@175:2",
           "name": "compactPaths",
-          "line": 249,
-          "end": 251,
+          "line": 175,
+          "end": 177,
           "sha256": "a54759a3b4003f794da071bc3d5db27644d4bfd46b78b7310636bd6c4e08ada1",
           "scope": [],
           "role": "domain",
@@ -25035,10 +24921,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/pathAt@253:2",
+          "id": "<iife>/pathAt@179:2",
           "name": "pathAt",
-          "line": 253,
-          "end": 255,
+          "line": 179,
+          "end": 181,
           "sha256": "58551abdb47d1a684a9cafdd9cebf557b477fc1c0115ff4f3fff8afcfdc9dec9",
           "scope": [],
           "role": "domain",
@@ -25055,10 +24941,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/modeShare@262:2",
+          "id": "<iife>/modeShare@188:2",
           "name": "modeShare",
-          "line": 262,
-          "end": 277,
+          "line": 188,
+          "end": 203,
           "sha256": "2112f043d07cdb960df259a4c1d544803108cd07bad0fb85d20edd07feddf04d",
           "scope": [],
           "role": "domain",
@@ -25075,6 +24961,53 @@
             "scripts/test_rail_map15.cjs",
             "scripts/test_rail_map42.cjs"
           ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/tariffs@212:15",
+          "name": "tariffs",
+          "line": 212,
+          "end": 212,
+          "sha256": "bdb5bcf13198ab61db75b16f02d97e7f69bbf4d612be8b7b623990b3c8dcf65c",
+          "scope": [],
+          "role": "domain",
+          "phase": "P3-2",
+          "owner": "Rust graph/forecast/directory/cache",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/ui-line-view.js"
+          ],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/LIMITS@213:14",
+          "name": "LIMITS",
+          "line": 213,
+          "end": 213,
+          "sha256": "d4bb9a5c990e1192c672c8cb7710ee443eba8b21dd3efe0f74fedfe36a44da3c",
+          "scope": [],
+          "role": "domain",
+          "phase": "P3-2",
+          "owner": "Rust graph/forecast/directory/cache",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/PRICES@214:14",
+          "name": "PRICES",
+          "line": 214,
+          "end": 214,
+          "sha256": "23aeab27e4aabfcf59d32202e4b9b97234e72680bdddbddd4b8468fa56522007",
+          "scope": [],
+          "role": "domain",
+          "phase": "P3-2",
+          "owner": "Rust graph/forecast/directory/cache",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         }
       ]
@@ -25442,7 +25375,7 @@
       "functions": []
     },
     "rail/simulation-worker.js": {
-      "sha256": "1c757567710169cd09d60b0490d5e54480640671b6ba34ae8efe1f733fefcf70",
+      "sha256": "2c181cc2883aefc51b14ac211d7d168cd590cafad734c4c8339192a348ff7ea2",
       "role": "platform",
       "owner": "Rust task/revision/timeout/worker ownership",
       "phase": "P3-8",
@@ -25496,7 +25429,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 44,
-          "sha256": "8ecf65d3d4d97f6aba246062745ef36fa653202faf6c6e83948e2b86e9de64b8",
+          "sha256": "2ebc4e65195521ebf11467616577a6b0dba6d50bcc87580b66985b4b6aab0b1e",
           "scope": [],
           "role": "platform",
           "phase": "P3-8",
@@ -25736,7 +25669,6 @@
             "rail/operations-center.js",
             "rail/operations-wasm.js",
             "rail/operations-worker.js",
-            "rail/service-plan.js",
             "rail/ui-center-view.js",
             "rail/ui-stations-view.js",
             "rail/ui.js",
@@ -25880,6 +25812,7 @@
           "owner": "Rust city/statistics/observation",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
+            "rail/demand-world.js",
             "rail/diagnostic-snapshot.js",
             "rail/diagnostics-wasm.js",
             "rail/editor-wasm.js",
@@ -26903,7 +26836,7 @@
       ]
     },
     "rail/temporal-wasm.js": {
-      "sha256": "84ba7dc18e48dfcd4ed723b9c45005013296c3b3ce42eacc1b4b898339ab4475",
+      "sha256": "9211deadb190df61ea7f95dfca1fa0fbd4722378fb93f0d050598b90612bb902",
       "role": "domain",
       "owner": "Rust runtime/clock; edit lifecycle P3-4",
       "phase": "P3-3",
@@ -26932,7 +26865,7 @@
         {
           "kind": "require",
           "target": "rail/service-plan.js",
-          "line": 90
+          "line": 87
         }
       ],
       "functions": [
@@ -26940,8 +26873,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 147,
-          "sha256": "5709e49fe6c81d522c01e14f667b2ac1511c914b73545520975aa57c443390db",
+          "end": 142,
+          "sha256": "0ced4633d55c93c35d0e68e25ce54447fb53a0303c2dd600966794267f023c50",
           "scope": [],
           "role": "domain",
           "phase": "P3-3",
@@ -27113,7 +27046,7 @@
           "name": "same",
           "line": 43,
           "end": 43,
-          "sha256": "8ba0a8697e8c4b428c469ceca4d533c89097f6064d5c3d1e5193249ab6704d22",
+          "sha256": "91e97080ca8b3807f4dc4bdf9e7a94963f12fc093d0db0648e65b75ec4c44bec",
           "scope": [],
           "role": "domain",
           "phase": "P3-3",
@@ -27126,8 +27059,8 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/same/<callback:43:58>@43:58",
-          "name": "<callback:43:58>",
+          "id": "<iife>/same/<callback:43:80>@43:80",
+          "name": "<callback:43:80>",
           "line": 43,
           "end": 43,
           "sha256": "3b24a42bd986b48e6fb7e3c0fc0d8a1cdcfd33cc550e2e8046f0605ab1475228",
@@ -27146,8 +27079,8 @@
           "id": "<iife>/encode@45:2",
           "name": "encode",
           "line": 45,
-          "end": 49,
-          "sha256": "175c7f1c7cf65c3259b1d944459e22f6a42aedc64e52a453a03d5415bdf2124f",
+          "end": 48,
+          "sha256": "5e6dc9ca30a248fbca60134b690ba6a5e3cd3d903fa193798eff47ce7fe941ae",
           "scope": [],
           "role": "domain",
           "phase": "P3-3",
@@ -27167,10 +27100,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/planned@51:2",
+          "id": "<iife>/planned@50:2",
           "name": "planned",
-          "line": 51,
-          "end": 68,
+          "line": 50,
+          "end": 67,
           "sha256": "c2f8fc1c7073f2f8c0b7edd9ffd6c5de4ed7b193b91e280621a074f58e033902",
           "scope": [],
           "role": "domain",
@@ -27189,11 +27122,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/allocate@70:2",
+          "id": "<iife>/allocate@69:2",
           "name": "allocate",
-          "line": 70,
-          "end": 86,
-          "sha256": "d707a6bfaf98029d4bb0ab6f53e05ea5f120228f7db92ddbbd53ac5db37604a8",
+          "line": 69,
+          "end": 83,
+          "sha256": "e45c3887435e5d3cc8029f678995b5cd2409bc684a176977d5c9ef1c33aedc4f",
           "scope": [],
           "role": "domain",
           "phase": "P3-3",
@@ -27208,10 +27141,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/allocate/<callback:74:14>@74:14",
-          "name": "<callback:74:14>",
-          "line": 74,
-          "end": 74,
+          "id": "<iife>/allocate/<callback:71:44>@71:44",
+          "name": "<callback:71:44>",
+          "line": 71,
+          "end": 71,
           "sha256": "c2db2058ba72f7791b51d2b8f8fe6c281948655b5aa81f5c7122a5ec4ae19e9e",
           "scope": [
             "allocate"
@@ -27225,11 +27158,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshFleet@88:2",
+          "id": "<iife>/refreshFleet@85:2",
           "name": "refreshFleet",
-          "line": 88,
-          "end": 135,
-          "sha256": "525b1e4dc3cc59a400db38eea4e58a4a8ea23d80970e88b2a85466f233683c60",
+          "line": 85,
+          "end": 130,
+          "sha256": "9fdd856508e74f6d684e6078be1ff2ead90f810121e35e91d88a89f7f98ca2f1",
           "scope": [],
           "role": "domain",
           "phase": "P3-3",
@@ -27240,10 +27173,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshFleet/<callback:91:43>@91:43",
-          "name": "<callback:91:43>",
-          "line": 91,
-          "end": 91,
+          "id": "<iife>/refreshFleet/<callback:88:43>@88:43",
+          "name": "<callback:88:43>",
+          "line": 88,
+          "end": 88,
           "sha256": "22ad9e4719cc3d65e526ac5d7a626e0a0d07cd46332dc6d241103c85d4931a33",
           "scope": [
             "refreshFleet"
@@ -27257,10 +27190,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshFleet/<callback:92:35>@92:35",
-          "name": "<callback:92:35>",
-          "line": 92,
-          "end": 92,
+          "id": "<iife>/refreshFleet/<callback:89:35>@89:35",
+          "name": "<callback:89:35>",
+          "line": 89,
+          "end": 89,
           "sha256": "8b1395e2cde9ea4eb2ea05bd2edbc80f05569f28433009621d6136d02d54831a",
           "scope": [
             "refreshFleet"
@@ -27274,10 +27207,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshFleet/<callback:101:16>@101:16",
-          "name": "<callback:101:16>",
-          "line": 101,
-          "end": 101,
+          "id": "<iife>/refreshFleet/<callback:96:52>@96:52",
+          "name": "<callback:96:52>",
+          "line": 96,
+          "end": 96,
           "sha256": "c2db2058ba72f7791b51d2b8f8fe6c281948655b5aa81f5c7122a5ec4ae19e9e",
           "scope": [
             "refreshFleet"
@@ -27291,10 +27224,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshFleet/<callback:104:22>@104:22",
-          "name": "<callback:104:22>",
-          "line": 104,
-          "end": 104,
+          "id": "<iife>/refreshFleet/<callback:99:22>@99:22",
+          "name": "<callback:99:22>",
+          "line": 99,
+          "end": 99,
           "sha256": "24e665553356ac20465970731f583ffaa4248081499893b9e820dcffd2671a59",
           "scope": [
             "refreshFleet"
@@ -27308,10 +27241,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshFleet/<callback:105:81>@105:81",
-          "name": "<callback:105:81>",
-          "line": 105,
-          "end": 106,
+          "id": "<iife>/refreshFleet/<callback:100:81>@100:81",
+          "name": "<callback:100:81>",
+          "line": 100,
+          "end": 101,
           "sha256": "ae970faa3082aa77e5cf58802042a0ec9aaef3eb0b46afca5315cb2c417fc61c",
           "scope": [
             "refreshFleet"
@@ -27325,10 +27258,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshFleet/<callback:105:81>/<callback:106:21>@106:21",
-          "name": "<callback:106:21>",
-          "line": 106,
-          "end": 106,
+          "id": "<iife>/refreshFleet/<callback:100:81>/<callback:101:21>@101:21",
+          "name": "<callback:101:21>",
+          "line": 101,
+          "end": 101,
           "sha256": "f86355d10facf940794bfc2feb9834435f9f0add123ae981951517c52a613ae7",
           "scope": [
             "refreshFleet"
@@ -27474,6 +27407,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/gba-data.js",
             "rail/hubs.js",
@@ -29007,7 +28941,7 @@
       ]
     },
     "rail/ui-line-view.js": {
-      "sha256": "f47b9561bf441f696c56d47f7c207e18315b1fa8e3d586b7c86960c2792f5d1d",
+      "sha256": "eab3731d2c109a1626f4560bdba97f1d3aec7d398ac672f8e05f63bc0d79347f",
       "role": "ui",
       "owner": "Formats read-only native projections and renders panel HTML; no authoritative state mutation",
       "phase": "UI",
@@ -29033,7 +28967,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 156,
-          "sha256": "553b231e626f42c6e7e2da24dda24ddbd35fb5d612b640b51d56f0f592653270",
+          "sha256": "0dd3b84113496f24e9c0c780cbf0940b9d4aa38b3a3665364342de90e319946b",
           "scope": [],
           "role": "ui",
           "phase": "UI",
@@ -29048,7 +28982,7 @@
           "name": "create",
           "line": 6,
           "end": 150,
-          "sha256": "f4c1492132b4f32147dd1a2392db4d96634d26dd22792abd5a1718f31d7e2fdd",
+          "sha256": "88275a1cbdc0d1f4f768109e8a3fb6e74ae3809a486df8b774104f73bf8590bc",
           "scope": [],
           "role": "ui",
           "phase": "UI",
@@ -29392,7 +29326,7 @@
           "name": "operationControls",
           "line": 63,
           "end": 67,
-          "sha256": "f680cc4b353c9a7e44d0b629501989cf40139e4f29c07612ee0b14f8565b52cd",
+          "sha256": "bd72e2e0f6972a39a29d7dd9216b84c5bb2252fd763d7789c413fc6c65cea228",
           "scope": [
             "create"
           ],
@@ -29405,11 +29339,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/operationControls/<callback:66:131>@66:131",
-          "name": "<callback:66:131>",
+          "id": "<iife>/create/operationControls/<callback:66:129>@66:129",
+          "name": "<callback:66:129>",
           "line": 66,
           "end": 66,
-          "sha256": "7029cc527df4345d63b0b1ab77d50ca50dc8fc9d5db430a3e49e88755991bb26",
+          "sha256": "22116ec572409075dfe1d35244327e9639ad2a6c2a97dece1e28da17cef076cb",
           "scope": [
             "create",
             "operationControls"
@@ -29423,8 +29357,8 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/operationControls/<callback:66:825>@66:825",
-          "name": "<callback:66:825>",
+          "id": "<iife>/create/operationControls/<callback:66:846>@66:846",
+          "name": "<callback:66:846>",
           "line": 66,
           "end": 66,
           "sha256": "0034f0cf715bd160fb8b6b6fc43cd5479d2a275b489b68e007575232b2392775",
@@ -30279,7 +30213,6 @@
             "rail/memory-audit.js",
             "rail/operations-center.js",
             "rail/routing-wasm.js",
-            "rail/service-plan.js",
             "rail/statistics-wasm.js",
             "rail/ui-center-view.js",
             "rail/ui.js"
@@ -30292,7 +30225,7 @@
       ]
     },
     "rail/ui.js": {
-      "sha256": "f8afb379ba2f6384c106b391f8d951ecc845fb1471f54c669593dce8e2f3394c",
+      "sha256": "0895eaa166ff9aecb309d1f085205b734039b16b439242733b5de144e31179b2",
       "role": "mixed",
       "owner": "UI shell; all embedded domain orchestration moves to Rust",
       "phase": "P3-8",
@@ -30314,7 +30247,7 @@
           "name": "<iife>",
           "line": 1,
           "end": 3556,
-          "sha256": "35ee0b93e2fd2e449f9f5a264f7b84420f32947fec187b69dc0b1fca4fe0642a",
+          "sha256": "a34ee764e1cb1f7bb23a2c397b84fbeba8ef22fc9bff616ecb796628fd9c2da3",
           "scope": [],
           "role": "mixed",
           "phase": "P3-8",
@@ -30600,7 +30533,7 @@
           "name": "createDemandClient",
           "line": 226,
           "end": 245,
-          "sha256": "f89e3d03a7485475b89bf12065d35a9d99d87c3221a25f3ce914eb708b462bcf",
+          "sha256": "5a579a7bf6da50b38b0c320c5c8ae1aa0ac70c387d61b529bc0b6c06630eecc9",
           "scope": [],
           "role": "mixed",
           "phase": "P3-8",
@@ -30615,7 +30548,7 @@
           "name": "createWorker",
           "line": 228,
           "end": 228,
-          "sha256": "e42ad664b6df5c7020458cb89e63ffd19c2874c67d9479461e69fc24c51b673c",
+          "sha256": "9d3ba7f83633efb086a09ddadbd97614c37a6d78f4e50a8c70863b24a335ab02",
           "scope": [
             "createDemandClient"
           ],
@@ -31455,9 +31388,7 @@
           "phase": "P3-8",
           "owner": "UI shell; all embedded domain orchestration moves to Rust",
           "exportNameCandidate": false,
-          "productionReferenceCandidates": [
-            "rail/service-plan.js"
-          ],
+          "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -36761,7 +36692,6 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/demand-kernels.js",
-            "rail/demand-world.js",
             "rail/diagnostics-wasm.js",
             "rail/management.js",
             "rail/network.js",
@@ -36951,7 +36881,8 @@
             "rail/demand-world.js",
             "rail/engine.js",
             "rail/operations-wasm.js",
-            "rail/shell-ui.js"
+            "rail/shell-ui.js",
+            "rail/ui-line-view.js"
           ],
           "testReferenceCandidates": [
             "scripts/test_rail.cjs",
@@ -37837,6 +37768,7 @@
           "productionReferenceCandidates": [
             "rail/bootstrap-wasm.js",
             "rail/demand-worker.js",
+            "rail/demand-world.js",
             "rail/flow-history.js",
             "rail/forecast-catalog.js",
             "rail/history-wasm.js",
@@ -39058,6 +38990,7 @@
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/city-development.js",
+            "rail/demand-world.js",
             "rail/engine.js",
             "rail/gba-data.js",
             "rail/hubs.js",
@@ -39173,6 +39106,7 @@
           "productionReferenceCandidates": [
             "rail/bootstrap-wasm.js",
             "rail/demand-worker.js",
+            "rail/demand-world.js",
             "rail/flow-history.js",
             "rail/forecast-catalog.js",
             "rail/history-wasm.js",

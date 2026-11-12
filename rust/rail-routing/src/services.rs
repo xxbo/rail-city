@@ -11,6 +11,12 @@ pub(super) struct Pattern {
     pub(super) end: f64,
     pub(super) default: bool,
 }
+impl Pattern {
+    pub(super) fn local(stops: usize, fleet: f64) -> Self {
+        Self { kind: 0, from: 0.0, to: stops as f64 - 1.0, fleet,
+            calls: vec![], target: -1, end: f64::NAN, default: true }
+    }
+}
 pub(super) struct Line {
     pub(super) key: usize,
     pub(super) spec: usize,
@@ -195,16 +201,7 @@ pub(super) fn decode(input: &[f64]) -> (usize, f64, usize, f64, Vec<Line>, Optio
         let n = r.u();
         let mut patterns = (0..n).map(|_| pattern(&mut r)).collect::<Vec<_>>();
         if !explicit {
-            patterns = vec![Pattern {
-                kind: 0,
-                from: 0.0,
-                to: stops.len() as f64 - 1.0,
-                fleet,
-                calls: vec![],
-                target: -1,
-                end: f64::NAN,
-                default: true,
-            }];
+            patterns = vec![Pattern::local(stops.len(), fleet)];
         }
         lines.push(Line {
             key,

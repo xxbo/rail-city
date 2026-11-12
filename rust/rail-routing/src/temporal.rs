@@ -88,6 +88,15 @@ pub(super) fn allocations(total: f64, weights: &[f64]) -> Vec<f64> {
     }
     out
 }
+// Negative one denotes an implicit full-length service weighted by the line fleet.
+// Zero remains the explicit empty list in the original numeric ABI.
+fn service_weights(v: &[f64], at: usize) -> (&[f64], usize) {
+    if v[at] == -1.0 { (&v[at - 1..at], at + 1) }
+    else {
+        let end = at + 1 + int(v[at]);
+        (&v[at + 1..end], end)
+    }
+}
 fn refresh(v: &[f64]) -> Vec<f64> {
     let now = v[2];
     let modern = v[3] != 0.0;
@@ -106,10 +115,9 @@ fn refresh(v: &[f64]) -> Vec<f64> {
         } else {
             v[at + 2]
         };
-        let nw = int(v[at + 6]);
-        at += 7;
-        let assigned = allocations(total, &v[at..at + nw]);
-        at += nw;
+        let (weights, next) = service_weights(v, at + 6);
+        let assigned = allocations(total, weights);
+        at = next;
         let pi = int(v[at]);
         let fleet = assigned[pi];
         let is_loop = v[at + 1] != 0.0;
@@ -175,8 +183,8 @@ fn run(v: &[f64]) -> Vec<f64> {
             out
         }
         1 => {
-            let n = int(v[8]);
-            assert_eq!(v.len(), 9 + n);
+            let (weights, end) = service_weights(v, 8);
+            assert_eq!(v.len(), end);
             let off = if v[2] == 0.0 {
                 v[7]
             } else if v[3] != 0.0 {
@@ -191,9 +199,9 @@ fn run(v: &[f64]) -> Vec<f64> {
             } else {
                 v[4]
             };
-            let mut out = vec![1.0, off, high, n as f64];
-            out.extend(allocations(off, &v[9..]));
-            out.extend(allocations(high, &v[9..]));
+            let mut out = vec![1.0, off, high, weights.len() as f64];
+            out.extend(allocations(off, weights));
+            out.extend(allocations(high, weights));
             out
         }
         2 => refresh(v),
@@ -215,6 +223,13 @@ pub extern "C" fn temporal_run() -> *const f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn implicit_fleet_is_one_service_and_explicit_empty_stays_empty() {
+        let mut frame = vec![1.0,1.0,1.0,1.0,4.0,6.0,10.0,12.0,-1.0];
+        assert_eq!(run(&frame),vec![1.0,6.0,10.0,1.0,6.0,10.0]);
+        frame[8]=0.0;
+        assert_eq!(run(&frame),vec![1.0,6.0,10.0,0.0]);
+    }
     #[test]
     fn directional_profiles_normalize() {
         for p in 0..3 {

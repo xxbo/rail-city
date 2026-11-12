@@ -569,12 +569,7 @@ pub extern "C" fn geometry_run() -> *const f64 {
             }
             7 => {
                 let km = r.f();
-                let rounded = (km - 1e-8).ceil();
-                let index = [6.0, 11.0, 19.0, 27.0, 40.0, 999.0]
-                    .iter()
-                    .position(|v| rounded <= *v)
-                    .unwrap_or(5);
-                out.push(if km <= 1e-9 { -1.0 } else { index as f64 });
+                out.push(crate::tariffs::band(km).map_or(-1.0, |i| i as f64));
             }
             8 => {
                 let purpose = r.u();

@@ -20,7 +20,8 @@ fn point(r: &mut Read) -> (f64, f64) {
 }
 pub(super) fn valid(input: &[f64]) -> bool {
     let mut r = Read { v: input, at: 0 };
-    assert_eq!(r.f(), 1.0);
+    let version = r.f();
+    assert!(version == 1.0 || version == 2.0);
     let n = r.u();
     let frame = &input[r.at..r.at + n];
     r.at += n;
@@ -76,13 +77,13 @@ pub(super) fn valid(input: &[f64]) -> bool {
         let fare = r.f();
         let nf = r.u();
         let mut prev = f64::NAN;
-        if fare < 0.0 || (fare != 0.0 && nf != 6) {
+        if fare < 0.0 || (fare != 0.0 && nf != crate::tariffs::LIMITS.len()) {
             return false;
         }
         for _ in 0..nf {
             let present = r.f() != 0.0;
             let v = r.f();
-            if present && (!integer(v) || !(20.0..=3000.0).contains(&v) || v < prev) {
+            if present && (!integer(v) || !(crate::tariffs::MIN_PRICE..=crate::tariffs::MAX_PRICE).contains(&v) || v < prev) {
                 return false;
             }
             prev = if present { v } else { f64::NAN };
@@ -96,7 +97,9 @@ pub(super) fn valid(input: &[f64]) -> bool {
         let compiled = r.f() != 0.0;
         let mut pattern_headways = vec![];
         let mut calls_arrays = vec![];
-        for _ in 0..l.patterns.len() {
+        // V1 supplied an extra pair for an implicit pattern. Its fields are unused.
+        let rows = if l.explicit || version == 1.0 { l.patterns.len() } else { 0 };
+        for _ in 0..rows {
             pattern_headways.push(r.f());
             calls_arrays.push(r.f() != 0.0);
         }

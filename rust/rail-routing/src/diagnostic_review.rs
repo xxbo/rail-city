@@ -100,17 +100,7 @@ fn config(l: &V) -> V {
                 V::Null
             },
         ),
-        (
-            "fares",
-            if l.get("fareBands").truth() {
-                l.get("fareBands").clone()
-            } else {
-                arr([180.0, 210.0, 260.0, 300.0, 330.0, 400.0]
-                    .iter()
-                    .map(|v| n(*v))
-                    .collect())
-            },
-        ),
+        ("fares", crate::tariffs::bands(l)),
         ("stops", l.get("stops").clone()),
         ("tracks", l.get("trackIds").clone()),
         ("open", l.get("open").clone()),
@@ -821,11 +811,11 @@ pub(super) fn valid(s: &V) -> bool {
                     .all(|k| ["local", "short", "express", "direct", "cross"].contains(&k.text()))
                 && (matches!(p.get("fares"), V::Null)
                     || (matches!(p.get("fares"), V::Array(_))
-                        && p.get("fares").array().len() == 6
+                        && p.get("fares").array().len() == crate::tariffs::LIMITS.len()
                         && p.get("fares")
                             .array()
                             .iter()
-                            .all(|f| positive(f) && f.n() <= 3000.0)))
+                            .all(|f| positive(f) && f.n() <= crate::tariffs::MAX_PRICE)))
                 && integer(p.get("stations"))
                 && p.num("stations") >= 2.0
                 && p.num("stations") <= 60.0
