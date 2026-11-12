@@ -460,9 +460,9 @@
       "owner": "Formats read-only native projections and renders panel HTML; no authoritative state mutation"
     },
     "rail/ui-save-view.js": {
-      "role": "mixed",
-      "phase": "P3-8",
-      "owner": "Separate domain ViewModel queries from HTML"
+      "role": "ui",
+      "phase": "UI",
+      "owner": "Formats native save summaries and renders the import preview"
     },
     "rail/ui-stations-view.js": {
       "role": "ui",
@@ -500,19 +500,19 @@
           "owner": "Rust persistence/records"
         },
         "readLocalSave": {
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records"
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets"
         },
         "cancelLocalImport": {
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records"
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets"
         },
         "applyLocalSave": {
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records"
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets"
         },
         "calculate": {
           "role": "domain",
@@ -535,9 +535,9 @@
           "owner": "Rust atomic commands/session replacement"
         },
         "startNewGame": {
-          "role": "mixed",
-          "phase": "P3-8",
-          "owner": "New world built by Rust session; remaining UI reset/runtime wiring is scheduled in P3-3/P3-8"
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets"
         },
         "setPlaying": {
           "role": "domain",
@@ -558,6 +558,11 @@
           "role": "domain",
           "phase": "P3-5",
           "owner": "Rust observation/statistics queries"
+        },
+        "storedGameLink": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Navigation and recovery control for a committed checkpoint"
         }
       }
     },

@@ -9,7 +9,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -81,3 +81,19 @@ jobs:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify the published revision and play both maps on Pages
+        env:
+          RAIL_PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+          RAIL_ACCEPTANCE_SOURCE: ${{ github.sha }}
+        run: |
+          for attempt in {1..12}; do
+            if curl -fsSL "${RAIL_PAGES_URL%/}/deployment.json?run=$GITHUB_RUN_ID" | jq -e --arg sha "$GITHUB_SHA" '.source == $sha'; then break; fi
+            if [ "$attempt" = 12 ]; then exit 1; fi
+            sleep 5
+          done
+          npm install --prefix "$RUNNER_TEMP/rail-live" --no-save --package-lock=false playwright@1.62.1
+          NODE_PATH="$RUNNER_TEMP/rail-live/node_modules" RAIL_CHROMIUM="$(command -v google-chrome)" node scripts/probe_rail_release.cjs

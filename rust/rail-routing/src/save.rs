@@ -684,7 +684,7 @@ pub(super) fn validate_cohorts(s: &V, plan: &V, r: &V, cfg: &V, earliest: f64,
     (r.num("generated") - r.num("completed") - r.num("cancelled") - waiting - onboard).abs()
         <= 0.1_f64.max(r.num("generated") * 1e-8)
 }
-fn accept(v: &V, cfg: &V, structure: &V) -> u32 {
+pub(super) fn accept(v: &V, cfg: &V, structure: &V) -> u32 {
     if !object(v) {
         return 3;
     }

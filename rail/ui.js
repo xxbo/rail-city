@@ -49,7 +49,7 @@
     pendingImport = null,
     previewing = false,
     importError = '',
-    importResume = false,
+    importSelection = null,
     importing = false;
   const INS = RailInsights;
   let achievementFilter = "全部",
@@ -225,7 +225,7 @@
   };
   function createDemandClient() {
     const client=RailWorkerClient.create({
-      createWorker:()=>typeof Worker==='function'?new Worker('demand-worker.js?v=77'):null,
+      createWorker:()=>typeof Worker==='function'?new Worker('demand-worker.js?v=78'):null,
       timeout:45000,
       timeoutMessage:'后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
       errorMessage:'客流后台计算失败',
@@ -2461,6 +2461,7 @@
     if (!mode) zoomAt(zoom * 2, e.clientX, e.clientY, true);
   });
   document.addEventListener('keydown', e => {
+    if(calculating||importing)return;
     if (e.target.matches('input,select,textarea') && e.key !== 'Escape') return;
     if (e.key === 'Escape' && utilityPanel) {
       closeUtility();
@@ -2981,7 +2982,8 @@
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast('存档已生成，请查看浏览器下载。');
   }
-  let importRead=0,departure='';
+  let departure='';
+  const transition=(event,args)=>RailBootstrap.persistence('replacement',{event,...args});
   function resumeGame(){
     calculating=false;
     $('calculation-status').hidden=true;
@@ -2995,77 +2997,125 @@
     departure='';
     resumeGame();
   });
+  function storedGameLink(target){
+    // Keep the old page read-only even when the browser delays navigation.
+    calculating=true;
+    importing=true;
+    departure='import';
+    const url=new URL(location.href);
+    url.searchParams.set('map',target);
+    url.searchParams.set('v',UI_VERSION);
+    const status=$('calculation-status'),button=document.createElement('button');
+    button.textContent='打开已保存的游戏';
+    const open=()=>{try{location.assign(url.href);}catch(error){console.warn('Open checkpoint',error);}};
+    button.onclick=open;
+    status.replaceChildren('存档已写入本机。',button);
+    status.hidden=false;
+    return open;
+  }
   async function readLocalSave(file) {
     if(!file||calculating||importing)return;
-    const identity=traffic,read=++importRead;
-    const current=()=>read===importRead&&identity===traffic&&!calculating;
+    const identity=traffic,old=pendingImport;
+    const {ticket}=transition('select',{region,playing});
+    const current=()=>identity===traffic && transition('current',{ticket});
+    importSelection=ticket;
+    pendingImport=null;
     importError='';
-    if(!previewing)importResume=playing;
     previewing=true;
     setPlaying(false);
+    let preview;
     try{
+      if(old)await RailRuntime.cancelImport(identity,old.token);
+      if(!current())return;
       await demandClient.refresh.pause();
       if(!current())return;
       $('calculation-status').hidden=true;
       RailBootstrap.persistence('fileSize',{bytes:file.size});
-      if(pendingImport)await RailRuntime.cancelImport(identity,pendingImport.token);
-      if(!current())return;
-      pendingImport=null;
       await saveQueue.flush();
       const text=await file.text();
       if(!current())return;
-      const preview=await RailRuntime.previewImport(identity,text);
-      if(!current()){
-        if(identity===traffic)await RailRuntime.cancelImport(identity,preview.token).catch(()=>{});
-        return;
-      }
-      pendingImport=preview;
+      preview=await RailRuntime.previewImport(identity,text,true);
+      if(!current())return;
+      const target=transition('preview',{ticket,region:preview.region,token:preview.token});
+      const base=await DB.replacementBase(target.saveKey);
+      if(!current())return;
+      pendingImport={...preview,ticket,base};
     }catch(error){
       if(!current())return;
+      const {resumePlaying}=transition('cancel',{ticket});
+      importSelection=null;
+      previewing=false;
       importError=RailLocalSave.errorMessage(error);
-      if(!pendingImport){previewing=false;resumeGame();setPlaying(importResume);}
+      resumeGame();
+      setPlaying(resumePlaying);
+    }finally{
+      if(preview && pendingImport?.token!==preview.token && identity===traffic)
+        await RailRuntime.cancelImport(identity,preview.token).catch(()=>{});
     }
-    renderActivity();
+    if(!calculating)renderActivity();
   }
   async function cancelLocalImport() {
-    const identity=traffic,read=++importRead;
-    try{if(pendingImport)await RailRuntime.cancelImport(identity,pendingImport.token);}
-    catch(error){if(identity===traffic&&read===importRead){importError=RailLocalSave.errorMessage(error);renderActivity();}return;}
-    if(identity!==traffic||read!==importRead||calculating)return;
-    pendingImport=null;previewing=false;importError='';resumeGame();setPlaying(importResume);renderActivity();
+    if(calculating || importSelection===null)return;
+    const identity=traffic,preview=pendingImport,ticket=importSelection;
+    const {resumePlaying}=transition('cancel',{ticket});
+    importSelection=null;
+    pendingImport=null;
+    previewing=false;
+    importError='';
+    if(preview)await RailRuntime.cancelImport(identity,preview.token).catch(error=>console.warn('Cancel preview',error));
+    if(identity!==traffic || importSelection!==null || calculating)return;
+    resumeGame();setPlaying(resumePlaying);renderActivity();
   }
   async function applyLocalSave() {
     if(!pendingImport||calculating||importing)return;
-    const c=pendingImport,identity=traffic;
+    const c=pendingImport,identity=traffic,{ticket,token}=c;
+    const target=transition('apply',{ticket});
     calculating=true;
-    importRead++;
     $('calculation-status').textContent='正在校验并恢复存档…';
     $('calculation-status').hidden=false;
-    let next,prepared,committed=false;
+    let next,prepared,source;
     try{
       await demandClient.refresh.pause();
       await saveQueue.flush();
       await M.whenIdle(identity);
-      next=await calculate(c.state,undefined,'runtimeOnly');
-      const target=B.get(c.region);
-      const previous=await DB.read(target.saveKey);
-      // The worker validates the retained candidate and freezes its origin
-      // before returning bytes. UI copies never become the restore authority.
-      prepared=await RailRuntime.prepareImport(identity,c.token,next,{previous:previous?.text,recordsRaw:DB.records(target.recordsKey).text,personalRecords});
-      await DB.writeRecord(prepared.saveKey,prepared,previous?.source==='legacy'?previous.text:null);
-      committed=true;
-      try{DB.persistRecords(prepared.recordsKey,prepared.personalRecords);}catch(error){console.warn('Import records',error);}
-      await RailRuntime.commitImport(identity,c.token).catch(()=>{});
-      importing=true;
-      const url=new URL(location.href);url.searchParams.set('map',c.region);url.searchParams.set('v',UI_VERSION);location.assign(url.href);departure='import';
+      const snapshot=await RailRuntime.importForecastInput(identity,token);
+      next=await calculate(null,snapshot,'runtimeOnly');
+      // When moving maps, preserve the live origin in the same IDB transaction.
+      if(target.crossMap && RailBootstrap.persistence('canSave',{fault:runtimeFault||M.lastError(identity),blocked:storageReadBlocked})){
+        const base=await DB.replacementBase(KEY,true);
+        const record=await RailRuntime.checkpoint(identity,{playing:target.resumePlaying,speed,personalRecords});
+        source={base,record};
+      }
+      const records=DB.records(target.recordsKey,undefined,undefined,c.base.previous);
+      prepared=await RailRuntime.prepareImport(identity,token,next,{recordsRaw:records.text,personalRecords});
+      transition('write',{ticket,token,saveKey:prepared.saveKey});
+      const rows=[{base:c.base,record:prepared}];
+      if(source)rows.push(source);
+      await DB.writeReplacement(rows);
     }catch(error){
-      if(!committed&&prepared)try{await RailRuntime.importWriteFailed(identity,c.token);}catch(releaseError){
-        importError=RailLocalSave.errorMessage(releaseError);resumeGame();renderActivity();return;
+      let unavailable=!!M.lastError(identity);
+      if(prepared)try{await RailRuntime.importWriteFailed(identity,token);}catch{unavailable=true;}
+      const recovery=transition('failed',{ticket,code:error.message,unavailable}),retry=recovery.retry;
+      if(!retry){
+        await RailRuntime.cancelImport(identity,token).catch(()=>{});
+        pendingImport=null;importSelection=null;previewing=false;
       }
       importError=RailLocalSave.errorMessage(error);
-      if(!committed)resumeGame();
+      resumeGame();
+      if(!retry)setPlaying(recovery.resumePlaying);
       renderActivity();
-    }finally{if(next)RailForecastCatalog.discardHandoff(next);}
+      return;
+    }finally{if(next)try{RailForecastCatalog.discardHandoff(next);}catch(error){console.warn('Release import forecast',error);}}
+    // The new checkpoint is already durable. Even a lost Worker reply must
+    // continue from it, rather than resume autosave on the previous session.
+    const open=storedGameLink(target.region);
+    try{
+      transition('stored',{ticket});
+      await RailRuntime.commitImport(identity,token);
+      DB.persistRecords(target.recordsKey,prepared.personalRecords);
+      if(source)DB.persistRecords(RECORD_KEY,source.record.personalRecords);
+    }catch(error){console.warn('Finish stored import',error);}
+    open();
   }
 
   function patchInsightNode(old, next) {
@@ -3413,75 +3463,102 @@
 
   async function startNewGame() {
     if(calculating||importing)return;
-    const oldTraffic=traffic,oldClient=demandClient,wasPlaying=playing;
-    let prepared,nextTraffic,nextState,nextForecast,nextClient;
+    const oldTraffic=traffic,oldClient=demandClient,oldPreview=pendingImport;
+    const target=transition('reset',{region,playing:utilityPanel==='newgame'?pauseBeforeDialog:playing});
+    const {ticket}=target;
+    let prepared,nextTraffic,nextState,nextForecast,nextClient,sealed=false,payload,meta;
     calculating=true;
-    importRead++;
+    importSelection=null;pendingImport=null;previewing=false;
     setPlaying(false);
     $('calculation-status').textContent='正在准备新游戏…';
     $('calculation-status').hidden=false;
     try {
+      if(oldPreview)await RailRuntime.cancelImport(oldTraffic,oldPreview.token);
       await oldClient.refresh.pause();
       await saveQueue.flush();
-      await DB.flush();
       await M.whenIdle(oldTraffic);
+      const base=await DB.replacementBase(target.saveKey,true);
+      const earned=RailBootstrap.persistence('mergeRecords',{values:[personalRecords,oldTraffic.personalRecords]});
+      const records=DB.records(target.recordsKey,earned,s,base.previous);
       prepared=RailBootstrap.prepareStart({region});
       nextState=prepared.state;
       nextClient=createDemandClient();
       nextForecast=await calculate(nextState,undefined,'withView',nextClient);
       nextTraffic=O.create(nextState,nextForecast);
       await RailRuntime.ready(nextTraffic);
-      syncRecords();persistRecords();
-      RailBootstrap.commitStart(prepared.token);
+      payload=await RailRuntime.checkpoint(nextTraffic,{speed:prepared.speed,playing:prepared.playing,personalRecords:records.value});
+      RailBootstrap.sealStart(prepared.token);
+      sealed=true;
+      transition('write',{ticket,token:prepared.token,saveKey:payload.saveKey});
+      meta=await DB.writeReplacement([{base,record:payload}]);
     }catch(error){
-      if(prepared)try{RailBootstrap.cancelStart(prepared.token);}catch{}
-      if(nextTraffic)O.dispose(nextTraffic);
-      if(nextForecast)RailForecastCatalog.discardHandoff(nextForecast);
-      nextClient?.dispose();
+      if(prepared)try{
+        if(sealed)RailBootstrap.abortStartWrite(prepared.token);
+        else RailBootstrap.cancelStart(prepared.token);
+      }catch(releaseError){console.warn('Release new game',releaseError);}
+      try{if(nextTraffic)O.dispose(nextTraffic);}catch(e){console.warn('Release candidate runtime',e);}
+      try{if(nextForecast)RailForecastCatalog.discardHandoff(nextForecast);}catch(e){console.warn('Release candidate forecast',e);}
+      try{nextClient?.dispose();}catch(e){console.warn('Release candidate Worker',e);}
+      const recovery=transition('failed',{ticket});
+      utilityPanel=null;
       resumeGame();
-      setPlaying(wasPlaying);
-      toast('新游戏准备失败，当前进度已保留：'+error.message);
+      render();
+      setPlaying(recovery.resumePlaying);
+      toast('新游戏未写入，当前进度已保留：'+RailLocalSave.errorMessage(error));
       return;
     }
-    const fresh=prepared;
-    oldClient.dispose();
-    O.dispose(oldTraffic);
-    demandClient=nextClient;
-    pendingImport=null;previewing=false;importError='';
-    demandState.status='ready';demandState.error='';demandState.updatedAt=nextTraffic.minute;
-    centerJob=null;centerAnalysis=null;centerRendered=null;centerReview=null;centerError='';
-    stationForecastCache=null;stationForecastRequest=null;detailQuery=null;alarmRequest=null;alarms=[];
-    lastForecastRefresh=nextTraffic.minute;
-    calculating=false;
-    $('calculation-status').hidden=true;
-    runtimeFault = '';
-    networkRevision++;
-    storageReadBlocked = false;
-    utilityPanel = null;
-    hoverPoint = null;
-    s=nextState;forecast=nextForecast;traffic=nextTraffic;
-    urbanDrawRevision = -1;
-    densityField = null;
-    refreshUrbanMap();
-    selected = null;
-    overview = false;
-    stationMenu = false;
-    account = false;
-    inspection = null;
-    mode = null;
-    draft = [];
-    undoState = null;
-    density = 'off';
-    stationQuery = '';
-    stationSort = 'waiting';
-    speed = fresh.speed;
-    $('speed').value = String(fresh.speed);
-    $('density-toggle').checked = false;
-    render();
-    resetCamera();
-    setPlaying(fresh.playing);
-    save();
-    toast('新游戏已开始，初始余额 2.5 亿元。');
+    try{
+      transition('stored',{ticket});
+      RailBootstrap.activateStart(prepared.token);
+      const fresh=prepared;
+      oldClient.dispose();
+      O.dispose(oldTraffic);
+      demandClient=nextClient;
+      pendingImport=null;previewing=false;importError='';
+      demandState.status='ready';demandState.error='';demandState.updatedAt=nextTraffic.minute;
+      centerJob=null;centerAnalysis=null;centerRendered=null;centerReview=null;centerError='';
+      stationForecastCache=null;stationForecastRequest=null;detailQuery=null;alarmRequest=null;alarms=[];
+      lastForecastRefresh=nextTraffic.minute;
+      calculating=false;
+      $('calculation-status').hidden=true;
+      runtimeFault = '';
+      networkRevision++;
+      storageReadBlocked = false;
+      utilityPanel = null;
+      hoverPoint = null;
+      s=nextState;forecast=nextForecast;traffic=nextTraffic;
+      urbanDrawRevision = -1;
+      densityField = null;
+      refreshUrbanMap();
+      selected = null;
+      overview = false;
+      stationMenu = false;
+      account = false;
+      inspection = null;
+      mode = null;
+      draft = [];
+      undoState = null;
+      density = 'off';
+      stationQuery = '';
+      stationSort = 'waiting';
+      speed = fresh.speed;
+      $('speed').value = String(fresh.speed);
+      $('density-toggle').checked = false;
+      render();
+      resetCamera();
+      setPlaying(fresh.playing);
+      personalRecords=payload.personalRecords;
+      persistRecords();
+      saveMeta=meta;
+      saveStatus='已保存到本地数据库';
+      storageOK=true;
+      legacySaveText=null;
+      transition('activated',{ticket});
+      toast('新游戏已开始，初始余额 2.5 亿元。');
+    }catch(error){
+      console.warn('Activate stored new game',error);
+      storedGameLink(target.region)();
+    }
   }
 
   if (region === 'gba') {

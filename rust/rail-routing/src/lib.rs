@@ -3,6 +3,7 @@
 mod assets;
 mod json_codec;
 mod persistence;
+mod replacement;
 mod platform;
 mod refresh_schedule;
 mod view_model;

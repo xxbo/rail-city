@@ -131,6 +131,8 @@ pub struct SessionHost {
     next_id: u64,
     state: Option<State>,
     next_prepared: u64,
+    sealed_start: Option<u64>,
+    last_started: Option<(u64,u64)>,
     pending: Option<(u64, u64, u64, V)>,
     forecasts: crate::forecast_session::ForecastOwner,
     runtimes:crate::runtime_session::RuntimeOwner,
@@ -171,6 +173,17 @@ impl SessionHost {
             if result.get("error").truth(){return error(result.get("error").text(),0,0);}
             return envelope(true,self.state.as_ref().map_or(0,|s|s.id),self.state.as_ref().map_or(0,|s|s.revision),result);
         }
+        let op = input.get("op").text();
+        if self.sealed_start.is_some() && matches!(op, "open"|"start"|"prepare_start"|"dispatch"|"close"|"cancel_start"|"commit_start") {
+            return error("START_WRITE_PENDING",0,0);
+        }
+        if op == "activate_start" {
+            if let Some((token, sid)) = self.last_started {
+                if id(input.get("token")) == Some(token) && self.state.as_ref().is_some_and(|s| s.id == sid) {
+                    return envelope(true,sid,0,V::Null);
+                }
+            }
+        }
         if input.get("op").text() == "prepare_start" {
             if self.next_prepared as f64 >= MAX_SAFE {
                 return error("PREPARED_LIMIT", 0, 0);
@@ -178,7 +191,7 @@ impl SessionHost {
             let startup = crate::bootstrap::startup(input);
             let world = startup.get("state");
             let cfg = crate::bootstrap::config();
-            if !editor::validate_world(world, &cfg) || !assets::economy_valid(world) {
+            if !editor::validate_world(world, &cfg) || !editor::validate(world, &cfg) || !assets::economy_valid(world) {
                 return error("INVALID_CHECKPOINT", 0, 0);
             }
             self.next_prepared += 1;
@@ -188,27 +201,35 @@ impl SessionHost {
             result.set("token", n(self.next_prepared as f64));
             return envelope(true, sid, rev, result);
         }
-        if ["commit_start", "cancel_start"].contains(&input.get("op").text()) {
+        if matches!(op,"commit_start"|"cancel_start"|"seal_start"|"abort_start_write"|"activate_start") {
             let Some((token, sid, rev, _)) = self.pending.as_ref() else {
                 return error("NO_PREPARED_SESSION", 0, 0);
             };
-            if id(input.get("token")) != Some(*token)
-                || self.state.as_ref().map_or((0, 0), |s| (s.id, s.revision)) != (*sid, *rev)
-            {
-                return error("PREPARED_SESSION_EXPIRED", *sid, *rev);
+            let (token,sid,rev) = (*token,*sid,*rev);
+            if id(input.get("token")) != Some(token)
+                || self.state.as_ref().map_or((0, 0), |s| (s.id, s.revision)) != (sid, rev) {
+                return error("PREPARED_SESSION_EXPIRED",sid,rev);
             }
-            let (_, sid, rev, startup) = self.pending.take().unwrap();
-            if input.get("op").text() == "cancel_start" {
-                return envelope(true, sid, rev, V::Null);
+            if op == "seal_start" {
+                if self.next_id as f64 >= MAX_SAFE { return error("SESSION_LIMIT",sid,rev); }
+                self.sealed_start = Some(token);
+                return envelope(true,sid,rev,V::Null);
             }
+            if matches!(op,"activate_start"|"abort_start_write") && self.sealed_start != Some(token) {
+                return error("START_NOT_SEALED",sid,rev);
+            }
+            self.sealed_start = None;
+            let (_,_,_,startup) = self.pending.take().unwrap();
+            if matches!(op, "cancel_start"|"abort_start_write") { return envelope(true,sid,rev,V::Null); }
             let mut out = self.handle(&obj(&[
-                ("protocolVersion", n(1.0)),
-                ("op", text("open")),
-                ("world", startup.get("state").clone()),
+                ("protocolVersion", n(1.0)), ("op", text("open")), ("world",startup.get("state").clone()),
                 ("config", (*crate::bootstrap::config()).clone()),
             ]));
             if out.get("ok").truth() {
-                out.set("result", startup);
+                if op == "activate_start" {
+                    self.last_started = Some((token,self.next_id));
+                    out.set("result",V::Null);
+                } else { out.set("result",startup); }
             }
             return out;
         }
@@ -243,6 +264,7 @@ impl SessionHost {
                 return error("SESSION_LIMIT", 0, 0);
             }
             self.next_id += 1;
+            self.last_started = None;
             self.forecasts.advance_epoch();
             self.pending = None;
             self.state = Some(State {
@@ -348,6 +370,8 @@ impl SessionHost {
             }
             "close" => {
                 let out = envelope(true, s.id, s.revision, V::Null);
+                self.pending = None;
+                self.last_started = None;
                 self.state = None;
                 self.forecasts.advance_epoch();
                 out

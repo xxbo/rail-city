@@ -11,6 +11,20 @@ for(const [selected,last,expected]of [['gba','tokyo','gba'],['tokyo','gba','toky
 const opened=B.start({region:'gba'}),query=()=>B.query({sessionId:opened.sessionId,view:'snapshot'});exact(query().result,opened.state);Core.recycleSimulation();exact(query().result,opened.state);const view=query().result;view.nodes.push({bad:true});exact(query().result,opened.state);
 const before=B.run('rngStatus').draws;const seed=B.run('random');assert(seed>=0&&seed<1);assert.equal(B.run('rngStatus').draws,before+1);checks++;
 const candidate=B.prepareStart({region:'tokyo'});exact(query().result,opened.state);B.cancelStart(candidate.token);exact(query().result,opened.state);const approved=B.prepareStart({region:'tokyo'});const replacement=B.commitStart(approved.token);assert.equal(replacement.state.region,'tokyo');assert.equal(query().error.code,'SESSION_MISMATCH');assert.throws(()=>B.commitStart(approved.token),/NO_PREPARED_SESSION/);checks++;
+// A sealed reset reserves the current session until the browser reports the write.
+const reset=B.prepareStart({region:'gba'});
+B.sealStart(reset.token);
+assert.throws(()=>B.cancelStart(reset.token),/START_WRITE_PENDING/);
+assert.throws(()=>B.start({region:'tokyo'}),/START_WRITE_PENDING/);
+assert.throws(()=>B.abortStartWrite(reset.token+1),/PREPARED_SESSION_EXPIRED/);
+B.abortStartWrite(reset.token);
+assert.equal(B.query({sessionId:replacement.sessionId,view:'snapshot'}).result.region,'tokyo');
+const persisted=B.prepareStart({region:'gba'});
+B.sealStart(persisted.token);
+const active=B.activateStart(persisted.token);
+assert.equal(B.activateStart(persisted.token).sessionId,active.sessionId);
+assert.equal(B.query({sessionId:active.sessionId,view:'snapshot'}).result.region,'gba');
+checks++;
 const large=structuredClone(opened.state);large.custom='x'.repeat(9*1024*1024);const restoredLarge=B.start({region:'gba',stored:{present:true,value:{gameVersion:7,state:large,runtime:null,runtimeVersion:1}}});assert.equal(restoredLarge.state.custom.length,large.custom.length);assert.equal(hash(restoredLarge.state.custom),hash(large.custom));checks++;
 const mask=require('../rust/rail-routing/data/sources-v1.json');for(const[file,meta]of Object.entries(mask.files)){const data=fs.readFileSync(path.join(__dirname,'../rust/rail-routing/data',file));assert.equal(data.length,meta.bytes);assert.equal(crypto.createHash('sha256').update(data).digest('hex'),meta.sha256);checks++;}
 const custom={cells:[{id:'a',x:100,y:100,populationValid:true,survey:0},{id:'b',x:101,y:100,populationValid:false,survey:0}]},U=require('../rail/urban-growth');exact(U.terrain(custom,{x:100,y:100}),custom.cells[0]);assert(U.buildable({region:'tokyo',world:{width:500,height:500}},custom,{x:100,y:100}));checks++;

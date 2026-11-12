@@ -9,16 +9,18 @@ const root=path.resolve(__dirname,'..');
   if(!fs.existsSync(file)){res.writeHead(404).end();return;}
   res.setHeader('Content-Type',({'.js':'text/javascript','.html':'text/html','.json':'application/json','.wasm':'application/wasm','.css':'text/css'})[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res);
  });
- await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const base='http://127.0.0.1:'+server.address().port;
+ const deployed=process.env.RAIL_PAGES_URL;
+ if(!deployed)await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const gameUrl=new URL(deployed||('http://127.0.0.1:'+server.address().port+'/rail/'));
  let browser;const scenarios=[],measurements=[],failures=[];
  try{
   browser=await chromium.launch({headless:true,executablePath:process.env.RAIL_CHROMIUM,args:['--no-sandbox']});
   const context=await browser.newContext({acceptDownloads:true});
   for(const region of ['tokyo','gba']){
    const page=await context.newPage(),faults=[];page.on('pageerror',error=>faults.push(error.message));
-   await page.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+   await page.route('**/*',route=>new URL(route.request().url()).origin===gameUrl.origin?route.continue():route.abort());
    await page.addInitScript(()=>{window.railProbe={longTasks:[],frames:[]};try{new PerformanceObserver(list=>{for(const entry of list.getEntries())window.railProbe.longTasks.push(entry.duration);}).observe({type:'longtask',buffered:true});}catch{}let last;const frame=at=>{if(last!==undefined&&window.railProbe.frames.length<600)window.railProbe.frames.push(at-last);last=at;requestAnimationFrame(frame);};requestAnimationFrame(frame);});
-   const open=async()=>{await page.goto(base+'/rail/?map='+region);await page.waitForFunction(()=>!document.querySelector('#game-loading'),null,{timeout:60000});if(await page.locator('#dismiss-guide').isVisible())await page.locator('#dismiss-guide').click();};
+   const open=async()=>{const url=new URL(gameUrl);url.searchParams.set('map',region);await page.goto(url.href);await page.waitForFunction(()=>!document.querySelector('#game-loading'),null,{timeout:60000});if(await page.locator('#dismiss-guide').isVisible())await page.locator('#dismiss-guide').click();};
    await open();scenarios.push({id:region+'-start',status:'passed'});
    if(await page.locator('#play').getAttribute('aria-label')==='暂停运行')await page.locator('#play').click();
    for(const speed of ['1','3','6','12','24']){await page.locator('#speed').selectOption(speed);assert.equal(await page.locator('#speed').inputValue(),speed);}
@@ -32,6 +34,25 @@ const root=path.resolve(__dirname,'..');
    await page.waitForFunction(()=>!document.querySelector('#game-loading')&&new URL(location.href).searchParams.get('v'),null,{timeout:60000});
    assert.equal(await page.locator('#play').getAttribute('aria-label'),'开始运行');
    await page.reload();await page.waitForFunction(()=>!document.querySelector('#game-loading'),null,{timeout:60000});
+   const atomic=await page.evaluate(async region=>{
+    // Use the real IDB adapter. The conflict is on the second key, after the
+    // first update has been requested from this transaction.
+    const adapter=RailSaveStore.indexedAdapter(indexedDB),store=RailSaveStore.create(adapter,null);
+    const keys=[region+'-replacement-origin',region+'-replacement-target'];
+    for(const key of keys)await store.write(key,{sequence:1});
+    const bases=await Promise.all(keys.map(key=>store.replacementBase(key)));
+    const record={text:'{"sequence":2}',bytes:14,savedAt:2};
+    await adapter.put(keys[1],{...record,text:'{"sequence":3}'},bases[1].expected);
+    let code;
+    try{await store.writeReplacement(bases.map(base=>({base,record})));}catch(error){code=error.message;}
+    const failed=await Promise.all(keys.map(key=>adapter.get(key)));
+    const latest=await Promise.all(keys.map(key=>store.replacementBase(key)));
+    await store.writeReplacement(latest.map(base=>({base,record})));
+    const committed=await Promise.all(keys.map(key=>adapter.get(key)));
+    return {code,failed:failed.map(x=>JSON.parse(x.text).sequence),committed:committed.map(x=>JSON.parse(x.text).sequence)};
+   },region);
+   assert.deepEqual(atomic,{code:'COMMIT_CONFLICT',failed:[1,3],committed:[2,2]});
+   scenarios.push({id:region+'-atomic-replacement',status:'passed'});
    const metrics=await page.evaluate(()=>({longTasks:window.railProbe.longTasks,frameIntervals:window.railProbe.frames,jsHeap:performance.memory?.usedJSHeapSize??null}));measurements.push({region,...metrics});
    assert.equal(faults.length,0,faults.join('\n'));await page.close();
   }
@@ -40,6 +61,6 @@ const root=path.resolve(__dirname,'..');
  finally{
   const result={schemaVersion:1,source:process.env.RAIL_ACCEPTANCE_SOURCE||null,scope:'two-map startup, controls, file round trip and refresh; empty-network scenario',status:failures.length?'failed':'passed',scenarios,measurements,failures};
   const target=process.env.RAIL_BROWSER_EVIDENCE||process.argv[2];if(target)fs.writeFileSync(path.resolve(target),JSON.stringify(result,null,2)+'\n');
-  console.log(JSON.stringify(result));await browser?.close();await new Promise(resolve=>server.close(resolve));
+  console.log(JSON.stringify(result));await browser?.close();if(server.listening)await new Promise(resolve=>server.close(resolve));
  }
 })().catch(error=>{console.error(error);process.exitCode=1;});
