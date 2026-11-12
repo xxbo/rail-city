@@ -22,6 +22,12 @@ async function buildFromMap(page, region, screenshotDirectory) {
   }));
   assert(allVisible,'All phone toolbar actions must fit on screen');
  }
+ // Zoom from inside the construction workspace, then place stops at street scale.
+ for (let i=0; i<(mobile?3:1); i++) {
+  const before=await map.getAttribute('viewBox');
+  await page.locator('#zoom-in').click();
+  await page.waitForFunction(box => document.querySelector('#map').getAttribute('viewBox')!==box, before);
+ }
  const points = await map.evaluate(svg => {
   const rect = svg.getBoundingClientRect();
   const step = Math.min(55, svg.getScreenCTM().a * 19);

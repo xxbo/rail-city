@@ -354,6 +354,8 @@ body.console-ui.drawer-open #interface-shell > #game-guide:not([hidden]) {displa
   visibility: visible;
   opacity: 1;
 }
+body.console-ui.drawer-open :is(.map-zoom, .map-scale, #density-legend) {visibility: visible; opacity: 1}
+body.console-ui.drawer-open #density-legend:not([hidden]) {pointer-events: auto}
 .console-ui .map-zoom {right: var(--edge) !important; bottom: 46px !important; pointer-events: auto !important}
 .console-ui .map-zoom button {width: 34px; height: 34px; padding: 0; background: none; color: #e5eef3; border-color: var(--chrome-line)}
 .console-ui .map-zoom button:hover {background: var(--chrome-raised)}
