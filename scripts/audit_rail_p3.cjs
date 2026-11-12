@@ -8,7 +8,7 @@ const isFunction=n=>['FunctionDeclaration','FunctionExpression','ArrowFunctionEx
 function name(n,p){if(n.id?.name)return n.id.name;const a=p.at(-1);if(a?.type==='VariableDeclarator')return a.id.name||'<destructure>';if(a?.type==='Property'||a?.type==='MethodDefinition')return a.key.name||String(a.key.value);if(a?.type==='AssignmentExpression')return a.left.property?.name||a.left.name||'<assignment>';return a?.type==='CallExpression'&&a.callee===n?'<iife>':`<callback:${n.loc.start.line}:${n.loc.start.column}>`;}
 const value=n=>n?.type==='Literal'&&typeof n.value==='string'?n.value:null;
 const member=n=>n?.type==='MemberExpression'?(n.computed?value(n.property):n.property.name):null;
-const nodeFixtures=new Set(['engine-wasm','preparation-wasm','simulation-client','simulation-wasm','queue-runtime'].map(n=>'scripts/fixtures/rail-p3-6-'+n+'.cjs').concat('scripts/fixtures/rail-p3-8-ridership.cjs'));
+const nodeFixtures=new Set(['engine-wasm','preparation-wasm','simulation-client','simulation-wasm','queue-runtime'].map(n=>'scripts/fixtures/rail-p3-6-'+n+'.cjs').concat('scripts/fixtures/rail-p3-8-ridership.cjs','scripts/fixtures/rail-map56-flow-history.cjs'));
 function localRef(file,ref){if(!ref||/^(?:node:|https?:|data:|blob:)/.test(ref))return null;let p=path.posix.normalize(path.posix.join(path.posix.dirname(file),ref.split(/[?#]/)[0]));if(!path.posix.extname(p))p+='.js';if(!p.startsWith('rail/')&&!nodeFixtures.has(p))throw Error('Dependency escapes rail/: '+p);return p;}
 async function scan(base=root){
  const {parse}=await parseModule(),files=fs.readdirSync(path.join(base,'rail')).filter(x=>x.endsWith('.js')).sort(),data={};

@@ -11,7 +11,10 @@ pub(super) fn km(s:&V,l:&V)->f64{l.get("trackIds").array().iter().map(|id|track(
 pub(super) fn operator(l:&V,i:usize)->V{let op=l.get("operators").array().get(i).unwrap_or(&V::Missing);if op.truth(){op.clone()}else{l.get("owner").clone()}}
 pub(super) fn capacity(l:&V)->f64{if l.get("fleetManaged").truth(){crate::bootstrap::config().get("specs").get(l.get("stockSpec").text()).num("capacity")}else{if l.get("cars").truth(){l.num("cars")*100.0}else{800.0}}}
 pub(super) fn headway(s:&V,l:&V)->f64{if s.num("routeModel")==9.0{return crate::editor_support::headway(s,l).unwrap_or(f64::INFINITY);}if !l.get("fleet").truth(){return l.num("headway");}let cycle=l.get("trackIds").array().iter().map(|id|track(s,id).num("km")/48.0*60.0+0.6).sum::<f64>()+1.0;l.num("headway").max(2.0*cycle/l.num("fleet"))}
-pub(super) fn route_time(s:&V,l:&V)->f64{if s.num("routeModel")==9.0{duration(s,l).unwrap_or(0.0)}else{l.get("trackIds").array().iter().map(|id|track(s,id).num("km")/48.0*60.0+0.6).sum()}}
+pub(super) fn legacy_running_time(lengths:impl Iterator<Item=f64>)->f64 {
+    lengths.map(|km|km / 48.0 * 60.0 + 0.6).sum()
+}
+pub(super) fn route_time(s:&V,l:&V)->f64{if s.num("routeModel")==9.0{duration(s,l).unwrap_or(0.0)}else{legacy_running_time(l.get("trackIds").array().iter().map(|id|track(s,id).num("km")))}}
 fn log(s:&mut V,message:String){let q=s.get("quarter").clone();s.get_mut("log").array_mut().insert(0,obj(&[("q",q),("text",text(&message))]));s.get_mut("log").array_mut().truncate(50);}
 fn fail(message:&str)->V{obj(&[("error",text(message))])}
 pub(super) fn graph(s:&V,penalties:&V)->V{

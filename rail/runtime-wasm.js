@@ -12,7 +12,7 @@ function create(world,forecast,start=420,warm=true,saved,initial){const handle=C
 function worker(entry){if(entry.worker||entry.localOnly||entry.disposed)return;const snapshot=B().runtime('handoff',{id:entry.id});
  const Client=node?require('./worker-client'):root.RailWorkerClient;
  entry.worker=Client.create({stateful:true,timeout:45000,timeoutMessage:'运行会话响应超时，进度等待恢复。',errorMessage:'运行线程异常',
-  createWorker:()=>node?new (require('node:worker_threads').Worker)(require('node:path').join(__dirname,'simulation-worker.js')):new Worker(new URL('simulation-worker.js?v=78',root.location.href)),
+  createWorker:()=>node?new (require('node:worker_threads').Worker)(require('node:path').join(__dirname,'simulation-worker.js')):new Worker(new URL('simulation-worker.js?v=79',root.location.href)),
   onFault:error=>{entry.closed=true;entry.failure=error;}});
  async function startWorker() {
   const forecast=C().runtimePacket(entry.forecast);

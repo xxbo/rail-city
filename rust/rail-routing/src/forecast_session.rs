@@ -112,7 +112,7 @@ impl Catalog {
     fn dto(&self)->V{obj(&[("count",n(self.count() as f64)),("flowData",numeric(&self.flows)),("contractData",numeric(&self.contracts)),("graph",(*self.graph).clone()),("hubs",(*self.hubs).clone()),("effective",boolean(self.effective))])}
     fn totals(&self)->V{let(mut daily,mut active,mut valid)=(0.0,0, true);for &at in &self.cp{let d=self.contracts[at+1];let fare=self.contracts[at+2];daily+=d;active+=usize::from(d>0.0);valid&=d.is_finite()&&d>=0.0&&fare.is_finite()&&fare>=0.0&&self.contracts[at+9]>0.0;}obj(&[("daily",n(daily)),("activeProfiles",n(active as f64)),("valid",boolean(valid))])}
     fn summary(&mut self,q:&V)->V{
-        let mut rows=vec![];for id in self.graph.get("lines").array(){let l=q.get("lines").get(id.text());rows.push([l.truth() as u8 as f64,if matches!(l.get("satisfaction"),V::Missing|V::Null){0.7}else{l.num("satisfaction")},num(l.get("awareness")),num(l.get("trust"))]);}
+        let mut rows=vec![];for id in self.graph.get("lines").array(){let l=q.get("lines").get(id.text());rows.push([l.truth() as u8 as f64,crate::diagnostics::satisfaction_score(l),num(l.get("awareness")),num(l.get("trust"))]);}
         let model=if q.truth(){if q.num("model")==22.0{22.0}else{1.0}}else{0.0};let mut key=vec![f64::to_bits(model)];for row in &rows{key.extend(row.iter().map(|v|v.to_bits()));}if let Some((old,value))=&self.summary{if *old==key{return (**value).clone();}}
         let(mut expected,mut journeys,mut km,mut transfers)=(0.0,0.0,0.0,0.0);let mut stations=BTreeMap::<usize,[f64;2]>::new();
         for &at in &self.fp{let h=&self.flows[at..at+24];let mut p=at+24+h[23] as usize;let mut factor=1.0;let count=self.flows[p] as usize;p+=1;

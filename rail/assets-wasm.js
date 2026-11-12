@@ -12,7 +12,7 @@
   const pick=(v,keys)=>Object.fromEntries(keys.filter(k=>Object.hasOwn(v,k)).map(k=>[k,v[k]]));
   function projection(s,op) {
     if(['validLine','configureFleet'].includes(op))return {};
-    if(op==='facilityValue')return {urban:{facilities:s.urban?.facilities?.map(f=>pick(f,['kind','level','system']))}};
+    if(op==='facilityCosts'||op==='facilityValue')return {urban:{facilities:s.urban?.facilities?.map(f=>pick(f,['kind','level','system']))}};
     if(op==='purchase')return {depot:s.depot};
     if(op==='reserved'||op==='free')return {depot:s.depot,services:s.services?.map(l=>pick(l,['id','fleetManaged','stockSpec','fleet']))};
     if(op==='vehicleValue'||op==='validateFleet'||op==='fleetUpgrade')return pick(s,['routeModel','depot','services']);
@@ -36,11 +36,11 @@
   }
   const facilityCache=new WeakMap();
   function query(s,op,args={}) {
-    if(op!=='facilityValue')return run(s,op,args).result;
+    if(op!=='facilityValue' && op!=='facilityUpkeep')return run(s,op,args).result;
     const rows=s.urban?.facilities||[],old=facilityCache.get(s);
-    if(old&&old.rows.length===rows.length&&rows.every((f,i)=>['kind','level','system'].every(k=>Object.is(f[k],old.rows[i][k]))))return old.result;
-    const result=run(s,op,args).result;
-    facilityCache.set(s,{rows:rows.map(f=>pick(f,['kind','level','system'])),result});return result;
+    if(old&&old.rows.length===rows.length&&rows.every((f,i)=>['kind','level','system'].every(k=>Object.is(f[k],old.rows[i][k]))))return old.result[op];
+    const result=run(s,'facilityCosts',args).result;
+    facilityCache.set(s,{rows:rows.map(f=>pick(f,['kind','level','system'])),result});return result[op];
   }
   function mutate(s,op,args={}) {const out=run(s,op,args);if(!out.result?.error)apply(s,out.patch);return out.result;}
   function transaction(s,command,commit,after,result) {

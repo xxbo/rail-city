@@ -279,6 +279,61 @@ fn feedback(r: &mut Reader<'_>, cache: &mut CoverageCache) -> Vec<f64> {
 }
 const FIELDS: usize = 9;
 // cash, revenue, operatingGrant, operating, interestPaid, principalPaid, arrears, minute, blocked
+/// Loans, ledger entries and scheduled payments share a projection for live and cold games.
+pub(super) fn account_command(e: &crate::value::Value, command: &crate::value::Value, carry: f64, cold: bool)
+    -> (crate::value::Value, f64, f64) {
+    use crate::{editor_support::*, runtime_seed::ECONOMY};
+    let action = command.num("creditAction");
+    let amount = if cold && action == 1.0 && !matches!(command.get("amount"), crate::value::Value::Number(_)) {
+        f64::NAN
+    } else { command.zero("amount") };
+    let loan_index = e.get("loans").array().iter()
+        .position(|l| eq(l.get("id"), command.get("loanId"))).map_or(-1.0, |i| i as f64);
+    let config = crate::bootstrap::config();
+    let balance = config.get("balance");
+    let op = if cold && command.get("settle").truth() { 1.0 } else { 6.0 };
+    let mut input = vec![1.0, op, e.num("minute"), amount, loan_index, e.num("nextLoan"), action,
+        0.0, 0.0, 0.0, 0.0, balance.num("OPERATING_FACTOR"), balance.num("GRANT_RATE"), carry];
+    for key in ECONOMY { input.push(num(e.get(key))); }
+    let old_loans = e.get("loans").array();
+    input.push(old_loans.len() as f64);
+    for loan in old_loans {
+        for key in ["principal","interest","installment","nextDue"] { input.push(loan.num(key)); }
+    }
+    input.push(0.0);
+    let out = run(&input);
+    let mut economy = e.clone();
+    for (i, key) in ECONOMY.iter().enumerate() {
+        economy.set(key, if *key=="blocked" { boolean(out[8+i]!=0.0) } else { n(out[8+i]) });
+    }
+    let mut at = 18;
+    let mut loans = Vec::new();
+    for _ in 0..out[17] as usize {
+        let mut loan = if out[at] < 0.0 { obj(&[("id",e.get("nextLoan").clone()),("initial",n(amount))]) }
+            else { old_loans[out[at] as usize].clone() };
+        for (i,key) in ["principal","interest","installment","nextDue"].iter().enumerate() {
+            loan.set(key,n(out[at+1+i]));
+        }
+        loans.push(loan);
+        at += 5;
+    }
+    economy.set("loans", arr(loans));
+    let count = out[at] as usize;
+    let bills = &out[at+1..at+1+count];
+    at += 1 + count;
+    at += 1 + out[at] as usize;
+    let (error, available) = (out[at], out[at+1]);
+    let booked = op == 6.0 && error == 0.0 && action != 0.0;
+    let entry = |label, sum| obj(&[("minute",e.get("minute").clone()),("type",text(label)),("amount",n(sum))]);
+    if booked {
+        economy.set("nextLoan", n(out[at+3]));
+        economy.get_mut("ledger").array_mut().insert(0,entry(if action==1.0 {"贷款到账"} else {"提前结清贷款"},out[at+2]));
+    }
+    for bill in bills { economy.get_mut("ledger").array_mut().insert(0, entry("每日偿还贷款本息", -bill)); }
+    if !cold || booked || count > 0 { economy.get_mut("ledger").array_mut().truncate(80); }
+    (economy,error,available)
+}
+
 fn settle(e: &mut [f64], loans: &mut Vec<Vec<f64>>, payments: &mut Vec<f64>) {
     e[8] = 0.0;
     if e[6] > 0.0 {

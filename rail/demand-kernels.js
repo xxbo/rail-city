@@ -4,12 +4,6 @@
   const node = typeof module !== 'undefined' && module.exports;
   const Core = node ? require('./routing-wasm') : root.RailRouting;
   const PURPOSES = ['work', 'shopping', 'leisure'];
-  const VOT = {
-    work: 40,
-    shopping: 25,
-    leisure: 20
-  };
-
   function ipf(seed, rows, cols, n, maxIterations = 160, tolerance = 1e-6) {
     if (!Number.isInteger(n) || n < 0 || seed.length !== n * n || rows.length !== n || cols.length !== n) throw Error('OD矩阵尺寸无效');
     const input = new Float64Array(3 + n * n + n * 2);
@@ -29,7 +23,7 @@
     const n = zones.length,
       effective = !!city.metadata?.effectiveConnections;
     const input = new Float64Array(6 + n * 8);
-    input.set([n, effective ? 1 : 0, city.totals.people, ...PURPOSES.map((p, i) => effective ? budgets[p].outbound : city.totals.people * [.52, .16, .12][i])]);
+    input.set([n, effective ? 1 : -1, city.totals.people, ...PURPOSES.map(p => effective ? budgets[p].outbound : 0)]);
     for (let i = 0; i < n; i++) {
       const z = zones[i];
       input.set([z.x, z.y, z.area, z.people, z.jobs, z.shops, z.industry, z.leisure], 6 + i * 8);
@@ -51,19 +45,11 @@
     };
   }
 
-  function modeShare({
-    purpose,
-    minutes,
-    access,
-    accessCost = 1.7 * access,
-    fare,
-    km,
-    availability = {}
-  }) {
-    return Core.modeKernel([VOT[purpose] || 25, minutes, accessCost, fare, km,
-      availability.walk ?? (km <= 5 ? 1 : 0), availability.bike ?? (km <= 12 ? .35 : 0),
-      availability.car ?? .5, availability.bus ?? 1, availability.rail ?? 1
-    ]);
+  function modeShare({purpose,minutes,access,accessCost,fare,km,availability={}}) {
+    const fields=['walk','bike','car','bus','rail'];
+    const mask=fields.reduce((bits,key,i)=>availability[key]==null?bits:bits|(1<<i),0);
+    return Core.kernel('demand_mode',[PURPOSES.indexOf(purpose),minutes,access,Number(accessCost),
+      +(accessCost!==undefined),fare,km,mask,...fields.map(key=>Number(availability[key]))])[0];
   }
   let strategyInput = new Float64Array(128);
 
@@ -86,7 +72,7 @@
   }
 
   function strategy(candidates, purpose, valueOverride = null) {
-    const length = 2 + candidates.length * 5;
+    const length = 3 + candidates.length * 5;
     if (strategyInput.length < length) strategyInput = new Float64Array(length);
     const keys = new Map();
     let at = 2;
@@ -102,7 +88,8 @@
       strategyInput[at++] = index;
     });
     strategyInput[0] = (at - 2) / 5;
-    strategyInput[1] = valueOverride || VOT[purpose] || 25;
+    strategyInput[1] = Number(valueOverride);
+    strategyInput[at++] = PURPOSES.indexOf(purpose);
     const result = Core.kernel('demand_strategy', strategyInput.subarray(0, at), readStrategy, candidates);
     // Only retain a small scratch buffer after unusually large public API calls.
     if (strategyInput.byteLength > 65536) strategyInput = new Float64Array(128);

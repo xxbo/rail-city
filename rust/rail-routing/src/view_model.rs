@@ -1,7 +1,7 @@
 //! Detached projections for UI panels. No model mutation or RNG consumption.
 use crate::{bootstrap::round,editor_support::*,value::Value as V};
 const WEIGHTS:[(&str,f64);7]=[("crowding",0.22),("waiting",0.18),("speed",0.15),("coverage",0.15),("fare",0.13),("reliability",0.10),("hours",0.07)];
-fn line(s:&V,id:&V)->V{let q=s.get("ridership").get("lines").get(&jsstring(id));if !q.truth(){return obj(&[("awareness",n(1.0)),("trust",n(1.0)),("serviceDays",n(0.0)),("factor",n(1.0)),("bestDay",n(0.0))]);}let mut out=q.clone();let factor=if s.get("ridership").num("model")==22.0{0.25+0.75*fallback(q.get("satisfaction"),0.7).clamp(0.0,1.0)}else{q.num("awareness")*q.num("trust")};out.set("factor",n(factor));out}
+fn line(s:&V,id:&V)->V{let q=s.get("ridership").get("lines").get(&jsstring(id));if !q.truth(){return obj(&[("awareness",n(1.0)),("trust",n(1.0)),("serviceDays",n(0.0)),("factor",n(1.0)),("bestDay",n(0.0))]);}let mut out=q.clone();let factor=if s.get("ridership").num("model")==22.0{0.25+0.75*crate::diagnostics::satisfaction_score(q).clamp(0.0,1.0)}else{q.num("awareness")*q.num("trust")};out.set("factor",n(factor));out}
 fn awards(records:&V)->V{
  let mut rows=vec![];
  let mut add=|id:&str,name:&str,key:&str,target:f64,category:&str,unit:&str,suffix:&str|{let value=records.zero(key);let income=category=="收入";let mut row=obj(&[("id",text(id)),("name",text(name)),("target",n(target)),("value",n(value))]);if matches!(id,"first100"|"day1000"|"day10000"|"hour1000"){row.set("unit",text(unit));row.set("suffix",text(suffix));row.set("category",text(category));}else{row.set("category",text(category));row.set("unit",text(unit));row.set("suffix",text(suffix));}for (key,value) in [("displayTarget",n(if income{target*0.05}else{target})),("displayValue",n(if income{value*0.05}else{value})),("unlocked",boolean(value+1e-7>=target)),("progress",n((value/target).min(1.0)))]{row.set(key,value);}rows.push(row);};
@@ -15,8 +15,34 @@ fn awards(records:&V)->V{
  ]{for(i,(target,name))in tiers.iter().enumerate(){add(&format!("{}{}",key,i),name,key,*target,category,unit,suffix);}}
  arr(rows)
 }
+fn journey_factor(state: &V, journey: &V) -> f64 {
+    let ids = if journey.get("lineIds").truth() {
+        journey.get("lineIds").array().to_vec()
+    } else {
+        journey.get("path").get("fares").entries().iter().map(|(id, _)| text(id)).collect()
+    };
+    crate::diagnostics::factor(state, &ids, journey.get("hub").truth())
+}
+
+fn station_entries(state: &V, flows: &V) -> V {
+    let mut counts = std::collections::BTreeMap::<String, [f64; 2]>::new();
+    for flow in flows.array() {
+        let trips = flow.num("trips") * journey_factor(state, flow);
+        counts.entry(jsstring(flow.get("from"))).or_default()[0] += trips;
+        counts.entry(jsstring(flow.get("to"))).or_default()[1] += trips;
+    }
+    V::Object(counts.into_iter().map(|(id, [entered, exited])|
+        (id, obj(&[("entry", n(entered)), ("exit", n(exited))]))).collect())
+}
+
 pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
+ "reviewDue"=>boolean(crate::diagnostic_review::sample_due(v.num("minute"),v.num("nextAt"),v.get("force").truth())),
+ "coldAccount"=>{
+     let (economy,error,available)=crate::operations::account_command(v.get("economy"),v,0.0,true);
+     obj(&[("economy",economy),("credit",obj(&[("error",n(error)),("available",n(available))]))])
+ },
  "lineSettings"=>obj(&[("fareBands",crate::tariffs::bands(v.get("line"))),("patterns",crate::diagnostics::patterns(v.get("line")))]),
+ "legacyFleetDuration"=>n(1.0 + crate::legacy::legacy_running_time(v.get("lengths").array().iter().map(num))),
  "distanceFare"=>crate::tariffs::quote(v.get("line"),num(v.get("km"))),
  "feedbackFares"=>arr(crate::tariffs::feedback(v.get("line"),v.num("length")).map(n).to_vec()),
  "defaultPatterns"=>crate::diagnostics::patterns(v.get("line")),
@@ -25,7 +51,8 @@ pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
  "awards"=>awards(v.get("records")),
  "weights"=>V::Object(WEIGHTS.iter().map(|(k,w)|(k.to_string(),n(*w))).collect()),
  "multiplier"=>n(0.25+0.75*v.num("score").clamp(0.0,1.0)),
- "factor"=>{let j=v.get("journey");let ids=if has(j,"lineIds"){j.get("lineIds").array().to_vec()}else{j.get("path").get("fares").entries().iter().map(|(id,_)|text(id)).collect()};n(crate::diagnostics::factor(s,&ids,j.get("hub").truth()))},
+ "factor"=>n(journey_factor(s,v.get("journey"))),
+ "stationEntries"=>station_entries(s,v.get("flows")),
  "station"=>{let current=s.get("ridership").get("current");let mut out=obj(&[("entered",n(0.0)),("boarded",n(0.0)),("alighted",n(0.0))]);if current.num("number")==crate::history::day(v.num("minute")){for(k,val)in current.get("stations").get(&jsstring(v.get("target"))).entries(){out.set(k,val.clone());}}out},
  "limits"=>{let ls=if s.get("baseLines").truth(){s.get("baseLines")}else{s.get("services")};let lines=ls.array().iter().filter(|l|l.get("stops").array().iter().any(|id|eq(id,v.get("target")))).collect::<Vec<_>>();let cars=lines.iter().map(|l|if l.get("cars").truth(){l.num("cars")}else{6.0}).fold(4.0_f64,f64::max);let cfg=crate::bootstrap::config();let length=lines.iter().filter(|l|l.get("fleetManaged").truth()).map(|l|cfg.get("specs").get(l.get("stockSpec").text()).num("length")+20.0).fold(cars*20.0+20.0,f64::max);let platforms=(lines.len()as f64*2.0).clamp(2.0,6.0);let area=length*3.0*platforms;let capacity=(area/0.93).floor();obj(&[("capacity",n(capacity)),("outsideCapacity",n((capacity*0.5).floor())),("platforms",n(platforms)),("length",n(length)),("usableWidth",n(3.0)),("area",n(area)),("spacePerPerson",n(0.93))])},
  "day"=>n(crate::history::day(v.num("minute"))),
@@ -36,6 +63,34 @@ pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
  _=>obj(&[("error",text("UNKNOWN_VIEW_MODEL"))])
 }}
 #[cfg(test)]mod tests{use super::*;
+ #[test]
+ fn station_entries_preserve_fare_fallback_and_transfer_counts() {
+     let state=obj(&[("ridership",obj(&[("model",n(22.0)),("lines",obj(&[("L",obj(&[("satisfaction",n(0.0))]))]))]))]);
+     let flow=|from,to,trips,line_ids:V| {
+         let mut row=obj(&[("from",n(from)),("to",n(to)),("trips",n(trips)),
+             ("path",obj(&[("fares",obj(&[("L",n(2.0))]))]))]);
+         if !matches!(line_ids,V::Missing) { row.set("lineIds",line_ids); }
+         row
+     };
+     let out=station_entries(&state,&arr(vec![flow(1.0,2.0,6.0,V::Missing),flow(2.0,1.0,4.0,arr(vec![]))]));
+     assert_eq!(out.get("1").num("entry"),1.5);
+     assert_eq!(out.get("1").num("exit"),4.0);
+     assert_eq!(out.get("2").num("entry"),4.0);
+     assert_eq!(out.get("2").num("exit"),1.5);
+ }
+ #[test]
+ fn rejected_cold_credit_is_a_business_result_and_preserves_the_ledger() {
+     let economy=obj(&[("cash",n(1000.0)),("minute",n(420.0)),("nextLoan",n(1.0)),
+         ("loans",arr(vec![])),("ledger",arr(vec![])),("blocked",boolean(false))]);
+     let request=obj(&[("kind",text("coldAccount")),("creditAction",n(1.0)),
+         ("amount",n(1.0)),("economy",economy)]);
+     let result=query(&request);
+     assert!(!result.get("error").truth());
+     assert_eq!(result.get("credit").num("error"),1.0);
+     assert_eq!(result.get("economy").num("cash"),1000.0);
+     assert!(result.get("economy").get("loans").array().is_empty());
+     assert!(result.get("economy").get("ledger").array().is_empty());
+ }
  #[test]fn loan_projection_does_not_charge_accounts(){let state=obj(&[("economy",obj(&[("minute",n(420.0)),("loans",arr(vec![obj(&[("id",n(1.0)),("principal",n(1000.0)),("installment",n(40.0)),("interest",n(10.0)),("nextDue",n(1860.0))])]))]))]);let before=crate::value::write(&state);let out=query(&obj(&[("kind",text("finance")),("state",state.clone())]));assert_eq!(out.num("principal"),1000.0);assert_eq!(out.get("loans").array()[0].num("nextPayment"),50.5);assert_eq!(before,crate::value::write(&state));}
  #[test]fn income_award_uses_saved_units_and_currency_display(){let out=query(&obj(&[("kind",text("awards")),("records",obj(&[("bestRevenue",n(2e6))]))]));let first=out.array().iter().find(|r|r.get("id").text()=="bestRevenue0").unwrap();assert!(first.get("unlocked").truth());assert_eq!(first.num("displayTarget"),100000.0);assert_eq!(first.num("progress"),1.0);}
 }

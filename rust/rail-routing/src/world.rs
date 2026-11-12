@@ -5,8 +5,8 @@ use std::collections::{BTreeMap, HashMap};
 use std::hash::Hash;
 use std::rc::Rc;
 const W: f64 = 1.0 / 16.0;
-const RATES: [f64; 3] = [0.52, 0.16, 0.12];
-const VOT: [f64; 3] = [40.0, 25.0, 20.0];
+pub(super) const RATES: [f64; 3] = [0.52, 0.16, 0.12];
+pub(super) const VOT: [f64; 3] = [40.0, 25.0, 20.0];
 const FIELDS: [usize; 3] = [1, 2, 4];
 struct Read<'a> {
     v: &'a [f64],
@@ -1260,17 +1260,14 @@ fn flows(
         let share = if let Some(hub) = g.hub {
             hub_share(&w.hubs[hub], minutes, access, fare, km, staff)
         } else {
+            let availability = crate::demand::mode_availability(km);
             mode_value(&[
                 VOT[g.purpose],
                 minutes,
                 access_cost,
                 fare,
                 km,
-                if km <= 5.0 { 1.0 } else { 0.0 },
-                if km <= 12.0 { 0.35 } else { 0.0 },
-                0.5,
-                1.0,
-                1.0,
+                availability[0], availability[1], availability[2], availability[3], availability[4],
             ])
         };
         for a in &strat.routes {
