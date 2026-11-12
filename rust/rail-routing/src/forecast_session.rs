@@ -37,7 +37,7 @@ impl Catalog {
         let contracts=if matches!(dto.get("contractData"),V::Array(_)){Some(numbers(dto.get("contractData")))}else{None};
         Self::from_tables(dto,flows,contracts)
     }
-    fn from_tables(dto:&V,flows:Vec<f64>,supplied:Option<Vec<f64>>)->Option<Self>{
+    fn from_tables(dto:&V,mut flows:Vec<f64>,supplied:Option<Vec<f64>>)->Option<Self>{
         let count=unsigned(dto.get("count"))?;if count>2_000_000{return None;}
         let fp=offsets(&flows,count,false)?;
         let graph=dto.get("graph"); let edges=graph.get("edges").array();
@@ -47,7 +47,7 @@ impl Catalog {
         for &at in &fp { let h=&flows[at..at+24]; if !(0..3).contains(&(h[2] as i32)) || h[2].fract()!=0.0 {return None;}
             for k in 0..h[23] as usize {let ix=cursor(&flows,at+24+k)?;if ix>=edges.len(){return None;}}
         }
-        let contracts=supplied.unwrap_or_else(||crate::catalog::compile(count,&descriptors,&flows));
+        let mut contracts=supplied.unwrap_or_else(||crate::catalog::compile(count,&descriptors,&flows));
         let cp=offsets(&contracts,count,true)?;
         // Validate variable-sized contract rows and every name index used by projections.
         for &at in &cp { let end=at+contracts[at-1] as usize; let legs=cursor(&contracts,at+9)?;
@@ -56,6 +56,10 @@ impl Catalog {
             if p+2>end{return None;} let shares=cursor(&contracts,p)?;p=p.checked_add(2)?.checked_add(shares.checked_mul(2)?)?;
             if p!=end{return None;}
         }
+        // Both tables are retained for the life of the forecast. Release the spare
+        // capacity from incremental construction before allocating the runtime arenas.
+        flows.shrink_to_fit();
+        contracts.shrink_to_fit();
         Some(Self {graph:Rc::new(graph.clone()),hubs:Rc::new(dto.get("hubs").clone()),effective:dto.get("effective").truth(),flows,contracts,fp,cp,revision:0,changed:BTreeMap::new(),changes_by_revision:BTreeMap::new(),daily_reads:0,views:VecDeque::new(),summary:None,diagnostics:None})
     }
     fn append(&mut self,mut other:Self)->Option<()>{
