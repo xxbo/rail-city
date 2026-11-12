@@ -499,3 +499,21 @@ mod transport_tests{
         let reads=owner.catalogs[&(id as u64)].daily_reads;for _ in 0..10{let empty=owner.handle(&obj(&[("action",text("dailyPatch")),("id",n(id)),("after",n(1.0)),("load",boolean(false))]));assert!(empty.get("entries").array().is_empty());}assert_eq!(owner.catalogs[&(id as u64)].daily_reads,reads);
     }
 }
+
+#[cfg(test)]
+#[test]
+fn map60_compiler_reuses_a_peak_frame_and_returns_detached_routes() {
+    let state = crate::json_codec::parse(r#"{"services":[{"id":"a","name":"A","stops":[0,1,2],"trackIds":["t0","t1"],"fleet":4,"headway":8}]}"#).unwrap();
+    let mut request = obj(&[("action", text("compiledServices")), ("state", state), ("minute", n(480.0))]);
+    let mut owner = ForecastOwner::default();
+    let mut first = owner.handle(&request);
+    first.array_mut()[0].get_mut("stops").array_mut().push(n(99.0));
+    let cached = owner.service_cache.front().unwrap().0.as_ptr();
+    request.set("minute", n(481.0));
+    let second = owner.handle(&request);
+    assert_eq!(owner.service_cache.front().unwrap().0.as_ptr(), cached);
+    assert_eq!(second.array()[0].get("stops").array().len(), 3);
+    owner.advance_epoch();
+    assert!(owner.service_cache.is_empty());
+    assert_eq!(crate::value::write(&owner.handle(&request)), crate::value::write(&second));
+}

@@ -1483,7 +1483,7 @@ pub(super) fn graph(s: &V) -> Res<V> {
     }
     Ok(arr(adj.into_iter().map(arr).collect()))
 }
-fn run(input: V, cfg: &V) -> V {
+pub(super) fn run(input: V, cfg: &V) -> V {
     let before = input.get("state");
     let mut s = before.clone();
     let op = input.get("op").text();
