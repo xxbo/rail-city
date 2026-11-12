@@ -8,7 +8,7 @@ function errorMessage(error){const code=error?.message||String(error);
   if(code.startsWith('PARSE_'))return 'JSON存档解析失败，请选择游戏导出的完整文件。';
   if(code.includes('VERSION')||code==='VALIDATE_SAVE_4'||code==='VALIDATE_SAVE_5')return '此存档版本尚未受支持，原存档已保留。';
   if(code==='RESTORE_STALE_PREVIEW'||code==='RESTORE_TOKEN_MISMATCH')return '预览后的游戏进度已有变化，请重新选择存档文件。';
-  if(code==='COMMIT_CONFLICT')return '其他标签页已更新存档，请刷新后重新导入。';
+  if(code==='COMMIT_CONFLICT')return '本机存档已被其他页面更新，请刷新后重新确认。';
   if(code.startsWith('COMMIT_'))return '存档写入失败，请检查站点存储权限或磁盘空间后重试。';
   if(code.startsWith('READ_'))return '本地存档读取失败，请检查站点存储权限后重试。';
   if(code.startsWith('VALIDATE_')||code.startsWith('RESTORE_'))return '线网、财务或乘客运行数据校验失败，请检查文件。';
