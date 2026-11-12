@@ -1,5 +1,5 @@
 /* Native passenger arenas. Cohorts, identities, migration and weighted/integer modes belong to Rust. */
-(function(root){'use strict';const node=typeof module!=='undefined'&&module.exports,Runtime=node?require('./runtime-wasm'):root.RailRuntime,B=node?require('./operations'):root.RailOperations,Catalog=node?require('./forecast-catalog'):root.RailForecastCatalog,Wire=node?require('./bootstrap-wasm'):root.RailBootstrap;
+(function(root){'use strict';const node=typeof module!=='undefined'&&module.exports,Runtime=node?require('./runtime-wasm'):root.RailRuntime,B=node?require('./operations'):root.RailOperations,Catalog=node?require('./forecast-catalog'):root.RailForecastCatalog;
 const details=new WeakMap();
 function create(s,forecast,start=420,warm=true,initial){return Runtime.create(s,forecast,start,warm,undefined,initial);}
 function restore(s,forecast,saved){try{return Runtime.create(s,forecast,saved.minute,false,saved);}catch{return null;}}

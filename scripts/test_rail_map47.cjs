@@ -5,7 +5,6 @@ const assert = require('node:assert/strict'),
 const P = require('../rail/passengers'),
   Q = require('../rail/ridership'),
   M = require('./helpers/management-compat.cjs'),
-  N = require('../rail/network'),
   D = require('../rail/demand-model'),
   X = require('../rail/service-plan'),
   Core = require('../rail/routing-wasm');

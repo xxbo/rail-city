@@ -5,7 +5,6 @@ const assert = require('node:assert/strict'),
 const P = require('../rail/passengers'),
   Q = require('../rail/ridership'),
   M = require('./helpers/management-compat.cjs'),
-  N = require('../rail/network'),
   D = require('../rail/demand-model'),
   X = require('../rail/service-plan'),
   Core = require('../rail/routing-wasm');
@@ -95,7 +94,7 @@ function forecast(s) {
   });
 }
 
-const H=require('./helpers/session-oracle.cjs'),Oracle=require('./helpers/native-oracle.cjs'),Runtime=require('../rail/runtime-wasm');
+const H=require('./helpers/session-oracle.cjs'),Runtime=require('../rail/runtime-wasm');
 function pair(start=480,weighted=false){return H.pair(()=>create(3),forecast,OldP,start,weighted);}
 function check(p,dt,managed=false){H.advance(p,OldM,dt);checks++;}
 for (const weighted of [false, true]) {

@@ -1,10 +1,8 @@
 const assert=require('node:assert/strict');
 const P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),D=require('../rail/demand-model'),N=require('../rail/network');
 const OldP=require('./fixtures/rail-map52-passengers.cjs'),OldM=require('./fixtures/rail-map52-management.cjs');
-const Perf=require('../rail/performance'),OldPerf=require('./fixtures/rail-map52-performance.cjs');
-const U=require('../rail/urban-growth'),RV=require('../rail/operations-review'),Core=require('../rail/routing-wasm');
+const U=require('../rail/urban-growth'),RV=require('../rail/operations-review');
 const {create}=require('./fixtures/rail-memory-grid.cjs');
-const exact=(a,b)=>{assert.deepEqual(a,b);assert.equal(JSON.stringify(a),JSON.stringify(b));};
 let checks=0;
 function forecast(s) {
   const cells = s.nodes.map((n, i) => ({

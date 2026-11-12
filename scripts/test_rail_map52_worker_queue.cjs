@@ -1,25 +1,17 @@
 /* Frozen MAP44 oracle for native queue ownership and ordered event continuation. */
-const assert = require('node:assert/strict'),
-  fs = require('node:fs');
+const assert = require('node:assert/strict');
 const P = require('../rail/passengers'),
   Old = require('./fixtures/rail-map51-passengers.cjs');
 const M = require('./helpers/management-compat.cjs'),
   OldM = require('./fixtures/rail-map51-management.cjs');
 const N = require('../rail/network'),
-  D = require('../rail/demand-model'),
-  Core = require('../rail/routing-wasm');
+  D = require('../rail/demand-model');
 const {
   create
 } = require('./fixtures/rail-memory-grid.cjs');
-let checkpoints = 0,
-  resumes = 0;
+let checkpoints = 0;
 const runtimes=[];
 const Oracle=require('./helpers/native-oracle.cjs');
-const kernel = Core.kernel;
-Core.kernel = function(name, input, ...rest) {
-  if (name === 'engine_step' && input[4] === 1) resumes++;
-  return kernel(name, input, ...rest);
-};
 
 function forecast(s) {
   const cells = s.nodes.map((n, i) => ({
