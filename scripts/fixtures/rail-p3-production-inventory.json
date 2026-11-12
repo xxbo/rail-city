@@ -11768,7 +11768,7 @@
       ]
     },
     "rail/management.js": {
-      "sha256": "68fe4d0fdca6308d220768e7327a979bd59570bd9529f8622dfddba3f48bcfdc",
+      "sha256": "e07e1b4cb066f56c9578d8950c0eab25d923ae212d066c6191b553e033d39cfb",
       "role": "platform",
       "owner": "Rust RuntimeOwner for all continuous models; structured cold asset and credit transport",
       "phase": "P3-6 bridge",
@@ -11859,7 +11859,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 99,
-          "sha256": "8981d3e919e58bb389f491781ba6c509e4d1fdec445b92e87e7ee1ad805e0bb2",
+          "sha256": "a51727e02ba61bfae107d262a34e0b7b36f3778bc2ab3ad569bafd6868f85cc5",
           "scope": [],
           "role": "platform",
           "phase": "P3-6 bridge",
@@ -12127,7 +12127,7 @@
           "name": "coldAccount",
           "line": 23,
           "end": 28,
-          "sha256": "fa31a125ae459610f9d4d311c68c02c5a74462c2d52e7a06b6f395208b17afbe",
+          "sha256": "66998a5b9688bc4f1b8d315002261708f8c487fffd10dfbc2859d27410ab3756",
           "scope": [],
           "role": "platform",
           "phase": "P3-6 bridge",

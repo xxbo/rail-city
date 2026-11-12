@@ -39,7 +39,7 @@ pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
  "reviewDue"=>boolean(crate::diagnostic_review::sample_due(v.num("minute"),v.num("nextAt"),v.get("force").truth())),
  "coldAccount"=>{
      let (economy,error,available)=crate::operations::account_command(v.get("economy"),v,0.0,true);
-     obj(&[("economy",economy),("error",n(error)),("available",n(available))])
+     obj(&[("economy",economy),("credit",obj(&[("error",n(error)),("available",n(available))]))])
  },
  "lineSettings"=>obj(&[("fareBands",crate::tariffs::bands(v.get("line"))),("patterns",crate::diagnostics::patterns(v.get("line")))]),
  "legacyFleetDuration"=>n(1.0 + crate::legacy::legacy_running_time(v.get("lengths").array().iter().map(num))),
@@ -77,6 +77,19 @@ pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
      assert_eq!(out.get("1").num("exit"),4.0);
      assert_eq!(out.get("2").num("entry"),4.0);
      assert_eq!(out.get("2").num("exit"),1.5);
+ }
+ #[test]
+ fn rejected_cold_credit_is_a_business_result_and_preserves_the_ledger() {
+     let economy=obj(&[("cash",n(1000.0)),("minute",n(420.0)),("nextLoan",n(1.0)),
+         ("loans",arr(vec![])),("ledger",arr(vec![])),("blocked",boolean(false))]);
+     let request=obj(&[("kind",text("coldAccount")),("creditAction",n(1.0)),
+         ("amount",n(1.0)),("economy",economy)]);
+     let result=query(&request);
+     assert!(!result.get("error").truth());
+     assert_eq!(result.get("credit").num("error"),1.0);
+     assert_eq!(result.get("economy").num("cash"),1000.0);
+     assert!(result.get("economy").get("loans").array().is_empty());
+     assert!(result.get("economy").get("ledger").array().is_empty());
  }
  #[test]fn loan_projection_does_not_charge_accounts(){let state=obj(&[("economy",obj(&[("minute",n(420.0)),("loans",arr(vec![obj(&[("id",n(1.0)),("principal",n(1000.0)),("installment",n(40.0)),("interest",n(10.0)),("nextDue",n(1860.0))])]))]))]);let before=crate::value::write(&state);let out=query(&obj(&[("kind",text("finance")),("state",state.clone())]));assert_eq!(out.num("principal"),1000.0);assert_eq!(out.get("loans").array()[0].num("nextPayment"),50.5);assert_eq!(before,crate::value::write(&state));}
  #[test]fn income_award_uses_saved_units_and_currency_display(){let out=query(&obj(&[("kind",text("awards")),("records",obj(&[("bestRevenue",n(2e6))]))]));let first=out.array().iter().find(|r|r.get("id").text()=="bestRevenue0").unwrap();assert!(first.get("unlocked").truth());assert_eq!(first.num("displayTarget"),100000.0);assert_eq!(first.num("progress"),1.0);}

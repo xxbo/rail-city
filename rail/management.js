@@ -24,7 +24,7 @@
     const owner=node?require('./bootstrap-wasm'):root.RailBootstrap;
     const result=owner.viewModel('coldAccount',{economy:s.economy,creditAction,...args});
     R.sync(s.economy,result.economy);
-    return result;
+    return result.credit;
   }
   function available(s) {
     init(s);
