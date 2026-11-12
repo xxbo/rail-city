@@ -492,6 +492,17 @@ mod tests {
         assert!((out[2] + out[4] - 40.0).abs() < 1e-8);
     }
     #[test]
+    fn mode_defaults_preserve_explicit_zero_and_distance_boundaries() {
+        for (purpose, value) in [(0.0,40.0),(1.0,25.0),(2.0,20.0),(-1.0,25.0)] {
+            for km in [5.0,5.01,12.0,12.01] {
+                let [walk,bike,car,bus,rail]=mode_availability(km);
+                let expected=mode_value(&[value,12.0,8.5,180.0,km,walk,bike,car,bus,rail]);
+                assert_eq!(mode(&[purpose,12.0,5.0,0.0,0.0,180.0,km,0.0,0.0,0.0,0.0,0.0,0.0]),vec![expected]);
+                assert_eq!(mode(&[purpose,12.0,5.0,0.0,1.0,180.0,km,16.0,0.0,0.0,0.0,0.0,0.0]),vec![0.0]);
+            }
+        }
+    }
+    #[test]
     fn disabled_rail() {
         assert_eq!(
             mode(&[40.0, 12.0, 5.0, 180.0, 8.0, 0.0, 0.0, 0.0, 0.0, 0.0]),

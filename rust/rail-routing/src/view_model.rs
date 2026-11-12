@@ -36,6 +36,7 @@ fn station_entries(state: &V, flows: &V) -> V {
 }
 
 pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
+ "reviewDue"=>boolean(crate::diagnostic_review::sample_due(v.num("minute"),v.num("nextAt"),v.get("force").truth())),
  "coldAccount"=>{
      let (economy,error,available)=crate::operations::account_command(v.get("economy"),v,0.0,true);
      obj(&[("economy",economy),("error",n(error)),("available",n(available))])
@@ -62,6 +63,21 @@ pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
  _=>obj(&[("error",text("UNKNOWN_VIEW_MODEL"))])
 }}
 #[cfg(test)]mod tests{use super::*;
+ #[test]
+ fn station_entries_preserve_fare_fallback_and_transfer_counts() {
+     let state=obj(&[("ridership",obj(&[("model",n(22.0)),("lines",obj(&[("L",obj(&[("satisfaction",n(0.0))]))]))]))]);
+     let flow=|from,to,trips,line_ids:V| {
+         let mut row=obj(&[("from",n(from)),("to",n(to)),("trips",n(trips)),
+             ("path",obj(&[("fares",obj(&[("L",n(2.0))]))]))]);
+         if !matches!(line_ids,V::Missing) { row.set("lineIds",line_ids); }
+         row
+     };
+     let out=station_entries(&state,&arr(vec![flow(1.0,2.0,6.0,V::Missing),flow(2.0,1.0,4.0,arr(vec![]))]));
+     assert_eq!(out.get("1").num("entry"),1.5);
+     assert_eq!(out.get("1").num("exit"),4.0);
+     assert_eq!(out.get("2").num("entry"),4.0);
+     assert_eq!(out.get("2").num("exit"),1.5);
+ }
  #[test]fn loan_projection_does_not_charge_accounts(){let state=obj(&[("economy",obj(&[("minute",n(420.0)),("loans",arr(vec![obj(&[("id",n(1.0)),("principal",n(1000.0)),("installment",n(40.0)),("interest",n(10.0)),("nextDue",n(1860.0))])]))]))]);let before=crate::value::write(&state);let out=query(&obj(&[("kind",text("finance")),("state",state.clone())]));assert_eq!(out.num("principal"),1000.0);assert_eq!(out.get("loans").array()[0].num("nextPayment"),50.5);assert_eq!(before,crate::value::write(&state));}
  #[test]fn income_award_uses_saved_units_and_currency_display(){let out=query(&obj(&[("kind",text("awards")),("records",obj(&[("bestRevenue",n(2e6))]))]));let first=out.array().iter().find(|r|r.get("id").text()=="bestRevenue0").unwrap();assert!(first.get("unlocked").truth());assert_eq!(first.num("displayTarget"),100000.0);assert_eq!(first.num("progress"),1.0);}
 }

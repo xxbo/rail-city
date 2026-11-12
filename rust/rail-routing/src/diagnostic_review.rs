@@ -146,10 +146,13 @@ fn accumulate(a: &mut V, row: &V, minutes: f64, is_peak: bool) {
         add(a, "peakMinutes", minutes);
     }
 }
+pub(super) fn sample_due(minute: f64, next: f64, force: bool) -> bool {
+    force || !(minute + 1e-7 < next)
+}
 fn sample(s: &mut V, rt: &V, force: bool, cfg: &V) -> bool {
     let r = s.get("operationsReview");
     let to = rt.num("minute");
-    if !r.truth() || (!force && to + 1e-7 < r.num("nextAt")) {
+    if !r.truth() || !sample_due(to, r.num("nextAt"), force) {
         return false;
     }
     let from = r.get("cursor").num("minute");
