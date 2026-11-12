@@ -75,6 +75,13 @@ fn sig(l: &V) -> V {
         .map(|k| l.get(k).clone())
         .collect())))
 }
+pub(super) fn satisfaction_score(line: &V) -> f64 {
+    match line.get("satisfaction") {
+        V::Missing | V::Null => 0.7,
+        value => num(value),
+    }
+}
+
 pub(super) fn factor(s: &V, ids: &[V], hub: bool) -> f64 {
     let q = s.get("ridership");
     if !q.truth() || ids.is_empty() {
@@ -85,7 +92,7 @@ pub(super) fn factor(s: &V, ids: &[V], hub: bool) -> f64 {
         let f = if !l.truth() {
             1.0
         } else if q.num("model") == 22.0 {
-            0.25 + 0.75 * max(0.0, min(1.0, fallback(l.get("satisfaction"), 0.7)))
+            0.25 + 0.75 * max(0.0, min(1.0, satisfaction_score(l)))
         } else {
             let aw = if hub {
                 1.0 - (1.0 - l.num("awareness")) * 0.5
