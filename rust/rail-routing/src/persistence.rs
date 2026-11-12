@@ -5,6 +5,12 @@ use std::collections::{HashMap,VecDeque,HashSet};
 const FIELDS:[&str;7]=["bestDay","bestHour","totalCompleted","totalPassengerKm","bestNetworkKm","bestLineKm","bestRevenue"];
 pub(super) fn merge(values:&[V])->V{let mut out=obj(&[]);for key in FIELDS{let mut best:Option<f64>=None;for v in values{if let V::Number(n)=v.get(key){if n.is_finite()&&*n>=0.0{best=Some(best.map_or(*n,|b|b.max(*n)));}}}if let Some(best)=best{out.set(key,n(best));}}out}
 fn decoded(text:&V)->V{if !text.truth(){return obj(&[("present",boolean(false))]);}match crate::json_codec::parse(text.text()){Ok(value)=>obj(&[("present",boolean(true)),("value",value)]),Err(e)=>obj(&[("present",boolean(true)),("error",boolean(true)),("code",crate::editor_support::text(&e))])}}
+pub(super) fn save_summary(lines:&V,economy:&V,facilities:usize)->V {
+    let stops=lines.array().iter().flat_map(|line|line.get("stops").array().iter().map(|id|id.n() as usize)).collect::<HashSet<_>>();
+    let minute=economy.num("minute");
+    obj(&[("lines",n(lines.array().len() as f64)),("stations",n(stops.len() as f64)),("day",n(crate::history::day(minute))),
+        ("minute",n(minute)),("cash",economy.get("cash").clone()),("facilities",n(facilities as f64))])
+}
 pub(super) fn world_records(s:&V,previous:&V)->V{
     if !matches!(s,V::Object(_)){return merge(&[previous.clone()]);}
     let tracks=s.get("tracks").array();let mut indices=HashMap::new();
@@ -33,8 +39,8 @@ pub(super) fn parse(text:&str)->Result<V,String>{
         if startup.get("blocked").truth(){return Err("VALIDATE_LEGACY_CHECKPOINT".into());}
         value=pack(startup.get("state").clone(),V::Null,&obj(&[("speed",startup.get("speed").clone()),("personalRecords",startup.get("records").clone())]));
     }
-    let code=crate::save::run(&obj(&[("op",crate::editor_support::text("accept")),("value",value.clone())]),&crate::bootstrap::config()).n();
-    if code!=0.0{return Err(format!("VALIDATE_SAVE_{}",code as u32));}
+    let code=crate::save::accept(&value,&crate::bootstrap::config(),&V::Missing);
+    if code!=0{return Err(format!("VALIDATE_SAVE_{}",code));}
     value.set("region",value.get("state").get("region").clone());value.set("speed",speed(value.get("speed")));value.set("playing",boolean(false));value.set("personalRecords",merge(&[value.get("personalRecords").clone()]));Ok(value)
 }
 pub(super) fn encoded(value:&V,at:&V)->Result<V,String>{let text=crate::json_codec::encode(value)?;let bytes=text.len();Ok(obj(&[("text",crate::editor_support::text(&text)),("bytes",n(bytes as f64)),("savedAt",at.clone())]))}
@@ -44,9 +50,21 @@ impl Queue{
     fn stats(&self)->V{obj(&[("active",boolean(self.active.is_some())),("pending",boolean(!self.pending.is_empty())),("started",n(self.started as f64)),("coalesced",n(self.coalesced as f64)),("completed",n(self.completed as f64)),("failed",n(self.failed as f64))])}
 }
 #[derive(Default)]
-pub(super) struct Owner{next:u64,queues:HashMap<u64,Queue>,observed:HashMap<String,V>,last_error:Option<f64>}
+pub(super) struct Owner{replacement:crate::replacement::Owner,next:u64,queues:HashMap<u64,Queue>,observed:HashMap<String,V>,last_error:Option<f64>}
 impl Owner{
     pub(super) fn request(&mut self,v:&V)->V{let result=(||->Result<V,String>{match v.get("action").text(){
+        "replacement"=>self.replacement.event(v),
+        "saveSummary"=>Ok(save_summary(v.get("lines"),v.get("economy"),v.num("facilities") as usize)),
+        "replacementBase"=>{
+            let record=v.get("record");
+            if record.truth() && !matches!(record.get("text"),V::String(_)){return Err("READ_STORAGE".into());}
+            let expected=if record.truth(){record.get("text")}else{&V::Null};
+            if v.get("guardActive").truth() && self.observed.get(v.get("key").text()).is_some_and(|old|!eq(old,expected)){
+                return Err("COMMIT_CONFLICT".into());
+            }
+            // Keep the browser's preimage separate from the observation used by autosave.
+            Ok(obj(&[("source",text(if record.truth(){"indexeddb"}else{"legacy"}))]))
+        },
         "storageObserved"=>{self.observed.insert(v.get("key").text().into(),v.get("text").clone());Ok(V::Null)},
         "storageExpected"=>Ok(obj(&[("known",boolean(self.observed.contains_key(v.get("key").text()))),("text",self.observed.get(v.get("key").text()).cloned().unwrap_or(V::Null))])),
         "errorNotice"=>{let at=v.num("at");let due=at.is_finite()&&self.last_error.map_or(true,|last|at-last>=30000.0||at<last);if due{self.last_error=Some(at);}Ok(boolean(due))},

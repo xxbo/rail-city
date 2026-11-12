@@ -15,8 +15,28 @@ const root=path.resolve(__dirname,'..');
    await app.locator('#play').click();await app.waitForFunction(()=>document.querySelector('#play')?.getAttribute('aria-label')==='暂停运行');
    await app.locator('#play').click();await app.waitForFunction(()=>document.querySelector('#play')?.getAttribute('aria-label')==='开始运行');
    if(await app.locator('#dismiss-guide').isVisible())await app.locator('#dismiss-guide').click();
+   // A rejected durable write must leave the current game and its stored bytes available.
+   await app.locator('#speed').selectOption('12');
+   await app.evaluate(()=>{
+    window.realReplacementWrite=RailSaveStore.writeReplacement;
+    RailSaveStore.writeReplacement=async([{base}])=>{window.resetPreimage=base.expected;throw Error('COMMIT_ABORTED');};
+   });
+   await app.locator('#manage-toggle').click();await app.locator('#new-game').click();await app.locator('#confirm-newgame').click();
+   await app.waitForFunction(()=>document.querySelector('#toast')?.textContent.includes('新游戏未写入'));
+   const [before,kept]=await app.evaluate(async region=>{
+    RailSaveStore.writeReplacement=window.realReplacementWrite;
+    return [window.resetPreimage,(await RailSaveStore.replacementBase(RailRegions.get(region).saveKey)).expected];
+   },region);
+   assert.equal(JSON.parse(before).speed,12);
+   assert.equal(kept,before);
+   assert.equal(await app.locator('#speed').inputValue(),'12');
    await app.locator('#manage-toggle').click();await app.locator('#new-game').click();await app.locator('#confirm-newgame').click();
    await app.waitForFunction(()=>document.querySelector('#toast')?.textContent.includes('新游戏已开始'));
+   const saved=await app.evaluate(async region=>{
+    const base=await RailSaveStore.replacementBase(RailRegions.get(region).saveKey);
+    return RailLocalSave.parse(base.expected).state.region;
+   },region);
+   assert.equal(saved,region);
    assert.equal(faults.length,0,faults.join('\n'));games.push({region,startPause:true,newGame:true,pageErrors:faults});await app.close();
   }
   const result={scope:'P3-1 Rust initialization and compatibility session/browser acceptance',browser:browser.version(),probe,games};

@@ -52,9 +52,14 @@ console.log('P3 regressions passed: queue wire ordering, prepared catalogs, immu
   const Runtime=require('../rail/runtime-wasm'),world=create(2),f=forecast(world),rt=P.create(world,f,420,false);
   try{
    const file=JSON.stringify(LS.pack(world,null,{speed:6,playing:false}));
-   const {token}=await Runtime.previewImport(rt,file);
+   const {token,summary,state}=await Runtime.previewImport(rt,file,true);
+   assert.equal(state,undefined);
+   assert.equal(summary.lines,world.services.length);
+   assert.equal(summary.stations,new Set(world.services.flatMap(l=>l.stops)).size);
+   assert.equal((await Runtime.importForecastInput(rt,token)).region,world.region);
    const first=await Runtime.prepareImport(rt,token,f);
    assert.equal(first.token,token);
+   await assert.rejects(Runtime.cancelImport(rt,token),/RESTORE_COMMIT_PENDING/);
    await assert.rejects(Runtime.importWriteFailed(rt,token+1),/RESTORE_TOKEN_MISMATCH/);
    await Runtime.importWriteFailed(rt,token);
    const second=await Runtime.prepareImport(rt,token,f);

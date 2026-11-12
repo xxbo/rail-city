@@ -32,6 +32,25 @@ const root=path.resolve(__dirname,'..');
    await page.waitForFunction(()=>!document.querySelector('#game-loading')&&new URL(location.href).searchParams.get('v'),null,{timeout:60000});
    assert.equal(await page.locator('#play').getAttribute('aria-label'),'开始运行');
    await page.reload();await page.waitForFunction(()=>!document.querySelector('#game-loading'),null,{timeout:60000});
+   const atomic=await page.evaluate(async region=>{
+    // Use the real IDB adapter. The conflict is on the second key, after the
+    // first update has been requested from this transaction.
+    const adapter=RailSaveStore.indexedAdapter(indexedDB),store=RailSaveStore.create(adapter,null);
+    const keys=[region+'-replacement-origin',region+'-replacement-target'];
+    for(const key of keys)await store.write(key,{sequence:1});
+    const bases=await Promise.all(keys.map(key=>store.replacementBase(key)));
+    const record={text:'{"sequence":2}',bytes:14,savedAt:2};
+    await adapter.put(keys[1],{...record,text:'{"sequence":3}'},bases[1].expected);
+    let code;
+    try{await store.writeReplacement(bases.map(base=>({base,record})));}catch(error){code=error.message;}
+    const failed=await Promise.all(keys.map(key=>adapter.get(key)));
+    const latest=await Promise.all(keys.map(key=>store.replacementBase(key)));
+    await store.writeReplacement(latest.map(base=>({base,record})));
+    const committed=await Promise.all(keys.map(key=>adapter.get(key)));
+    return {code,failed:failed.map(x=>JSON.parse(x.text).sequence),committed:committed.map(x=>JSON.parse(x.text).sequence)};
+   },region);
+   assert.deepEqual(atomic,{code:'COMMIT_CONFLICT',failed:[1,3],committed:[2,2]});
+   scenarios.push({id:region+'-atomic-replacement',status:'passed'});
    const metrics=await page.evaluate(()=>({longTasks:window.railProbe.longTasks,frameIntervals:window.railProbe.frames,jsHeap:performance.memory?.usedJSHeapSize??null}));measurements.push({region,...metrics});
    assert.equal(faults.length,0,faults.join('\n'));await page.close();
   }

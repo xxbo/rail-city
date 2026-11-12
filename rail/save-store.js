@@ -32,6 +32,34 @@
       });
       return opened;
     }
+    async function putMany(rows) {
+      const db=await open();
+      return new Promise((resolve,reject)=>{
+        const tx=db.transaction('saves','readwrite'), store=tx.objectStore('saves');
+        let failure;
+        tx.oncomplete=()=>resolve();
+        tx.onabort=()=>reject(failure || tx.error || Error('COMMIT_ABORTED'));
+        try {
+          for(const {key,value,expected} of rows){
+            const read=store.get(key);
+            read.onsuccess=()=>{
+              if(failure)return;
+              const old=read.result;
+              const matches=old===undefined ? expected===null : typeof old?.text==='string' && old.text===expected;
+              if(expected!==undefined && !matches){
+                failure=Error('COMMIT_CONFLICT');
+                tx.abort();
+                return;
+              }
+              store.put(value,key);
+            };
+          }
+        }catch(error){
+          failure=error;
+          tx.abort();
+        }
+      });
+    }
     return {
       async get(key) {
         const db = await open();
@@ -45,18 +73,8 @@
           tx.onabort = () => reject(tx.error || Error('存档读取中断。'));
         });
       },
-      async put(key, value, expected) {
-        const db = await open();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction('saves', 'readwrite');
-          const store=tx.objectStore('saves'), read=store.get(key);
-          let conflict=false;
-          read.onsuccess=()=>{if(expected!==undefined&&(read.result?.text??null)!==expected){conflict=true;tx.abort();}else store.put(value,key);};
-          tx.oncomplete = () => resolve();
-          tx.onerror = () => reject(tx.error || Error('存档写入失败。'));
-          tx.onabort = () => reject(Error(conflict?'COMMIT_CONFLICT':(tx.error?.message||'COMMIT_ABORTED')));
-        });
-      }
+      put:(key,value,expected)=>putMany([{key,value,expected}]),
+      putMany
     };
   }
 
@@ -65,6 +83,9 @@
     let queue;
     const writes=()=>queue||(queue=(typeof module!=='undefined'&&module.exports?require('./save-queue'):root.RailSaveQueue).create({coalesce:false}));
     const legacyRead=key=>{try{return legacy?.getItem(key)??null;}catch{return null;}};
+    function replacementLegacy(key){
+      try{return legacy?.getItem(key)??null;}catch{throw Error('READ_STORAGE');}
+    }
     async function read(key){await writes().flush();let record,failed=false;try{record=await adapter.get(key);native('storageObserved',{key,text:record?.text??null});}catch{failed=true;}return native('read',{record,legacy:legacyRead(key),failed});}
     function writeRecord(key,record,legacyText=null){return writes().request(async()=>{
       if(!native('storageExpected',{key}).known){const old=await adapter.get(key);native('storageObserved',{key,text:old?.text??null});}
@@ -73,10 +94,41 @@
       if(result.cleanup)try{legacy.removeItem(key);}catch{}
       return result;
     });}
+    async function replacementBase(key,guardActive=false){
+      await writes().flush();
+      let record;
+      try{record=await adapter.get(key);}catch{throw Error('READ_STORAGE');}
+      const {source}=native('replacementBase',{key,record,guardActive});
+      const legacyText=source==='legacy'?replacementLegacy(key):null;
+      return Object.freeze({key,expected:record?.text??null,previous:record?.text??legacyText,checkLegacy:source==='legacy',legacyText});
+    }
+    function writeReplacement(entries){
+      return writes().request(async()=>{
+        if(!entries.length || new Set(entries.map(({base})=>base.key)).size!==entries.length)throw Error('COMMIT_INVALID_TARGET');
+        const rows=entries.map(({base,record})=>{
+          if(record.saveKey!==undefined && record.saveKey!==base.key)throw Error('COMMIT_INVALID_TARGET');
+          if(base.checkLegacy && replacementLegacy(base.key)!==base.legacyText)throw Error('COMMIT_CONFLICT');
+          const {text,bytes,savedAt}=record;
+          return {key:base.key,expected:base.expected,value:{text,bytes,savedAt}};
+        });
+        if(rows.length===1)await adapter.put(rows[0].key,rows[0].value,rows[0].expected);
+        else await adapter.putMany(rows);
+        // IDB has committed. Auxiliary observations and legacy cleanup cannot
+        // turn that success into a retry of the replacement.
+        for(const {base,record} of entries){
+          try{
+            native('storageObserved',{key:base.key,text:record.text});
+            if(base.legacyText!==null && legacyRead(base.key)===base.legacyText)legacy.removeItem(base.key);
+          }catch(error){console.warn('Checkpoint bookkeeping',error);}
+        }
+        const {bytes,savedAt}=rows[0].value;
+        return {source:'indexeddb',bytes,savedAt};
+      });
+    }
     function write(key,value,legacyText=null){const record=native('prepareWrite',{value,at:Date.now()});return writeRecord(key,record,legacyText);}
     function records(key,value,state,checkpoint){const result=native('records',{raw:legacyRead(key),value,state,checkpoint});return result;}
     function persistRecords(key,value,state){const result=records(key,value,state);try{legacy?.setItem(key,result.text);}catch{}return result.value;}
-    return {read,write,writeRecord,records,persistRecords,flush:()=>writes().flush()};
+    return {read,write,writeRecord,replacementBase,writeReplacement,records,persistRecords,flush:()=>writes().flush()};
   }
   function workerSerializer(){return value=>Promise.resolve(native('encode',{value}).text);}
   const node=typeof module!=='undefined'&&module.exports;

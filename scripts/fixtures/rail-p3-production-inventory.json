@@ -1010,7 +1010,7 @@
       ]
     },
     "rail/bootstrap-wasm.js": {
-      "sha256": "9185b48dea765beac1a46eaf543e2967911582ee6690a8249957d21e5ca2461d",
+      "sha256": "556c107710eeb7fbff02b2e603821444d3a94fb360a3ad216304909b91352dfe",
       "role": "platform",
       "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
       "phase": "P3-7 bridge",
@@ -1023,6 +1023,8 @@
         "RailBootstrap"
       ],
       "exports": [
+        "abortStartWrite",
+        "activateStart",
         "cancelStart",
         "clock",
         "commitStart",
@@ -1043,6 +1045,7 @@
         "readonly",
         "run",
         "runtime",
+        "sealStart",
         "settings",
         "start",
         "view",
@@ -1066,7 +1069,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 89,
-          "sha256": "8cce053b48ab0f8f107d93f926106944e9acbcb84b8df557e66382ad0ba804ce",
+          "sha256": "00227c6b56bb3eaec32ddf2b68aebcb0b494fc92b66165c6fe3aec191e01a835",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -1560,6 +1563,7 @@
             "rail/save-queue.js",
             "rail/save-store.js",
             "rail/save-worker.js",
+            "rail/ui-save-view.js",
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
@@ -1718,6 +1722,23 @@
           "phase": "P3-7 bridge",
           "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
           "exportNameCandidate": true,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [
+            "scripts/test_rail_p31_bootstrap.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/sealStart@87:1423",
+          "name": "sealStart",
+          "line": 87,
+          "end": 87,
+          "sha256": "864b60a947d4b0dad4bb5111a74617be5f6d790675ff279e0cd91c7d68c8b7c3",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/ui.js"
           ],
@@ -1727,7 +1748,45 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cancelStart@87:1425",
+          "id": "<iife>/abortStartWrite@87:1476",
+          "name": "abortStartWrite",
+          "line": 87,
+          "end": 87,
+          "sha256": "6594fb8fecea0814836daef4462ba360d664eabc145aa8d97e908d83f7fad922",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/ui.js"
+          ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_p31_bootstrap.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/activateStart@87:1534",
+          "name": "activateStart",
+          "line": 87,
+          "end": 87,
+          "sha256": "4ab53faf7e21355658c08d68a259d572b0d5868f4665b878b959751960c00337",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/ui.js"
+          ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_p31_bootstrap.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/cancelStart@87:1587",
           "name": "cancelStart",
           "line": 87,
           "end": 87,
@@ -1746,7 +1805,7 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/geo@87:1468",
+          "id": "<iife>/geo@87:1630",
           "name": "geo",
           "line": 87,
           "end": 87,
@@ -1764,7 +1823,7 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/start@87:1533",
+          "id": "<iife>/start@87:1695",
           "name": "start",
           "line": 87,
           "end": 87,
@@ -1800,7 +1859,7 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/query@87:1730",
+          "id": "<iife>/query@87:1892",
           "name": "query",
           "line": 87,
           "end": 87,
@@ -1842,7 +1901,7 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/decode@87:1807",
+          "id": "<iife>/decode@87:1969",
           "name": "decode",
           "line": 87,
           "end": 87,
@@ -1870,7 +1929,7 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/memoryBytes@87:1858",
+          "id": "<iife>/memoryBytes@87:2020",
           "name": "memoryBytes",
           "line": 87,
           "end": 87,
@@ -1889,7 +1948,7 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/ensure@87:1897",
+          "id": "<iife>/ensure@87:2059",
           "name": "ensure",
           "line": 87,
           "end": 87,
@@ -2619,6 +2678,7 @@
             "rail/operations.js",
             "rail/passengers.js",
             "rail/shell-ui.js",
+            "rail/ui-save-view.js",
             "rail/ui.js",
             "rail/urban-growth.js"
           ],
@@ -4730,7 +4790,7 @@
       ]
     },
     "rail/demand-worker.js": {
-      "sha256": "b3dbda7f33683123538d415d3eee288bdcdaca2548134bd53dd6a49a31cfa386",
+      "sha256": "9b19407e4af8632b545bf7e43b89c93efed1fb2ea3ac9a9e8c0c9f58695fa7f1",
       "role": "platform",
       "owner": "Rust task/revision/timeout/worker ownership",
       "phase": "P3-8",
@@ -6455,6 +6515,7 @@
             "rail/city-development.js",
             "rail/ridership.js",
             "rail/statistics-wasm.js",
+            "rail/ui-save-view.js",
             "rail/ui.js"
           ],
           "testReferenceCandidates": [],
@@ -10115,6 +10176,7 @@
             "rail/operations.js",
             "rail/passengers.js",
             "rail/shell-ui.js",
+            "rail/ui-save-view.js",
             "rail/ui.js",
             "rail/urban-growth.js"
           ],
@@ -10316,6 +10378,7 @@
             "rail/operations.js",
             "rail/passengers.js",
             "rail/runtime-wasm.js",
+            "rail/save-store.js",
             "rail/street-map.js",
             "rail/ui-dom.js",
             "rail/ui.js"
@@ -11612,7 +11675,7 @@
       ]
     },
     "rail/local-save.js": {
-      "sha256": "fbdceda13128aca4ba9e096ff27fd37a76517074bd4abd7402a76508141baad1",
+      "sha256": "f367bb4eb0879183e90df2be3ec0863b929cb5c0c443a4bd3693982adce534d5",
       "role": "platform",
       "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
       "phase": "P3-7 bridge",
@@ -11644,7 +11707,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 21,
-          "sha256": "0d9ca0fa57c15f7703c7b1f338f0cadf8b537cad8667657f204a524e26aa6bd2",
+          "sha256": "f166ccf9f5d71bbc860bd1f56cc0482500513529afd35f593ade0b78ed38633d",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -11714,7 +11777,7 @@
           "name": "errorMessage",
           "line": 4,
           "end": 16,
-          "sha256": "d4bacf8f1356f4c4d85411d8c62568453fc94be8117ca83d05a56fa386ea1e65",
+          "sha256": "812f650b00d9c7ffd0cbfdd2ea5c03de5c5006868c4a4aabdc541043dc3ef4d2",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -13225,6 +13288,7 @@
             "rail/statistics-wasm.js",
             "rail/ui-center-view.js",
             "rail/ui-line-view.js",
+            "rail/ui-save-view.js",
             "rail/ui.js",
             "rail/urban-growth.js"
           ],
@@ -13630,6 +13694,7 @@
             "rail/operations.js",
             "rail/passengers.js",
             "rail/shell-ui.js",
+            "rail/ui-save-view.js",
             "rail/ui.js",
             "rail/urban-growth.js"
           ],
@@ -15894,7 +15959,7 @@
       ]
     },
     "rail/operations-worker.js": {
-      "sha256": "957fed52b0be501ff36899ceeb9edd836be594efc5b1c25b761208e1abfb7a9c",
+      "sha256": "be3a8cf93cbc61a131526ef1903a2f3323d283d6b34648b4c1c084e369e2b815",
       "role": "platform",
       "owner": "Rust task/revision/timeout/worker ownership",
       "phase": "P3-8",
@@ -16572,6 +16637,7 @@
             "rail/metrics.js",
             "rail/passengers.js",
             "rail/shell-ui.js",
+            "rail/ui-save-view.js",
             "rail/ui.js",
             "rail/urban-growth.js"
           ],
@@ -17026,6 +17092,7 @@
             "rail/metrics.js",
             "rail/operations.js",
             "rail/shell-ui.js",
+            "rail/ui-save-view.js",
             "rail/ui.js",
             "rail/urban-growth.js"
           ],
@@ -19114,6 +19181,7 @@
             "rail/city-development.js",
             "rail/diagnostics-wasm.js",
             "rail/statistics-wasm.js",
+            "rail/ui-save-view.js",
             "rail/ui.js"
           ],
           "testReferenceCandidates": [],
@@ -19337,7 +19405,7 @@
       ]
     },
     "rail/routing-wasm.js": {
-      "sha256": "7af29d4f2b3f5b30a9209a2cd85602820f3523ac0be2b48ce5ef8c023747aa18",
+      "sha256": "3715c3dd931c762d2c3c39e7633a43a442960df147d9e161d563d935218ca371",
       "role": "domain",
       "owner": "Rust graph/forecast/directory/cache",
       "phase": "P3-2",
@@ -19410,7 +19478,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 465,
-          "sha256": "daadad23a6a8d3c13c1fd73eca2e16a278af5d7f38544ab72986f202799c8488",
+          "sha256": "c6bf9eb1f506aaf68367bf4f39dbb7d06337c78025cc9146fc93c4b132d54f1e",
           "scope": [],
           "role": "domain",
           "phase": "P3-2",
@@ -20686,7 +20754,7 @@
       ]
     },
     "rail/runtime-wasm.js": {
-      "sha256": "623d7bffff930dbba18735282e77094e359ba394b0f88f2d91b89c96f7080f1e",
+      "sha256": "b93950f606d5c5f222a1343cd8e5bf9ed160f2444649521dc3bc47dca34d5547",
       "role": "platform",
       "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
       "phase": "P3-8 bridge",
@@ -20716,6 +20784,7 @@
         "forecastQuery",
         "has",
         "idle",
+        "importForecastInput",
         "importWriteFailed",
         "intent",
         "isBusy",
@@ -20767,8 +20836,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 91,
-          "sha256": "21441e6fcbeef097515a90c42904dd795cddd867cedfa76bd2260aa7903a8495",
+          "end": 92,
+          "sha256": "cf75354c5236134119d442bd7d06cb237859e2539c7a0788629533d536b9dee4",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -21113,7 +21182,7 @@
           "name": "worker",
           "line": 12,
           "end": 39,
-          "sha256": "9b13fbcc736a7ebf922c3c72c76cbdf5c28562ba9ab8b2834602972bfd39d3f4",
+          "sha256": "8fdce269e73c0f483b0a2b4f9110ffb452687133f8071d24f9ac51014e761b8a",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -21136,7 +21205,7 @@
           "name": "createWorker",
           "line": 15,
           "end": 15,
-          "sha256": "f6991b43b868e625180d9bc598e1f0a3702e1bb6e7d28739d4b4756dded3dc28",
+          "sha256": "b0d690cba7d8432319d1ee393152fe7e27058afc3cfaed92fc521550ed04edc5",
           "scope": [
             "worker"
           ],
@@ -21794,7 +21863,7 @@
           "name": "request",
           "line": 87,
           "end": 87,
-          "sha256": "e40abff7380e9109cf9e4a83b8b2828d4e69747993041537e296e196a507e7dc",
+          "sha256": "47d8cbffd0beea499c7aa8dbd1c6759f9f0b2b842273c4b53f16cc0ccea2c1a9",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -21817,10 +21886,25 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/setDaily@88:0",
-          "name": "setDaily",
+          "id": "<iife>/detached@88:15",
+          "name": "detached",
           "line": 88,
           "end": 88,
+          "sha256": "8df9a1c6db2347b8b995e90eeecc08ac1d1bd1c939bf2e0fef55479824bd59a6",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-8 bridge",
+          "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/setDaily@89:0",
+          "name": "setDaily",
+          "line": 89,
+          "end": 89,
           "sha256": "c46d837f961ae6dc1c484fca5760036ee1e5f29ef612e4b9d539baf700f82e3f",
           "scope": [],
           "role": "platform",
@@ -21839,10 +21923,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/setDaily/<callback:88:135>@88:135",
-          "name": "<callback:88:135>",
-          "line": 88,
-          "end": 88,
+          "id": "<iife>/setDaily/<callback:89:135>@89:135",
+          "name": "<callback:89:135>",
+          "line": 89,
+          "end": 89,
           "sha256": "52121db348ce8afdde50162930ede22705cb0c43826d4fec7bddf09c640dac20",
           "scope": [
             "setDaily"
@@ -21856,10 +21940,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/dispatchRecommendation@89:34",
+          "id": "<iife>/dispatchRecommendation@90:34",
           "name": "dispatchRecommendation",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "e6691980cb16a165cd6ca0e7cc952511076366d724d93af86a470d2672c1d2ea",
           "scope": [],
           "role": "platform",
@@ -21875,10 +21959,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/checkpoint@89:122",
+          "id": "<iife>/checkpoint@90:122",
           "name": "checkpoint",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "fe36aa225a17178482f2659a140736439689c9e0047aeb3b9ea7094ede5ae243",
           "scope": [],
           "role": "platform",
@@ -21918,11 +22002,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/previewImport@89:204",
+          "id": "<iife>/previewImport@90:204",
           "name": "previewImport",
-          "line": 89,
-          "end": 89,
-          "sha256": "f48fa4cebc35cbd222edc70c4e5de12c125beb334233fa7f8552003060bd9de3",
+          "line": 90,
+          "end": 90,
+          "sha256": "2d65e19abef61a45dd7aded918c7f5a3d7594dbd558c5fefb455f0cf72ac5e9a",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -21937,10 +22021,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/previewImport/<callback:89:255>@89:255",
-          "name": "<callback:89:255>",
-          "line": 89,
-          "end": 89,
+          "id": "<iife>/previewImport/<callback:90:277>@90:277",
+          "name": "<callback:90:277>",
+          "line": 90,
+          "end": 90,
           "sha256": "e206e9af94cb36add6895f22ae4e344f0696edae52cc2f6cd645c33d12fce2d3",
           "scope": [
             "previewImport"
@@ -21954,11 +22038,30 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/prepareImport@89:287",
+          "id": "<iife>/importForecastInput@90:315",
+          "name": "importForecastInput",
+          "line": 90,
+          "end": 90,
+          "sha256": "8a66d7015531b37a978ea5a6fa48760599b2d04c4d0992b70bc21cc008aa88e4",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-8 bridge",
+          "owner": "Rust session/runtime/platform transport; JS handles, serialization and display copy application",
+          "exportNameCandidate": true,
+          "productionReferenceCandidates": [
+            "rail/ui.js"
+          ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_p3_regressions.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/prepareImport@90:392",
           "name": "prepareImport",
-          "line": 89,
-          "end": 89,
-          "sha256": "e269d41b97f6f6b95f8407b1b2feb428c8c492c4f28d47fd3f7fe897b92ca37f",
+          "line": 90,
+          "end": 90,
+          "sha256": "54258a9665d372c1f5b6e6960b62f290839a720bf8da2309c04cfdb86337b33b",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -21973,11 +22076,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/importWriteFailed@89:401",
+          "id": "<iife>/importWriteFailed@90:515",
           "name": "importWriteFailed",
-          "line": 89,
-          "end": 89,
-          "sha256": "0a6075f9bf4dfffbde803e36c4d3ea52ee641a45de3234473b8ac718ec218ef0",
+          "line": 90,
+          "end": 90,
+          "sha256": "f17a65c9207aab960ffe11b6a013972d9ab6e6810a9bed998a48fe22b65c8ed4",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -21992,11 +22095,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cancelImport@89:466",
+          "id": "<iife>/cancelImport@90:589",
           "name": "cancelImport",
-          "line": 89,
-          "end": 89,
-          "sha256": "676f565a5d4e2a48e25d83b7a538baf0eae967aef45177575e9cf3e43a3639a2",
+          "line": 90,
+          "end": 90,
+          "sha256": "7b86b02711d5f2fc7d3a8d348d41b12eb5a9274567805f346dfe020403eb4f63",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -22011,11 +22114,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/commitImport@89:526",
+          "id": "<iife>/commitImport@90:658",
           "name": "commitImport",
-          "line": 89,
-          "end": 89,
-          "sha256": "79e2cf387d1228c754b24e5cb5f39e21b489b4e61abed0dddd269fc36cc87533",
+          "line": 90,
+          "end": 90,
+          "sha256": "5b9fac272451d546870e654e2160a3df6d1dfef3982d559d50e15503d30d5dd3",
           "scope": [],
           "role": "platform",
           "phase": "P3-8 bridge",
@@ -22030,10 +22133,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/query@89:582",
+          "id": "<iife>/query@90:723",
           "name": "query",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "cd82535d33ef069c7c22258cbb8283b0f8127fe82a37070683a88ca3cffa76b3",
           "scope": [],
           "role": "platform",
@@ -22072,10 +22175,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/query/<callback:89:641>@89:641",
-          "name": "<callback:89:641>",
-          "line": 89,
-          "end": 89,
+          "id": "<iife>/query/<callback:90:782>@90:782",
+          "name": "<callback:90:782>",
+          "line": 90,
+          "end": 90,
           "sha256": "1cf5a866597cbf54333f0e40cac2ac0037a22a6dba69426ce64ce13fd635f9a7",
           "scope": [
             "query"
@@ -22089,10 +22192,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/querySync@89:672",
+          "id": "<iife>/querySync@90:813",
           "name": "querySync",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "4386cb15bd6ebebf0ffb91613756fe96e8fcc75287e3b5eb63d83845833a01e8",
           "scope": [],
           "role": "platform",
@@ -22110,10 +22213,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecastInvalidate@89:860",
+          "id": "<iife>/forecastInvalidate@90:1001",
           "name": "forecastInvalidate",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "e1dcf0b60f845f711500c6d74140fe6c68b03b668c79c1916d43bc978dc45673",
           "scope": [],
           "role": "platform",
@@ -22127,10 +22230,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecastBegin@89:911",
+          "id": "<iife>/forecastBegin@90:1052",
           "name": "forecastBegin",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "83a48602b2cdcc0e9eb9df7858ad9828d650b740dec465d1a1d02579f4f53720",
           "scope": [],
           "role": "platform",
@@ -22146,10 +22249,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecastFinish@89:1002",
+          "id": "<iife>/forecastFinish@90:1143",
           "name": "forecastFinish",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "beb7d1ca33d49a79e04bfa54c399737ab95ac43fb0cde18c4a8e5b7dd1a83a5e",
           "scope": [],
           "role": "platform",
@@ -22163,10 +22266,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnose@89:1091",
+          "id": "<iife>/diagnose@90:1232",
           "name": "diagnose",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "06354bfd976b1faa4cca1a4764b3133f3a901645892aea65c14a06ab876000a1",
           "scope": [],
           "role": "platform",
@@ -22180,10 +22283,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/observe@89:1142",
+          "id": "<iife>/observe@90:1283",
           "name": "observe",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "1197b23d6e2b173a0d8e20a8e6ff1eb62192e1239446bdbd4f336b77390b3a1a",
           "scope": [],
           "role": "platform",
@@ -22203,10 +22306,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/forecastQuery@89:1202",
+          "id": "<iife>/forecastQuery@90:1343",
           "name": "forecastQuery",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "0c227270fdf463ef970e953479bfc65571ec44d1aedbec25856d4ffb34691a9d",
           "scope": [],
           "role": "platform",
@@ -22220,10 +22323,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/command@89:1286",
+          "id": "<iife>/command@90:1427",
           "name": "command",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "5fbbb3f4844f36f576245b7f8c8d50b093c0ff90cc57e0c23c25ed8ed443828a",
           "scope": [],
           "role": "platform",
@@ -22248,10 +22351,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/preview@89:1360",
+          "id": "<iife>/preview@90:1501",
           "name": "preview",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "8f980782d2fd47f6a8119519d3915927124dd64bec459b3ac067f72e261a58d6",
           "scope": [],
           "role": "platform",
@@ -22275,10 +22378,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/undo@89:1415",
+          "id": "<iife>/undo@90:1556",
           "name": "undo",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "d0aebf9b32ef16879ebe2678f3eb59cc4e1511a4c594f0c74e2ec01ee3dae901",
           "scope": [],
           "role": "platform",
@@ -22293,10 +22396,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/editRevision@89:1511",
+          "id": "<iife>/editRevision@90:1652",
           "name": "editRevision",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "34bb69e2ef51750a31f554ab1a41675c590b7ffe6f4408efd51fa2f668c4c6ef",
           "scope": [],
           "role": "platform",
@@ -22312,10 +22415,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/credit@89:1552",
+          "id": "<iife>/credit@90:1693",
           "name": "credit",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "29da064ec9be15d716c2f269389b5bffdf1ce15f196a3a57defd4707ffb4eab5",
           "scope": [],
           "role": "platform",
@@ -22330,10 +22433,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/credit/<callback:89:1607>@89:1607",
-          "name": "<callback:89:1607>",
-          "line": 89,
-          "end": 89,
+          "id": "<iife>/credit/<callback:90:1748>@90:1748",
+          "name": "<callback:90:1748>",
+          "line": 90,
+          "end": 90,
           "sha256": "89c64fdfc40e4d9111730d2b1d05fa73bd7d626f900941691b7c139f0b30276b",
           "scope": [
             "credit"
@@ -22347,10 +22450,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/ready@89:1636",
+          "id": "<iife>/ready@90:1777",
           "name": "ready",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "06b004d8f3369f2c74e5f88c7bc5a1d8d9b3c06a79e2d36bf1117efa409514a7",
           "scope": [],
           "role": "platform",
@@ -22371,10 +22474,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/lastError@89:1692",
+          "id": "<iife>/lastError@90:1833",
           "name": "lastError",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "40432c68f6bc8e73ffa8a7b0177482021b83c425938ee629bd75cc069cefe2d8",
           "scope": [],
           "role": "platform",
@@ -22389,10 +22492,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/usesWorker@89:1741",
+          "id": "<iife>/usesWorker@90:1882",
           "name": "usesWorker",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "4deb825094141064454a664e5ea71a0b082e5e4e815953f43252d17db012356f",
           "scope": [],
           "role": "platform",
@@ -22412,10 +22515,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/has@89:1791",
+          "id": "<iife>/has@90:1932",
           "name": "has",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "e2575384360673b8c6d3051cbe86cb3e5e60a3fb6e240e4fbc2ecc35dcde2158",
           "scope": [],
           "role": "platform",
@@ -22450,10 +22553,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/materializeAsync@89:1885",
+          "id": "<iife>/materializeAsync@90:2026",
           "name": "materializeAsync",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "043b170f935a36f3ed9bc872721101061e8de2917baf071018354d3b9c8a2687",
           "scope": [],
           "role": "platform",
@@ -22472,10 +22575,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/materializeAsync/<callback:89:1930>@89:1930",
-          "name": "<callback:89:1930>",
-          "line": 89,
-          "end": 89,
+          "id": "<iife>/materializeAsync/<callback:90:2071>@90:2071",
+          "name": "<callback:90:2071>",
+          "line": 90,
+          "end": 90,
           "sha256": "ab664b8a51006756486c9b3a585bb23cc5ada558c1cb49268f6d784ccf94ad6f",
           "scope": [
             "materializeAsync"
@@ -22489,10 +22592,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/syncBank@89:1962",
+          "id": "<iife>/syncBank@90:2103",
           "name": "syncBank",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "cb5ff229340f9a5075ffc8e9d239712d092ec4a7bdb5e4e628441105911b5550",
           "scope": [],
           "role": "platform",
@@ -22504,10 +22607,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/idle@89:2039",
+          "id": "<iife>/idle@90:2180",
           "name": "idle",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "ba7d5eb68a22650ed41fbe22e36a17f0142f04bcd0b38379f501c8783ebb0fce",
           "scope": [],
           "role": "platform",
@@ -22522,10 +22625,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/isBusy@89:2091",
+          "id": "<iife>/isBusy@90:2232",
           "name": "isBusy",
-          "line": 89,
-          "end": 89,
+          "line": 90,
+          "end": 90,
           "sha256": "e11de0b5add87471d5187c61f267f104597f5ff6546620c79c1e6c0c0e099fa6",
           "scope": [],
           "role": "platform",
@@ -23007,7 +23110,7 @@
       ]
     },
     "rail/save-store.js": {
-      "sha256": "d5c58a6499a304dc9c51bcc151829df06f253bdd0fea6926e17cfaba49793a7d",
+      "sha256": "7aaa961610f75cdc74d28ef9d3574f1b69d19156456257768b076fa6f64a78a0",
       "role": "platform",
       "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
       "phase": "P3-7 bridge",
@@ -23022,12 +23125,12 @@
         {
           "kind": "require",
           "target": "rail/bootstrap-wasm.js",
-          "line": 63
+          "line": 81
         },
         {
           "kind": "require",
           "target": "rail/save-queue.js",
-          "line": 66
+          "line": 84
         }
       ],
       "functions": [
@@ -23035,8 +23138,8 @@
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 87,
-          "sha256": "d6fcd770c0095813a39d93ee5042d97a34910e530743715af5f8a63a2111d391",
+          "end": 139,
+          "sha256": "1257a234712d61e99db5c3bd39cb30853752ee3da3d90d492421528db0ea5f85",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -23050,8 +23153,8 @@
           "id": "<iife>/indexedAdapter@5:2",
           "name": "indexedAdapter",
           "line": 5,
-          "end": 61,
-          "sha256": "ebd84a74d276544f2e1c472fe99c666714dbd629025200c44ea4ffbf3ed11e24",
+          "end": 79,
+          "sha256": "d10629e5b048bf86e29dcf2262091214b05996c312df072d06e1fe2bf53fe2b9",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -23222,10 +23325,99 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/indexedAdapter/get@36:15",
+          "id": "<iife>/indexedAdapter/putMany@35:4",
+          "name": "putMany",
+          "line": 35,
+          "end": 62,
+          "sha256": "e2857b61d019fc34be2bf66045707c1dccc6f6720c8fd0eea7358c6f26730c21",
+          "scope": [
+            "indexedAdapter"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/indexedAdapter/putMany/<callback:37:25>@37:25",
+          "name": "<callback:37:25>",
+          "line": 37,
+          "end": 61,
+          "sha256": "213d30027943f8ed606e52c702f0157db3a159ce78bbc68b8e4e60bf4c99da0e",
+          "scope": [
+            "indexedAdapter",
+            "putMany"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/indexedAdapter/putMany/<callback:37:25>/oncomplete@40:22",
+          "name": "oncomplete",
+          "line": 40,
+          "end": 40,
+          "sha256": "1d849e9886051fe2dbee7f5d582add3c673a82b56674abf7d00965e0b17fa94a",
+          "scope": [
+            "indexedAdapter",
+            "putMany"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/indexedAdapter/putMany/<callback:37:25>/onabort@41:19",
+          "name": "onabort",
+          "line": 41,
+          "end": 41,
+          "sha256": "28a992755dd153b239cba395b53ed734e95b0dd241ff39ccd4ed9c911cef1234",
+          "scope": [
+            "indexedAdapter",
+            "putMany"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/indexedAdapter/putMany/<callback:37:25>/onsuccess@45:27",
+          "name": "onsuccess",
+          "line": 45,
+          "end": 55,
+          "sha256": "38b2db1c77b0b094153b2ecdc70f773ef512533fe87b2db0e848be8797eddac1",
+          "scope": [
+            "indexedAdapter",
+            "putMany"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/indexedAdapter/get@64:15",
           "name": "get",
-          "line": 36,
-          "end": 47,
+          "line": 64,
+          "end": 75,
           "sha256": "3a9bb2addb82216e29345f6b271965cee974431098a7907c777a5e98408dfe9f",
           "scope": [
             "indexedAdapter"
@@ -23287,10 +23479,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/indexedAdapter/get/<callback:38:27>@38:27",
-          "name": "<callback:38:27>",
-          "line": 38,
-          "end": 46,
+          "id": "<iife>/indexedAdapter/get/<callback:66:27>@66:27",
+          "name": "<callback:66:27>",
+          "line": 66,
+          "end": 74,
           "sha256": "df2356d428c4523c432b105ade863e2cbd4826ea89e797e442c9dfda472f38ac",
           "scope": [
             "indexedAdapter",
@@ -23305,10 +23497,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/indexedAdapter/get/<callback:38:27>/onsuccess@42:24",
+          "id": "<iife>/indexedAdapter/get/<callback:66:27>/onsuccess@70:24",
           "name": "onsuccess",
-          "line": 42,
-          "end": 42,
+          "line": 70,
+          "end": 70,
           "sha256": "c1f20bb8f3df0c8f68a06faa66a2ba9749adac078ba7d4e2fb042f09f4b3d2b5",
           "scope": [
             "indexedAdapter",
@@ -23323,10 +23515,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/indexedAdapter/get/<callback:38:27>/oncomplete@43:26",
+          "id": "<iife>/indexedAdapter/get/<callback:66:27>/oncomplete@71:26",
           "name": "oncomplete",
-          "line": 43,
-          "end": 43,
+          "line": 71,
+          "end": 71,
           "sha256": "232bf1f5a5d1995cc638437944f1120039bd34b8902d127090ba8281f2bf4be7",
           "scope": [
             "indexedAdapter",
@@ -23341,10 +23533,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/indexedAdapter/get/<callback:38:27>/onerror@44:23",
+          "id": "<iife>/indexedAdapter/get/<callback:66:27>/onerror@72:23",
           "name": "onerror",
-          "line": 44,
-          "end": 44,
+          "line": 72,
+          "end": 72,
           "sha256": "93a1f6e4552088d8f3749ecec1cb04a0503d0d7a3eb5eb0642685baa23456c43",
           "scope": [
             "indexedAdapter",
@@ -23365,10 +23557,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/indexedAdapter/get/<callback:38:27>/onabort@45:23",
+          "id": "<iife>/indexedAdapter/get/<callback:66:27>/onabort@73:23",
           "name": "onabort",
-          "line": 45,
-          "end": 45,
+          "line": 73,
+          "end": 73,
           "sha256": "f68d534404f46cf99e69305be349d80dcef53475bff8b6027043904f55bdc2d9",
           "scope": [
             "indexedAdapter",
@@ -23383,11 +23575,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/indexedAdapter/put@48:15",
+          "id": "<iife>/indexedAdapter/put@76:10",
           "name": "put",
-          "line": 48,
-          "end": 59,
-          "sha256": "033a0010e6f43acc10fe1e5fcd998e915904126d47a1e8117b3792aa060981f1",
+          "line": 76,
+          "end": 76,
+          "sha256": "e6584e0b5c6969567050f67d0a96287f7d1c972d5a1b20d109ee9e09cab49c42",
           "scope": [
             "indexedAdapter"
           ],
@@ -23402,106 +23594,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/indexedAdapter/put/<callback:50:27>@50:27",
-          "name": "<callback:50:27>",
-          "line": 50,
-          "end": 58,
-          "sha256": "1dc258f1db9b07f39a70c69309851fd27b36394acdd9df9c61f6529fccb2e3ea",
-          "scope": [
-            "indexedAdapter",
-            "put"
-          ],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/indexedAdapter/put/<callback:50:27>/onsuccess@54:25",
-          "name": "onsuccess",
-          "line": 54,
-          "end": 54,
-          "sha256": "37a55b87d0312319ef30420d9771c6a14df3f73d4ca9048b4d53f2a87a2fc79f",
-          "scope": [
-            "indexedAdapter",
-            "put"
-          ],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/indexedAdapter/put/<callback:50:27>/oncomplete@55:26",
-          "name": "oncomplete",
-          "line": 55,
-          "end": 55,
-          "sha256": "21af913c53b3de95635a7a43c83798b7a89163f5896c100c5721336894a13ae4",
-          "scope": [
-            "indexedAdapter",
-            "put"
-          ],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/indexedAdapter/put/<callback:50:27>/onerror@56:23",
-          "name": "onerror",
-          "line": 56,
-          "end": 56,
-          "sha256": "bcc42c2c4732b887db66c6d034d9f797b18eb38092da73b1ae6fada34ffa0b19",
-          "scope": [
-            "indexedAdapter",
-            "put"
-          ],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [
-            "rail/street-map.js",
-            "rail/vector-map.js",
-            "rail/worker-client.js"
-          ],
-          "testReferenceCandidates": [
-            "scripts/test_rail_map38.cjs"
-          ],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/indexedAdapter/put/<callback:50:27>/onabort@57:23",
-          "name": "onabort",
-          "line": 57,
-          "end": 57,
-          "sha256": "b15be38541fbdc8cb3c0f015c7cfcd2486abbbfe010ea5369d4211463f0f408c",
-          "scope": [
-            "indexedAdapter",
-            "put"
-          ],
-          "role": "platform",
-          "phase": "P3-7 bridge",
-          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/native@63:15",
+          "id": "<iife>/native@81:15",
           "name": "native",
-          "line": 63,
-          "end": 63,
+          "line": 81,
+          "end": 81,
           "sha256": "74e0c7da6b9fd38a27cdd6a15ef9273864d69bd803e306f1fb1a4155ca09554b",
           "scope": [],
           "role": "platform",
@@ -23526,11 +23622,11 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create@64:2",
+          "id": "<iife>/create@82:2",
           "name": "create",
-          "line": 64,
-          "end": 80,
-          "sha256": "ac26b195422331a6429514bce65808daf4e539483d94aefcec347cafa4f53239",
+          "line": 82,
+          "end": 132,
+          "sha256": "4cb25ca5b1b1717e5d25024294fb8c4b16661a1262eac48ad64e7c9402aadee1",
           "scope": [],
           "role": "platform",
           "phase": "P3-7 bridge",
@@ -23637,10 +23733,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/writes@66:17",
+          "id": "<iife>/create/writes@84:17",
           "name": "writes",
-          "line": 66,
-          "end": 66,
+          "line": 84,
+          "end": 84,
           "sha256": "f64c1869b523ce34e4c23f4755537b9264f0dc9efd5de3e497eb84242497eb9c",
           "scope": [
             "create"
@@ -23654,10 +23750,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/legacyRead@67:21",
+          "id": "<iife>/create/legacyRead@85:21",
           "name": "legacyRead",
-          "line": 67,
-          "end": 67,
+          "line": 85,
+          "end": 85,
           "sha256": "686a73169ec5a79e597d6ddb2fb57c25624f1abe6e2970a4a411a493d2f03814",
           "scope": [
             "create"
@@ -23671,10 +23767,27 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/read@68:4",
+          "id": "<iife>/create/replacementLegacy@86:4",
+          "name": "replacementLegacy",
+          "line": 86,
+          "end": 88,
+          "sha256": "8c2977c1abe4add521ca8dd442921f7f01e5053775ad8ce095834d8ef057a42b",
+          "scope": [
+            "create"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/create/read@89:4",
           "name": "read",
-          "line": 68,
-          "end": 68,
+          "line": 89,
+          "end": 89,
           "sha256": "12afb536c37a346239af99a5d3bd35a902d730bfc2ff232ce068d3f6f60e0aba",
           "scope": [
             "create"
@@ -23698,10 +23811,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/writeRecord@69:4",
+          "id": "<iife>/create/writeRecord@90:4",
           "name": "writeRecord",
-          "line": 69,
-          "end": 75,
+          "line": 90,
+          "end": 96,
           "sha256": "d11569757ac884c38117ac2a32dd7feac35977c4598e48c310f291b85e392dfc",
           "scope": [
             "create"
@@ -23717,10 +23830,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/writeRecord/<callback:69:77>@69:77",
-          "name": "<callback:69:77>",
-          "line": 69,
-          "end": 75,
+          "id": "<iife>/create/writeRecord/<callback:90:77>@90:77",
+          "name": "<callback:90:77>",
+          "line": 90,
+          "end": 96,
           "sha256": "d86958980482dbd311d42b77fc5765f2c623eb4a11ebbdfc1393fe205678b02f",
           "scope": [
             "create",
@@ -23735,10 +23848,102 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/write@76:4",
+          "id": "<iife>/create/replacementBase@97:4",
+          "name": "replacementBase",
+          "line": 97,
+          "end": 104,
+          "sha256": "5ed71115d97968f861e726e113736c4a75a7b1c963d38c032d2278fbc1702931",
+          "scope": [
+            "create"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [
+            "rail/ui.js"
+          ],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/create/writeReplacement@105:4",
+          "name": "writeReplacement",
+          "line": 105,
+          "end": 127,
+          "sha256": "e3f6dd2b0513ccf5f99956104e7ddc6be26a0988958aad0a7ebf82c55a70493a",
+          "scope": [
+            "create"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [
+            "rail/ui.js"
+          ],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/create/writeReplacement/<callback:106:30>@106:30",
+          "name": "<callback:106:30>",
+          "line": 106,
+          "end": 126,
+          "sha256": "bda2f9d70ca4d05e670a489963e711083bef0c180c3c33bf79ff49bceaaeb500",
+          "scope": [
+            "create",
+            "writeReplacement"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/create/writeReplacement/<callback:106:30>/<callback:107:50>@107:50",
+          "name": "<callback:107:50>",
+          "line": 107,
+          "end": 107,
+          "sha256": "8c66289160feee83f040d8a53746f822522903c9ce226f785a52b69b8b75c462",
+          "scope": [
+            "create",
+            "writeReplacement"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/create/writeReplacement/<callback:106:30>/<callback:108:31>@108:31",
+          "name": "<callback:108:31>",
+          "line": 108,
+          "end": 113,
+          "sha256": "0fc283dae45de516b6e0ff8ccf01094919cfb246a68a6128288e0460f8774ec1",
+          "scope": [
+            "create",
+            "writeReplacement"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/create/write@128:4",
           "name": "write",
-          "line": 76,
-          "end": 76,
+          "line": 128,
+          "end": 128,
           "sha256": "47462e1622d9b84bcb47968a2ac97003698b09cb02dcfdd73d2203c8e9e1786a",
           "scope": [
             "create"
@@ -23758,10 +23963,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/records@77:4",
+          "id": "<iife>/create/records@129:4",
           "name": "records",
-          "line": 77,
-          "end": 77,
+          "line": 129,
+          "end": 129,
           "sha256": "e52dd5a284f0003a2c6f5be1c80d8cbd8c0007ef3aefc5ba8fff0fade384e5e2",
           "scope": [
             "create"
@@ -23788,10 +23993,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/persistRecords@78:4",
+          "id": "<iife>/create/persistRecords@130:4",
           "name": "persistRecords",
-          "line": 78,
-          "end": 78,
+          "line": 130,
+          "end": 130,
           "sha256": "6997f767b138e8e728eb2f1e22893c443d052c9ba0b2466873d8c92a1a854bcc",
           "scope": [
             "create"
@@ -23807,10 +24012,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/flush@79:64",
+          "id": "<iife>/create/flush@131:97",
           "name": "flush",
-          "line": 79,
-          "end": 79,
+          "line": 131,
+          "end": 131,
           "sha256": "7e6d6245247a622a8c9530e738c78cd1f2c5642a375322da65a6436987c0bbbe",
           "scope": [
             "create"
@@ -23829,10 +24034,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/workerSerializer@81:2",
+          "id": "<iife>/workerSerializer@133:2",
           "name": "workerSerializer",
-          "line": 81,
-          "end": 81,
+          "line": 133,
+          "end": 133,
           "sha256": "8c4209fc650ecfacc2e550ac0779bcbc72fb6093d7a389864b6f507c6f5ceeef",
           "scope": [],
           "role": "platform",
@@ -23844,10 +24049,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/workerSerializer/<callback:81:37>@81:37",
-          "name": "<callback:81:37>",
-          "line": 81,
-          "end": 81,
+          "id": "<iife>/workerSerializer/<callback:133:37>@133:37",
+          "name": "<callback:133:37>",
+          "line": 133,
+          "end": 133,
           "sha256": "251affba2c4b395eed352cca56b422372f4e897ccb710e06b2f13cc2e753bb23",
           "scope": [
             "workerSerializer"
@@ -23963,7 +24168,7 @@
       ]
     },
     "rail/save-worker.js": {
-      "sha256": "774745b8b7b87d1680e7f323b6e264900d767a6d6214bf54302de0155fd6da0c",
+      "sha256": "ef71ff9d8fff72ef7b3e2b51207675cf28ddbcc0344a3f5f5d3c6ebab3de429b",
       "role": "platform",
       "owner": "Rust persistence codec, format, revision-bound import and save scheduler; JS IO/RPC only",
       "phase": "P3-7 bridge",
@@ -25375,7 +25580,7 @@
       "functions": []
     },
     "rail/simulation-worker.js": {
-      "sha256": "2c181cc2883aefc51b14ac211d7d168cd590cafad734c4c8339192a348ff7ea2",
+      "sha256": "5e2bb5026bbbd7a9c91270ab5e7956cbe69ef1c257410ab9ab1c9a04e8045ff6",
       "role": "platform",
       "owner": "Rust task/revision/timeout/worker ownership",
       "phase": "P3-8",
@@ -25429,7 +25634,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 44,
-          "sha256": "2ebc4e65195521ebf11467616577a6b0dba6d50bcc87580b66985b4b6aab0b1e",
+          "sha256": "5f185c363054a8cb268a7cdcde7809e2f8b847a964d5d7dea665599cf0b3bccb",
           "scope": [],
           "role": "platform",
           "phase": "P3-8",
@@ -25669,6 +25874,7 @@
             "rail/operations-center.js",
             "rail/operations-wasm.js",
             "rail/operations-worker.js",
+            "rail/save-store.js",
             "rail/ui-center-view.js",
             "rail/ui-stations-view.js",
             "rail/ui.js",
@@ -25879,6 +26085,7 @@
             "rail/diagnostics-wasm.js",
             "rail/history-wasm.js",
             "rail/operations-wasm.js",
+            "rail/ui-save-view.js",
             "rail/ui.js",
             "rail/vector-map.js",
             "rail/worker-client.js"
@@ -26040,6 +26247,7 @@
             "rail/diagnostics-wasm.js",
             "rail/history-wasm.js",
             "rail/operations-wasm.js",
+            "rail/ui-save-view.js",
             "rail/ui.js",
             "rail/vector-map.js",
             "rail/worker-client.js"
@@ -29724,10 +29932,10 @@
       ]
     },
     "rail/ui-save-view.js": {
-      "sha256": "f15fbf51af14f6c78cf9e52a63e3fd695bc626e769995c069f045181baead048",
-      "role": "mixed",
-      "owner": "Separate domain ViewModel queries from HTML",
-      "phase": "P3-8",
+      "sha256": "6a0f4938932c8acdf6a859e4de219c06802a9fa36bb82c4da2c788bfba79cc70",
+      "role": "ui",
+      "owner": "Formats native save summaries and renders the import preview",
+      "phase": "UI",
       "contexts": [
         "page"
       ],
@@ -29737,18 +29945,24 @@
       "exports": [
         "create"
       ],
-      "dependencies": [],
+      "dependencies": [
+        {
+          "kind": "require",
+          "target": "rail/bootstrap-wasm.js",
+          "line": 12
+        }
+      ],
       "functions": [
         {
           "id": "/<iife>@2:1",
           "name": "<iife>",
           "line": 2,
-          "end": 35,
-          "sha256": "2770fe46a23f7b6ffcf71de581ce337c7f2768a9be2835b89754dd3766181d31",
+          "end": 40,
+          "sha256": "9db8e9dea5d4ed0dbd5f69de4ad7e9440ddf67f08bde429eafe526547904bb42",
           "scope": [],
-          "role": "mixed",
-          "phase": "P3-8",
-          "owner": "Separate domain ViewModel queries from HTML",
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Formats native save summaries and renders the import preview",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
@@ -29758,12 +29972,12 @@
           "id": "<iife>/create@5:2",
           "name": "create",
           "line": 5,
-          "end": 29,
-          "sha256": "8014b058a53f7ff22152d360468ab2cde1ad2615a01511985c484e1348434ca5",
+          "end": 34,
+          "sha256": "6dc6f377c864511cc58a8d8ca0a809edb65e67460772be9d2f37a280c2b2edd3",
           "scope": [],
-          "role": "mixed",
-          "phase": "P3-8",
-          "owner": "Separate domain ViewModel queries from HTML",
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Formats native save summaries and renders the import preview",
           "exportNameCandidate": true,
           "productionReferenceCandidates": [
             "rail/bounded-cache.js",
@@ -29866,17 +30080,52 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/create/content@11:4",
-          "name": "content",
+          "id": "<iife>/create/summaryOf@11:4",
+          "name": "summaryOf",
           "line": 11,
-          "end": 24,
-          "sha256": "f91678eefac53454c6d97658da5d3d774bb30e2b71e233dd4a62f73c46a8aee4",
+          "end": 15,
+          "sha256": "af7c0bb78c87297eb2b6a19bbe81d4596db886ab097b549b029819121afcb427",
           "scope": [
             "create"
           ],
-          "role": "mixed",
-          "phase": "P3-8",
-          "owner": "Separate domain ViewModel queries from HTML",
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Formats native save summaries and renders the import preview",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/create/summaryOf/<callback:13:67>@13:67",
+          "name": "<callback:13:67>",
+          "line": 13,
+          "end": 13,
+          "sha256": "46b58dd7016422372625e6f2dd66f443d09af7a450e1945f9a679b2691c563d9",
+          "scope": [
+            "create",
+            "summaryOf"
+          ],
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Formats native save summaries and renders the import preview",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/create/content@16:4",
+          "name": "content",
+          "line": 16,
+          "end": 29,
+          "sha256": "53c8366d1639400cab9b5eb1322ac5df44a27a9ebc8e33c307299fbaee39d116",
+          "scope": [
+            "create"
+          ],
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Formats native save summaries and renders the import preview",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/review-view.js",
@@ -29889,42 +30138,6 @@
             "scripts/test_rail_map38.cjs",
             "scripts/test_rail_map39.cjs"
           ],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/create/content/<callback:23:244>@23:244",
-          "name": "<callback:23:244>",
-          "line": 23,
-          "end": 23,
-          "sha256": "3c68578a488ddfcb02f885b3b4d74156f5a7075c16bf193d5e0a93da662e6ccf",
-          "scope": [
-            "create",
-            "content"
-          ],
-          "role": "mixed",
-          "phase": "P3-8",
-          "owner": "Separate domain ViewModel queries from HTML",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
-          "disposition": "reviewed-migration-target; no dead-code inference"
-        },
-        {
-          "id": "<iife>/create/content/<callback:23:1197>@23:1197",
-          "name": "<callback:23:1197>",
-          "line": 23,
-          "end": 23,
-          "sha256": "3c68578a488ddfcb02f885b3b4d74156f5a7075c16bf193d5e0a93da662e6ccf",
-          "scope": [
-            "create",
-            "content"
-          ],
-          "role": "mixed",
-          "phase": "P3-8",
-          "owner": "Separate domain ViewModel queries from HTML",
-          "exportNameCandidate": false,
-          "productionReferenceCandidates": [],
-          "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         }
       ]
@@ -30225,7 +30438,7 @@
       ]
     },
     "rail/ui.js": {
-      "sha256": "0895eaa166ff9aecb309d1f085205b734039b16b439242733b5de144e31179b2",
+      "sha256": "ea1c7f7b8c046b7f9b7342f4fc7ed752fdb66152830e1e784fe34c1258beb088",
       "role": "mixed",
       "owner": "UI shell; all embedded domain orchestration moves to Rust",
       "phase": "P3-8",
@@ -30246,8 +30459,8 @@
           "id": "/<iife>@1:1",
           "name": "<iife>",
           "line": 1,
-          "end": 3556,
-          "sha256": "a34ee764e1cb1f7bb23a2c397b84fbeba8ef22fc9bff616ecb796628fd9c2da3",
+          "end": 3633,
+          "sha256": "9ac79a76b9559e46685c7c0557f1c129e7e04c6c726682688bec41deb45043a9",
           "scope": [],
           "role": "mixed",
           "phase": "P3-8",
@@ -30533,7 +30746,7 @@
           "name": "createDemandClient",
           "line": 226,
           "end": 245,
-          "sha256": "5a579a7bf6da50b38b0c320c5c8ae1aa0ac70c387d61b529bc0b6c06630eecc9",
+          "sha256": "23337ae6888f467201afb1dab88bc4905282f19dfc96b99a38a95254b33d7413",
           "scope": [],
           "role": "mixed",
           "phase": "P3-8",
@@ -30548,7 +30761,7 @@
           "name": "createWorker",
           "line": 228,
           "end": 228,
-          "sha256": "9d3ba7f83633efb086a09ddadbd97614c37a6d78f4e50a8c70863b24a335ab02",
+          "sha256": "b419702238fddfb909dbc92d1fa054785b7b2786446a70220eb9f6f419a6e3d9",
           "scope": [
             "createDemandClient"
           ],
@@ -30858,6 +31071,7 @@
             "rail/history-wasm.js",
             "rail/operations-wasm.js",
             "rail/statistics-wasm.js",
+            "rail/ui-save-view.js",
             "rail/vector-map.js",
             "rail/worker-client.js"
           ],
@@ -33642,8 +33856,8 @@
           "id": "<iife>/<callback:2463:39>@2463:39",
           "name": "<callback:2463:39>",
           "line": 2463,
-          "end": 2491,
-          "sha256": "cf93908c692690a30bc2dcab2722bfaf3a83c4ca90ce5a1f8aa952bd1a91c50d",
+          "end": 2492,
+          "sha256": "c20c4c9f5d83ad2dad95c4db66cab5488eeb71492cd23fdb28adcbc1eeffc530",
           "scope": [],
           "role": "mixed",
           "phase": "P3-8",
@@ -33654,10 +33868,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:2493:36>@2493:36",
-          "name": "<callback:2493:36>",
-          "line": 2493,
-          "end": 2496,
+          "id": "<iife>/<callback:2494:36>@2494:36",
+          "name": "<callback:2494:36>",
+          "line": 2494,
+          "end": 2497,
           "sha256": "e9ba818bde25c69484d392c252fefc67f43c53e6d3c7fa82d648427cd3982b48",
           "scope": [],
           "role": "mixed",
@@ -33669,10 +33883,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:2497:21>@2497:21",
-          "name": "<callback:2497:21>",
-          "line": 2497,
-          "end": 2497,
+          "id": "<iife>/<callback:2498:21>@2498:21",
+          "name": "<callback:2498:21>",
+          "line": 2498,
+          "end": 2498,
           "sha256": "f9129d3b3a9e21600642b4bd07cb24564d68ec408dcd07dd428719597d112717",
           "scope": [],
           "role": "mixed",
@@ -33684,10 +33898,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:2498:44>@2498:44",
-          "name": "<callback:2498:44>",
-          "line": 2498,
-          "end": 2501,
+          "id": "<iife>/<callback:2499:44>@2499:44",
+          "name": "<callback:2499:44>",
+          "line": 2499,
+          "end": 2502,
           "sha256": "a5961c5e9caa419b946cf2e741496d598fbf710c2bc6876e34a1b6bbce657c09",
           "scope": [],
           "role": "mixed",
@@ -33699,10 +33913,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:2502:48>@2502:48",
-          "name": "<callback:2502:48>",
-          "line": 2502,
-          "end": 2505,
+          "id": "<iife>/<callback:2503:48>@2503:48",
+          "name": "<callback:2503:48>",
+          "line": 2503,
+          "end": 2506,
           "sha256": "b4cc22e6fbc5d480435bb2aafdb191fbd0484610d3f3e460fea80c8ed169615e",
           "scope": [],
           "role": "mixed",
@@ -33714,10 +33928,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/frame@2508:2",
+          "id": "<iife>/frame@2509:2",
           "name": "frame",
-          "line": 2508,
-          "end": 2556,
+          "line": 2509,
+          "end": 2557,
           "sha256": "577214bb698528cd94e09fc7055ec4d2491e94fa289269c0081fc6fca281c47b",
           "scope": [],
           "role": "mixed",
@@ -33734,10 +33948,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/frame/<callback:2527:165>@2527:165",
-          "name": "<callback:2527:165>",
-          "line": 2527,
-          "end": 2527,
+          "id": "<iife>/frame/<callback:2528:165>@2528:165",
+          "name": "<callback:2528:165>",
+          "line": 2528,
+          "end": 2528,
           "sha256": "4e7484dbdd296c4e862eb47996e95feb88fdf00a83f331230cfb867c365e09e5",
           "scope": [
             "frame"
@@ -33751,10 +33965,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/frame/<callback:2527:337>@2527:337",
-          "name": "<callback:2527:337>",
-          "line": 2527,
-          "end": 2527,
+          "id": "<iife>/frame/<callback:2528:337>@2528:337",
+          "name": "<callback:2528:337>",
+          "line": 2528,
+          "end": 2528,
           "sha256": "f403b33a672f3939abcc73c70373245b9e337cd9fb32fa029b91a2ecd1e4a9d8",
           "scope": [
             "frame"
@@ -33768,10 +33982,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/frame/<callback:2549:47>@2549:47",
-          "name": "<callback:2549:47>",
-          "line": 2549,
-          "end": 2549,
+          "id": "<iife>/frame/<callback:2550:47>@2550:47",
+          "name": "<callback:2550:47>",
+          "line": 2550,
+          "end": 2550,
           "sha256": "bb692f126be0163786432dfefc317d37f9b3a1ab41a4ee6e275055df6f3e8e92",
           "scope": [
             "frame"
@@ -33785,10 +33999,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/resetCamera@2558:2",
+          "id": "<iife>/resetCamera@2559:2",
           "name": "resetCamera",
-          "line": 2558,
-          "end": 2562,
+          "line": 2559,
+          "end": 2563,
           "sha256": "0a77d3308ceac4f6a34f25e9d3d2c139785c6838121eeb55be2dcf3fa944df61",
           "scope": [],
           "role": "mixed",
@@ -33800,10 +34014,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/releaseCenterWorker@2565:2",
+          "id": "<iife>/releaseCenterWorker@2566:2",
           "name": "releaseCenterWorker",
-          "line": 2565,
-          "end": 2565,
+          "line": 2566,
+          "end": 2566,
           "sha256": "4294fc3b8596b0e8c0dcc0ef1140664aae1a9dc8ae84b267002fd4fc22b2491e",
           "scope": [],
           "role": "mixed",
@@ -33815,10 +34029,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/centerRows@2566:2",
+          "id": "<iife>/centerRows@2567:2",
           "name": "centerRows",
-          "line": 2566,
-          "end": 2570,
+          "line": 2567,
+          "end": 2571,
           "sha256": "d59232fa1b3c441f05bbbbae3062cc1a66d2b17368da1be5e36073b75fe4c8a2",
           "scope": [],
           "role": "mixed",
@@ -33830,10 +34044,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/requestCenter@2571:2",
+          "id": "<iife>/requestCenter@2572:2",
           "name": "requestCenter",
-          "line": 2571,
-          "end": 2579,
+          "line": 2572,
+          "end": 2580,
           "sha256": "5b3a91dde352df1520c405c15337dabb637b40131bca4148fa50f687c587d529",
           "scope": [],
           "role": "mixed",
@@ -33845,10 +34059,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/requestCenter/<callback:2573:13>@2573:13",
-          "name": "<callback:2573:13>",
-          "line": 2573,
-          "end": 2578,
+          "id": "<iife>/requestCenter/<callback:2574:13>@2574:13",
+          "name": "<callback:2574:13>",
+          "line": 2574,
+          "end": 2579,
           "sha256": "5dec4501758d0d3a783fd3b5afaeb3d3113c6e36af690d7550e39d4d4bd5c68c",
           "scope": [
             "requestCenter"
@@ -33862,10 +34076,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/requestCenter/<callback:2578:13>@2578:13",
-          "name": "<callback:2578:13>",
-          "line": 2578,
-          "end": 2578,
+          "id": "<iife>/requestCenter/<callback:2579:13>@2579:13",
+          "name": "<callback:2579:13>",
+          "line": 2579,
+          "end": 2579,
           "sha256": "e8d570c613b9fd1edf3e90171aef6aa5eb3b584bce4ca706fa984ed03648f313",
           "scope": [
             "requestCenter"
@@ -33879,10 +34093,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/patchCenterPanel@2581:2",
+          "id": "<iife>/patchCenterPanel@2582:2",
           "name": "patchCenterPanel",
-          "line": 2581,
-          "end": 2612,
+          "line": 2582,
+          "end": 2613,
           "sha256": "b068e88f2bcad0e64f81cc4edbd373e9a91e28d57ed094510e398706778c399e",
           "scope": [],
           "role": "mixed",
@@ -33894,10 +34108,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/patchCenterPanel/<callback:2601:39>@2601:39",
-          "name": "<callback:2601:39>",
-          "line": 2601,
-          "end": 2602,
+          "id": "<iife>/patchCenterPanel/<callback:2602:39>@2602:39",
+          "name": "<callback:2602:39>",
+          "line": 2602,
+          "end": 2603,
           "sha256": "4fc8473e3869f94ebf6f4e4629c918c593d7b03de4d6b1b2e3b399b13479baec",
           "scope": [
             "patchCenterPanel"
@@ -33911,10 +34125,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/centerMatch@2614:2",
+          "id": "<iife>/centerMatch@2615:2",
           "name": "centerMatch",
-          "line": 2614,
-          "end": 2616,
+          "line": 2615,
+          "end": 2617,
           "sha256": "5feab59f1f750b8e64ca53b51a48dab4d99b39aed0ebe3ae92a0c257da598a77",
           "scope": [],
           "role": "mixed",
@@ -33928,10 +34142,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/filterCenter@2618:2",
+          "id": "<iife>/filterCenter@2619:2",
           "name": "filterCenter",
-          "line": 2618,
-          "end": 2628,
+          "line": 2619,
+          "end": 2629,
           "sha256": "01ac7dc0f70b91adbe59f5ea3311186c07c8983f6ee4ddbecb6f5706f8e8ec4d",
           "scope": [],
           "role": "mixed",
@@ -33943,10 +34157,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/filterCenter/<callback:2621:28>@2621:28",
-          "name": "<callback:2621:28>",
-          "line": 2621,
-          "end": 2621,
+          "id": "<iife>/filterCenter/<callback:2622:28>@2622:28",
+          "name": "<callback:2622:28>",
+          "line": 2622,
+          "end": 2622,
           "sha256": "d214a20ff56ea0784eb7288a351e8530ae1bd521953f2b816fe3933231f10444",
           "scope": [
             "filterCenter"
@@ -33960,10 +34174,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/centerEvidence@2630:2",
+          "id": "<iife>/centerEvidence@2631:2",
           "name": "centerEvidence",
-          "line": 2630,
-          "end": 2632,
+          "line": 2631,
+          "end": 2633,
           "sha256": "4a6452d56e81f866f5972f736ce15fd565636f1ba357c5dbf973e48a18c744b1",
           "scope": [],
           "role": "mixed",
@@ -33975,10 +34189,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:2633:38>@2633:38",
-          "name": "<callback:2633:38>",
-          "line": 2633,
-          "end": 2639,
+          "id": "<iife>/<callback:2634:38>@2634:38",
+          "name": "<callback:2634:38>",
+          "line": 2634,
+          "end": 2640,
           "sha256": "0b77deef20b09b64016baf3f972eb12225a3f1571e83d52364a47b79257f7991",
           "scope": [],
           "role": "mixed",
@@ -33990,10 +34204,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:2633:38>/<callback:2636:42>@2636:42",
-          "name": "<callback:2636:42>",
-          "line": 2636,
-          "end": 2636,
+          "id": "<iife>/<callback:2634:38>/<callback:2637:42>@2637:42",
+          "name": "<callback:2637:42>",
+          "line": 2637,
+          "end": 2637,
           "sha256": "343457ae7b870a61f84bb8dd7b772d70a802f50a32216688812c7496dcc6f9aa",
           "scope": [],
           "role": "mixed",
@@ -34005,10 +34219,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview@2641:2",
+          "id": "<iife>/renderOverview@2642:2",
           "name": "renderOverview",
-          "line": 2641,
-          "end": 2689,
+          "line": 2642,
+          "end": 2690,
           "sha256": "dc5a7fc7c203cac0b06feff793dcdf70445588875d169d66d40ef0076ffa5a22",
           "scope": [],
           "role": "mixed",
@@ -34020,10 +34234,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2646:70>@2646:70",
-          "name": "<callback:2646:70>",
-          "line": 2646,
-          "end": 2647,
+          "id": "<iife>/renderOverview/<callback:2647:70>@2647:70",
+          "name": "<callback:2647:70>",
+          "line": 2647,
+          "end": 2648,
           "sha256": "537563a07c49444b2fcd61ecc20445ae2badf1f7e77232feabc679546cb94c8c",
           "scope": [
             "renderOverview"
@@ -34037,10 +34251,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2651:45>@2651:45",
-          "name": "<callback:2651:45>",
-          "line": 2651,
-          "end": 2651,
+          "id": "<iife>/renderOverview/<callback:2652:45>@2652:45",
+          "name": "<callback:2652:45>",
+          "line": 2652,
+          "end": 2652,
           "sha256": "bb692f126be0163786432dfefc317d37f9b3a1ab41a4ee6e275055df6f3e8e92",
           "scope": [
             "renderOverview"
@@ -34054,10 +34268,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2663:25>@2663:25",
-          "name": "<callback:2663:25>",
-          "line": 2663,
-          "end": 2663,
+          "id": "<iife>/renderOverview/<callback:2664:25>@2664:25",
+          "name": "<callback:2664:25>",
+          "line": 2664,
+          "end": 2664,
           "sha256": "7ecbce072701c43a81a8d0616d308fd8c4da41e1e66ae01178c97d5547e86235",
           "scope": [
             "renderOverview"
@@ -34071,10 +34285,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2663:25>/<callback:2663:49>@2663:49",
-          "name": "<callback:2663:49>",
-          "line": 2663,
-          "end": 2663,
+          "id": "<iife>/renderOverview/<callback:2664:25>/<callback:2664:49>@2664:49",
+          "name": "<callback:2664:49>",
+          "line": 2664,
+          "end": 2664,
           "sha256": "8e0b467fb0548643f7959b50f75a3ddf11f049f2882f57e8bd13e5fc3fa687d1",
           "scope": [
             "renderOverview"
@@ -34088,10 +34302,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2664:28>@2664:28",
-          "name": "<callback:2664:28>",
-          "line": 2664,
-          "end": 2664,
+          "id": "<iife>/renderOverview/<callback:2665:28>@2665:28",
+          "name": "<callback:2665:28>",
+          "line": 2665,
+          "end": 2665,
           "sha256": "0a5927c2697f96c85435ec9b93a96a6b3e76df2af2fa6b8d11a185fc5880ecb5",
           "scope": [
             "renderOverview"
@@ -34105,10 +34319,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2664:28>/<callback:2664:52>@2664:52",
-          "name": "<callback:2664:52>",
-          "line": 2664,
-          "end": 2664,
+          "id": "<iife>/renderOverview/<callback:2665:28>/<callback:2665:52>@2665:52",
+          "name": "<callback:2665:52>",
+          "line": 2665,
+          "end": 2665,
           "sha256": "02462ac9b7a87b3b23ee00030aa6db1dab56948715079052d9c913689b6f485e",
           "scope": [
             "renderOverview"
@@ -34122,10 +34336,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2665:29>@2665:29",
-          "name": "<callback:2665:29>",
-          "line": 2665,
-          "end": 2666,
+          "id": "<iife>/renderOverview/<callback:2666:29>@2666:29",
+          "name": "<callback:2666:29>",
+          "line": 2666,
+          "end": 2667,
           "sha256": "f52f042d816d97cf3ffe10206a12724912d7f12cf12071f0088e7c301b7ae5c7",
           "scope": [
             "renderOverview"
@@ -34139,10 +34353,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2665:29>/<callback:2665:53>@2665:53",
-          "name": "<callback:2665:53>",
-          "line": 2665,
-          "end": 2666,
+          "id": "<iife>/renderOverview/<callback:2666:29>/<callback:2666:53>@2666:53",
+          "name": "<callback:2666:53>",
+          "line": 2666,
+          "end": 2667,
           "sha256": "b2bafdca7094742ac3e9439f5d9a51dd5fdbcd6ac68365fcf9d079dd096f9e6e",
           "scope": [
             "renderOverview"
@@ -34156,10 +34370,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2667:31>@2667:31",
-          "name": "<callback:2667:31>",
-          "line": 2667,
-          "end": 2667,
+          "id": "<iife>/renderOverview/<callback:2668:31>@2668:31",
+          "name": "<callback:2668:31>",
+          "line": 2668,
+          "end": 2668,
           "sha256": "1ccd65e8c7bacb9e3d5765c9fe9fdd4d5dc966210969619e9325f584de116275",
           "scope": [
             "renderOverview"
@@ -34173,10 +34387,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2669:37>@2669:37",
-          "name": "<callback:2669:37>",
-          "line": 2669,
-          "end": 2669,
+          "id": "<iife>/renderOverview/<callback:2670:37>@2670:37",
+          "name": "<callback:2670:37>",
+          "line": 2670,
+          "end": 2670,
           "sha256": "652c5247d9829305e7ebbc11430efd928140c6f4666df35f555e9c87374b0dfa",
           "scope": [
             "renderOverview"
@@ -34190,10 +34404,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderOverview/<callback:2670:39>@2670:39",
-          "name": "<callback:2670:39>",
-          "line": 2670,
-          "end": 2670,
+          "id": "<iife>/renderOverview/<callback:2671:39>@2671:39",
+          "name": "<callback:2671:39>",
+          "line": 2671,
+          "end": 2671,
           "sha256": "94913457e6c2323a066fe809fbaf340a6a41d6d9e18c071ad5c5d9473dbecfcf",
           "scope": [
             "renderOverview"
@@ -34207,10 +34421,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/centerApply@2690:2",
+          "id": "<iife>/centerApply@2691:2",
           "name": "centerApply",
-          "line": 2690,
-          "end": 2706,
+          "line": 2691,
+          "end": 2707,
           "sha256": "16ed473d554762c509f12fc6b99096998f4a43710bfa7364d7382da282341de9",
           "scope": [],
           "role": "mixed",
@@ -34222,10 +34436,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/centerApply/<callback:2692:34>@2692:34",
-          "name": "<callback:2692:34>",
-          "line": 2692,
-          "end": 2692,
+          "id": "<iife>/centerApply/<callback:2693:34>@2693:34",
+          "name": "<callback:2693:34>",
+          "line": 2693,
+          "end": 2693,
           "sha256": "819ff9ecf8499caf4b84bb61bf65cb263b584c9b93c750d76fcfd06ccd0fe1df",
           "scope": [
             "centerApply"
@@ -34239,10 +34453,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/centerApply/<callback:2694:29>@2694:29",
-          "name": "<callback:2694:29>",
-          "line": 2694,
-          "end": 2694,
+          "id": "<iife>/centerApply/<callback:2695:29>@2695:29",
+          "name": "<callback:2695:29>",
+          "line": 2695,
+          "end": 2695,
           "sha256": "97d7aedbc33221560ad6123e41c4c4311f6e910e67929f3a3a4dac4af0f1747b",
           "scope": [
             "centerApply"
@@ -34256,10 +34470,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/prepareCenterPattern@2708:2",
+          "id": "<iife>/prepareCenterPattern@2709:2",
           "name": "prepareCenterPattern",
-          "line": 2708,
-          "end": 2727,
+          "line": 2709,
+          "end": 2728,
           "sha256": "cf813b92d62cf542c3989d455dfba4875746797e397a80db28599f5e55c8f642",
           "scope": [],
           "role": "mixed",
@@ -34271,10 +34485,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/prepareCenterPattern/<callback:2709:34>@2709:34",
-          "name": "<callback:2709:34>",
-          "line": 2709,
-          "end": 2709,
+          "id": "<iife>/prepareCenterPattern/<callback:2710:34>@2710:34",
+          "name": "<callback:2710:34>",
+          "line": 2710,
+          "end": 2710,
           "sha256": "4a785e9dafbdec5fbe709bb096cb60113da076db70649fca5fd5a0cf88669a92",
           "scope": [
             "prepareCenterPattern"
@@ -34288,10 +34502,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/prepareCenterPattern/<callback:2710:37>@2710:37",
-          "name": "<callback:2710:37>",
-          "line": 2710,
-          "end": 2710,
+          "id": "<iife>/prepareCenterPattern/<callback:2711:37>@2711:37",
+          "name": "<callback:2711:37>",
+          "line": 2711,
+          "end": 2711,
           "sha256": "6645c22e76f078e8ce73f9f206b8008f5627682e05c3d62693d02457f7f296c7",
           "scope": [
             "prepareCenterPattern"
@@ -34305,10 +34519,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/prepareCenterPattern/<callback:2712:31>@2712:31",
-          "name": "<callback:2712:31>",
-          "line": 2712,
-          "end": 2712,
+          "id": "<iife>/prepareCenterPattern/<callback:2713:31>@2713:31",
+          "name": "<callback:2713:31>",
+          "line": 2713,
+          "end": 2713,
           "sha256": "b4cf99477ef4a9da33ecf26c598da94afa69e55d7f00d5ba2b656779bcf44610",
           "scope": [
             "prepareCenterPattern"
@@ -34322,10 +34536,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/reviewContent@2732:2",
+          "id": "<iife>/reviewContent@2733:2",
           "name": "reviewContent",
-          "line": 2732,
-          "end": 2734,
+          "line": 2733,
+          "end": 2735,
           "sha256": "9c37a3007fd057cb307e1d06791c5dd735425ba1b65571ee8361ae2520109dbd",
           "scope": [],
           "role": "mixed",
@@ -34339,10 +34553,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/reviewPulse@2736:2",
+          "id": "<iife>/reviewPulse@2737:2",
           "name": "reviewPulse",
-          "line": 2736,
-          "end": 2738,
+          "line": 2737,
+          "end": 2739,
           "sha256": "6fd3992e9887e30457eeb23788e9d043dbfac56c9c7a7dcc5b0b064e87569fbd",
           "scope": [],
           "role": "domain",
@@ -34356,10 +34570,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/stationForecast@2743:2",
+          "id": "<iife>/stationForecast@2744:2",
           "name": "stationForecast",
-          "line": 2743,
-          "end": 2779,
+          "line": 2744,
+          "end": 2780,
           "sha256": "e9bf6f1da8b4498eb039f2f21e04afdf184206cbaefc313b4fb5ff9193532441",
           "scope": [],
           "role": "domain",
@@ -34371,10 +34585,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/stationForecast/<callback:2747:99>@2747:99",
-          "name": "<callback:2747:99>",
-          "line": 2747,
-          "end": 2747,
+          "id": "<iife>/stationForecast/<callback:2748:99>@2748:99",
+          "name": "<callback:2748:99>",
+          "line": 2748,
+          "end": 2748,
           "sha256": "7dd9cc2e6290d003495577ab8b078a90afe21b13181ea18a5d1097fe57bdc3b6",
           "scope": [
             "stationForecast"
@@ -34388,10 +34602,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/stationForecast/<callback:2747:398>@2747:398",
-          "name": "<callback:2747:398>",
-          "line": 2747,
-          "end": 2747,
+          "id": "<iife>/stationForecast/<callback:2748:398>@2748:398",
+          "name": "<callback:2748:398>",
+          "line": 2748,
+          "end": 2748,
           "sha256": "d7989b6670dd8b391914cd54e19c65dad5e501faa6a8a65db7b8becccdc5e1ed",
           "scope": [
             "stationForecast"
@@ -34405,10 +34619,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/stationForecast/<callback:2747:453>@2747:453",
-          "name": "<callback:2747:453>",
-          "line": 2747,
-          "end": 2747,
+          "id": "<iife>/stationForecast/<callback:2748:453>@2748:453",
+          "name": "<callback:2748:453>",
+          "line": 2748,
+          "end": 2748,
           "sha256": "4fa75f898e4ef65a9fb60395c4bf5253487c9944339a087ecfc3f98b10a490fc",
           "scope": [
             "stationForecast"
@@ -34422,10 +34636,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/capacityNote@2781:2",
+          "id": "<iife>/capacityNote@2782:2",
           "name": "capacityNote",
-          "line": 2781,
-          "end": 2784,
+          "line": 2782,
+          "end": 2785,
           "sha256": "3eb36dcaf732aa136c693d1907f13d945bd600c58073a1acc90e7e5de2174511",
           "scope": [],
           "role": "domain",
@@ -34437,10 +34651,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/memoryDiagnostics@2786:2",
+          "id": "<iife>/memoryDiagnostics@2787:2",
           "name": "memoryDiagnostics",
-          "line": 2786,
-          "end": 2794,
+          "line": 2787,
+          "end": 2795,
           "sha256": "530dc9ba7ade62817dbe3c85af5fa0406d283c881a383cde22aba43be2682e7b",
           "scope": [],
           "role": "mixed",
@@ -34452,10 +34666,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/memoryDiagnostics/mb@2791:15",
+          "id": "<iife>/memoryDiagnostics/mb@2792:15",
           "name": "mb",
-          "line": 2791,
-          "end": 2792,
+          "line": 2792,
+          "end": 2793,
           "sha256": "e8f960507f1c92fbf4740040209b80962f8026bc9848da107c269f8271bab56b",
           "scope": [
             "memoryDiagnostics"
@@ -34469,10 +34683,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnosticContent@2796:2",
+          "id": "<iife>/diagnosticContent@2797:2",
           "name": "diagnosticContent",
-          "line": 2796,
-          "end": 2810,
+          "line": 2797,
+          "end": 2811,
           "sha256": "98312ceb54ba02660e98a3fbba03582662e3498c17edaf3649b6d8e9f619b97a",
           "scope": [],
           "role": "mixed",
@@ -34484,10 +34698,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnosticContent/<callback:2799:31>@2799:31",
-          "name": "<callback:2799:31>",
-          "line": 2799,
-          "end": 2799,
+          "id": "<iife>/diagnosticContent/<callback:2800:31>@2800:31",
+          "name": "<callback:2800:31>",
+          "line": 2800,
+          "end": 2800,
           "sha256": "bdc0255156f8bd74fc482a2be55d911caf82647aefc17c81983d69c3d9e94182",
           "scope": [
             "diagnosticContent"
@@ -34501,10 +34715,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnosticContent/<callback:2800:30>@2800:30",
-          "name": "<callback:2800:30>",
-          "line": 2800,
-          "end": 2800,
+          "id": "<iife>/diagnosticContent/<callback:2801:30>@2801:30",
+          "name": "<callback:2801:30>",
+          "line": 2801,
+          "end": 2801,
           "sha256": "0337acebeef19d6f9cca9c0cfd084e08308cf66fcd71b9399e40f0c4342886e5",
           "scope": [
             "diagnosticContent"
@@ -34518,10 +34732,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnosticContent/<callback:2801:35>@2801:35",
-          "name": "<callback:2801:35>",
-          "line": 2801,
-          "end": 2804,
+          "id": "<iife>/diagnosticContent/<callback:2802:35>@2802:35",
+          "name": "<callback:2802:35>",
+          "line": 2802,
+          "end": 2805,
           "sha256": "a1f907dcfea04a9251400a2b51023e320ad1a5f3b23485096b23a55f09fb546a",
           "scope": [
             "diagnosticContent"
@@ -34535,10 +34749,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnosticContent/<callback:2804:15>@2804:15",
-          "name": "<callback:2804:15>",
-          "line": 2804,
-          "end": 2804,
+          "id": "<iife>/diagnosticContent/<callback:2805:15>@2805:15",
+          "name": "<callback:2805:15>",
+          "line": 2805,
+          "end": 2805,
           "sha256": "167c2e8b00e571e48c555922a50ce9629e1129191cf683d5999c38d3d4b3c274",
           "scope": [
             "diagnosticContent"
@@ -34552,10 +34766,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnosticContent/<callback:2809:1128>@2809:1128",
-          "name": "<callback:2809:1128>",
-          "line": 2809,
-          "end": 2809,
+          "id": "<iife>/diagnosticContent/<callback:2810:1128>@2810:1128",
+          "name": "<callback:2810:1128>",
+          "line": 2810,
+          "end": 2810,
           "sha256": "993f5dfd429f41a767a14c05286bc6ab5c94b93783d8fada961cefbd16232f3e",
           "scope": [
             "diagnosticContent"
@@ -34569,10 +34783,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/diagnosticContent/<callback:2809:1264>@2809:1264",
-          "name": "<callback:2809:1264>",
-          "line": 2809,
-          "end": 2809,
+          "id": "<iife>/diagnosticContent/<callback:2810:1264>@2810:1264",
+          "name": "<callback:2810:1264>",
+          "line": 2810,
+          "end": 2810,
           "sha256": "1e21feb40f5331b5533356b82bb27962b1782b01d7ba9157fe328484c23bfb30",
           "scope": [
             "diagnosticContent"
@@ -34586,10 +34800,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/dailyContent@2812:2",
+          "id": "<iife>/dailyContent@2813:2",
           "name": "dailyContent",
-          "line": 2812,
-          "end": 2815,
+          "line": 2813,
+          "end": 2816,
           "sha256": "57d3eaa942153e9f7b1c28f468ee75e91b09014e16bae99f218d0f8c0819f719",
           "scope": [],
           "role": "mixed",
@@ -34601,10 +34815,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/dailyContent/<callback:2814:802>@2814:802",
-          "name": "<callback:2814:802>",
-          "line": 2814,
-          "end": 2814,
+          "id": "<iife>/dailyContent/<callback:2815:802>@2815:802",
+          "name": "<callback:2815:802>",
+          "line": 2815,
+          "end": 2815,
           "sha256": "b2ab662c0f4543dbb051ed242a0c3c41910cb0bf33f9dc601affca45ddeaf266",
           "scope": [
             "dailyContent"
@@ -34618,10 +34832,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/achievementContent@2817:2",
+          "id": "<iife>/achievementContent@2818:2",
           "name": "achievementContent",
-          "line": 2817,
-          "end": 2828,
+          "line": 2818,
+          "end": 2829,
           "sha256": "e6a718ca81de00ccc21c492ed9e14f33ce947bf3b55bf390b2f8277fe0f2505b",
           "scope": [],
           "role": "mixed",
@@ -34633,10 +34847,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/achievementContent/<callback:2819:24>@2819:24",
-          "name": "<callback:2819:24>",
-          "line": 2819,
-          "end": 2819,
+          "id": "<iife>/achievementContent/<callback:2820:24>@2820:24",
+          "name": "<callback:2820:24>",
+          "line": 2820,
+          "end": 2820,
           "sha256": "5e85d0cf89fef29f32a9505dc451ddd9d3143c26da87a4dfdaef2c38765fc149",
           "scope": [
             "achievementContent"
@@ -34650,10 +34864,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/achievementContent/<callback:2820:25>@2820:25",
-          "name": "<callback:2820:25>",
-          "line": 2820,
-          "end": 2821,
+          "id": "<iife>/achievementContent/<callback:2821:25>@2821:25",
+          "name": "<callback:2821:25>",
+          "line": 2821,
+          "end": 2822,
           "sha256": "e3659c572868e69784d54b167963068d08469af11ee3a21f4ed49cfa2135af72",
           "scope": [
             "achievementContent"
@@ -34667,10 +34881,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/achievementContent/format@2822:15",
+          "id": "<iife>/achievementContent/format@2823:15",
           "name": "format",
-          "line": 2822,
-          "end": 2826,
+          "line": 2823,
+          "end": 2827,
           "sha256": "d6566d128cc78a530146a42a47bf9afbbdee3ad239199d6556c3a35990d33685",
           "scope": [
             "achievementContent"
@@ -34690,10 +34904,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/achievementContent/<callback:2827:293>@2827:293",
-          "name": "<callback:2827:293>",
-          "line": 2827,
-          "end": 2827,
+          "id": "<iife>/achievementContent/<callback:2828:293>@2828:293",
+          "name": "<callback:2828:293>",
+          "line": 2828,
+          "end": 2828,
           "sha256": "0c4027050bddeb41ad8239c37221485d5dd5675fa69d8d0e0a798ec167675e88",
           "scope": [
             "achievementContent"
@@ -34707,10 +34921,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/achievementContent/<callback:2827:452>@2827:452",
-          "name": "<callback:2827:452>",
-          "line": 2827,
-          "end": 2827,
+          "id": "<iife>/achievementContent/<callback:2828:452>@2828:452",
+          "name": "<callback:2828:452>",
+          "line": 2828,
+          "end": 2828,
           "sha256": "a21e1cfcaaaf2982218af5f2f9d08ac7b343016be52ae1d512e98a96233c29e9",
           "scope": [
             "achievementContent"
@@ -34724,10 +34938,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/legacyRecordDetails@2830:2",
+          "id": "<iife>/legacyRecordDetails@2831:2",
           "name": "legacyRecordDetails",
-          "line": 2830,
-          "end": 2836,
+          "line": 2831,
+          "end": 2837,
           "sha256": "46ffcebe245fbe0b7e9b3c077cef9fc500232c4fe9f4857f2fb64d8699a862d1",
           "scope": [],
           "role": "mixed",
@@ -34739,10 +34953,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/legacyRecordDetails/<callback:2834:36>@2834:36",
-          "name": "<callback:2834:36>",
-          "line": 2834,
-          "end": 2834,
+          "id": "<iife>/legacyRecordDetails/<callback:2835:36>@2835:36",
+          "name": "<callback:2835:36>",
+          "line": 2835,
+          "end": 2835,
           "sha256": "7b0875e81452363a6edafc4dbdde9488c93a3cb3b3ddde857b388d17ce779639",
           "scope": [
             "legacyRecordDetails"
@@ -34756,10 +34970,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/legacyRecordDetails/<callback:2835:562>@2835:562",
-          "name": "<callback:2835:562>",
-          "line": 2835,
-          "end": 2835,
+          "id": "<iife>/legacyRecordDetails/<callback:2836:562>@2836:562",
+          "name": "<callback:2836:562>",
+          "line": 2836,
+          "end": 2836,
           "sha256": "430dbc58d9105baa8be4eaf82d1cbd4103595f4d505b7393cfac0a912e48fed9",
           "scope": [
             "legacyRecordDetails"
@@ -34773,10 +34987,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowTime@2846:19",
+          "id": "<iife>/flowTime@2847:19",
           "name": "flowTime",
-          "line": 2846,
-          "end": 2847,
+          "line": 2847,
+          "end": 2848,
           "sha256": "be9bac917d9ea8346f52e1584e1b84532b1b851869c738a2d757a2129df0094a",
           "scope": [],
           "role": "mixed",
@@ -34788,10 +35002,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowReadout@2849:2",
+          "id": "<iife>/flowReadout@2850:2",
           "name": "flowReadout",
-          "line": 2849,
-          "end": 2855,
+          "line": 2850,
+          "end": 2856,
           "sha256": "34af14fa67eb397781d0115fe501efb4da684fac3e691ca035c6c0a61db7a619",
           "scope": [],
           "role": "mixed",
@@ -34803,10 +35017,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowChart@2859:2",
+          "id": "<iife>/flowChart@2860:2",
           "name": "flowChart",
-          "line": 2859,
-          "end": 2896,
+          "line": 2860,
+          "end": 2897,
           "sha256": "6f2e2e117b490c44b5ef4b1c5e869d30fac31184ecad8cdfa2476ce4747c8c0b",
           "scope": [],
           "role": "mixed",
@@ -34818,10 +35032,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowChart/<callback:2866:40>@2866:40",
-          "name": "<callback:2866:40>",
-          "line": 2866,
-          "end": 2866,
+          "id": "<iife>/flowChart/<callback:2867:40>@2867:40",
+          "name": "<callback:2867:40>",
+          "line": 2867,
+          "end": 2867,
           "sha256": "094d2a445a410620cbb551639c418d0923711c2d0b02f29e3b46cd3ab7dce14b",
           "scope": [
             "flowChart"
@@ -34835,10 +35049,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowChart/x@2869:10",
+          "id": "<iife>/flowChart/x@2870:10",
           "name": "x",
-          "line": 2869,
-          "end": 2869,
+          "line": 2870,
+          "end": 2870,
           "sha256": "87bd6eedb53f6aee9eb73d973e6cce657ffee25a0e8dd20cca6117d0235a916e",
           "scope": [
             "flowChart"
@@ -34870,10 +35084,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowChart/y@2870:10",
+          "id": "<iife>/flowChart/y@2871:10",
           "name": "y",
-          "line": 2870,
-          "end": 2870,
+          "line": 2871,
+          "end": 2871,
           "sha256": "3274c61183ff59e179338cd94d93147170f88adb77707451e354645506e8b390",
           "scope": [
             "flowChart"
@@ -34901,10 +35115,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowChart/<callback:2882:32>@2882:32",
-          "name": "<callback:2882:32>",
-          "line": 2882,
-          "end": 2883,
+          "id": "<iife>/flowChart/<callback:2883:32>@2883:32",
+          "name": "<callback:2883:32>",
+          "line": 2883,
+          "end": 2884,
           "sha256": "7437fd4576a94b232a12898fc74a0946aabcf6d5ea54da79b1a55fce0589b73b",
           "scope": [
             "flowChart"
@@ -34918,10 +35132,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowChart/<callback:2885:54>@2885:54",
-          "name": "<callback:2885:54>",
-          "line": 2885,
-          "end": 2886,
+          "id": "<iife>/flowChart/<callback:2886:54>@2886:54",
+          "name": "<callback:2886:54>",
+          "line": 2886,
+          "end": 2887,
           "sha256": "d09e04da5d770dad747d4eb1ffd465e8bd4d23bc48d2dba36b1750d3d2877ae5",
           "scope": [
             "flowChart"
@@ -34935,10 +35149,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowChart/<callback:2888:33>@2888:33",
-          "name": "<callback:2888:33>",
-          "line": 2888,
-          "end": 2888,
+          "id": "<iife>/flowChart/<callback:2889:33>@2889:33",
+          "name": "<callback:2889:33>",
+          "line": 2889,
+          "end": 2889,
           "sha256": "f1c659af44bcfe84f817391d78866f1610432d523ba59fe3760370420c001b0d",
           "scope": [
             "flowChart"
@@ -34952,10 +35166,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flowChart/<callback:2888:60>@2888:60",
-          "name": "<callback:2888:60>",
-          "line": 2888,
-          "end": 2894,
+          "id": "<iife>/flowChart/<callback:2889:60>@2889:60",
+          "name": "<callback:2889:60>",
+          "line": 2889,
+          "end": 2895,
           "sha256": "7661b1d116e3799d370c1c96b047aff651e92a03decf0fc7f6d53138dabfec3b",
           "scope": [
             "flowChart"
@@ -34969,10 +35183,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/recordDetails@2898:2",
+          "id": "<iife>/recordDetails@2899:2",
           "name": "recordDetails",
-          "line": 2898,
-          "end": 2906,
+          "line": 2899,
+          "end": 2907,
           "sha256": "80b3aea0c1c2363d2aa9330a3cec0154e9b327c381f2d497d6060a3a2b6ac7e6",
           "scope": [],
           "role": "mixed",
@@ -34984,10 +35198,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/recordDetails/<callback:2901:54>@2901:54",
-          "name": "<callback:2901:54>",
-          "line": 2901,
-          "end": 2901,
+          "id": "<iife>/recordDetails/<callback:2902:54>@2902:54",
+          "name": "<callback:2902:54>",
+          "line": 2902,
+          "end": 2902,
           "sha256": "e8ec5e79a3c356bf8a47dbe271dc68b03f6ba819e0c76a8ee5c3b7659843f1a8",
           "scope": [
             "recordDetails"
@@ -35001,10 +35215,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/recordDetails/<callback:2905:198>@2905:198",
-          "name": "<callback:2905:198>",
-          "line": 2905,
-          "end": 2905,
+          "id": "<iife>/recordDetails/<callback:2906:198>@2906:198",
+          "name": "<callback:2906:198>",
+          "line": 2906,
+          "end": 2906,
           "sha256": "052c4c889679e300b88e2bec38275a40811cf70e5302d3aa03e544e2f038b4aa",
           "scope": [
             "recordDetails"
@@ -35018,10 +35232,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/recordDetails/<callback:2905:230>@2905:230",
-          "name": "<callback:2905:230>",
-          "line": 2905,
-          "end": 2905,
+          "id": "<iife>/recordDetails/<callback:2906:230>@2906:230",
+          "name": "<callback:2906:230>",
+          "line": 2906,
+          "end": 2906,
           "sha256": "6ef57bccc22f5e5c46add5704fc934718e9f67082911789f93160b899f9f4d36",
           "scope": [
             "recordDetails"
@@ -35035,10 +35249,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/recordDetails/<callback:2905:460>@2905:460",
-          "name": "<callback:2905:460>",
-          "line": 2905,
-          "end": 2905,
+          "id": "<iife>/recordDetails/<callback:2906:460>@2906:460",
+          "name": "<callback:2906:460>",
+          "line": 2906,
+          "end": 2906,
           "sha256": "f27ad727ff8172c60149244efb18bade0e14605724e38fffef0754730593cefe",
           "scope": [
             "recordDetails"
@@ -35052,10 +35266,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/recordDetails/<callback:2905:672>@2905:672",
-          "name": "<callback:2905:672>",
-          "line": 2905,
-          "end": 2905,
+          "id": "<iife>/recordDetails/<callback:2906:672>@2906:672",
+          "name": "<callback:2906:672>",
+          "line": 2906,
+          "end": 2906,
           "sha256": "ef58b3840474040e53a766c9bdabe8c7a4f168f2e58ce27572c3b02a22eb6e88",
           "scope": [
             "recordDetails"
@@ -35069,10 +35283,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/geography@2908:2",
+          "id": "<iife>/geography@2909:2",
           "name": "geography",
-          "line": 2908,
-          "end": 2917,
+          "line": 2909,
+          "end": 2918,
           "sha256": "3001640bb1f1ea8ed9005619236326d241dd88e471e30c540095b9490f6061a9",
           "scope": [],
           "role": "mixed",
@@ -35084,10 +35298,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/geography/<callback:2911:38>@2911:38",
-          "name": "<callback:2911:38>",
-          "line": 2911,
-          "end": 2911,
+          "id": "<iife>/geography/<callback:2912:38>@2912:38",
+          "name": "<callback:2912:38>",
+          "line": 2912,
+          "end": 2912,
           "sha256": "ead86a6a92b83721cd999c366babb9ed259578d35bcac1e02254c4cf78bb3136",
           "scope": [
             "geography"
@@ -35101,10 +35315,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/geography/<callback:2913:38>@2913:38",
-          "name": "<callback:2913:38>",
-          "line": 2913,
-          "end": 2916,
+          "id": "<iife>/geography/<callback:2914:38>@2914:38",
+          "name": "<callback:2914:38>",
+          "line": 2914,
+          "end": 2917,
           "sha256": "5b5954ac370aca86a7883dc01b3beee5579259b4446b5a62a02df334092f84db",
           "scope": [
             "geography"
@@ -35118,10 +35332,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/requestDetail@2920:2",
+          "id": "<iife>/requestDetail@2921:2",
           "name": "requestDetail",
-          "line": 2920,
-          "end": 2933,
+          "line": 2921,
+          "end": 2934,
           "sha256": "d56514b49eb1a8daa06060151b3cbdf99aefbdd5f969fcd84648ea8c4222d79b",
           "scope": [],
           "role": "mixed",
@@ -35133,10 +35347,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/requestDetail/<callback:2928:48>@2928:48",
-          "name": "<callback:2928:48>",
-          "line": 2928,
-          "end": 2930,
+          "id": "<iife>/requestDetail/<callback:2929:48>@2929:48",
+          "name": "<callback:2929:48>",
+          "line": 2929,
+          "end": 2931,
           "sha256": "93c558ad5ac5c759d6c39105faa5fcb14026dd6d75fc6007342c8b097641f1dc",
           "scope": [
             "requestDetail"
@@ -35150,10 +35364,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/requestDetail/<callback:2930:15>@2930:15",
-          "name": "<callback:2930:15>",
-          "line": 2930,
-          "end": 2930,
+          "id": "<iife>/requestDetail/<callback:2931:15>@2931:15",
+          "name": "<callback:2931:15>",
+          "line": 2931,
+          "end": 2931,
           "sha256": "a8d943a96bed64590e2d262b09499535a330dcc4bd5c25bf16147362133380d8",
           "scope": [
             "requestDetail"
@@ -35167,10 +35381,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/inspect@2934:2",
+          "id": "<iife>/inspect@2935:2",
           "name": "inspect",
-          "line": 2934,
-          "end": 2952,
+          "line": 2935,
+          "end": 2953,
           "sha256": "260ee8a70c0df76054b67b074893f71ea0472869a106734cfd6ac7d02883f860",
           "scope": [],
           "role": "mixed",
@@ -35184,10 +35398,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/htmlIfChanged@2954:2",
+          "id": "<iife>/htmlIfChanged@2955:2",
           "name": "htmlIfChanged",
-          "line": 2954,
-          "end": 2956,
+          "line": 2955,
+          "end": 2957,
           "sha256": "10d61974e20d4ece6aaf77b47948be5f5bf118f813ae601e199541af71b6eb8a",
           "scope": [],
           "role": "mixed",
@@ -35199,10 +35413,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/localSaveContent@2958:2",
+          "id": "<iife>/localSaveContent@2959:2",
           "name": "localSaveContent",
-          "line": 2958,
-          "end": 2968,
+          "line": 2959,
+          "end": 2969,
           "sha256": "ad806eb47d7264558aa04cdd40609d25744f85e985cbba5a33cccc55dcd0ac0e",
           "scope": [],
           "role": "mixed",
@@ -35214,10 +35428,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/downloadLocalSave@2970:2",
+          "id": "<iife>/downloadLocalSave@2971:2",
           "name": "downloadLocalSave",
-          "line": 2970,
-          "end": 2983,
+          "line": 2971,
+          "end": 2984,
           "sha256": "312b6ca18a6ece8c491ef00c306fc3e15bce4ad054061ffa5b41f0da3120320f",
           "scope": [],
           "role": "domain",
@@ -35229,10 +35443,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/downloadLocalSave/<callback:2981:15>@2981:15",
-          "name": "<callback:2981:15>",
-          "line": 2981,
-          "end": 2981,
+          "id": "<iife>/downloadLocalSave/<callback:2982:15>@2982:15",
+          "name": "<callback:2982:15>",
+          "line": 2982,
+          "end": 2982,
           "sha256": "1bf72dfa11b33a1cc534137afd4ac2e9488e3ca7b3006b19795a4db64f1e4819",
           "scope": [
             "downloadLocalSave"
@@ -35246,10 +35460,25 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/resumeGame@2985:2",
+          "id": "<iife>/transition@2986:19",
+          "name": "transition",
+          "line": 2986,
+          "end": 2986,
+          "sha256": "d3f3e642024b837e434cae2db2e1716b153169ed822eef0cdef334a721d9deb6",
+          "scope": [],
+          "role": "mixed",
+          "phase": "P3-8",
+          "owner": "UI shell; all embedded domain orchestration moves to Rust",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/resumeGame@2987:2",
           "name": "resumeGame",
-          "line": 2985,
-          "end": 2991,
+          "line": 2987,
+          "end": 2993,
           "sha256": "97ecd47d29ff722dc53666663f82e2f36e5a2f0aee5fe075e99f75bc6a27c770",
           "scope": [],
           "role": "mixed",
@@ -35261,10 +35490,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:2992:37>@2992:37",
-          "name": "<callback:2992:37>",
-          "line": 2992,
-          "end": 2997,
+          "id": "<iife>/<callback:2994:37>@2994:37",
+          "name": "<callback:2994:37>",
+          "line": 2994,
+          "end": 2999,
           "sha256": "1f70f1dee5e6f95e61959fa7f880c4838cc55fd49bb5c1d87d0ff73b6ca56945",
           "scope": [],
           "role": "mixed",
@@ -35276,38 +35505,81 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readLocalSave@2998:2",
-          "name": "readLocalSave",
-          "line": 2998,
-          "end": 3029,
-          "sha256": "a67a0237e756f6b9ca689650e58d61876fe4b82bbbb98228cc9893f19a93cd96",
+          "id": "<iife>/storedGameLink@3000:2",
+          "name": "storedGameLink",
+          "line": 3000,
+          "end": 3015,
+          "sha256": "1fd89d1b7cfa1c0051c98022aaebf57c375ec6f5cd4da953faaecfaef0a88b67",
           "scope": [],
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records",
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Navigation and recovery control for a committed checkpoint",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readLocalSave/current@3001:18",
+          "id": "<iife>/storedGameLink/open@3010:15",
+          "name": "open",
+          "line": 3010,
+          "end": 3010,
+          "sha256": "3e9211011a2656e719f7eaa139cf5284827d18a8fbb079a55462b816e0dba7b5",
+          "scope": [
+            "storedGameLink"
+          ],
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Navigation and recovery control for a committed checkpoint",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [
+            "rail/operations-wasm.js",
+            "rail/review-view.js",
+            "rail/save-store.js",
+            "rail/shell-ui.js",
+            "rail/ui-center-view.js",
+            "rail/ui-dom.js",
+            "rail/ui-line-view.js"
+          ],
+          "testReferenceCandidates": [
+            "scripts/test_rail_publication.cjs"
+          ],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/readLocalSave@3016:2",
+          "name": "readLocalSave",
+          "line": 3016,
+          "end": 3056,
+          "sha256": "11107f4a5d3fb7145a65f6ca6eafb6a32ac83f658a6dacda6072a8fee31f38d7",
+          "scope": [],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/readLocalSave/current@3020:18",
           "name": "current",
-          "line": 3001,
-          "end": 3001,
-          "sha256": "6f1ea1296e594cf28fea28a5b1fa740bff7540cc87bf811bba3b62d4dde9ecbb",
+          "line": 3020,
+          "end": 3020,
+          "sha256": "fee74e296d8268c25b5a6438c60e1cdaf1ba36dba80596442549bfbbbf455f38",
           "scope": [
             "readLocalSave"
           ],
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records",
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [
             "rail/diagnostics-wasm.js",
             "rail/history-wasm.js",
             "rail/operations-wasm.js",
             "rail/statistics-wasm.js",
+            "rail/ui-save-view.js",
             "rail/vector-map.js",
             "rail/worker-client.js"
           ],
@@ -35317,74 +35589,91 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/readLocalSave/<callback:3019:91>@3019:91",
-          "name": "<callback:3019:91>",
-          "line": 3019,
-          "end": 3019,
+          "id": "<iife>/readLocalSave/<callback:3053:69>@3053:69",
+          "name": "<callback:3053:69>",
+          "line": 3053,
+          "end": 3053,
           "sha256": "dec7a076dec41531da7f2d40bd4b896e27d45dd09ecd541190941bf88e6de894",
           "scope": [
             "readLocalSave"
           ],
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records",
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/cancelLocalImport@3030:2",
+          "id": "<iife>/cancelLocalImport@3057:2",
           "name": "cancelLocalImport",
-          "line": 3030,
-          "end": 3036,
-          "sha256": "5a0d35e7959a85b2058849f26f1cb5977d5653bd3ad7cf4404975fd1b547c423",
+          "line": 3057,
+          "end": 3068,
+          "sha256": "60915b63c4a2671cad772bc6c053918b0c3caef2136a0939bb94fc7cd85bb00b",
           "scope": [],
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records",
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/applyLocalSave@3037:2",
+          "id": "<iife>/cancelLocalImport/<callback:3065:76>@3065:76",
+          "name": "<callback:3065:76>",
+          "line": 3065,
+          "end": 3065,
+          "sha256": "93bb745d10d5b4ad7ecfb6b28298d10dc403e0c706fb341cb2b472f5665feee5",
+          "scope": [
+            "cancelLocalImport"
+          ],
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets",
+          "exportNameCandidate": false,
+          "productionReferenceCandidates": [],
+          "testReferenceCandidates": [],
+          "disposition": "reviewed-migration-target; no dead-code inference"
+        },
+        {
+          "id": "<iife>/applyLocalSave@3069:2",
           "name": "applyLocalSave",
-          "line": 3037,
-          "end": 3069,
-          "sha256": "3e0d1b914e3320d77b88716e3b6323c570f7ce9da21416af2fc906b615bd269f",
+          "line": 3069,
+          "end": 3119,
+          "sha256": "4599d6c67f6c0ebe59adab967df563c39672a4762ed3c37dd221d1a1f6537665",
           "scope": [],
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records",
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/applyLocalSave/<callback:3058:61>@3058:61",
-          "name": "<callback:3058:61>",
-          "line": 3058,
-          "end": 3058,
+          "id": "<iife>/applyLocalSave/<callback:3100:61>@3100:61",
+          "name": "<callback:3100:61>",
+          "line": 3100,
+          "end": 3100,
           "sha256": "dec7a076dec41531da7f2d40bd4b896e27d45dd09ecd541190941bf88e6de894",
           "scope": [
             "applyLocalSave"
           ],
-          "role": "domain",
-          "phase": "P3-7",
-          "owner": "Rust persistence/records",
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/patchInsightNode@3071:2",
+          "id": "<iife>/patchInsightNode@3121:2",
           "name": "patchInsightNode",
-          "line": 3071,
-          "end": 3073,
+          "line": 3121,
+          "end": 3123,
           "sha256": "0e12825bed4430885b2a48c0783fb5b1fc0b93758aaeb55017a43d300df410d2",
           "scope": [],
           "role": "mixed",
@@ -35396,10 +35685,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshInsight@3075:2",
+          "id": "<iife>/refreshInsight@3125:2",
           "name": "refreshInsight",
-          "line": 3075,
-          "end": 3123,
+          "line": 3125,
+          "end": 3173,
           "sha256": "4389c4ac5eb70570073a902783380052fc5b93d805a27d5676b6becfd3c08a31",
           "scope": [],
           "role": "mixed",
@@ -35411,10 +35700,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/refreshReview@3125:2",
+          "id": "<iife>/refreshReview@3175:2",
           "name": "refreshReview",
-          "line": 3125,
-          "end": 3142,
+          "line": 3175,
+          "end": 3192,
           "sha256": "0390ddf98c447d4360eaed4f397b7a9e3fe18ab85f0777c261af0a3a1206fed5",
           "scope": [],
           "role": "mixed",
@@ -35426,10 +35715,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:3144:38>@3144:38",
-          "name": "<callback:3144:38>",
-          "line": 3144,
-          "end": 3149,
+          "id": "<iife>/<callback:3194:38>@3194:38",
+          "name": "<callback:3194:38>",
+          "line": 3194,
+          "end": 3199,
           "sha256": "32c3d3f07e3dae86a83ec6ffb637cbf29f0bb3fcdac431fc7d51a667b3e0f8f8",
           "scope": [],
           "role": "mixed",
@@ -35441,10 +35730,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity@3153:2",
+          "id": "<iife>/renderActivity@3203:2",
           "name": "renderActivity",
-          "line": 3153,
-          "end": 3245,
+          "line": 3203,
+          "end": 3295,
           "sha256": "cf923d9b22abe8516d9a3aba4cf3586c2484c3567714661e7eed150f031f8c9a",
           "scope": [],
           "role": "mixed",
@@ -35456,10 +35745,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3162:47>@3162:47",
-          "name": "<callback:3162:47>",
-          "line": 3162,
-          "end": 3163,
+          "id": "<iife>/renderActivity/<callback:3212:47>@3212:47",
+          "name": "<callback:3212:47>",
+          "line": 3212,
+          "end": 3213,
           "sha256": "75f27a9ea50daa29573ad601af47011b21074e167e799c8b7d457b57aa8137cf",
           "scope": [
             "renderActivity"
@@ -35473,10 +35762,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3196:40>@3196:40",
-          "name": "<callback:3196:40>",
-          "line": 3196,
-          "end": 3196,
+          "id": "<iife>/renderActivity/<callback:3246:40>@3246:40",
+          "name": "<callback:3246:40>",
+          "line": 3246,
+          "end": 3246,
           "sha256": "1f1280b6ee387d58b0efabc04884f55bb578bf144ba88bde16b2c391d6d93ff0",
           "scope": [
             "renderActivity"
@@ -35490,10 +35779,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3212:29>@3212:29",
-          "name": "<callback:3212:29>",
-          "line": 3212,
-          "end": 3212,
+          "id": "<iife>/renderActivity/<callback:3262:29>@3262:29",
+          "name": "<callback:3262:29>",
+          "line": 3262,
+          "end": 3262,
           "sha256": "a9bb2ed7274d5e5e54142b5fd2aae8cb68853579763ed99f48c4ee78cafca8b6",
           "scope": [
             "renderActivity"
@@ -35507,10 +35796,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3216:36>@3216:36",
-          "name": "<callback:3216:36>",
-          "line": 3216,
-          "end": 3216,
+          "id": "<iife>/renderActivity/<callback:3266:36>@3266:36",
+          "name": "<callback:3266:36>",
+          "line": 3266,
+          "end": 3266,
           "sha256": "249c377243906e15a82b74b456d96687a9b764b6ea4368ec132b542cc3ee0e22",
           "scope": [
             "renderActivity"
@@ -35524,10 +35813,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3224:496>@3224:496",
-          "name": "<callback:3224:496>",
-          "line": 3224,
-          "end": 3224,
+          "id": "<iife>/renderActivity/<callback:3274:496>@3274:496",
+          "name": "<callback:3274:496>",
+          "line": 3274,
+          "end": 3274,
           "sha256": "60873723a317475e665d7d199e1e24446de24b4f1ed298f6ce35ba47ae8e149d",
           "scope": [
             "renderActivity"
@@ -35541,10 +35830,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3224:529>@3224:529",
-          "name": "<callback:3224:529>",
-          "line": 3224,
-          "end": 3224,
+          "id": "<iife>/renderActivity/<callback:3274:529>@3274:529",
+          "name": "<callback:3274:529>",
+          "line": 3274,
+          "end": 3274,
           "sha256": "078d02b11717dffde082433e46a58638677ffee64a4f8800d4ada198f02b863c",
           "scope": [
             "renderActivity"
@@ -35558,10 +35847,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3233:1370>@3233:1370",
-          "name": "<callback:3233:1370>",
-          "line": 3233,
-          "end": 3233,
+          "id": "<iife>/renderActivity/<callback:3283:1370>@3283:1370",
+          "name": "<callback:3283:1370>",
+          "line": 3283,
+          "end": 3283,
           "sha256": "b36d58e6d426c18597a5a078a6f44dd8726d663c86bdaea82346f9e44d84df4c",
           "scope": [
             "renderActivity"
@@ -35575,10 +35864,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3233:1761>@3233:1761",
-          "name": "<callback:3233:1761>",
-          "line": 3233,
-          "end": 3233,
+          "id": "<iife>/renderActivity/<callback:3283:1761>@3283:1761",
+          "name": "<callback:3283:1761>",
+          "line": 3283,
+          "end": 3283,
           "sha256": "60873723a317475e665d7d199e1e24446de24b4f1ed298f6ce35ba47ae8e149d",
           "scope": [
             "renderActivity"
@@ -35592,10 +35881,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderActivity/<callback:3233:1794>@3233:1794",
-          "name": "<callback:3233:1794>",
-          "line": 3233,
-          "end": 3233,
+          "id": "<iife>/renderActivity/<callback:3283:1794>@3283:1794",
+          "name": "<callback:3283:1794>",
+          "line": 3283,
+          "end": 3283,
           "sha256": "0b861fcc7c42d173776998a60f2d04af595be64ef998ff5a6f31ac7c1f33acb8",
           "scope": [
             "renderActivity"
@@ -35609,10 +35898,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderAccount@3247:2",
+          "id": "<iife>/renderAccount@3297:2",
           "name": "renderAccount",
-          "line": 3247,
-          "end": 3256,
+          "line": 3297,
+          "end": 3306,
           "sha256": "eb283ee10cbd7a4a52bed688c891b8498abead1755f7327ed81b8b3a82543e03",
           "scope": [],
           "role": "mixed",
@@ -35624,10 +35913,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/updateAccountLive@3258:2",
+          "id": "<iife>/updateAccountLive@3308:2",
           "name": "updateAccountLive",
-          "line": 3258,
-          "end": 3263,
+          "line": 3308,
+          "end": 3313,
           "sha256": "b4d63e37724ebf477e86f4d07f4abd78d3d2b7ed3f3403bbf76fb7e55907a12f",
           "scope": [],
           "role": "mixed",
@@ -35639,10 +35928,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/hubMarkers@3265:2",
+          "id": "<iife>/hubMarkers@3315:2",
           "name": "hubMarkers",
-          "line": 3265,
-          "end": 3272,
+          "line": 3315,
+          "end": 3322,
           "sha256": "e403873a80c5f5cb73e982b205ede2e14f8b230f28fc67f7447c23f5144ef4bc",
           "scope": [],
           "role": "mixed",
@@ -35654,10 +35943,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/hubMarkers/<callback:3266:23>@3266:23",
-          "name": "<callback:3266:23>",
-          "line": 3266,
-          "end": 3271,
+          "id": "<iife>/hubMarkers/<callback:3316:23>@3316:23",
+          "name": "<callback:3316:23>",
+          "line": 3316,
+          "end": 3321,
           "sha256": "501d58e78ab80dd16296cb7dd8bd5cdba7eebc0265165006ba7fc96eb8f6a020",
           "scope": [
             "hubMarkers"
@@ -35671,10 +35960,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/hubList@3274:2",
+          "id": "<iife>/hubList@3324:2",
           "name": "hubList",
-          "line": 3274,
-          "end": 3276,
+          "line": 3324,
+          "end": 3326,
           "sha256": "ce8b4bf4b46086b311f01c216ad64613c5a4f802200d75029e3f2404cbd5aba0",
           "scope": [],
           "role": "mixed",
@@ -35686,10 +35975,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/hubList/<callback:3275:163>@3275:163",
-          "name": "<callback:3275:163>",
-          "line": 3275,
-          "end": 3275,
+          "id": "<iife>/hubList/<callback:3325:163>@3325:163",
+          "name": "<callback:3325:163>",
+          "line": 3325,
+          "end": 3325,
           "sha256": "f7a8b74f4b2fce854ad9356ea5062d86e74e39c96653d6cff989824b3733a57b",
           "scope": [
             "hubList"
@@ -35703,10 +35992,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/hubDetails@3278:2",
+          "id": "<iife>/hubDetails@3328:2",
           "name": "hubDetails",
-          "line": 3278,
-          "end": 3287,
+          "line": 3328,
+          "end": 3337,
           "sha256": "eb0afdf70d5d2977a0a1fa638f4074a85a03e700093ff45b331170a78d05049c",
           "scope": [],
           "role": "mixed",
@@ -35718,10 +36007,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/hubDetails/<callback:3286:1926>@3286:1926",
-          "name": "<callback:3286:1926>",
-          "line": 3286,
-          "end": 3286,
+          "id": "<iife>/hubDetails/<callback:3336:1926>@3336:1926",
+          "name": "<callback:3336:1926>",
+          "line": 3336,
+          "end": 3336,
           "sha256": "799b50aaaec3f3e53ba18ed8c7b2871d254b17352360579355252e501ec86cde",
           "scope": [
             "hubDetails"
@@ -35735,10 +36024,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/setDensity@3289:2",
+          "id": "<iife>/setDensity@3339:2",
           "name": "setDensity",
-          "line": 3289,
-          "end": 3301,
+          "line": 3339,
+          "end": 3351,
           "sha256": "f5300255620db79009e24c2020730e180c3634e7afe87bee4aa899a96976fc54",
           "scope": [],
           "role": "mixed",
@@ -35750,10 +36039,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/densityCells@3303:2",
+          "id": "<iife>/densityCells@3353:2",
           "name": "densityCells",
-          "line": 3303,
-          "end": 3309,
+          "line": 3353,
+          "end": 3359,
           "sha256": "f11935969c925dac181266583bab25245bbb9d19627cd0a15827d6a6ff3f21f8",
           "scope": [],
           "role": "mixed",
@@ -35765,10 +36054,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/densityCells/<callback:3304:25>@3304:25",
-          "name": "<callback:3304:25>",
-          "line": 3304,
-          "end": 3308,
+          "id": "<iife>/densityCells/<callback:3354:25>@3354:25",
+          "name": "<callback:3354:25>",
+          "line": 3354,
+          "end": 3358,
           "sha256": "e78ce17a1ae593cd3e1f751651d57ef38c2b01991e317069b1a88d8e79e76f3a",
           "scope": [
             "densityCells"
@@ -35782,10 +36071,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/densitySummary@3311:2",
+          "id": "<iife>/densitySummary@3361:2",
           "name": "densitySummary",
-          "line": 3311,
-          "end": 3319,
+          "line": 3361,
+          "end": 3369,
           "sha256": "91e63e1cbc355be14ab548436c3548524dc0e1bca6ed6b4df9d843d5dace805c",
           "scope": [],
           "role": "mixed",
@@ -35797,10 +36086,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/densitySummary/<callback:3318:292>@3318:292",
-          "name": "<callback:3318:292>",
-          "line": 3318,
-          "end": 3318,
+          "id": "<iife>/densitySummary/<callback:3368:292>@3368:292",
+          "name": "<callback:3368:292>",
+          "line": 3368,
+          "end": 3368,
           "sha256": "c290b35ccac1cd9dafb6dd415134b97c250a9714e4ed263bec0eecde9c6dadd4",
           "scope": [
             "densitySummary"
@@ -35814,10 +36103,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/drawDensity@3321:2",
+          "id": "<iife>/drawDensity@3371:2",
           "name": "drawDensity",
-          "line": 3321,
-          "end": 3360,
+          "line": 3371,
+          "end": 3410,
           "sha256": "583d440983367cae90316e80867dfb3f9ef3a5998d4ea7c2f75f52f1368cb70a",
           "scope": [],
           "role": "mixed",
@@ -35829,10 +36118,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/drawDensity/<callback:3332:61>@3332:61",
-          "name": "<callback:3332:61>",
-          "line": 3332,
-          "end": 3335,
+          "id": "<iife>/drawDensity/<callback:3382:61>@3382:61",
+          "name": "<callback:3382:61>",
+          "line": 3382,
+          "end": 3385,
           "sha256": "bb4d441f43685cfb21c91ce3a5aa496bfc9a8626e822aa7b227b502b7f1809cc",
           "scope": [
             "drawDensity"
@@ -35846,10 +36135,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/queueTotals@3362:2",
+          "id": "<iife>/queueTotals@3412:2",
           "name": "queueTotals",
-          "line": 3362,
-          "end": 3371,
+          "line": 3412,
+          "end": 3421,
           "sha256": "c2a62614b825209af05bcfb5f0dd9e98255937dac444586dc18cf37f797b35be",
           "scope": [],
           "role": "mixed",
@@ -35861,10 +36150,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/queueTotals/<callback:3367:63>@3367:63",
-          "name": "<callback:3367:63>",
-          "line": 3367,
-          "end": 3367,
+          "id": "<iife>/queueTotals/<callback:3417:63>@3417:63",
+          "name": "<callback:3417:63>",
+          "line": 3417,
+          "end": 3417,
           "sha256": "205ff71cf24137c5d66dbef8112c39124cffd338cfbc058de4014086892d336d",
           "scope": [
             "queueTotals"
@@ -35878,10 +36167,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/renderStations@3373:2",
+          "id": "<iife>/renderStations@3423:2",
           "name": "renderStations",
-          "line": 3373,
-          "end": 3380,
+          "line": 3423,
+          "end": 3430,
           "sha256": "0880cda8c19ef98bafa4999d3ee6e001de58a3a848df7b080546a29ca1f2f5ca",
           "scope": [],
           "role": "mixed",
@@ -35893,10 +36182,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/updateStationRows@3382:2",
+          "id": "<iife>/updateStationRows@3432:2",
           "name": "updateStationRows",
-          "line": 3382,
-          "end": 3396,
+          "line": 3432,
+          "end": 3446,
           "sha256": "f6a13a9974ad0edd55f4be47de5733df97fa1847c07d7f33fe848f93b9971bb7",
           "scope": [],
           "role": "mixed",
@@ -35908,10 +36197,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/updateStationRows/<callback:3391:34>@3391:34",
-          "name": "<callback:3391:34>",
-          "line": 3391,
-          "end": 3392,
+          "id": "<iife>/updateStationRows/<callback:3441:34>@3441:34",
+          "name": "<callback:3441:34>",
+          "line": 3441,
+          "end": 3442,
           "sha256": "f096202dbdf0e4c1f48a0b4cf23568fa602c0412dabbc52f5dda11432c76d4f9",
           "scope": [
             "updateStationRows"
@@ -35925,10 +36214,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/<callback:3397:37>@3397:37",
-          "name": "<callback:3397:37>",
-          "line": 3397,
-          "end": 3412,
+          "id": "<iife>/<callback:3447:37>@3447:37",
+          "name": "<callback:3447:37>",
+          "line": 3447,
+          "end": 3462,
           "sha256": "fca5f557a8e0b1d5e87c988bc9578e0674eed101e43925dc3d6500cf6b7aaf62",
           "scope": [],
           "role": "mixed",
@@ -35940,25 +36229,25 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/startNewGame@3414:2",
+          "id": "<iife>/startNewGame@3464:2",
           "name": "startNewGame",
-          "line": 3414,
-          "end": 3485,
-          "sha256": "5b31c8ed515c5ea80ea4225a099de99b13bb54a6995e00e3f1519c56d21ca9c2",
+          "line": 3464,
+          "end": 3562,
+          "sha256": "275a64af9011bc72ea930df8bef8fe9d147528bfad7f28393fc6b4307ef4a9dd",
           "scope": [],
-          "role": "mixed",
-          "phase": "P3-8",
-          "owner": "New world built by Rust session; remaining UI reset/runtime wiring is scheduled in P3-3/P3-8",
+          "role": "platform",
+          "phase": "P3-7 bridge",
+          "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets",
           "exportNameCandidate": false,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/flyTo@3511:2",
+          "id": "<iife>/flyTo@3588:2",
           "name": "flyTo",
-          "line": 3511,
-          "end": 3537,
+          "line": 3588,
+          "end": 3614,
           "sha256": "006374c7ede32cfea8f4151b0384750e2d029b86ce9177a7b33a5ba1dbb19cb9",
           "scope": [],
           "role": "mixed",
@@ -35970,10 +36259,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/fitLine@3539:2",
+          "id": "<iife>/fitLine@3616:2",
           "name": "fitLine",
-          "line": 3539,
-          "end": 3554,
+          "line": 3616,
+          "end": 3631,
           "sha256": "d9def49b145239abad27659870c5c00b236f2ca7690cafcfaa36afd06b03f37e",
           "scope": [],
           "role": "mixed",
@@ -35985,10 +36274,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/fitLine/<callback:3544:18>@3544:18",
-          "name": "<callback:3544:18>",
-          "line": 3544,
-          "end": 3544,
+          "id": "<iife>/fitLine/<callback:3621:18>@3621:18",
+          "name": "<callback:3621:18>",
+          "line": 3621,
+          "end": 3621,
           "sha256": "7f93146dd9b85e4a6186fc16e816c30ce6173c859e728f009f73bb17bdb29a03",
           "scope": [
             "fitLine"
@@ -36002,10 +36291,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<iife>/fitLine/<callback:3545:18>@3545:18",
-          "name": "<callback:3545:18>",
-          "line": 3545,
-          "end": 3545,
+          "id": "<iife>/fitLine/<callback:3622:18>@3622:18",
+          "name": "<callback:3622:18>",
+          "line": 3622,
+          "end": 3622,
           "sha256": "67c2fd40d3a53a940d6a2c10fd4f82b75ba2756d16356f6ced63fa8437aeb780",
           "scope": [
             "fitLine"
@@ -36019,10 +36308,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "/<callback:3556:11>@3556:11",
-          "name": "<callback:3556:11>",
-          "line": 3556,
-          "end": 3566,
+          "id": "/<callback:3633:11>@3633:11",
+          "name": "<callback:3633:11>",
+          "line": 3633,
+          "end": 3643,
           "sha256": "8ff1a2cef722b8778669b43f51d254b30b82553869d768a0a36746589227fa06",
           "scope": [],
           "role": "mixed",
@@ -36034,10 +36323,10 @@
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
-          "id": "<callback:3556:11>/onclick@3563:16",
+          "id": "<callback:3633:11>/onclick@3640:16",
           "name": "onclick",
-          "line": 3563,
-          "end": 3563,
+          "line": 3640,
+          "end": 3640,
           "sha256": "310308afaefa6873ed04c7da0db674511cc8bab2d8fd2d32948245027f1b8946",
           "scope": [],
           "role": "mixed",
@@ -36805,6 +37094,7 @@
             "rail/statistics-wasm.js",
             "rail/ui-center-view.js",
             "rail/ui-line-view.js",
+            "rail/ui-save-view.js",
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
