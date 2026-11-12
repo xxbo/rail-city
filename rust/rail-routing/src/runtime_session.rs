@@ -75,7 +75,8 @@ impl Runtime{
         seed.definitions.clear();seed.definitions.shrink_to_fit();
         for key in ["queues","outside","transfers","waitSince","outsideSince","stationOccupancy"]{del(&mut seed.runtime,key);}
         for train in seed.runtime.get_mut("trains").array_mut(){del(train,"passengers");}
-        let mut runtime=Self{record_lengths:None,persistence_epoch:0,import_serial:0,pending_import:None,import_fence:false,seed,arena,token,finance,clock:crate::runtime_control::Clock::new(),train_ids,actual_daily,revision:0,daily_revision:0,edit_revision,command_serial,receipts:VecDeque::new(),undo:None,forecast_work:crate::runtime_business::ForecastWork::default(),published_city:None,published_review:None};
+        let forecast_work=crate::runtime_business::ForecastWork::restored(seed.runtime.get("forecastStatus"));
+        let mut runtime=Self{record_lengths:None,persistence_epoch:0,import_serial:0,pending_import:None,import_fence:false,seed,arena,token,finance,clock:crate::runtime_control::Clock::new(),train_ids,actual_daily,revision:0,daily_revision:0,edit_revision,command_serial,receipts:VecDeque::new(),undo:None,forecast_work,published_city:None,published_review:None};
         if warm{
             // Warm passenger queues without charging a second set of startup accounts.
             let economy=runtime.seed.world.get("economy").clone();let operating=runtime.seed.world.get("ridership").get("current").zero("operating");
@@ -256,6 +257,9 @@ impl Runtime{
         let checkpoint=if action=="command"&&v.get("undo").truth(){forecasts.retain(self.seed.catalog)?;Some(Checkpoint{token:serial as u64,world:before,saved,catalog:self.seed.catalog})}else{None};
         self.replace(candidate,forecasts);
         if action!="demand"{if let Some(old)=self.undo.take(){forecasts.release_owned(old.catalog);}self.undo=checkpoint;}
+        if action=="demand" && has(v,"forecastTicket") {
+            self.forecast_work.finish(v.num("forecastTicket"),true);
+        }
         self.forecast_work.dirty=action!="demand";self.forecast_work.phases(&self.seed.world,self.seed.runtime.num("minute"));
         self.command_serial=serial as u64;
         let receipt=obj(&[("result",result),("quote",quote),("undoToken",self.undo.as_ref().map_or(V::Null,|u|n(u.token as f64)))]);
@@ -344,7 +348,7 @@ impl RuntimeOwner{
             let runtime=self.arenas.get_mut(&id).ok_or("RUNTIME_EXPIRED")?;
             if runtime.import_fence{
                 if action=="pulse"{let mut out=runtime.view(false);out.set("clock",runtime.clock.status());return Ok(out);}
-                if !matches!(action,"importCancel"|"importCommitted"|"query"|"snapshot"|"snapshotPage"|"handoff"|"view"|"diagnose"|"forecastQuery"|"dispatchRecommendation"|"intent"|"resetClock"){return Err("RESTORE_COMMIT_PENDING".into());}
+                if !matches!(action,"importCancel"|"importWriteFailed"|"importCommitted"|"query"|"snapshot"|"snapshotPage"|"handoff"|"view"|"diagnose"|"forecastQuery"|"dispatchRecommendation"|"intent"|"resetClock"){return Err("RESTORE_COMMIT_PENDING".into());}
             }
             if matches!(action,"command"|"demand"|"undo"|"setDaily"|"observe"|"syncBank"|"credit"|"daily"|"advanceAll"|"advance"){runtime.persistence_epoch+=1;}
             if action=="pulse"&&v.get("playing").truth(){runtime.persistence_epoch+=1;}
@@ -352,7 +356,26 @@ impl RuntimeOwner{
                 "checkpoint"=>runtime.checkpoint(v.get("settings"),v.get("at")),
                 "previewImport"=>runtime.preview_import(v),
                 "prepareImport"=>runtime.prepare_import(v,forecasts),
-                "importCancel"|"importCommitted"=>{if let Some((token,_,_))=&runtime.pending_import{if v.num("token")!=*token as f64{return Err("RESTORE_TOKEN_MISMATCH".into());}}runtime.pending_import=None;runtime.import_fence=action=="importCommitted";Ok(V::Null)},
+                "importWriteFailed"=>{
+                    if !runtime.import_fence || !runtime.pending_import.as_ref().is_some_and(|(token,_,_)|*token as f64==v.num("token")){
+                        return Err("RESTORE_TOKEN_MISMATCH".into());
+                    }
+                    runtime.import_fence=false;
+                    Ok(V::Null)
+                },
+                "importCancel"|"importCommitted"=>{
+                    let commit=action=="importCommitted";
+                    if let Some((token,_,_))=&runtime.pending_import {
+                        if *token as f64!=v.num("token"){return Err("RESTORE_TOKEN_MISMATCH".into());}
+                        if commit&&!runtime.import_fence{return Err("RESTORE_NOT_PREPARED".into());}
+                        runtime.pending_import=None;
+                        runtime.import_fence=commit;
+                    }else if (runtime.import_fence||commit)
+                        && !(commit&&runtime.import_fence&&v.num("token")==runtime.import_serial as f64){
+                        return Err("RESTORE_TOKEN_MISMATCH".into());
+                    }
+                    Ok(V::Null)
+                },
                 "command"|"preview"|"demand"|"undo"=>runtime.edit(v,forecasts),
                 "intent"=>{if v.get("reset").truth(){runtime.clock.reset();}runtime.clock.observe(v).map_err(str::to_string)?;Ok(runtime.clock.status())},
                 "handoff"=>{let mut view=runtime.snapshot_view(v);view.set("world",runtime.seed.world.clone());Ok(view)},"snapshot"=>Ok(runtime.snapshot_view(v)),
@@ -361,8 +384,13 @@ impl RuntimeOwner{
                 "query"=>{runtime.project_world();let q=runtime.arena.queues.as_ref().unwrap();let result=match v.get("query").text(){"storage"=>{let storage=runtime.arena.cycle.as_ref().unwrap().storage();obj(&[("cachedProfiles",n(storage[0]as f64)),("metadataBatches",n(storage[1]as f64)),("preparedDefinitions",n(q.prepared_count()as f64)),("storedDefinitions",n(q.definition_count()as f64)),("hostCommandValues",n(q.host_command_values()as f64)),("nativeReroutes",n(q.native_reroutes()as f64)),("statisticsFullFrames",n(q.statistics_full_frames()as f64))])},"history"=>obj(&[("current",runtime.seed.world.get("ridership").get("current").clone()),("history",runtime.seed.world.get("ridership").get("history").clone())]),"summary"=>q.summary_projection(),"train"=>{let id=runtime.train_ids.iter().find(|(_,name)|name.as_str()==v.get("target").text()).map_or(usize::MAX,|(id,_)|*id);q.train_projection(id)},_=>q.station_projection(&runtime.seed.world,v.num("target")as usize,&runtime.seed.names)};Ok(obj(&[("projection",result)]))},
                 "setDaily"=>{let result=forecasts.handle(&obj(&[("action",text("setDaily")),("id",n(runtime.seed.catalog as f64)),("index",v.get("index").clone()),("value",v.get("value").clone())]));if result.get("error").truth(){return Err(result.get("error").text().into());}runtime.sync_daily(forecasts)?;Ok(runtime.view(false))},
                 "forecastInvalidate"=>{runtime.forecast_work.dirty=true;Ok(runtime.forecast_work.status(&runtime.seed.world,runtime.edit_revision))},
-                "forecastBegin"=>{runtime.project_world();Ok(runtime.forecast_work.begin(&runtime.seed.world,runtime.edit_revision,v.get("blocked").truth()))},
-                "forecastFinish"=>Ok(runtime.forecast_work.finish(v.num("ticket"),v.get("success").truth())),
+                "forecastBegin"=>{if v.get("force").truth(){runtime.forecast_work.dirty=true;}runtime.project_world();
+                    let mut out=runtime.forecast_work.begin(&runtime.seed.world,runtime.edit_revision,v.get("blocked").truth());
+                    out.set("forecastStatus",runtime.forecast_work.status(&runtime.seed.world,runtime.edit_revision));Ok(out)},
+                "forecastFinish"=>{
+                    let mut out=runtime.forecast_work.finish(v.num("ticket"),v.get("success").truth());
+                    out.set("forecastStatus",runtime.forecast_work.status(&runtime.seed.world,runtime.edit_revision));Ok(out)
+                },
                 "dispatchRecommendation"=>{
                     runtime.project_world();
                     let plan=forecasts.dispatch_recommendation(runtime.seed.catalog,&runtime.seed.world,

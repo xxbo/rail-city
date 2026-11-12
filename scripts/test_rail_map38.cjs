@@ -356,7 +356,54 @@ async function workerContracts() {
   });
   await assert.rejects(denied.request({}), /denied/);
 }
-workerContracts().then(() => console.log(
+async function refreshSessionContracts() {
+  const timers=new Set(),notices=[],workers=[];
+  const options={
+    now:()=>0,
+    setTimer(fn,delay){const timer={fn,delay};timers.add(timer);return timer;},
+    clearTimer(timer){timers.delete(timer);},
+    createWorker(){
+      const worker={postMessage(){},terminate(){this.stopped=true;}};
+      workers.push(worker);
+      return worker;
+    },
+    refreshNotice(status){notices.push(status);}
+  };
+  function fire(timer){timers.delete(timer);timer.fn();}
+  let attempts=0;
+  const old=Client.create({...options,runRefresh:async()=>{
+    attempts++;
+    await old.request({});
+    return {dirty:false};
+  }});
+  old.refresh.signal();
+  old.refresh.signal();
+  assert.equal(timers.size,1);
+  const delayed=[...timers][0];
+  fire(delayed);
+  await Promise.resolve();
+  assert.equal(old.pending,1);
+  await old.refresh.pause();
+  assert(workers[0].stopped);
+  assert.equal(timers.size,0);
+  assert.deepEqual(notices,[]);
+  old.refresh.resume();
+  const retired=[...timers][0];
+  old.dispose();
+  const manual=[];
+  const next=Client.create({...options,runRefresh:async force=>{manual.push(force);return {dirty:false};}});
+  next.refresh.signal(true);
+  const fresh=[...timers][0];
+  retired.fn(); // A browser can deliver a timeout already queued before clearTimeout.
+  assert.equal(attempts,1);
+  assert.equal(timers.size,1);
+  fire(fresh);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.deepEqual(manual,[true]);
+  assert.equal(next.refresh.pending,false);
+  next.dispose();
+}
+workerContracts().then(refreshSessionContracts).then(() => console.log(
   'MAP38 passed: exact MAP37 statistics (local/express/cross/loop/legacy), one-pass batch, in-place mutation freshness, compact diagnostic parity, escaped views, concurrent RPC, timeout/crash/clone cleanup, stale callbacks, unavailable-worker rejection and restart.'
   )).catch(e => {
   console.error(e);
