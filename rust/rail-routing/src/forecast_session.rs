@@ -32,6 +32,11 @@ struct Catalog {
     views: VecDeque<(bool,usize,Rc<V>)>, summary: Option<(Vec<u64>,Rc<V>)>, diagnostics:Option<Vec<crate::diagnostics::Flow>>,
 }
 impl Catalog {
+    fn diagnostic_flows(&mut self) -> (V, &[crate::diagnostics::Flow]) {
+        let meta=obj(&[("graph", V::Shared(self.graph.clone())), ("count", n(self.count() as f64)), ("compact", boolean(true))]);
+        let flows=self.diagnostics.get_or_insert_with(|| crate::diagnostics::decode_owned(&meta, &self.flows));
+        (meta, flows.as_slice())
+    }
     fn load(dto: &V) -> Option<Self> {
         let count=unsigned(dto.get("count"))?; if count>2_000_000{return None;}
         let flows=numbers(dto.get("flowData"));
@@ -230,9 +235,15 @@ impl ForecastOwner {
     pub(super) fn diagnose(&mut self,id:u64,input:&V)->V{
         if input.get("op").text()=="alerts"{return crate::diagnostics::query_owned(input,&V::Missing,&[]);}
         let Some(c)=self.catalogs.get_mut(&id)else{return fault("FORECAST_EXPIRED")};
-        let meta=obj(&[("graph",(*c.graph).clone()),("count",n(c.count()as f64)),("compact",boolean(true))]);
-        if c.diagnostics.is_none(){c.diagnostics=Some(crate::diagnostics::decode_owned(&meta,&c.flows));}
-        crate::diagnostics::query_owned(input,&meta,c.diagnostics.as_ref().unwrap())
+        let (meta, flows) = c.diagnostic_flows();
+        crate::diagnostics::query_owned(input, &meta, flows)
+    }
+    pub(super) fn dispatch_recommendation(&mut self, id: u64, world: &V, line_id: &V, stations: &V) -> Result<V,String> {
+        let line = world.get("services").array().iter().find(|l| eq(l.get("id"), line_id)).ok_or("线路不存在。")?;
+        let catalog = self.catalogs.get_mut(&id).ok_or("FORECAST_EXPIRED")?;
+        let (meta, flows) = catalog.diagnostic_flows();
+        let riders = crate::diagnostics::line_riders(world, line, &meta, flows)?;
+        Ok(crate::line_planning::recommendation(world, line, riders, stations, &crate::bootstrap::config()))
     }
     pub(super) fn retain(&mut self,id:u64)->Result<(),String>{if !self.catalogs.contains_key(&id){return Err("FORECAST_EXPIRED".into());}*self.pins.entry(id).or_default()+=1;Ok(())}
     pub(super) fn release_owned(&mut self,id:u64){if let Some(count)=self.pins.get_mut(&id){*count=count.saturating_sub(1);if *count==0{self.pins.remove(&id);if self.deferred_release.remove(&id){self.catalogs.remove(&id);}}}}

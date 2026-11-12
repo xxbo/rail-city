@@ -16,6 +16,8 @@ fn awards(records:&V)->V{
  arr(rows)
 }
 pub(super) fn query(v:&V)->V{let s=v.get("state");match v.get("kind").text(){
+ "defaultPatterns"=>crate::diagnostics::patterns(v.get("line")),
+ "patternDraft"=>crate::line_planning::query(s,v).unwrap_or_else(|e|obj(&[("error",text(e))])),
  "currencyTo"=>n(round(v.num("value")*0.05*100.0)/100.0),"currencyFrom"=>n(round(v.num("value")/0.05)),
  "awards"=>awards(v.get("records")),
  "weights"=>V::Object(WEIGHTS.iter().map(|(k,w)|(k.to_string(),n(*w))).collect()),

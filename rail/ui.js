@@ -225,7 +225,7 @@
     updatedAt: null
   };
   const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=74') : null,
+    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=75') : null,
     timeout: 45000,
     timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
     errorMessage: '客流后台计算失败',
@@ -923,21 +923,30 @@
     return lineView.specOptions(value);
   }
 
+  let dispatchRequest=0;
   function markDispatchDirty() {
+    dispatchRequest++;
     dispatchDirty = true;
     if ($('dispatch-pending')) $('dispatch-pending').hidden = false;
   }
 
-  function recommendDispatch() {
+  async function recommendDispatch() {
+    const line=current(),control=$('dispatch-mode');
+    if(!line||!control)return;
     markDispatchDirty();
-    const l = current();
-    if (!l) return;
-    const st = N.stats(s, forecast, l.id),
-      potential = [...new Set(l.stops)].reduce((v, id) => {
-        const c = forecast.catchment.stations[id];
-        return v + (c ? (c.people + (c.jobs || 0) * .7) * .15 : 0);
-      }, 0),
-      r = F.recommend(s, l, Math.max(st.riders, potential));
+    const ticket=dispatchRequest,identity=traffic,source=forecast,edit=M.editRevision(identity);
+    const stations=Object.fromEntries(line.stops.map(id=>{
+      const row=source.catchment?.stations?.[id];
+      return [id,row?{people:row.people,jobs:row.jobs}:null];
+    }));
+    const active=()=>ticket===dispatchRequest && control===$('dispatch-mode') && current()?.id===line.id &&
+      identity===traffic && source===forecast && edit===M.editRevision(traffic);
+    let r;
+    try {
+      const result=await RailRuntime.dispatchRecommendation(identity,line.id,stations);
+      if(!active() || result.editRevision!==edit)return;
+      r=result.plan;
+    }catch(error){if(active())toast(error.message);return;}
     $('dispatch-mode').value = 'auto';
     $('dispatch-offpeak').value = r.offPeak;
     $('dispatch-peak').value = r.peak;
@@ -1046,8 +1055,11 @@
     ).join('');
   }
 
-  function patternCard(l, p, i) {
-    return lineView.patternCard(s, l, p, i);
+  function showPatternDraft(line, patterns) {
+    const list=$('pattern-list');
+    list.innerHTML=lineView.patternCards(s,line,patterns,true);
+    list.dataset.draft='true';
+    dispatchDirty=true;
   }
 
   function stopOptions(l, index) {
@@ -1059,6 +1071,7 @@
       const p = {
         kind: el.dataset.kind
       };
+      if(el.dataset.headway) p.headway=+el.dataset.headway;
       for (const key of ['from', 'to', 'fleet', 'headway', 'target', 'targetEnd']) {
         const input = el.querySelector(`[data-field="${key}"]`);
         if (input) p[key] = key === 'target' ? input.value : +input.value;
@@ -1076,50 +1089,12 @@
   }
 
   function addPattern() {
-    const l = current(),
-      patterns = readPatterns(),
-      kind = $('new-pattern-kind').value;
-    if (patterns.length >= 8) {
-      toast('每条线路最多 8 个交路。');
-      return;
-    }
-    const p = {
-      kind,
-      from: 0,
-      to: l.stops.length - 1,
-      fleet: 2,
-      headway: l.headway,
-      calls: [...l.stops]
-    };
-    if (kind === 'short') {
-      if (l.stops.length < 3) {
-        toast('小交路至少需要 3 座车站。');
-        return;
-      }
-      p.to = l.stops.length - 2;
-    }
-    if (kind === 'cross') {
-      const target = s.services.find(x => x.id !== l.id && x.stops.some(n => l.stops.includes(n)));
-      if (!target) {
-        toast('没有可接续线路。请先将另一条线路接入同一座车站。');
-        return;
-      }
-      p.to = l.stops.findIndex(id => target.stops.includes(id));
-      p.from = p.to === 0 ? (l.stops[0] === l.stops.at(-1) ? l.stops.length - 2 : l.stops.length - 1) : 0;
-      p.target = target.id;
-      p.targetEnd = target.stops.at(-1) !== l.stops[p.to] ? target.stops.length - 1 : 0;
-    }
-    const total = patterns.reduce((v, p) => v + p.fleet, 0);
-    if (total + 2 > l.fleet) {
-      const donor = patterns.find(p => p.fleet >= 4);
-      if (!donor) {
-        toast('配属车辆不足，请先购买并增加线路投放数量。');
-        return;
-      }
-      donor.fleet -= 2;
-    }
-    patterns.push(p);
-    $('pattern-list').innerHTML = patterns.map((p, i) => patternCard(l, p, i)).join('');
+    const line=current();
+    if(!line)return;
+    try {
+      const patterns=X.patternDraft(s,line.id,'add',{patterns:readPatterns(),patternKind:$('new-pattern-kind').value});
+      showPatternDraft(line,patterns);
+    }catch(error){toast(error.message);}
   }
 
   function path(l) {
@@ -1718,16 +1693,14 @@
       return;
     }
     if (b.dataset.dropPattern !== undefined) {
-      const l = current(),
-        patterns = R.clone(X.patterns(l));
-      patterns.splice(+b.dataset.dropPattern, 1);
-      if (!patterns.length) {
-        toast('至少保留一个交路。');
-        return;
-      }
-      await commit(M.command('network','configure',{id:l.id,values:{
-        patterns
-      }}), '已删除交路。');
+      const line=current();
+      if(!line)return;
+      const editing=$('pattern-list').dataset.draft==='true';
+      try {
+        const patterns=X.patternDraft(s,line.id,'remove',{patterns:editing?readPatterns():X.patterns(line),index:+b.dataset.dropPattern});
+        if(editing)showPatternDraft(line,patterns);
+        else await commit(M.command('network','configure',{id:line.id,values:{patterns}}),'已删除交路。');
+      }catch(error){toast(error.message);}
       return;
     }
     if (b.dataset.repay) {
@@ -1932,9 +1905,10 @@
         break;
       }
       case 'recommend-dispatch':
-        recommendDispatch();
+        await recommendDispatch();
         break;
       case 'save-dispatch': {
+        dispatchRequest++;
         const d = {
           mode: $('dispatch-mode').value,
           manual: +$('dispatch-manual').value,
@@ -2217,11 +2191,9 @@
     }
     if (id === 'dispatch-mode') {
       markDispatchDirty();
-    }
-    if (id === 'dispatch-mode') {
       document.querySelectorAll('[data-dispatch-row]').forEach(el => el.hidden = el.dataset
         .dispatchRow !== e.target.value);
-      if (e.target.value === 'auto' && current().dispatch.mode !== 'auto') recommendDispatch();
+      if (e.target.value === 'auto' && current().dispatch.mode !== 'auto') await recommendDispatch();
       return;
     }
     if (id === 'draft-spec') {
@@ -2238,11 +2210,18 @@
       depotQty = +e.target.value;
       return;
     }
-    if (e.target.dataset.field === 'target') {
-      const card = e.target.closest('[data-pattern-index]'),
-        line = s.services.find(l => l.id === e.target.value);
-      card.querySelector('[data-field="targetEnd"]').innerHTML = stopOptions(line, line.stops
-        .length - 1);
+    const card=e.target.closest('[data-pattern-index]');
+    if(card){
+      $('pattern-list').dataset.draft='true';
+      dispatchDirty=true;
+      if(e.target.dataset.field==='target'){
+        const option=e.target.selectedOptions[0],target=s.services.find(line=>line.id===option?.value);
+        if(target){
+          card.querySelector('[data-field="from"]').value=option.dataset.from;
+          card.querySelector('[data-field="to"]').value=option.dataset.to;
+          card.querySelector('[data-field="targetEnd"]').innerHTML=stopOptions(target,+option.dataset.end);
+        }
+      }
       return;
     }
     if (e.target.dataset.baseLayer) {
@@ -2700,12 +2679,11 @@
     const row = centerRows().find(x => x.id === id),
       advice = row?.suggestions.find(x => x.key === key);
     if (!advice?.patterns) return;
+    const live=s.services.find(line=>line.id===id);
+    if(!live || OC.signature(live)!==row.signature){toast('线路计划已变化，请重新查看运营建议。');return;}
     selectLine(id);
     showLineTab('rules');
-    $('pattern-list').innerHTML = advice.patterns.map((p, i) => patternCard({
-      ...current(),
-      patterns: advice.patterns
-    }, p, i).replace('当前 ', '草案 ')).join('');
+    showPatternDraft(live,advice.patterns);
     const note = document.createElement('p');
     note.className = 'dispatch-pending';
     note.textContent = '运营中心草案 · ' + advice.title + '。尚未生效，请检查端点、停站、配额后点击“应用运营规则”。';
@@ -3346,6 +3324,11 @@
     });
   }
   document.addEventListener('input', e => {
+    if(e.target.closest('[data-pattern-index]')){
+      $('pattern-list').dataset.draft='true';
+      dispatchDirty=true;
+      return;
+    }
     if (e.target.id === 'center-search') {
       centerQuery = e.target.value;
       filterCenter();

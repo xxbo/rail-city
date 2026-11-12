@@ -387,7 +387,7 @@ fn execute(s: &mut V, command: &V, cfg: &V) -> Result<V, String> {
         _ => Err("未知的资产命令。".into()),
     }
 }
-fn recommend(s: &V, l: &V, daily: f64, cfg: &V) -> V {
+pub(super) fn recommend(s: &V, l: &V, daily: f64, cfg: &V) -> V {
     let capacity = cfg
         .get("specs")
         .get(l.get("stockSpec").text())

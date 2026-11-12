@@ -40,6 +40,7 @@ mod projection;
 mod queues;
 mod service_validation;
 mod services;
+mod line_planning;
 mod simulation;
 mod statistics;
 mod temporal;

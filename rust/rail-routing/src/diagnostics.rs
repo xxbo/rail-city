@@ -343,9 +343,7 @@ fn append(ps: &V, l: &V, before_off: f64, before_peak: f64, mut p: V) -> V {
         return V::Null;
     }
     let mut out = crate::diagnostics::clone_json(ps);
-    let donor = out.array_mut().iter_mut().find(|p| p.num("fleet") >= 4.0);
-    let Some(donor) = donor else { return V::Null };
-    donor.set("fleet", n(donor.num("fleet") - 2.0));
+    if !crate::line_planning::donate_pair(out.array_mut()) { return V::Null; }
     p.set("fleet", n(2.0));
     p.set("headway", l.get("headway").clone());
     out.array_mut().push(p);
@@ -868,6 +866,63 @@ fn rows(s: &V, rt: &V, op: &V, totals: &V, details: &V, cfg: &V) -> V {
     });
     arr(result)
 }
+fn legacy_traffic(l: &V, graph: &V, data: &[Flow]) -> V {
+    let mut out = stats_row(l);
+    let time = (l.num("close") - l.num("open")) / (18.0 * 60.0);
+    data.iter().for_each(|f| {
+        let mut from = n(f.from);
+        let mut length = 0.0;
+        let mut aboard = false;
+        let mut used = false;
+        for (i, &ix) in f.edges.iter().enumerate() {
+            let e = &graph.get("edges").array()[ix];
+            if eq(e.get("service"), l.get("id")) {
+                if !aboard {
+                    add(
+                        out.get_mut("stations").get_mut(&jsstring(&from)),
+                        "board",
+                        f.trips * time,
+                    );
+                    add(&mut out, "riders", f.trips * time);
+                    aboard = true;
+                }
+                length += e.num("km");
+                used = true;
+                if f.edges.get(i + 1).map_or(true, |&j| {
+                    !eq(graph.get("edges").array()[j].get("service"), l.get("id"))
+                }) {
+                    add(
+                        out.get_mut("stations").get_mut(&jsstring(e.get("to"))),
+                        "alight",
+                        f.trips * time,
+                    );
+                    aboard = false;
+                }
+            }
+            from = e.get("to").clone();
+        }
+        if used {
+            add(
+                &mut out,
+                "revenue",
+                f.trips * f.fare * length / f.distance * time,
+            );
+        }
+    });
+    out
+}
+
+// Use the same boarding counts as the line panel, without constructing its
+// income, operating cost and frequency projections for every service.
+pub(super) fn line_riders(world: &V, line: &V, meta: &V, data: &[Flow]) -> Result<f64, String> {
+    if world.num("routeModel") != 9.0 {
+        return Ok(legacy_traffic(line, meta.get("graph"), data).num("riders"));
+    }
+    let plan = expanded(world, minute(world))?;
+    let totals = crate::diagnostic_aggregate::aggregate(world, &plan, meta, data, false, false).totals;
+    Ok(totals.get(line.get("id").text()).num("riders"))
+}
+
 fn aggregate(s: &V, rt: &V, meta: &V, data: &[Flow], cfg: &V, operation: &str, view: &V) -> V {
     let now = fallback(rt.get("minute"), minute(s));
     let op = expanded(
@@ -903,49 +958,7 @@ fn aggregate(s: &V, rt: &V, meta: &V, data: &[Flow], cfg: &V, operation: &str, v
         let stat = if s.num("routeModel") == 9.0 {
             finish(s, l, &total, &stats_op, cfg)
         } else {
-            // Legacy per-line boarding/fare semantics remain callable through the same native dispatcher.
-            let mut out = stats_row(l);
-            let time = (l.num("close") - l.num("open")) / (18.0 * 60.0);
-            data.iter().for_each(|f| {
-                let mut from = n(f.from);
-                let mut length = 0.0;
-                let mut aboard = false;
-                let mut used = false;
-                for (i, &ix) in f.edges.iter().enumerate() {
-                    let e = &graph.get("edges").array()[ix];
-                    if eq(e.get("service"), l.get("id")) {
-                        if !aboard {
-                            add(
-                                out.get_mut("stations").get_mut(&jsstring(&from)),
-                                "board",
-                                f.trips * time,
-                            );
-                            add(&mut out, "riders", f.trips * time);
-                            aboard = true;
-                        }
-                        length += e.num("km");
-                        used = true;
-                        if f.edges.get(i + 1).map_or(true, |&j| {
-                            !eq(graph.get("edges").array()[j].get("service"), l.get("id"))
-                        }) {
-                            add(
-                                out.get_mut("stations").get_mut(&jsstring(e.get("to"))),
-                                "alight",
-                                f.trips * time,
-                            );
-                            aboard = false;
-                        }
-                    }
-                    from = e.get("to").clone();
-                }
-                if used {
-                    add(
-                        &mut out,
-                        "revenue",
-                        f.trips * f.fare * length / f.distance * time,
-                    );
-                }
-            });
+            let out = legacy_traffic(l, graph, data);
             let length = km(s, l);
             let hw = effective(s, l);
             let hours = (l.num("close") - l.num("open")) / 60.0;
