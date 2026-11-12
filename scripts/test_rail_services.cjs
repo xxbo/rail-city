@@ -1,5 +1,17 @@
 const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),X=require('../rail/service-plan'),P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),C=require('../rail/city');
 const near=(a,b,t=1e-5)=>assert(Math.abs(a-b)<t,`${a} != ${b}`);
+{
+  const ring={stops:[2,1,2],headway:8,fleet:4};
+  const settings=X.lineSettings(ring);
+  assert.deepEqual(settings.fareBands,X.PRICES);
+  assert.deepEqual(settings.patterns,[{kind:'local',from:0,to:2,calls:[2,1],fleet:4,headway:8}]);
+  X.patterns(ring)[0].calls.pop();
+  assert.deepEqual(X.patterns(ring)[0].calls,[2,1]);
+  assert.deepEqual(X.lineSettings({...ring,patterns:[]}).patterns,[]);
+  const custom={fareBands:[220,250,300,350,400,450]};
+  assert.deepEqual(X.feedbackFares(custom,6+1e-9),[X.fare(custom,6+1e-9),180]);
+  assert.deepEqual(X.feedbackFares(custom,6.001),[250,210]);
+}
 const s=M.init(N.emptyWorld()),result=N.addLine(s,[{x:1168,y:920},{x:1180,y:900,waypoint:true},{x:1202,y:934},{x:1230,y:948},{x:1255,y:960}]);assert(!result.error);const l=s.services[0];assert.equal(s.nodes.length,4);assert.equal(s.tracks[0].bends.length,1);assert(s.tracks[0].km>R.distance(s.nodes[0],s.nodes[1]));assert(N.validate(s));const clone=JSON.parse(JSON.stringify(s));assert(N.validate(clone));clone.tracks[0].km=.1;assert(!N.validate(clone));
 const t=s.tracks[0],pos=P.position(s,{status:'moving',segment:{from:0,to:1,track:t.id},progress:.5},0),expected=X.along(X.trackPoints(s,t),.5);near(pos.x,expected.x);near(pos.y,expected.y);
 assert.equal(X.fare(l,6),180);assert.equal(X.fare(l,6.00001),210);assert.equal(X.fare(l,11.01),260);const untouched=JSON.stringify(s);assert(N.configure(s,l.id,{fareBands:[500,200,260,300,330,400]}).error);assert.equal(JSON.stringify(s),untouched);assert(N.addLine(s,[{x:1400,y:1000},{x:1410,y:1010,waypoint:true}]).error);assert.equal(JSON.stringify(s),untouched);

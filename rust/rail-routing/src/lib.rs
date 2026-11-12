@@ -41,6 +41,8 @@ mod projection;
 mod queues;
 mod service_validation;
 mod services;
+mod tariffs;
+mod forecast_input;
 mod line_planning;
 mod simulation;
 mod statistics;
@@ -56,7 +58,6 @@ use std::rc::Rc;
 const ABI: f64 = 1.0;
 const NONE: usize = usize::MAX;
 const STRIDE: usize = 14;
-const LIMITS: [f64; 6] = [6.0, 11.0, 19.0, 27.0, 40.0, 999.0];
 
 #[derive(Clone)]
 struct Edge {
@@ -149,11 +150,7 @@ fn finite(value: f64) -> f64 {
     value
 }
 fn fare(prices: &[f64; 6], km: f64) -> f64 {
-    if km <= 1e-9 {
-        return 0.0;
-    }
-    let rounded = (km - 1e-8).ceil();
-    prices[LIMITS.iter().position(|v| rounded <= *v).unwrap_or(5)]
+    tariffs::band(km).map_or(0.0, |index| prices[index])
 }
 fn parse_graph(v: &[f64]) -> Graph {
     assert!(v.len() >= 7 && v[0] == ABI);

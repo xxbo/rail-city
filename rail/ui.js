@@ -225,7 +225,7 @@
   };
   function createDemandClient() {
     const client=RailWorkerClient.create({
-      createWorker:()=>typeof Worker==='function'?new Worker('demand-worker.js?v=76'):null,
+      createWorker:()=>typeof Worker==='function'?new Worker('demand-worker.js?v=77'):null,
       timeout:45000,
       timeoutMessage:'后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
       errorMessage:'客流后台计算失败',

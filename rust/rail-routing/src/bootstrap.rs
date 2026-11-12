@@ -53,7 +53,7 @@ fn cached(key: &str, make: impl FnOnce() -> V) -> Rc<V> {
     CACHE.with(|c| c.borrow_mut().insert(key.into(), v.clone()));
     v
 }
-fn region_id(v: &str) -> &str {
+pub(super) fn region_id(v: &str) -> &str {
     if v == "gba" {
         "gba"
     } else {
@@ -138,7 +138,7 @@ fn daily(h: &V) -> f64 {
         _ => h.num("observed"),
     }
 }
-fn access(h: &V) -> V {
+pub(super) fn access(h: &V) -> V {
     if h.get("region").text() == "gba" {
         obj(&[
             (
@@ -167,7 +167,7 @@ fn access(h: &V) -> V {
         }
     }
 }
-fn envelope(h: &V) -> V {
+pub(super) fn envelope(h: &V) -> V {
     let movements = daily(h);
     let total = movements * h.num("landside");
     obj(&[
@@ -1290,6 +1290,7 @@ pub(super) fn run(input: &V) -> Rc<V> {
         "hubs" => hubs(region),
         "settings" => cached("settings", || {
             obj(&[
+                ("tariffs", crate::tariffs::settings()),
                 ("balance", raw().get("balance").clone()),
                 ("specs", specs()),
                 ("types", raw().get("facilityTypes").clone()),

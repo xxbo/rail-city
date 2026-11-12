@@ -42,13 +42,10 @@
       const length = l.trackIds.reduce((v, id) => v + (km.get(id) || 0), 0);
       const direct = l.stops[0] === l.stops.at(-1) ? length : X.distance(s.nodes[l.stops[0]], s
         .nodes[l.stops.at(-1)]);
-      const fareKm = Math.min(10, Math.max(1, length));
+      const fares = X.feedbackFares(l,length);
       out.push(l.open, l.close, +active.has(l.id), +(!l.fleetManaged || F.planned(l, rt.minute) >
           0),
-        length, direct, X.fare(l, fareKm), X.fare({
-          ...l,
-          fareBands: undefined
-        }, fareKm), l.stops.length, ...l.stops);
+        length, direct, ...fares, l.stops.length, ...l.stops);
       for (const k of FEEDBACK) out.push(Number(r[k]));
       out.push(r.satisfaction ?? .7, r.feedbackMinute ?? 0, +(r.feedbackMinute == null));
     }

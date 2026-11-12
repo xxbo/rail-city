@@ -217,7 +217,7 @@ pub(super) fn validate_plan(s: &V) -> bool {
         return false;
     }
     let (frame, tracks) = service_frame(s, minute(s), true);
-    let mut v = vec![1.0, frame.len() as f64];
+    let mut v = vec![2.0, frame.len() as f64];
     v.extend(frame);
     v.extend([
         (s.num("routeModel") == 9.0 && !s.get("operatingPlan").truth()) as u8 as f64,
@@ -329,8 +329,6 @@ pub(super) fn validate_plan(s: &V) -> bool {
                     matches!(p.get("calls"), V::Array(_)) as u8 as f64,
                 ]);
             }
-        } else {
-            v.extend([num(l.get("headway")), 0.0]);
         }
     }
     crate::service_validation::valid(&v)
@@ -364,6 +362,13 @@ pub(super) fn expanded(s: &V, minute: f64) -> Result<V, String> {
     }
     let (frame, tracks) = service_frame(s, minute, false);
     let data = crate::services::run(&frame);
+    let lines = render_services(s, &tracks, &data, None)?;
+    let mut out = operation_view(s, lines);
+    out.set("operatingPlan", boolean(true));
+    Ok(out)
+}
+
+pub(super) fn render_services(s: &V, tracks: &[V], data: &[f64], selected: Option<(&V, &V)>) -> Result<V, String> {
     if data[1] != 0.0 {
         return Err(compile_error(data[1] as usize).into());
     }
@@ -380,16 +385,11 @@ pub(super) fn expanded(s: &V, minute: f64) -> Result<V, String> {
         at += 5;
         let base = &s.get("services").array()[src];
         let mut l = base.clone();
-        let p = if default {
-            V::Missing
-        } else {
-            base.get("patterns").array()[ordinal].clone()
-        };
-        let kind = if default {
-            "local"
-        } else {
-            p.get("kind").text()
-        };
+        let ordinal_value = selected.map_or_else(|| n(ordinal as f64), |(_, index)| index.clone());
+        let p = if let Some((pattern, _)) = selected { pattern }
+            else if default { &V::Missing }
+            else { &base.get("patterns").array()[ordinal] };
+        let kind = if default { "local" } else { p.get("kind").text() };
         let kind_ix = KINDS.iter().position(|x| *x == kind);
         let ns = data[at] as usize;
         at += 1;
@@ -414,15 +414,15 @@ pub(super) fn expanded(s: &V, minute: f64) -> Result<V, String> {
         assert_eq!(at, end);
         l.set(
             "id",
-            if ordinal == 0 {
+            if !ordinal_value.truth() {
                 base.get("id").clone()
             } else {
-                text(&format!("{}p{}", jsstring(base.get("id")), ordinal))
+                text(&format!("{}p{}", jsstring(base.get("id")), jsstring(&ordinal_value)))
             },
         );
         l.set("parentLine", base.get("id").clone());
-        l.set("patternIndex", n(ordinal as f64));
-        l.set("patternKind", text(kind));
+        l.set("patternIndex", ordinal_value);
+        l.set("patternKind", if default { text(kind) } else { p.get("kind").clone() });
         l.set(
             "name",
             text(&format!(
@@ -461,10 +461,7 @@ pub(super) fn expanded(s: &V, minute: f64) -> Result<V, String> {
         l.set("parents", V::Missing);
         lines.push(l);
     }
-    let mut out = operation_view(s, arr(lines));
-    out.set("operatingPlan", boolean(true));
-
-    Ok(out)
+    Ok(arr(lines))
 }
 pub(super) fn compile_error(i: usize) -> &'static str {
     match i {
@@ -474,6 +471,8 @@ pub(super) fn compile_error(i: usize) -> &'static str {
         4 => "跨线交路需要相同车型与编组。",
         5 => "交路不能重复经过同一车站。",
         6 => "直达交路的起终点必须不同。",
+        7 => "交路端点无效。",
+        8 => "交路车队分配无效。",
         _ => "交路配置无效。",
     }
 }
@@ -519,6 +518,9 @@ pub(super) fn planned(l: &V, minute: f64) -> f64 {
 }
 pub(super) fn headway(s: &V, l: &V) -> Result<f64, String> {
     if s.num("routeModel")!=9.0{return Ok(crate::legacy::headway(s,l));}
+    service_headway(s, l)
+}
+pub(super) fn service_headway(s: &V, l: &V) -> Result<f64, String> {
     let managed = l.get("fleetManaged").truth();
     let fleet = if managed && !l.get("dispatchCompiled").truth() {
         planned(l, minute(s))

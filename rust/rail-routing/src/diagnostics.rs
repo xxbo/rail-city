@@ -54,10 +54,11 @@ pub(super) fn patterns(l: &V) -> V {
     if l.get("patterns").truth() {
         l.get("patterns").clone()
     } else {
+        let local = crate::services::Pattern::local(l.get("stops").array().len(), l.num("fleet"));
         arr(vec![obj(&[
-            ("kind", text("local")),
-            ("from", n(0.0)),
-            ("to", n(l.get("stops").array().len() as f64 - 1.0)),
+            ("kind", text(KINDS[local.kind as usize])),
+            ("from", n(local.from)),
+            ("to", n(local.to)),
             ("calls", arr(unique(l.get("stops").array()))),
             ("fleet", l.get("fleet").clone()),
             ("headway", l.get("headway").clone()),

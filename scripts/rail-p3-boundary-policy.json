@@ -83,7 +83,19 @@
     "rail/demand-world.js": {
       "role": "domain",
       "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "owner": "Rust graph/forecast/directory/cache",
+      "overrides": {
+        "encode": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust forecast input assembly; JS copies city cell columns and passes graph handles"
+        },
+        "writeCells": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust forecast input assembly; JS copies city cell columns and passes graph handles"
+        }
+      }
     },
     "rail/density-field.js": {
       "role": "ui",
@@ -348,6 +360,26 @@
           "role": "platform",
           "phase": "P3-2 bridge",
           "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering"
+        },
+        "lineSettings": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views"
+        },
+        "fare": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views"
+        },
+        "feedbackFares": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views"
+        },
+        "patterns": {
+          "role": "platform",
+          "phase": "P3-2 bridge",
+          "owner": "Rust tariff and service projections; JS exposes compatible views"
         }
       }
     },

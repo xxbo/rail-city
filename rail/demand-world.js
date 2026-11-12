@@ -4,42 +4,40 @@
   const node = typeof module !== 'undefined' && module.exports;
   const Core = node ? require('./routing-wasm') : root.RailRouting;
   const X = node ? require('./service-plan') : root.RailServicePlan;
-  const R = node ? require('./engine') : root.RailSim;
-  const H = node ? require('./hubs') : root.RailHubs;
-  const BAL = node ? require('./game-balance') : root.RailBalance;
+  const B = node ? require('./bootstrap-wasm') : root.RailBootstrap;
   const FIELDS = ['people','jobs','shops','industry','leisure'];
   const PURPOSES = ['work','shopping','leisure'], MODES = ['walk','bike','bus'];
   const KINDS = ['visitor-arrival','visitor-return','staff-outbound','staff-homebound','local-departure','local-return'];
   const tokens = new WeakMap();
-  function cellValues(c) {
-    return [c.x,c.y,c.w,c.h,c.area,...FIELDS.map(k => c[k]),c.factory,c.survey,c.populationValid ? 1 : 0];
+  const CELL_FIELDS=['x','y','w','h','area',...FIELDS,'factory','survey'];
+  const CELL_WIDTH=CELL_FIELDS.length+1;
+  function writeCells(values, at, cells) {
+    for(const cell of cells) {
+      for(const key of CELL_FIELDS) values[at++]=cell[key];
+      values[at++]=+!!cell.populationValid;
+    }
+    return at;
   }
-  function encode(state,city,adj=null) {
-    if (!tokens.has(city)) tokens.set(city,(node?require('./bootstrap-wasm'):root.RailBootstrap).forecast('cityIdentity'));
-    const plan = X.expand(state), effective = !!city.metadata?.effectiveConnections;
-    const ids = [...new Set(plan.services.filter(l => !effective || l.fleet > 0).flatMap(l => l.callStops || l.stops))];
-    const hubs = H.forRegion(state.region), tracks = state.tracks.map(t=>t.id), trackIds = new Map(tracks.map((id,i)=>[id,i]));
-    const edges = adj ? adj.flat() : [], runs = adj ? plan.services : [];
-    const values = [1,tokens.get(city),+effective,state.urban?1:0,state.urban?.version||0,state.urban?.step||0,
-      city.metadata?.demandZoneUnits||80,BAL.HUB_CAPTURE_MAX,BAL.HUB_MARKET_SCALE,
-      ...FIELDS.map(k=>city.totals[k]),state.nodes.length,ids.length,city.cells.length,hubs.length,runs.length,tracks.length,edges.length,state.services.length];
-    for(const n of state.nodes) values.push(n.x,n.y);
-    values.push(...ids);
-    for(const c of city.cells) values.push(...cellValues(c));
-    for(const h of hubs) {
-      const e=H.envelope(h),a=H.access(h);
-      values.push(h.x,h.y,e.movements,e.landside,e.visitorArrivals,e.visitorReturns,e.localDepartures,e.localReturns,a.staff||0,a.railReference);
-    }
-    for(const l of runs) {
-      const list=[...new Set(l.trackIds)].map(id=>trackIds.get(id));
-      values.push(X.headway(plan,l),R.capacity(l),list.length,...list);
-    }
-    for(const e of edges) {
-      const list=(e.tracks||[e.track]).map(id=>trackIds.get(id));
-      values.push(list.length,...list);
-    }
-    return {values, state,city,hubs,tracks,effective};
+  function encode(state,city,adj=null,command=null) {
+    if (!tokens.has(city)) tokens.set(city,B.forecast('cityIdentity'));
+    const {region,routeModel,operatingPlan,services,urban,economy}=state;
+    const {head,tail,hubs,effective}=B.forecast('worldInput',{
+      token:tokens.get(city),graphId:adj ? Core.forecastGraphId(state,adj) : undefined,
+      state:{region,routeModel,operatingPlan,services,nodes:state.nodes.map(({x,y})=>({x,y})),
+        tracks:state.tracks.map(({id,km})=>({id,km})),economy:{minute:economy?.minute},
+        urban:urban && {version:urban.version,step:urban.step}},
+      city:{count:city.cells.length,totals:city.totals,effectiveConnections:city.metadata?.effectiveConnections,
+        demandZoneUnits:city.metadata?.demandZoneUnits}
+    });
+    const start=command===null?0:1;
+    const values=new Float64Array(start+head.length+city.cells.length*CELL_WIDTH+tail.length);
+    if(start)values[0]=command;
+    values.set(head,start);
+    const at=writeCells(values,start+head.length,city.cells);
+    values.set(tail,at);
+    return {values,state,city,hubs,tracks:state.tracks.map(t=>t.id),effective};
   }
+
   function cursor(data) {
     let at=0;
     return {f(){if(at>=data.length) throw Error('批量预测结果不完整');return data[at++];},
@@ -65,7 +63,7 @@
     return Object.fromEntries(PURPOSES.map(k=>{const [nominal,capacity,outbound,m]=r.take(4);return [k,{nominal,capacity,outbound,...(matched?{matched:m}:{})}];}));
   }
   function assign(state,city) {
-    const e=encode(state,city), out=Core.kernel('world_run',[0,...e.values]);
+    const e=encode(state,city,null,0), out=Core.kernel('world_run',e.values);
     const r=cursor(out), result=readCatchment(r,city);r.done();return result;
   }
   function choices(p,stations,feeders=true) {
@@ -79,14 +77,15 @@
     r.done();return result;
   }
   function local(city,p,radius=.8) {
-    const values=[2,p.x,p.y,radius,city.cells.length];
-    for(const c of city.cells)values.push(...cellValues(c));
+    const values=new Float64Array(5+city.cells.length*CELL_WIDTH);
+    values.set([2,p.x,p.y,radius,city.cells.length]);
+    writeCells(values,5,city.cells);
     const r=cursor(Core.kernel('world_run',values));
     const out=fields(r,[...FIELDS,'cells','area','factory','surveyArea','populationArea']);r.done();return out;
   }
   function distribution(city) {
     const state={nodes:[],services:[],tracks:[],companies:[],region:city.metadata?.region};
-    const e=encode(state,city),r=cursor(Core.kernel('world_run',[1,...e.values])),n=r.f(),zones=[];
+    const e=encode(state,city,null,1),r=cursor(Core.kernel('world_run',e.values)),n=r.f(),zones=[];
     for(let i=0;i<n;i++){
       const [bx,by]=r.take(2),z={key:bx+':'+by,...fields(r,['x','y','count','area',...FIELDS])},count=r.f();
       z.cells=Array.from(r.take(count),ix=>city.cells[ix]);zones.push(z);
@@ -109,9 +108,9 @@
     const nh=r.f();
     for(let i=0;i<nh;i++) {
       const [marketActivation,riders,arrivals,departures,staffRiders,passengerRiders,visitorDestinationScale,visitorDestinationCapacity,corridorCapture,corridorMass,development,n]=r.take(12);
-      const h=hubs[i],env=H.envelope(h),railReference=H.access(h).railReference,connections=[];
+      const {id,envelope,railReference,referenceTarget}=hubs[i],connections=[];
       for(let j=0;j<n;j++){const[id,walk,share]=r.take(3);connections.push({id,walk,share});}
-      base.hubStats[h.id]={...env,railReference,referenceTarget:env.landside*railReference,marketActivation,riders,arrivals,departures,staffRiders,passengerRiders,connections,
+      base.hubStats[id]={...envelope,railReference,referenceTarget,marketActivation,riders,arrivals,departures,staffRiders,passengerRiders,connections,
         ...(populated&&effective?{visitorDestinationScale,visitorDestinationCapacity}:{}),...(populated?{corridorCapture,corridorMass,development}:{})};
     }
     for(const [key,ids] of [['trackFlow',tracks],['trackLoad',tracks],['serviceFlow',graph.lines]]){
