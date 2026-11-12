@@ -48,6 +48,24 @@ const file=LS.pack(s,P.snapshot(rt),{personalRecords:{bestDay:12}});assert.equal
 for(const value of [rt,restored,pr,evaluatedRuntime])P.dispose(value);
 console.log('P3 regressions passed: queue wire ordering, prepared catalogs, immutable DTOs, native restore/continuation, cumulative costs, authoritative views, compiled services, invalid-input recovery and save compatibility.');
 (async()=>{
+ {
+  const Runtime=require('../rail/runtime-wasm'),world=create(2),f=forecast(world),rt=P.create(world,f,420,false);
+  try{
+   const file=JSON.stringify(LS.pack(world,null,{speed:6,playing:false}));
+   const {token}=await Runtime.previewImport(rt,file);
+   const first=await Runtime.prepareImport(rt,token,f);
+   assert.equal(first.token,token);
+   await assert.rejects(Runtime.importWriteFailed(rt,token+1),/RESTORE_TOKEN_MISMATCH/);
+   await Runtime.importWriteFailed(rt,token);
+   const second=await Runtime.prepareImport(rt,token,f);
+   assert.equal(second.saveKey,first.saveKey);
+   await Runtime.commitImport(rt,token);
+   await Runtime.commitImport(rt,token);
+   await assert.rejects(Runtime.cancelImport(rt,token),/RESTORE_TOKEN_MISMATCH/);
+   await assert.rejects(Runtime.forecastBegin(rt),/RESTORE_COMMIT_PENDING/);
+  }finally{Runtime.dispose(rt);}
+ }
+
  {const world=create(2),f=forecast(world),rt=P.create(world,f,419.9,false,{arrivalMode:'weighted'});try{assert.equal(rt.arrivalMode,'weighted');await M.advanceBudgetAsync(world,rt,.3,{budget:1e6,maxSteps:10000});assert.equal(rt.arrivalMode,'weighted','cold arrival mode survives internal Worker handoff');}finally{P.dispose(rt);}}
  // The public clock must be the actual native event clock, not start + requested.
  {const world=create(2),f=forecast(world),rt=P.create(world,f,419.9,false);try{

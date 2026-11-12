@@ -3,7 +3,7 @@
 use crate::{editor_support::*,value::Value as V};
 use std::collections::{BTreeSet,HashMap};
 #[derive(Default)]
-struct Client{epoch:u64,serial:u64,pending:BTreeSet<u64>,active:bool,offered:bool,disposed:bool,poisoned:bool,stateful:bool,timeout:f64,last_poll:Option<f64>}
+struct Client{refresh:crate::refresh_schedule::RefreshSchedule,epoch:u64,serial:u64,pending:BTreeSet<u64>,active:bool,offered:bool,disposed:bool,poisoned:bool,stateful:bool,timeout:f64,last_poll:Option<f64>}
 #[derive(Default)]
 pub(super) struct Owner{serial:u64,clients:HashMap<u64,Client>}
 impl Owner{
@@ -11,6 +11,7 @@ impl Owner{
   let action=v.get("action").text();if action=="create"{let timeout=v.num("timeout");if !timeout.is_finite()||timeout<=0.0||timeout>300000.0{return Err("INVALID_RPC_TIMEOUT".into());}self.serial+=1;self.clients.insert(self.serial,Client{timeout,stateful:v.get("stateful").truth(),..Client::default()});return Ok(n(self.serial as f64));}
   let client=self.clients.get_mut(&(v.num("id")as u64)).ok_or("RPC_EXPIRED")?;
   match action{
+   "refresh"=>Ok(if client.disposed {V::Null} else {client.refresh.event(v)}),
    "status"=>Ok(obj(&[("active",boolean(client.active)),("pending",n(client.pending.len()as f64)),("disposed",boolean(client.disposed)),("poisoned",boolean(client.poisoned))])),
    "open"=>{if client.disposed{return Err("RPC_DISPOSED".into());}if client.poisoned{return Err("RPC_COMMIT_UNKNOWN".into());}if !client.active{client.epoch+=1;client.active=true;}Ok(n(client.epoch as f64))},
    "poll"=>{let at=v.num("at");if !at.is_finite(){return Err("INVALID_POLL_TIME".into());}let due=client.last_poll.map_or(true,|last|at-last>=10000.0||at<last);let selected=!v.get("busy").truth()&&(v.get("force").truth()||v.get("stale").truth()&&!v.get("failed").truth()||due);if selected{client.last_poll=Some(at);}Ok(boolean(selected))},

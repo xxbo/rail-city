@@ -59,7 +59,7 @@
   function signature(s) {return (node?require('./save-wasm'):root.RailSave).run('signature',{state:s});}
   const api = {
     command,
-    forecastBeginAsync:(rt,blocked)=>Runtime.forecastBegin(rt,blocked),forecastFinishAsync:(rt,ticket,success)=>Runtime.forecastFinish(rt,ticket,success),
+    forecastBeginAsync:(rt,blocked,force)=>Runtime.forecastBegin(rt,blocked,force),forecastFinishAsync:(rt,ticket,success)=>Runtime.forecastFinish(rt,ticket,success),
     invalidateForecastAsync:rt=>Runtime.forecastInvalidate(rt),diagnoseAsync:(rt,query)=>Runtime.diagnose(rt,query),observeAsync:(rt,id)=>Runtime.observe(rt,id),forecastQueryAsync:(rt,query,args)=>Runtime.forecastQuery(rt,query,args),
     changeAsync:(s,rt,operation,undo=false)=>Runtime.command(rt,operation,undo).then(out=>({...out.result,quote:out.quote,undoToken:out.undoToken})),
     previewAsync:(s,rt,operation)=>Runtime.preview(rt,operation),
@@ -78,7 +78,7 @@
     repayAsync:(s,rt,loanId)=>Runtime.credit(rt,{creditAction:2,loanId}).then(r=>r.error?{error:CREDIT_ERRORS[r.error]}:{}),
     pulseAsync:(s,rt,intent)=>Runtime.pulse(s,rt,intent),runtimeIntent:(rt,intent)=>Runtime.intent(rt,intent),nativeRuntime:rt=>Runtime.has(rt),
     advanceBudget,advanceBudgetAsync,whenIdle,
-    isBusy:rt=>Runtime.isBusy(rt),lastError:()=>null,
+    isBusy:rt=>Runtime.isBusy(rt),lastError:rt=>Runtime.lastError(rt),
     signature,
     INITIAL,
     CREDIT,

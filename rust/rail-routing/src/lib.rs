@@ -4,6 +4,7 @@ mod assets;
 mod json_codec;
 mod persistence;
 mod platform;
+mod refresh_schedule;
 mod view_model;
 mod calendar;
 mod runtime_control;

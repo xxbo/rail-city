@@ -7,6 +7,9 @@ pub(super) struct ForecastWork{
     period:Option<Vec<u64>>,phase:u64,
 }
 impl ForecastWork{
+    pub fn restored(status: &V) -> Self {
+        Self { dirty: status.get("dirty").truth() || status.get("busy").truth(), ..Self::default() }
+    }
     pub fn stamp(&self,world:&V,edit:u64)->[u64;4]{[edit,world.get("urban").zero("revision")as u64,world.get("urban").zero("step")as u64,self.phase]}
     pub fn phases(&mut self,world:&V,minute:f64){
         let clock=minute.rem_euclid(1440.0);let mut current=vec![crate::temporal::peak(minute)as u64];
@@ -20,7 +23,7 @@ impl ForecastWork{
         obj(&[("needed",boolean(true)),("ticket",n(self.serial as f64)),("expectedEditRevision",n(edit as f64)),("snapshot",crate::forecast_session::snapshot(world))])
     }
     pub fn ready(&self)->bool{!self.dirty&&self.pending.is_none()}
-    pub fn accepts(&self,ticket:f64,world:&V,edit:u64)->bool{self.pending.is_some_and(|(id,stamp)|id as f64==ticket&&stamp==self.stamp(world,edit))}
+    pub fn accepts(&self,ticket:f64,world:&V,edit:u64)->bool{!self.dirty && self.pending.is_some_and(|(id,stamp)|id as f64==ticket&&stamp==self.stamp(world,edit))}
     pub fn finish(&mut self,ticket:f64,success:bool)->V{if self.pending.is_some_and(|(id,_)|id as f64==ticket){self.pending=None;if !success{self.dirty=true;}}obj(&[("dirty",boolean(self.dirty)),("busy",boolean(self.pending.is_some()))])}
 }
 pub(super) fn city_step(world:&mut V,source:&V)->Result<f64,String>{
@@ -53,3 +56,22 @@ pub(super) fn enable_development(world:&mut V,source:&V,places:&V)->bool{
  if !world.get("urban").truth()||world.get("urban").get("development").truth(){return false;}let filtered=arr(places.array().iter().filter(|p|crate::bootstrap::buildable_input(world,p,source)).cloned().collect());let d=crate::bootstrap::urban_call(10,world,vec![("region",world.get("region").clone()),("places",filtered)]);let u=world.get_mut("urban");u.set("development",d);u.set("revision",n(u.zero("revision")+1.0));true
 }
 pub(super) fn candidates(world:&V,source:&V)->V{let mut keys=world.get("urban").get("cells").entries().iter().map(|(k,_)|k.clone()).collect::<Vec<_>>();let mut seen=keys.iter().cloned().collect::<HashSet<_>>();for p in crate::bootstrap::urban_call(12,world,vec![]).array(){if crate::bootstrap::buildable_input(world,p,source){let key=format!("{}:{}",(p.num("x")/12.0).floor(),(p.num("y")/12.0).floor());if seen.insert(key.clone()){keys.push(key);}}}keys.truncate(24000);arr(keys.iter().map(|k|text(k)).collect())}
+
+#[cfg(test)]
+mod refresh_tests {
+    use super::*;
+    #[test]
+    fn restored_work_gets_a_fresh_ticket_and_later_invalidation_wins() {
+        let world=obj(&[]);
+        let mut work=ForecastWork::restored(&obj(&[("busy",boolean(true))]));
+        assert!(work.dirty && work.pending.is_none());
+        let first=work.begin(&world,0,false).num("ticket");
+        assert!(work.accepts(first,&world,0));
+        work.dirty=true;
+        assert!(!work.accepts(first,&world,0));
+        work.finish(first,false);
+        let second=work.begin(&world,0,false).num("ticket");
+        work.finish(first,true);
+        assert!(work.accepts(second,&world,0));
+    }
+}

@@ -47,6 +47,7 @@
     saveMeta = null;
   let insertIndex = null,
     pendingImport = null,
+    previewing = false,
     importError = '',
     importResume = false,
     importing = false;
@@ -149,7 +150,6 @@
     alarms = [],
     dispatchDirty = false,
     facilityKind = 'school',
-    urbanJob = false,
     urbanDrawRevision = -1,
     densityField = null,
     densityFieldRevision = -1,
@@ -217,30 +217,39 @@
   const migratedUrban=startup.migratedUrban,migratedFacilities=startup.migratedFacilities;
   unlocked = new Set(Q.awards(personalRecords).filter(a => a.unlocked).map(a => a.id));
   let calculating = false,
-    networkRevision = 0,
-    forecastTimer = null;
+    networkRevision = 0;
   const demandState = {
     status: 'starting',
     error: '',
     updatedAt: null
   };
-  const demandClient = RailWorkerClient.create({
-    createWorker: () => typeof Worker === 'function' ? new Worker('demand-worker.js?v=75') : null,
-    timeout: 45000,
-    timeoutMessage: '后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
-    errorMessage: '客流后台计算失败',
-    onFault: error => {
-      demandState.error = error.message;
-    }
-  });
-
-  function calculate(state,snapshot,handoff='withView') {
-    return demandClient.request({
-      handoff, state: snapshot || RailDemandSnapshot.capture(state)
-    }).then(message => RailForecastCatalog.hydrate(message.result,message.handoff));
+  function createDemandClient() {
+    const client=RailWorkerClient.create({
+      createWorker:()=>typeof Worker==='function'?new Worker('demand-worker.js?v=76'):null,
+      timeout:45000,
+      timeoutMessage:'后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
+      errorMessage:'客流后台计算失败',
+      discard:message=>RailForecastCatalog.cancelPort(message?.handoff),
+      runRefresh:manual=>refreshUrbanDemand(client,manual),
+      refreshNotice(status,error){
+        if(client!==demandClient||calculating||importing)return;
+        demandState.status=status;
+        if(status==='error'){
+          demandState.error=error;
+          console.warn('Demand update',error);
+          toast('需求更新失败：'+error+' 可在管理 → 运行诊断查看。');
+        }
+      }
+    });
+    return client;
+  }
+  let demandClient=createDemandClient();
+  function calculate(state,snapshot,handoff='withView',client=demandClient) {
+    return client.request({handoff,state:snapshot||RailDemandSnapshot.capture(state)})
+      .then(message=>RailForecastCatalog.hydrate(message.result,message.handoff));
   }
   let forecast;
-  try{forecast=await calculate(s);}catch(error){const loading=$('game-loading');loading.replaceChildren();const title=document.createElement('b'),detail=document.createElement('span'),retry=document.createElement('button');title.textContent='需求线程启动失败';detail.textContent=error.message;retry.textContent='重新加载';retry.onclick=()=>location.reload();loading.append(title,detail,retry);return;}
+  try{forecast=await calculate(s);}catch(error){demandClient.dispose();const loading=$('game-loading');loading.replaceChildren();const title=document.createElement('b'),detail=document.createElement('span'),retry=document.createElement('button');title.textContent='需求线程启动失败';detail.textContent=error.message;retry.textContent='重新加载';retry.onclick=()=>location.reload();loading.append(title,detail,retry);return;}
   const restored=savedRuntime&&O.restore(s,forecast,savedRuntime),runtimePolicy=RailBootstrap.run('runtimePolicy',{state:{economy:s.economy},restored:!!restored,runtimeMinute:restored?.minute,migratedFacilities,hasSaved:!!savedRuntime,connectionModel:forecast.connectionModel});
   let traffic=runtimePolicy.reuse?restored:O.create(s,forecast,runtimePolicy.minute,runtimePolicy.warm);
   demandState.status='ready';demandState.updatedAt=traffic.minute;
@@ -303,17 +312,22 @@
   }
 
   function save() {
-    return saveQueue.request(saveNow);
+    const identity=traffic;
+    return saveQueue.request(()=>saveNow(identity));
   }
-  async function saveNow() {
-    await M.whenIdle(traffic);
-    if(!RailBootstrap.persistence('canSave',{fault:runtimeFault||M.lastError(traffic),blocked:storageReadBlocked,busy:calculating||importing||!!pendingImport}))return false;
+  async function saveNow(identity,forMapSwitch=false) {
+    await M.whenIdle(identity);
+    if(identity!==traffic)return false;
+    if(!RailBootstrap.persistence('canSave',{fault:runtimeFault||M.lastError(traffic),blocked:storageReadBlocked,busy:(calculating&&!forMapSwitch)||importing||previewing}))return false;
     syncRecords();
     try {
       memoryAudit.record('save-start', s, forecast, traffic, saveQueue);
-      const payload=await RailRuntime.checkpoint(traffic,{playing,speed,personalRecords});
+      const payload=await RailRuntime.checkpoint(identity,{playing,speed,personalRecords});
+      if(identity!==traffic)return false;
       saveStatus = '正在写入本地数据库…';
-      saveMeta = await DB.writeRecord(KEY, payload, legacySaveText);
+      const meta=await DB.writeRecord(KEY,payload,legacySaveText);
+      if(identity!==traffic)return false;
+      saveMeta=meta;
       personalRecords=payload.personalRecords;persistRecords();
       memoryAudit.record('save-end', s, forecast, traffic, saveQueue);
       legacySaveText = null;
@@ -594,6 +608,12 @@
     zoomAt(base * factor, r.left + r.width / 2, r.top + r.height / 2, true);
   }
 
+  function sendClockIntent(reset){
+    const identity=traffic;
+    if(runtimeFault||M.lastError(identity))return;
+    M.runtimeIntent(identity,{at:performance.now(),speed,playing,visible:!document.hidden,reset})
+      .catch(error=>{if(identity===traffic&&!calculating)console.warn('Clock intent',error);});
+  }
   function setPlaying(on) {
     if (on && runtimeFault) {
       toast('运营异常，请查看运行诊断；刷新可恢复上次成功存档。');
@@ -609,7 +629,7 @@
       if ($('undo')) $('undo').hidden = true;
     }
     playing = on;
-    M.runtimeIntent(traffic,{at:performance.now(),speed,playing,visible:!document.hidden,reset:true});
+    sendClockIntent(true);
     $('play').textContent = on ? 'Ⅱ' : '▶ 开始运营';
     document.body.classList.toggle('simulation-paused', !on);
     $('play').setAttribute('aria-label', on ? '暂停运行' : '开始运行');
@@ -617,10 +637,13 @@
   }
   async function commit(action, message) {
     if (calculating) return false;
-    await M.whenIdle(traffic);
+    const identity=traffic;
+    await M.whenIdle(identity);
+    if(identity!==traffic||calculating)return false;
     const paused = !playing;
     let result;
-    try {result=await M.changeAsync(s,traffic,action,paused);} catch(error){toast(error.message);return false;}
+    try {result=await M.changeAsync(s,identity,action,paused);} catch(error){toast(error.message);return false;}
+    if(identity!==traffic)return false;
     if(result?.error){toast(result.error);return false;}
     networkRevision++;
     undoState=paused&&result.undoToken?{token:result.undoToken,forecast}:null;
@@ -643,7 +666,7 @@
     return result || true;
   }
 
-  function scheduleForecast(){if(!forecastTimer&&!urbanJob)forecastTimer=setTimeout(refreshUrbanDemand,120);}
+  function scheduleForecast(manual=false){demandClient.refresh.signal(manual);}
 
   function setPane(id, visible) {
     const el = $(id);
@@ -788,53 +811,54 @@
     }));
     urbanDrawRevision = s.urban.revision;
   }
-  async function refreshUrbanDemand() {
-    forecastTimer=null;
-    const identity=traffic;let job,next,submitted=false;urbanJob=true;
-    try{job=await M.forecastBeginAsync(identity,calculating||importing);}catch(error){urbanJob=false;demandState.status="error";demandState.error=error.message;return;}
-    if(!job.needed||identity!==traffic){urbanJob=false;return;}
-    memoryAudit.record('demand-start', s, forecast, traffic, saveQueue);
-    demandState.status = 'updating';
-    $('calculation-status').hidden = false;
-    $('calculation-status').textContent = '需求后台更新中' + (playing ? ' · 运营继续' : '');
+  async function refreshUrbanDemand(client,manual) {
+    const identity=traffic;
+    const currentSession=()=>identity===traffic&&client===demandClient;
+    const available=()=>currentSession()&&!calculating&&!importing&&!previewing;
+    const result={dirty:false};
+    let job,next,submitted=false;
     try {
-      next = await calculate(s,job.snapshot);
-      await M.whenIdle(traffic);
-      if(identity!==traffic)return;
-      await M.replaceDemandAsync(traffic,next,job.expectedEditRevision,job.ticket);
+      if(!available())return {dirty:true,repeatManual:manual};
+      job=await M.forecastBeginAsync(identity,false,manual);
+      if(!job.needed||!available())return result;
+      memoryAudit.record('demand-start',s,forecast,identity,saveQueue);
+      demandState.status='updating';
+      $('calculation-status').hidden=false;
+      $('calculation-status').textContent='需求后台更新中'+(playing?' · 运营继续':'');
+      next=await calculate(s,job.snapshot,'withView',client);
+      if(!available())return result;
+      await M.replaceDemandAsync(identity,next,job.expectedEditRevision,job.ticket);
       submitted=true;
+      if(!currentSession())return result;
+      // Once the runtime accepts the ticket, its UI forecast must match even
+      // if an import or reset starts while the reply is in flight.
       delete next.preparedDefinitions;
-      demandState.status = 'ready';
-      demandState.error = '';
-      demandState.updatedAt = traffic.minute;
-      forecast = next;
-      memoryAudit.record('demand-end', s, forecast, traffic, saveQueue);
-      centerAnalysis = null;
-      centerRendered = null;
-      save();
-      if (overview && !document.activeElement?.matches('#overview-panel input,#overview-panel select'))
-        renderOverview();
-      if (current() && !dispatchDirty && !document.activeElement?.matches('input,select,textarea'))
-        renderPanel();
-      updateHUD();
-    } catch (error) {
-      if(identity!==traffic)return;
-      if(['FORECAST_JOB_STALE','EDIT_REVISION_CONFLICT'].includes(error.message)){demandState.status='updating';return;}
-      demandState.status = 'error';
-      demandState.error = error.message;
-      console.warn('Demand update', error);
-      toast('需求更新失败：' + error.message + ' 可在管理 → 运行诊断查看。');
-      if (!forecastTimer) forecastTimer = setTimeout(() => {
-        forecastTimer = null;
-        scheduleForecast();
-      }, 10000);
-    } finally {
+      forecast=next;
+      demandState.status='ready';
+      demandState.error='';
+      demandState.updatedAt=identity.minute;
+      centerAnalysis=null;
+      centerRendered=null;
+      memoryAudit.record('demand-end',s,forecast,identity,saveQueue);
+      if(available()){
+        save();
+        if(overview&&!document.activeElement?.matches('#overview-panel input,#overview-panel select'))renderOverview();
+        if(current()&&!dispatchDirty&&!document.activeElement?.matches('input,select,textarea'))renderPanel();
+        updateHUD();
+      }
+    }catch(error){
+      result.error=error.message;
+      result.repeatManual=manual&&!job;
+    }finally{
       if(next)RailForecastCatalog.discardHandoff(next);
-      let completion={dirty:false};if(identity===traffic)try{completion=await M.forecastFinishAsync(identity,job.ticket,submitted);}catch(error){demandState.status="error";demandState.error=error.message;}
-      urbanJob = false;
-      if (!calculating) $('calculation-status').hidden = true;
-      if (completion.dirty) scheduleForecast();
+      if(job?.needed&&currentSession()){
+        try{result.dirty=(await M.forecastFinishAsync(identity,job.ticket,submitted)).dirty;}
+        catch(error){result.error=error.message;}
+      }
+      result.fatal=!!M.lastError(identity);
+      if(job?.needed&&available())$('calculation-status').hidden=true;
     }
+    return result;
   }
 
   function urbanGeometry() {
@@ -970,7 +994,7 @@
   let alarmRequest=null;
   function updateAlarms(){
     if(M.nativeRuntime(traffic)){
-      if(!alarmRequest){const identity=traffic;alarmRequest=M.diagnoseAsync(traffic,'alerts').then(result=>{if(identity===traffic&&result.editRevision===M.editRevision(traffic)){alarms=A.project(result.bundle);paintAlarms();}}).catch(error=>console.warn('Alert query',error)).finally(()=>{alarmRequest=null;});}
+      if(!alarmRequest){const identity=traffic;alarmRequest=M.diagnoseAsync(traffic,'alerts').then(result=>{if(identity===traffic&&result.editRevision===M.editRevision(traffic)){alarms=A.project(result.bundle);paintAlarms();}}).catch(error=>console.warn('Alert query',error)).finally(()=>{if(identity===traffic)alarmRequest=null;});}
     }else{alarms=A.evaluate(s,traffic);}
     paintAlarms();
   }
@@ -1287,7 +1311,7 @@
       renderMap();
       drawDensity();
     }
-    if (traffic.forecastStatus?.dirty && !traffic.forecastStatus.busy && !calculating && !urbanJob && !forecastTimer)
+    if (traffic.forecastStatus?.dirty && !traffic.forecastStatus.busy && !calculating && !importing && !previewing && !runtimeFault && !demandClient.refresh.pending)
       scheduleForecast();
     updateAlarms();
     if (traffic.minute - lastForecastRefresh >= 60 && !mode && !dispatchDirty && !document.activeElement
@@ -1675,14 +1699,18 @@
         closeUtility();
         return;
       }
-      if (!await save()) {
-        toast('当前进度尚未保存，请先导出文件后再切换地图。');
-        return;
-      }
-      const url = new URL(location.href);
-      url.searchParams.set('map', b.dataset.world);
-      url.searchParams.set('v', UI_VERSION);
-      location.assign(url.href);
+      if(previewing){toast('请先确认或取消存档导入，再切换地图。');return;}
+      calculating=true;
+      try {
+        await demandClient.refresh.pause();
+        await saveQueue.flush();
+        if(!await saveNow(traffic,true)){toast('当前进度尚未保存，请先导出文件后再切换地图。');return;}
+        const url=new URL(location.href);
+        url.searchParams.set('map',b.dataset.world);
+        url.searchParams.set('v',UI_VERSION);
+        location.assign(url.href);
+        departure='map';
+      }finally{if(!departure)resumeGame();}
       return;
     }
     if (b.dataset.focusCity !== undefined) {
@@ -1812,8 +1840,8 @@
         inspect('diagnostics', null);
         break;
       case 'retry-demand':
-        await M.invalidateForecastAsync(traffic);
-        scheduleForecast();
+        if(runtimeFault||M.lastError(traffic)){toast('运行会话已中断，请从存档恢复。');break;}
+        scheduleForecast(true);
         toast('已安排后台重算，现有列车与乘客保留。');
         break;
       case 'today-flow-card':
@@ -2149,9 +2177,11 @@
         break;
       case 'undo':
         if (undoState) {
-          try{await M.undoAsync(traffic,undoState.token);}catch(error){toast(error.message);break;}
+          const identity=traffic,previous=undoState;
+          try{await M.undoAsync(identity,previous.token);}catch(error){if(identity===traffic)toast(error.message);break;}
+          if(identity!==traffic)return;
           networkRevision++;
-          forecast=undoState.forecast||forecast;
+          forecast=previous.forecast||forecast;
           undoState=null;
           mode=null;
           draft=[];
@@ -2470,7 +2500,7 @@
     renderConstructionPreview();
   });
   document.addEventListener('visibilitychange', () => {
-    M.runtimeIntent(traffic,{at:performance.now(),speed,playing,visible:!document.hidden});
+    sendClockIntent(false);
     if (document.hidden) save();
   });
   window.addEventListener('pagehide', save);
@@ -2494,7 +2524,7 @@
       if (t === 1) cameraTween = null;
     }
     const identity=traffic;
-    if(!runtimeFault)M.pulseAsync(s,traffic,{at:now,speed,budget:perf.budget,playing:playing&&!calculating,visible:!document.hidden}).then(result=>{if(identity!==traffic)return;computeMs=computeMs*.8+(result.clock?.ms||0)*.2;if(result.clock?.ok===false){setPlaying(false);toast('余额不足或贷款到期未偿还，运营已暂停。');}}).catch(error=>{if(identity!==traffic)return;runtimeFault=error.message;setPlaying(false);toast('运营计算异常，已暂停并保留上次存档。');});
+    if(!calculating&&!importing&&!runtimeFault)M.pulseAsync(s,traffic,{at:now,speed,budget:perf.budget,playing:playing&&!calculating,visible:!document.hidden}).then(result=>{if(identity!==traffic)return;computeMs=computeMs*.8+(result.clock?.ms||0)*.2;if(result.clock?.ok===false){setPlaying(false);toast('余额不足或贷款到期未偿还，运营已暂停。');}}).catch(error=>{if(identity!==traffic)return;runtimeFault=error.message;setPlaying(false);toast('运营计算异常，已暂停并保留上次存档。');});
     if (playing && now - lastDots >= 1000 / (lodLevel === 'full' ? perf.fps : Math.min(perf.fps, 12))) {
       const at = performance.now();
       renderDots();
@@ -2714,7 +2744,7 @@
     if(M.nativeRuntime(traffic)){
       const hour=Math.floor(traffic.minute/60),revision=M.editRevision(traffic),city=s.urban.revision;
       if(!stationForecastRequest&&(!stationForecastCache||stationForecastCache.revision!==revision||stationForecastCache.city!==city||stationForecastCache.hour!==hour)){
-        const identity=traffic;stationForecastRequest=M.forecastQueryAsync(traffic,'summary').then(result=>{if(identity!==traffic||result.editRevision!==M.editRevision(traffic)||result.cityRevision!==s.urban.revision)return;stationForecastCache={revision:result.editRevision,city:result.cityRevision,hour,entries:result.projection.entries};if(inspection?.type==='station')renderActivity();}).catch(error=>console.warn('Station forecast',error)).finally(()=>{stationForecastRequest=null;});
+        const identity=traffic;stationForecastRequest=M.forecastQueryAsync(traffic,'summary').then(result=>{if(identity!==traffic||result.editRevision!==M.editRevision(traffic)||result.cityRevision!==s.urban.revision)return;stationForecastCache={revision:result.editRevision,city:result.cityRevision,hour,entries:result.projection.entries};if(inspection?.type==='station')renderActivity();}).catch(error=>console.warn('Station forecast',error)).finally(()=>{if(identity===traffic)stationForecastRequest=null;});
       }
       return stationForecastCache?.entries[id]||{entry:0,exit:0};
     }
@@ -2951,32 +2981,69 @@
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast('存档已生成，请查看浏览器下载。');
   }
+  let importRead=0,departure='';
+  function resumeGame(){
+    calculating=false;
+    $('calculation-status').hidden=true;
+    if(demandState.status==='updating')demandState.status='ready';
+    if(!pendingImport)previewing=false;
+    if(!previewing)demandClient.refresh.resume();
+  }
+  window.addEventListener('pageshow',event=>{
+    if(!event.persisted||!departure)return;
+    if(departure==='import'){location.reload();return;}
+    departure='';
+    resumeGame();
+  });
   async function readLocalSave(file) {
-    if(!file)return;
+    if(!file||calculating||importing)return;
+    const identity=traffic,read=++importRead;
+    const current=()=>read===importRead&&identity===traffic&&!calculating;
     importError='';
-    if(!pendingImport)importResume=playing;
+    if(!previewing)importResume=playing;
+    previewing=true;
     setPlaying(false);
     try{
+      await demandClient.refresh.pause();
+      if(!current())return;
+      $('calculation-status').hidden=true;
       RailBootstrap.persistence('fileSize',{bytes:file.size});
-      if(pendingImport)await RailRuntime.cancelImport(traffic,pendingImport.token);
+      if(pendingImport)await RailRuntime.cancelImport(identity,pendingImport.token);
+      if(!current())return;
       pendingImport=null;
       await saveQueue.flush();
-      pendingImport=await RailRuntime.previewImport(traffic,await file.text());
-    }catch(error){importError=RailLocalSave.errorMessage(error);}
+      const text=await file.text();
+      if(!current())return;
+      const preview=await RailRuntime.previewImport(identity,text);
+      if(!current()){
+        if(identity===traffic)await RailRuntime.cancelImport(identity,preview.token).catch(()=>{});
+        return;
+      }
+      pendingImport=preview;
+    }catch(error){
+      if(!current())return;
+      importError=RailLocalSave.errorMessage(error);
+      if(!pendingImport){previewing=false;resumeGame();setPlaying(importResume);}
+    }
     renderActivity();
   }
   async function cancelLocalImport() {
-    try{if(pendingImport)await RailRuntime.cancelImport(traffic,pendingImport.token);}catch(error){importError=RailLocalSave.errorMessage(error);renderActivity();return;}
-    pendingImport=null;importError='';setPlaying(importResume);renderActivity();
+    const identity=traffic,read=++importRead;
+    try{if(pendingImport)await RailRuntime.cancelImport(identity,pendingImport.token);}
+    catch(error){if(identity===traffic&&read===importRead){importError=RailLocalSave.errorMessage(error);renderActivity();}return;}
+    if(identity!==traffic||read!==importRead||calculating)return;
+    pendingImport=null;previewing=false;importError='';resumeGame();setPlaying(importResume);renderActivity();
   }
   async function applyLocalSave() {
     if(!pendingImport||calculating||importing)return;
     const c=pendingImport,identity=traffic;
     calculating=true;
+    importRead++;
     $('calculation-status').textContent='正在校验并恢复存档…';
     $('calculation-status').hidden=false;
     let next,prepared,committed=false;
     try{
+      await demandClient.refresh.pause();
       await saveQueue.flush();
       await M.whenIdle(identity);
       next=await calculate(c.state,undefined,'runtimeOnly');
@@ -2987,13 +3054,17 @@
       prepared=await RailRuntime.prepareImport(identity,c.token,next,{previous:previous?.text,recordsRaw:DB.records(target.recordsKey).text,personalRecords});
       await DB.writeRecord(prepared.saveKey,prepared,previous?.source==='legacy'?previous.text:null);
       committed=true;
-      DB.persistRecords(prepared.recordsKey,prepared.personalRecords);
+      try{DB.persistRecords(prepared.recordsKey,prepared.personalRecords);}catch(error){console.warn('Import records',error);}
       await RailRuntime.commitImport(identity,c.token).catch(()=>{});
       importing=true;
-      const url=new URL(location.href);url.searchParams.set('map',c.region);url.searchParams.set('v',UI_VERSION);location.assign(url.href);
+      const url=new URL(location.href);url.searchParams.set('map',c.region);url.searchParams.set('v',UI_VERSION);location.assign(url.href);departure='import';
     }catch(error){
-      if(!committed&&prepared)try{await RailRuntime.cancelImport(identity,c.token);}catch{}
-      importError=RailLocalSave.errorMessage(error);calculating=false;$('calculation-status').hidden=true;renderActivity();
+      if(!committed&&prepared)try{await RailRuntime.importWriteFailed(identity,c.token);}catch(releaseError){
+        importError=RailLocalSave.errorMessage(releaseError);resumeGame();renderActivity();return;
+      }
+      importError=RailLocalSave.errorMessage(error);
+      if(!committed)resumeGame();
+      renderActivity();
     }finally{if(next)RailForecastCatalog.discardHandoff(next);}
   }
 
@@ -3341,20 +3412,48 @@
   });
 
   async function startNewGame() {
-    const wasPlaying=playing;let prepared,nextTraffic,nextState,nextForecast;
+    if(calculating||importing)return;
+    const oldTraffic=traffic,oldClient=demandClient,wasPlaying=playing;
+    let prepared,nextTraffic,nextState,nextForecast,nextClient;
+    calculating=true;
+    importRead++;
     setPlaying(false);
-    await saveQueue.flush();
-    await DB.flush();
-    await M.whenIdle(traffic);
+    $('calculation-status').textContent='正在准备新游戏…';
+    $('calculation-status').hidden=false;
     try {
-    prepared=RailBootstrap.prepareStart({region});
-    nextState=prepared.state;nextForecast=C.evaluate(nextState,{compact:true});
-    nextTraffic=O.create(nextState,nextForecast);
-    RailBootstrap.commitStart(prepared.token);
-    } catch(error){if(prepared)try{RailBootstrap.cancelStart(prepared.token);}catch{}if(nextTraffic)O.dispose(nextTraffic);setPlaying(wasPlaying);toast('新游戏准备失败，当前进度已保留：'+error.message);return;}
+      await oldClient.refresh.pause();
+      await saveQueue.flush();
+      await DB.flush();
+      await M.whenIdle(oldTraffic);
+      prepared=RailBootstrap.prepareStart({region});
+      nextState=prepared.state;
+      nextClient=createDemandClient();
+      nextForecast=await calculate(nextState,undefined,'withView',nextClient);
+      nextTraffic=O.create(nextState,nextForecast);
+      await RailRuntime.ready(nextTraffic);
+      syncRecords();persistRecords();
+      RailBootstrap.commitStart(prepared.token);
+    }catch(error){
+      if(prepared)try{RailBootstrap.cancelStart(prepared.token);}catch{}
+      if(nextTraffic)O.dispose(nextTraffic);
+      if(nextForecast)RailForecastCatalog.discardHandoff(nextForecast);
+      nextClient?.dispose();
+      resumeGame();
+      setPlaying(wasPlaying);
+      toast('新游戏准备失败，当前进度已保留：'+error.message);
+      return;
+    }
     const fresh=prepared;
-    syncRecords();persistRecords();
-    O.dispose(traffic);
+    oldClient.dispose();
+    O.dispose(oldTraffic);
+    demandClient=nextClient;
+    pendingImport=null;previewing=false;importError='';
+    demandState.status='ready';demandState.error='';demandState.updatedAt=nextTraffic.minute;
+    centerJob=null;centerAnalysis=null;centerRendered=null;centerReview=null;centerError='';
+    stationForecastCache=null;stationForecastRequest=null;detailQuery=null;alarmRequest=null;alarms=[];
+    lastForecastRefresh=nextTraffic.minute;
+    calculating=false;
+    $('calculation-status').hidden=true;
     runtimeFault = '';
     networkRevision++;
     storageReadBlocked = false;
