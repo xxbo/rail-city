@@ -9,14 +9,8 @@ const N = require('../rail/network'),
 const {
   create
 } = require('./fixtures/rail-memory-grid.cjs');
-const H=require('./helpers/session-oracle.cjs'),OldM=H.legacyManagement(Old,require('./fixtures/rail-map44-ridership.cjs')),Oracle=require('./helpers/native-oracle.cjs');
-let checkpoints = 0,
-  resumes = 0;
-const kernel = Core.kernel;
-Core.kernel = function(name, input, ...rest) {
-  if (name === 'simulation_step' && input[2] === 1) resumes++;
-  return kernel(name, input, ...rest);
-};
+const H=require('./helpers/session-oracle.cjs'),OldM=H.legacyManagement(Old,require('./fixtures/rail-map44-ridership.cjs'));
+let checkpoints = 0;
 
 function forecast(s) {
   const cells = s.nodes.map((n, i) => ({

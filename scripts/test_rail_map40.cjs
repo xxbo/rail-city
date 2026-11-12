@@ -2,9 +2,7 @@
 const assert = require('node:assert/strict');
 const {
   fixture,
-  N,
   M,
-  Q,
   X
 } = require('./fixtures/rail-ui-scenario.cjs');
 const oldPaths = require('./fixtures/rail-map39-paths.cjs');

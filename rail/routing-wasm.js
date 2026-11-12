@@ -363,8 +363,8 @@
     revisionGraph:plan=>{const X=node?require('./service-plan'):root.RailServicePlan,all={...plan,operatingPlan:true,services:plan.services.map(l=>({...l,dispatchCompiled:true,fleet:Math.max(1,l.fleet)}))},adj=X.network(all),g=GRAPH.get(adj)||prepare(all,adj),weights=plan.services.map(l=>[l.id,X.headway(plan,l),X.loopDwell(plan,l)]),byId=new Map(weights.map(row=>[row[0],row]));return {data:Array.from(g.data),prices:Array.from(prices(plan,g)),services:g.services,lines:g.lines,edges:g.edges.map(e=>({...e,headway:byId.get(e.service)[1],minutes:e.km/48*60+byId.get(e.service)[2]})),weights};},
 
     createWorkspace:()=>{
-      let e;const Wire=node?require('./value-wire'):root.RailValueWire;
-      const module=new WebAssembly.Instance(compiled,{rail_math:{cos:Math.cos,exp:Math.exp,log:Math.log,hypot:Math.hypot,sin:Math.sin,acos:Math.acos,atan2:Math.atan2,random:()=>Math.random(),log1p:Math.log1p,pow:Math.pow,now:()=>performance.now()}});e=module.exports;
+      const module=new WebAssembly.Instance(compiled,{rail_math:{cos:Math.cos,exp:Math.exp,log:Math.log,hypot:Math.hypot,sin:Math.sin,acos:Math.acos,atan2:Math.atan2,random:()=>Math.random(),log1p:Math.log1p,pow:Math.pow,now:()=>performance.now()}});
+      const e=module.exports;
       return {kernel:(name,values,bytes)=>{if(!['bootstrap_run','session_contract','bootstrap_packed','session_packed','forecast_numeric','forecast_numeric_export'].includes(name))throw Error('Unknown initialization operation');workspaceCalls++;const p=e.input_resize(values.length);new Float64Array(e.memory.buffer,p,values.length).set(values);if(bytes){const b=e.cycle_bytes_resize(bytes.length);new Uint8Array(e.memory.buffer,b,bytes.length).set(bytes);}const at=e[name](),out=new Float64Array(e.memory.buffer,at,e.output_len()).slice();const result=bytes?{values:out,bytes:new Uint8Array(e.memory.buffer,e.bootstrap_bytes_ptr(),e.bootstrap_bytes_len()).slice()}:out;e.output_clear();return result;},memoryBytes:()=>e.memory.buffer.byteLength};
     },
     catalogViewToken:()=>exports().catalog_view_token(),

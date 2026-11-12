@@ -1,11 +1,10 @@
 /* Native statistics lifetime and minute-window projections against frozen MAP55. */
 const assert=require('node:assert/strict');
-const P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),Q=require('../rail/ridership'),D=require('../rail/demand-model');
+const P=require('../rail/passengers'),M=require('./helpers/management-compat.cjs'),D=require('../rail/demand-model');
 const OldP=require('./fixtures/rail-map55-passengers.cjs'),OldM=require('./fixtures/rail-map55-management.cjs'),OldQ=require('./fixtures/rail-map55-ridership.cjs');
 const {create}=require('./fixtures/rail-memory-grid.cjs');
 const Oracle=require('./helpers/native-oracle.cjs'),Runtime=require('../rail/runtime-wasm');
 const options={budget:1e6,maxSteps:10000,now:()=>0};
-const exact=(a,b)=>{assert.deepEqual(a,b);assert.equal(JSON.stringify(a),JSON.stringify(b));};
 function forecast(s,populated){
  const cells=s.nodes.map((n,i)=>({id:'c'+i,x:n.x,y:n.y,w:8,h:8,area:.13,people:populated?3000+i*200:0,jobs:populated?1500+i*100:0,shops:populated?500:0,industry:0,leisure:0}));
  return D.evaluate(s,{cells,totals:Object.fromEntries(['people','jobs','shops','industry','leisure'].map(k=>[k,cells.reduce((n,c)=>n+c[k],0)])),metadata:{effectiveConnections:true,demandZoneUnits:40}});

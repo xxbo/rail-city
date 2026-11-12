@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),G=require('../rail/street-map'),N=require('../rail/network'),R=require('../rail/engine');
+const assert=require('node:assert/strict'),G=require('../rail/street-map'),N=require('../rail/network');
 for(const p of [{x:80,y:60},{x:1200,y:950},{x:2800,y:2000},{x:367.123,y:476.456}]){const d=G.display(p),q=G.model(d);assert(Math.abs(q.x-p.x)<1e-8);assert(Math.abs(q.y-p.y)<1e-8);}
 // A projected Tokyo point lies in the correct XYZ tile and inverse projection retains metre-scale precision.
 const p={x:1314,y:924},d=G.display(p),ll=G.latLon(p);for(const z of [10,14,18]){const x=Math.floor((ll.lon+180)/360*2**z),y=Math.floor((1-Math.log(Math.tan(Math.PI/4+ll.lat*Math.PI/360))/Math.PI)/2*2**z),t=G.tileBox(z,x,y);assert(d.x>=t.x&&d.x<t.x+t.size);assert(d.y>=t.y&&d.y<t.y+t.size);}

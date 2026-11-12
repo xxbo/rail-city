@@ -2,7 +2,6 @@
 (function(root) {
   'use strict';
   const node = typeof module !== 'undefined' && module.exports,
-    Q = node ? require('./ridership') : root.RailRidership,
     BAL = node ? require('./game-balance') : root.RailBalance;
 
   const History = node ? require('./history-wasm') : root.RailHistory;

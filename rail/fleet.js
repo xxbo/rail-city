@@ -1,8 +1,7 @@
 /* A/B body classes follow Chinese metro naming. Capacity and prices are game assumptions. */
 (function(root) {
   'use strict';
-  const node = typeof module !== 'undefined' && module.exports,
-    B = node ? require('./game-balance') : root.RailBalance;
+  const node = typeof module !== 'undefined' && module.exports;
   const native = () => node ? require('./assets-wasm') : root.RailAssets;
   function upgrade(s) { native().mutate(s,'fleetUpgrade'); return s; }
 

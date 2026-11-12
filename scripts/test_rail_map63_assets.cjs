@@ -1,5 +1,5 @@
 /* P2-2 full state, accounting, native command boundaries and failure atomicity. */
-const assert=require('node:assert/strict'),R=require('../rail/engine'),N=require('../rail/network'),M=require('./helpers/management-compat.cjs'),F=require('../rail/fleet'),U=require('../rail/urban-growth'),C=require('../rail/city'),Names=require('../rail/place-names'),A=require('../rail/assets-wasm'),Core=require('../rail/routing-wasm');
+const assert=require('node:assert/strict'),N=require('../rail/network'),M=require('./helpers/management-compat.cjs'),F=require('../rail/fleet'),U=require('../rail/urban-growth'),C=require('../rail/city'),Names=require('../rail/place-names'),A=require('../rail/assets-wasm'),Core=require('../rail/routing-wasm');
 const OldM=require('./fixtures/rail-map62-management.cjs'),OldF=require('./fixtures/rail-map62-fleet.cjs'),OldU=require('./fixtures/rail-map62-urban-growth.cjs');
 const clone=structuredClone;let checks=0;
 function exact(a,b,label){assert.deepEqual(a,b,label);assert.equal(JSON.stringify(a),JSON.stringify(b),label+' field order');checks++;}

@@ -54,7 +54,6 @@
   function tiles(view, screenWidth, max = 18) {
     const pixels = screenWidth / view.w,
       z = Math.max(5, Math.min(max, Math.round(Math.log2(K * pixels)))),
-      size = 256 * K / 2 ** z,
       x0 = Math.floor((view.x / K + originX) * 2 ** z / 256),
       y0 = Math.floor((view.y / K + originY) * 2 ** z / 256),
       x1 = Math.floor(((view.x + view.w) / K + originX) * 2 ** z / 256),

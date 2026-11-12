@@ -7,7 +7,6 @@ const D = require('../rail/demand-model'),
 const Router = require('../rail/routing-wasm'),
   KD = require('../rail/demand-kernels');
 const N = require('../rail/network'),
-  F = require('../rail/fleet'),
   P = require('../rail/passengers'),
   M = require('./helpers/management-compat.cjs'),
   LS = require('../rail/local-save');

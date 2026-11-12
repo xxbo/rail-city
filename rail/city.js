@@ -3,7 +3,6 @@
   'use strict';
   const node = typeof module !== 'undefined' && module.exports,
     R = node ? require('./engine') : root.RailSim;
-  const X = node ? require('./service-plan') : root.RailServicePlan;
   const D = node ? require('./demand-model') : root.RailDemand;
   const U = node ? require('./urban-growth') : root.RailUrban;
   const CELL = 2000 / 120,
@@ -12,16 +11,12 @@
     DETOUR = 1.25;
   let cached;
 
-  function source() {
-    return node ? require('./tokyo-data') : root.RailCityData;
-  }
-
   function create(region='tokyo') {
     if(region==='gba')return (node?require('./gba-data'):root.RailGBA).create();
     if(cached)return cached;
     cached=(node?require('./bootstrap-wasm'):root.RailBootstrap).view('city',region);
     cached.metadata.raw=(node?require('./tokyo-data'):root.RailCityData).raw;
-    let demand;Object.defineProperty(cached,'demand',{enumerable:true,get:()=>demand||(demand=buildDemand(cached.cells))});return (node?require('./bootstrap-wasm'):root.RailBootstrap).readonly(cached);
+    let demand;Object.defineProperty(cached,'demand',{enumerable:true,get:()=>demand||(demand=buildDemand())});return (node?require('./bootstrap-wasm'):root.RailBootstrap).readonly(cached);
   }
 
   const legacy=(action,s={},args={})=>R.compat(action,s,args).result;

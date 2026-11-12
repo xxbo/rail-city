@@ -3,13 +3,11 @@
   'use strict';
   const node = typeof module !== 'undefined' && module.exports,
     H = node ? require('./hubs') : root.RailHubs,
-    F = node ? require('./fleet') : root.RailFleet,
     D = node ? require('./city-development') : root.RailDevelopment;
   const VERSION = 19,
     STEP = 360,
     SIZE = 12,
-    AREA = (SIZE * .045) ** 2,
-    FIELDS = ['people', 'jobs', 'shops', 'industry', 'leisure'];
+    AREA = (SIZE * .045) ** 2;
   const TYPES=new Proxy({}, {get:(_,key)=>(node?require('./bootstrap-wasm'):root.RailBootstrap).settings().types[key],ownKeys:()=>Object.keys((node?require('./bootstrap-wasm'):root.RailBootstrap).settings().types),getOwnPropertyDescriptor:()=>({enumerable:true,configurable:true})});
 
   function native(op,s,extra={}) {
@@ -24,12 +22,7 @@
   }
   function adopt(u,v){Object.assign(u,v);}
   function cityProjection(s,v){v.cells=v.cells.map(c=>({id:c.id,...s.urban.cells[c.id],...c}));return v;}
-  function needRate(kind) {
-    return TYPES[kind].needRate ?? (kind === 'school' ? .12 : kind === 'hospital' ? .025 : .05);
-  }
-  const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x)),
-    dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) * .045,
-    cache = new WeakMap();
+  const cache = new WeakMap();
 
   function init(s){if(!s.urban)s.urban=(node?require('./bootstrap-wasm'):root.RailBootstrap).run('urbanInit',{state:{economy:s.economy}});return s.urban;}
   // Automatic city destinations are deterministic game facilities, not a real POI inventory.

@@ -12,7 +12,6 @@
     };
   const Editor = typeof module !== 'undefined' && module.exports ? require('./editor-wasm') : root
     .RailEditor;
-  const F = typeof module !== 'undefined' && module.exports ? require('./fleet') : root.RailFleet;
   const TRANSFER = 4;
   const distance = (a, b) => Editor.numeric(2, [Number(a?.x), Number(a?.y), Number(b?.x), Number(b?.y)])[1];
   const sum = points => Editor.numeric(1, [points.length, ...Editor.coords(points)], points)[1];

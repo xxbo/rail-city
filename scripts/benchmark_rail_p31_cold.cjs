@@ -1,5 +1,5 @@
 /* Cold API + module/WASM initialization, separate processes and exact complete results. */
-const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{spawnSync,execFileSync}=require('node:child_process'),{hash,start}=require('./freeze_rail_p31.cjs');
+const path=require('node:path'),assert=require('node:assert/strict'),{spawnSync,execFileSync}=require('node:child_process'),{hash,start}=require('./freeze_rail_p31.cjs');
 const modes=['javascript','previous','current'],scopes=['seed','tokyoGeo','gbaGeo','tokyoStartup','gbaStartup'];
 if(process.argv[2]==='child'){
  const mode=process.argv[3],scope=process.argv[4],base=process.argv[5],load=n=>require(path.join(base,'rail',n));
