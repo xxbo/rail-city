@@ -569,3 +569,6 @@ mod bootstrap;
 
 // Experimental P3-0 exports; production source line locations above remain fixed.
 pub mod session;
+
+#[cfg(test)]
+mod map_regressions;

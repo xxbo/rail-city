@@ -224,18 +224,16 @@ pub(super) fn configure(l: &mut V, d: &V, cfg: &V) -> Result<V, String> {
     if d.num("peak") < d.num("offPeak") {
         return Err("高峰投放不能少于平峰。".into());
     }
-    l.set("dispatch", d.clone());
-    l.set(
-        "fleet",
-        if d.get("mode").text() == "auto" {
-            n(max(d.num("peak"), d.num("offPeak")))
-        } else {
-            d.get("manual").clone()
-        },
-    );
-    if !E::valid_fleet_line(l, cfg) {
+    let fleet = if d.get("mode").text() == "auto" {
+        n(max(d.num("peak"), d.num("offPeak")))
+    } else {
+        d.get("manual").clone()
+    };
+    if !E::valid_dispatch(l, &fleet, d, cfg) {
         return Err("每个交路至少需要双向各 1 列，请增加投放或减少交路。".into());
     }
+    l.set("dispatch", d.clone());
+    l.set("fleet", fleet);
     Ok(obj(&[]))
 }
 fn purchase(s: &mut V, a: &V, cfg: &V) -> Result<V, String> {

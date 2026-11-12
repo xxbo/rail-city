@@ -9,7 +9,19 @@ concurrency:
   group: rail-tests-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  rust:
+    name: Native Rust regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned native compiler
+        run: rustup toolchain install 1.99.1 --profile minimal
+      - name: Run Rust unit tests
+        run: cargo +1.99.1 test --locked --features session-contract --manifest-path rust/rail-routing/Cargo.toml
   tests:
+    needs: rust
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -23,10 +35,6 @@ jobs:
         run: |
           node scripts/build_rail_wasm.cjs
           node scripts/build_rail_session_contract.cjs
-      - name: Run Rust unit tests
-        id: rust
-        continue-on-error: true
-        run: cargo +1.99.1 test --locked --features session-contract --manifest-path rust/rail-routing/Cargo.toml
       - name: Run all Node regression suites
         id: node
         continue-on-error: true
@@ -43,5 +51,5 @@ jobs:
       - name: Require both suites to pass
         if: always()
         run: |
-          test '${{ steps.rust.outcome }}' = success
+          test '${{ needs.rust.result }}' = success
           test '${{ steps.node.outcome }}' = success

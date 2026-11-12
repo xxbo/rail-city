@@ -905,7 +905,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -1133,7 +1132,6 @@
             "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map52.cjs",
-            "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -1835,7 +1833,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -2037,7 +2034,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -2091,8 +2087,7 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map19.cjs",
-            "scripts/test_rail_map22.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map22.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -2847,7 +2842,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -3045,9 +3039,7 @@
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_retirement.cjs",
-            "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map60_services.cjs",
-            "scripts/test_rail_map61_validation.cjs"
+            "scripts/test_rail_map59_reroutes.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -3620,9 +3612,7 @@
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map58_retirement.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs"
+            "scripts/test_rail_map58_retirement.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -6979,7 +6969,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -7085,9 +7074,7 @@
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map58_retirement.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs"
+            "scripts/test_rail_map58_retirement.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -7497,7 +7484,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -7662,9 +7648,7 @@
             "scripts/test_rail_map44.cjs",
             "scripts/test_rail_map45.cjs",
             "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -7691,7 +7675,6 @@
             "scripts/test_rail_map15.cjs",
             "scripts/test_rail_map17.cjs",
             "scripts/test_rail_map41.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs"
@@ -8161,10 +8144,7 @@
             "scripts/test_rail_map24.cjs",
             "scripts/test_rail_map26.cjs",
             "scripts/test_rail_map35.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_services.cjs",
@@ -8300,9 +8280,7 @@
             "scripts/test_rail_map44.cjs",
             "scripts/test_rail_map45.cjs",
             "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -8406,8 +8384,7 @@
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [
             "scripts/test_rail_map18.cjs",
-            "scripts/test_rail_map58_worker_transport.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map58_worker_transport.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -8425,9 +8402,7 @@
           "productionReferenceCandidates": [
             "rail/ui.js"
           ],
-          "testReferenceCandidates": [
-            "scripts/test_rail_map63_assets.cjs"
-          ],
+          "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -8443,9 +8418,7 @@
           "exportNameCandidate": true,
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [
-            "scripts/test_rail_map18.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs"
+            "scripts/test_rail_map18.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -8498,10 +8471,7 @@
             "scripts/test_rail_map24.cjs",
             "scripts/test_rail_map26.cjs",
             "scripts/test_rail_map35.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_services.cjs",
@@ -8540,7 +8510,6 @@
             "scripts/test_rail_map43.cjs",
             "scripts/test_rail_map44.cjs",
             "scripts/test_rail_map53_calendar.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -8589,8 +8558,7 @@
             "rail/vector-map.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map18.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map18.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -8647,7 +8615,6 @@
             "scripts/test_rail_map53_native_state.cjs",
             "scripts/test_rail_map53_worker.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_p3_regressions.cjs",
@@ -9076,7 +9043,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -10386,10 +10352,7 @@
             "scripts/test_rail_map52_transport.cjs",
             "scripts/test_rail_map55_history.cjs",
             "scripts/test_rail_map58_catalog.cjs",
-            "scripts/test_rail_map60_services.cjs",
-            "scripts/test_rail_map61_validation.cjs",
-            "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map62_network.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         }
@@ -10669,7 +10632,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -12020,9 +11982,6 @@
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
-            "scripts/test_rail_map61_validation.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
@@ -12063,10 +12022,7 @@
             "scripts/test_rail_map24.cjs",
             "scripts/test_rail_map26.cjs",
             "scripts/test_rail_map35.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_services.cjs",
@@ -12115,9 +12071,7 @@
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map58_retirement.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs"
+            "scripts/test_rail_map58_retirement.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -12148,8 +12102,7 @@
             "scripts/test_rail_map19.cjs",
             "scripts/test_rail_map20.cjs",
             "scripts/test_rail_map22.cjs",
-            "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map58_urban.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -12175,7 +12128,6 @@
             "scripts/test_rail_map17.cjs",
             "scripts/test_rail_map23.cjs",
             "scripts/test_rail_map39.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -12218,9 +12170,7 @@
             "scripts/test_rail_map53_worker.cjs",
             "scripts/test_rail_map53_worker_queue.cjs",
             "scripts/test_rail_map58_retirement.cjs",
-            "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs"
+            "scripts/test_rail_map59_reroutes.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -13101,7 +13051,6 @@
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_boundary.cjs",
             "scripts/test_rail_p3_contract.cjs",
@@ -13443,7 +13392,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -13994,10 +13942,7 @@
             "scripts/test_rail_map53_calendar.cjs",
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_regressions.cjs",
@@ -14157,9 +14102,7 @@
             "scripts/test_rail_map44.cjs",
             "scripts/test_rail_map53_calendar.cjs",
             "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_p3_regressions.cjs",
@@ -14185,7 +14128,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map17.cjs",
             "scripts/test_rail_map24.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_services.cjs",
             "scripts/test_rail_streets.cjs",
@@ -14236,8 +14178,6 @@
             "scripts/test_rail_map53_worker_queue.cjs",
             "scripts/test_rail_map58_retirement.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map61_validation.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_services.cjs",
             "scripts/test_rail_tokyo.cjs"
@@ -14297,7 +14237,6 @@
             "scripts/test_rail_map53_native_state.cjs",
             "scripts/test_rail_map53_worker.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_p3_regressions.cjs",
@@ -14339,10 +14278,7 @@
             "scripts/test_rail_map24.cjs",
             "scripts/test_rail_map26.cjs",
             "scripts/test_rail_map35.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_services.cjs",
@@ -14481,9 +14417,7 @@
             "scripts/test_rail_map44.cjs",
             "scripts/test_rail_map45.cjs",
             "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -15176,7 +15110,6 @@
             "scripts/test_rail_map17.cjs",
             "scripts/test_rail_map23.cjs",
             "scripts/test_rail_map39.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -15322,9 +15255,6 @@
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
-            "scripts/test_rail_map61_validation.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
@@ -16344,7 +16274,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -16915,7 +16844,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -17694,7 +17622,6 @@
             "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map52.cjs",
-            "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -17723,7 +17650,6 @@
             "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map52.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_p3_boundary.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -18091,7 +18017,6 @@
             "scripts/test_rail_map35.cjs",
             "scripts/test_rail_map36.cjs",
             "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -18522,7 +18447,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -19093,7 +19017,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -19574,9 +19497,6 @@
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
-            "scripts/test_rail_map61_validation.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
@@ -20503,7 +20423,6 @@
             "scripts/test_rail_map53_demand.cjs",
             "scripts/test_rail_map58_catalog.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p31_bootstrap.cjs"
@@ -20550,10 +20469,7 @@
             "scripts/test_rail_map52_transport.cjs",
             "scripts/test_rail_map55_history.cjs",
             "scripts/test_rail_map58_catalog.cjs",
-            "scripts/test_rail_map60_services.cjs",
-            "scripts/test_rail_map61_validation.cjs",
-            "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map62_network.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -20655,7 +20571,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -21095,7 +21010,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -22065,7 +21979,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -22241,9 +22154,7 @@
             "rail/ui.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map58_retirement.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs"
+            "scripts/test_rail_map58_retirement.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -22269,7 +22180,6 @@
             "scripts/test_rail_map17.cjs",
             "scripts/test_rail_map23.cjs",
             "scripts/test_rail_map39.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -22703,7 +22613,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -23623,7 +23532,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -24593,9 +24501,7 @@
             "rail/routing-wasm.js",
             "rail/ui-line-view.js"
           ],
-          "testReferenceCandidates": [
-            "scripts/test_rail_map60_services.cjs"
-          ],
+          "testReferenceCandidates": [],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
         {
@@ -24624,7 +24530,6 @@
             "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map52.cjs",
-            "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
@@ -24793,10 +24698,7 @@
             "scripts/test_rail_map24.cjs",
             "scripts/test_rail_map26.cjs",
             "scripts/test_rail_map35.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_services.cjs",
@@ -26909,7 +26811,6 @@
             "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map52.cjs",
-            "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -27527,7 +27428,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -27615,9 +27515,7 @@
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_retirement.cjs",
-            "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map60_services.cjs",
-            "scripts/test_rail_map61_validation.cjs"
+            "scripts/test_rail_map59_reroutes.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         }
@@ -27858,7 +27756,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -28519,7 +28416,6 @@
             "scripts/test_rail_map58_retirement.cjs",
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_operations.cjs",
             "scripts/test_rail_p3_boundary.cjs",
@@ -28822,7 +28718,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -29075,7 +28970,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -29852,7 +29746,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -30064,7 +29957,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -36437,9 +36329,6 @@
             "scripts/test_rail_map57_lifecycle.cjs",
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
-            "scripts/test_rail_map61_validation.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_p3_regressions.cjs",
             "scripts/test_rail_services.cjs"
@@ -36593,10 +36482,7 @@
             "scripts/test_rail_map24.cjs",
             "scripts/test_rail_map26.cjs",
             "scripts/test_rail_map35.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
-            "scripts/test_rail_map63_browser.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
             "scripts/test_rail_services.cjs",
@@ -36640,7 +36526,6 @@
             "scripts/test_rail_map22.cjs",
             "scripts/test_rail_map35.cjs",
             "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -36674,8 +36559,7 @@
           "productionReferenceCandidates": [],
           "testReferenceCandidates": [
             "scripts/test_rail_map19.cjs",
-            "scripts/test_rail_map22.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map22.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -36706,8 +36590,7 @@
             "scripts/test_rail_map19.cjs",
             "scripts/test_rail_map20.cjs",
             "scripts/test_rail_map22.cjs",
-            "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map58_urban.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -36748,9 +36631,7 @@
             "scripts/test_rail_map44.cjs",
             "scripts/test_rail_map45.cjs",
             "scripts/test_rail_map58_urban.cjs",
-            "scripts/test_rail_map61_validation.cjs",
             "scripts/test_rail_map62_network.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map65_saves.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -36777,8 +36658,7 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map19.cjs",
-            "scripts/test_rail_map22.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map22.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -37548,8 +37428,7 @@
             "rail/value-wire.js"
           ],
           "testReferenceCandidates": [
-            "scripts/test_rail_map18.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map18.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
@@ -38331,7 +38210,6 @@
           "testReferenceCandidates": [
             "scripts/test_rail_map56_statistics.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_p31_bootstrap.cjs",
             "scripts/test_rail_p3_contract.cjs"
           ],
@@ -38962,7 +38840,6 @@
             "scripts/test_rail_map58_urban.cjs",
             "scripts/test_rail_map58_worker_transport.cjs",
             "scripts/test_rail_map59_reroutes.cjs",
-            "scripts/test_rail_map63_assets.cjs",
             "scripts/test_rail_map64_diagnostics.cjs",
             "scripts/test_rail_map65_saves.cjs",
             "scripts/test_rail_network.cjs",
@@ -39039,7 +38916,6 @@
             "scripts/test_rail_map50.cjs",
             "scripts/test_rail_map51.cjs",
             "scripts/test_rail_map52.cjs",
-            "scripts/test_rail_map60_services.cjs",
             "scripts/test_rail_map62_network.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
@@ -39068,8 +38944,7 @@
           ],
           "testReferenceCandidates": [
             "scripts/test_rail_map19.cjs",
-            "scripts/test_rail_map22.cjs",
-            "scripts/test_rail_map63_assets.cjs"
+            "scripts/test_rail_map22.cjs"
           ],
           "disposition": "reviewed-migration-target; no dead-code inference"
         },
