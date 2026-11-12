@@ -142,6 +142,22 @@ fn asset_request(state: &V, op: &str, args: &V) -> V {
     assets::run(&obj(&[("state", state.clone()), ("op", text(op)), ("args", args.clone())]), &bootstrap::config())
 }
 
+// The browser imported Math.hypot for curve lengths; native Rust calls libm.
+// Compare new segment lengths within two ULPs, and all other editor fields exactly.
+// Accounting below receives the frozen staged geometry and must match bit for bit.
+fn check_staged_edit(mut actual: V, frozen: &V, before: &V, name: &str) {
+    for (track, target) in actual.get_mut("tracks").array_mut().iter_mut().zip(frozen.get("tracks").array()) {
+        if index_id(before.get("tracks"), track.get("id")).is_none() {
+            let km = track.num("km");
+            let old_km = target.num("km");
+            assert!(km.is_finite() && old_km.is_finite() && km >= 0.0 && old_km >= 0.0
+                && km.to_bits().abs_diff(old_km.to_bits()) <= 2, "{name}: new track length {km:?} vs {old_km:?}");
+            track.set("km", target.get("km").clone());
+        }
+    }
+    exact(&actual, frozen, name, true);
+}
+
 #[test]
 fn map63_asset_transactions_match_frozen_receipts_and_complete_worlds() {
     let cfg = bootstrap::config();
@@ -172,15 +188,16 @@ fn map63_asset_transactions_match_frozen_receipts_and_complete_worlds() {
             }
             "finalize" | "rejectFinalize" => {
                 // Historical editor callbacks stage their result before ledger settlement.
-                let (mut staged, receipt) = if op == "finalize" {
-                    let mut staged = clone_json(state);
-                    let edit = editor::run(obj(&[("op", cmd.get("op").clone()), ("state", staged.clone()),
+                let mut staged = case.get("staged").clone();
+                let receipt = case.get("result").clone();
+                if op == "finalize" {
+                    let mut edited = clone_json(state);
+                    let edit = editor::run(obj(&[("op", cmd.get("op").clone()), ("state", edited.clone()),
                         ("args", cmd.get("args").clone())]), &cfg);
-                    runtime_edit::apply(&mut staged, edit.get("patch"));
-                    (staged, edit.get("result").clone())
-                } else {
-                    (case.get("staged").clone(), case.get("result").clone())
-                };
+                    runtime_edit::apply(&mut edited, edit.get("patch"));
+                    check_staged_edit(edited, &staged, state, name);
+                    exact(edit.get("result"), &receipt, name, true);
+                }
                 let out = assets::run(&obj(&[("op", text("finalize")), ("state", state.clone()),
                     ("after", staged.clone()), ("accounts", clone_json(state.get("economy"))),
                     ("commit", boolean(true)), ("result", receipt.clone())]), &cfg);
