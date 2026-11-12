@@ -1,6 +1,18 @@
 /* Optional real-browser verification; Playwright is a development host dependency. */
 const {chromium}=require('playwright'),http=require('node:http'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
+// Give the current zoom level a chance to paint its own tiles before capturing.
+async function captureMap(page, directory, name) {
+ if (!directory) return;
+ await page.waitForFunction(() => {
+  const svg=document.querySelector('#map'), box=svg.viewBox.baseVal;
+  if (document.querySelector('#street-tiles').hidden) return true;
+  const required=StreetMap.tiles({x:box.x,y:box.y,w:box.width,h:box.height},svg.getBoundingClientRect().width,StreetMap.sources[document.querySelector('#basemap-select').value].max);
+  return required.every(t=>document.querySelector('[data-tile="'+t.z+'/'+t.tx+'/'+t.ty+'"]')?.dataset.state==='loaded');
+ },null,{timeout:8000}).catch(error=>{if(error.name!=='TimeoutError') throw error;});
+ await page.screenshot({path:path.join(directory,name+'.png')});
+}
+
 // Exercise pointer hit testing with the inspector open. These scenarios use the
 // real editor and its transaction, including the distinction between stops and bends.
 async function buildFromMap(page, region, screenshotDirectory) {
@@ -49,14 +61,14 @@ async function buildFromMap(page, region, screenshotDirectory) {
  await press(points[1], true);
  await press(points[2]);
  await page.waitForFunction(() => document.querySelectorAll('.build-stop').length === 2);
- if (screenshotDirectory) await page.screenshot({path:path.join(screenshotDirectory,region+'-construction.png')});
+ await captureMap(page,screenshotDirectory,region+'-construction');
  await page.locator('#confirm-add').click();
  await page.locator('#line-panel').waitFor();
  assert.equal(await map.locator('.route').count(),1);
  await page.locator('#line-tab-stations').click();
  const stops = page.locator('#line-view-stations .stop-name');
  assert.equal(await stops.count(),2);
- if (screenshotDirectory) await page.screenshot({path:path.join(screenshotDirectory,region+'-line.png')});
+ await captureMap(page,screenshotDirectory,region+'-line');
  await stops.first().click();
  await page.locator('#back-to-line').click();
  await page.locator('#line-panel').waitFor();

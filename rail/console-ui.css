@@ -367,7 +367,15 @@ body.console-ui.drawer-open #density-legend:not([hidden]) {pointer-events: auto}
 .console-ui #map-attribution {bottom: 2px; right: var(--edge); max-width: calc(100% - 20px); font-size: 9px; background: #1a242cdc; color: #c4d2da}
 .console-ui #map-attribution a {color: #d5e0e6}
 .console-ui #density-legend {top: 74px !important; left: var(--edge) !important; bottom: auto !important; max-width: 235px !important; opacity: 1; visibility: visible; border-radius: 5px}
-.console-ui #tile-status {inset: auto auto var(--panel-bottom) var(--edge); max-width: 280px}
+body.console-ui #stage #tile-status {
+  inset: auto auto var(--panel-bottom) var(--edge);
+  width: fit-content;
+  height: fit-content;
+  max-width: min(280px, calc(100% - 120px));
+  background: #263238;
+  color: #f3d5a0;
+  border-color: #73654d;
+}
 .console-ui #toast {bottom: var(--panel-bottom); left: 50%; z-index: 95; border-radius: 5px; background: #1e303a; color: white}
 .console-ui #calculation-status {inset: auto auto var(--panel-bottom) var(--edge); font-size: 10px; border-radius: 4px}
 .console-ui.drawer-open .guide-target {outline: none !important; box-shadow: none !important}
@@ -398,8 +406,7 @@ body.console-ui.drawer-open #density-legend:not([hidden]) {pointer-events: auto}
   .console-ui #map-detail-status, .console-ui.drawer-open #map-detail-status {right: auto !important; left: var(--edge); top: 70px !important; bottom: auto !important}
   .console-ui #density-legend, .console-ui #game-guide {top: 100px !important}
   .console-ui #map-attribution {right: 3px; bottom: 0; font-size: 8px; line-height: 1.1; padding: 1px 3px}
-  .console-ui #tile-status {max-width: calc(100vw - 132px)}
-  .console-ui.drawer-open #tile-status {bottom: 15px; top: auto}
+  body.console-ui.drawer-open #stage #tile-status {bottom: 15px}
   .console-ui #toast, .console-ui.drawer-open #calculation-status {top: 95px; bottom: auto; max-width: calc(100vw - 28px)}
   .console-ui :is(.panel-scroll, #account-panel .finance-content, #stations-panel .stations-content) {padding: 12px 14px 18px !important}
   .console-ui .center-tools {display: flex; flex-wrap: wrap}
