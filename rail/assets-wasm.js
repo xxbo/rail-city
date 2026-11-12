@@ -12,7 +12,7 @@
   const pick=(v,keys)=>Object.fromEntries(keys.filter(k=>Object.hasOwn(v,k)).map(k=>[k,v[k]]));
   function projection(s,op) {
     if(['validLine','configureFleet'].includes(op))return {};
-    if(op==='facilityValue')return {urban:{facilities:s.urban?.facilities?.map(f=>pick(f,['kind','level','system']))}};
+    if(op==='facilityValue'||op==='facilityUpkeep')return {urban:{facilities:s.urban?.facilities?.map(f=>pick(f,['kind','level','system']))}};
     if(op==='purchase')return {depot:s.depot};
     if(op==='reserved'||op==='free')return {depot:s.depot,services:s.services?.map(l=>pick(l,['id','fleetManaged','stockSpec','fleet']))};
     if(op==='vehicleValue'||op==='validateFleet'||op==='fleetUpgrade')return pick(s,['routeModel','depot','services']);

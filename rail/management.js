@@ -2,7 +2,7 @@
 (function(root) {
   'use strict';
   const node=typeof module!=='undefined'&&module.exports,R=node?require('./engine'):root.RailSim,BAL=node?require('./game-balance'):root.RailBalance;
-  const Runtime=node?require('./runtime-wasm'):root.RailRuntime,Native=node?require('./operations-wasm'):root.RailNativeOperations;
+  const Runtime=node?require('./runtime-wasm'):root.RailRuntime;
   const INITIAL = 5e9,
     CREDIT = 3e9,
     MAX_LOAN = 1e9,
@@ -20,9 +20,15 @@
   const preview = (s,operation) => plan(s,operation,false);
   function change(s,operation){if(!operation||typeof operation!=='object')throw TypeError('编辑操作须使用结构化命令。');const out=R.compat('assetChange',s,{command:operation});if(!out.result?.error)R.sync(s,out.state);return out.result;}
 
+  function coldAccount(s, creditAction, args={}) {
+    const owner=node?require('./bootstrap-wasm'):root.RailBootstrap;
+    const result=owner.viewModel('coldAccount',{economy:s.economy,creditAction,...args});
+    R.sync(s.economy,result.economy);
+    return result;
+  }
   function available(s) {
     init(s);
-    return Native.credit(s, 0).available;
+    return coldAccount(s, 0).available;
   }
 
   const CREDIT_ERRORS = [null,
@@ -32,7 +38,7 @@
 
   function borrow(s, amount) {
     init(s);
-    const result = Native.credit(s, 1, amount);
+    const result = coldAccount(s, 1, {amount});
     return result.error ? {
       error: CREDIT_ERRORS[result.error]
     } : {};
@@ -40,16 +46,15 @@
 
   function repay(s, id) {
     init(s);
-    const result = Native.credit(s, 2, 0, s.economy.loans.findIndex(l => l.id === id));
+    const result = coldAccount(s, 2, {loanId:id});
     return result.error ? {
       error: CREDIT_ERRORS[result.error]
     } : {};
   }
 
   function settle(s) {
-    return Native.accounts(s, {
-      minute: s.economy.minute
-    }, 1).running;
+    coldAccount(s, 0, {settle:true});
+    return !s.economy.blocked;
   }
 
   const advance=(s,rt,minutes)=>Runtime.advance(s,rt,minutes,{full:true}).running;

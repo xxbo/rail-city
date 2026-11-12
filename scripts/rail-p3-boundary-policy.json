@@ -5,14 +5,22 @@
   "finalHandwrittenJavaScript": "UI only",
   "files": {
     "rail/alerts.js": {
-      "role": "domain",
+      "role": "ui",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "overrides": {
+        "evaluate": {
+          "role": "platform",
+          "phase": "P3-5",
+          "owner": "Native diagnostics query"
+        }
+      }
     },
     "rail/assets-wasm.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-4",
-      "owner": "Rust atomic edit and assets"
+      "owner": "Rust atomic edit and assets",
+      "bridgeDisposition": "Packs selected asset fields, sends edit or query commands and applies patches. Rust assets.rs calculates valuation, quotas, prices and construction eligibility."
     },
     "rail/bootstrap-wasm.js": {
       "role": "platform",
@@ -38,9 +46,10 @@
       "bridgeDisposition": "Legacy and modern forecast requests, native catalog adoption and Map decoding; no host OD construction."
     },
     "rail/connection-model.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "owner": "Rust graph/forecast/directory/cache",
+      "bridgeDisposition": "Encodes journeys and reads the native connection summary. world.rs and transactions.rs own the activity budgets, reachable allocations and operating values."
     },
     "rail/console-ui.js": {
       "role": "ui",
@@ -54,14 +63,16 @@
       "bridgeDisposition": "UI/RPC/IO primitive bridge. Model decisions execute in Rust; source acceptance remains pending P3-9 per-function review."
     },
     "rail/demand-kernels.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "owner": "Rust graph/forecast/directory/cache",
+      "bridgeDisposition": "Marshals numeric columns, buffer lengths and route IDs. demand.rs and world.rs own distribution weights, defaults for mode choice, route shares and capacity."
     },
     "rail/demand-model.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-2",
-      "owner": "Rust graph/forecast/directory/cache"
+      "owner": "Rust graph/forecast/directory/cache",
+      "bridgeDisposition": "Publishes read-only forecast handles, read-only model constants and the structured result from the forecast and connection owners."
     },
     "rail/demand-rates.js": {
       "role": "domain",
@@ -81,7 +92,7 @@
       "bridgeDisposition": "Generated or minimal API forwarding; queues, fallback and retry policies move to Rust"
     },
     "rail/demand-world.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-2",
       "owner": "Rust graph/forecast/directory/cache",
       "overrides": {
@@ -95,7 +106,8 @@
           "phase": "P3-2 bridge",
           "owner": "Rust forecast input assembly; JS copies city cell columns and passes graph handles"
         }
-      }
+      },
+      "bridgeDisposition": "Packs geographic columns and graph handles into Rust and decodes typed forecast, spatial and cache-statistic pages. No route allocation occurs in the adapter."
     },
     "rail/density-field.js": {
       "role": "ui",
@@ -108,14 +120,16 @@
       "owner": "Rust city/statistics/observation"
     },
     "rail/diagnostics-wasm.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "bridgeDisposition": "Packs detached state, runtime and forecast rows, invokes diagnostic_run and projects the returned view or patch."
     },
     "rail/editor-wasm.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-4",
-      "owner": "Rust atomic edit and assets"
+      "owner": "Rust atomic edit and assets",
+      "bridgeDisposition": "Keeps host object identity, encodes coordinates and native commands, and applies returned edit patches. Rust owns geometry, validation and edit decisions."
     },
     "rail/engine-wasm.js": {
       "role": "test-reference",
@@ -136,9 +150,10 @@
       "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/flow-history.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "bridgeDisposition": "Forwards the requested display field and chart bin width to history.rs. Only Node fixtures load the historical mutable day helper."
     },
     "rail/forecast-catalog.js": {
       "role": "platform",
@@ -159,9 +174,10 @@
       "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/history-wasm.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "bridgeDisposition": "Encodes line, track, day and record inputs. Rust history.rs determines archival, lengths, awards, time bins and daily totals."
     },
     "rail/hubs.js": {
       "role": "platform",
@@ -170,9 +186,17 @@
       "bridgeDisposition": "No source tables or model derivation; forwards to the Rust bootstrap workspace"
     },
     "rail/insights.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "bridgeDisposition": "Presents native totals with line names, locale sorting and display colors. It never updates game history or record values.",
+      "overrides": {
+        "daily": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Labels, colors and locale sort for native daily totals"
+        }
+      }
     },
     "rail/local-save.js": {
       "role": "platform",
@@ -192,34 +216,101 @@
       "owner": "Interface, visual geometry and private display preferences"
     },
     "rail/memory-audit.js": {
-      "role": "mixed",
+      "role": "ui",
       "phase": "P3-8",
       "owner": "UI telemetry display; domain telemetry supplied by Rust"
     },
     "rail/metrics.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "bridgeDisposition": "Forwards the network summary request to the native diagnostics kernel."
     },
     "rail/network-stats.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "bridgeDisposition": "Requests Rust line and network aggregates, retaining existing browser line references where necessary."
     },
     "rail/network.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-4",
-      "owner": "Rust atomic edit and assets"
+      "owner": "Rust atomic edit and assets",
+      "bridgeDisposition": "Transports edit/validation requests, preserves selected point identity and reads the Rust editor and network statistics results."
     },
     "rail/operations-center.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-5",
-      "owner": "Rust city/statistics/observation"
+      "owner": "Rust city/statistics/observation",
+      "bridgeDisposition": "Presents native dispatch suggestions and marshals review and capacity queries. Priorities, actions, draft patterns and limits come from diagnostics.rs.",
+      "overrides": {
+        "project": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "add": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "reduce": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "crowd": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "station": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "stock": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "duplicate": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "low-pattern": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "short": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "express": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "observe": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        },
+        "quality": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Localized native suggestion labels"
+        }
+      }
     },
     "rail/operations-review.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-5",
-      "owner": "Rust review lifecycle; default UI observe and due sampling use RuntimeOwner, cold compatibility adapter remains"
+      "owner": "Rust review lifecycle; default UI observe and due sampling use RuntimeOwner, cold compatibility adapter remains",
+      "bridgeDisposition": "Forwards observation and sample requests. diagnostic_review.rs owns sample deadlines, observation history and all sufficiency decisions."
     },
     "rail/operations-wasm.js": {
       "role": "domain",
@@ -233,9 +324,32 @@
       "bridgeDisposition": "Generated or minimal API forwarding; queues, fallback and retry policies move to Rust"
     },
     "rail/operations.js": {
-      "role": "mixed",
+      "role": "platform",
       "phase": "P3-6 bridge",
-      "owner": "Rust legacy_operations.rs for simulation; JS position/geometry code is display interpolation"
+      "owner": "Rust legacy_operations.rs for simulation; JS position/geometry code is display interpolation",
+      "bridgeDisposition": "Creates, restores and releases native runtime handles, and projects Rust snapshots. Train geometry interpolation is exclusively for display.",
+      "overrides": {
+        "ease": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Train marker interpolation, angle and track offsets"
+        },
+        "geometryIndex": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Train marker interpolation, angle and track offsets"
+        },
+        "cachedTrackPoints": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Train marker interpolation, angle and track offsets"
+        },
+        "position": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Train marker interpolation, angle and track offsets"
+        }
+      }
     },
     "rail/passengers.js": {
       "role": "platform",
@@ -262,6 +376,11 @@
           "role": "platform",
           "phase": "P3-3 bridge",
           "owner": "Rust Controls; callback forwarding only, including legacy resumable callback compatibility"
+        },
+        "<iife>": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Render cadence presets for the UI"
         }
       }
     },
@@ -292,7 +411,19 @@
     "rail/review-view.js": {
       "role": "mixed",
       "phase": "P3-8",
-      "owner": "Separate sample-sufficiency decisions/domain queries from observation HTML; visual colors and precision remain UI"
+      "owner": "Separate sample-sufficiency decisions/domain queries from observation HTML; visual colors and precision remain UI",
+      "overrides": {
+        "<iife>": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Observation cards and filters for native before/after rates"
+        },
+        "create": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Observation cards and filters for native before/after rates"
+        }
+      }
     },
     "rail/ridership.js": {
       "role": "platform",
@@ -301,7 +432,7 @@
       "bridgeDisposition": "UI/RPC/IO primitive bridge. Model decisions execute in Rust; source acceptance remains pending P3-9 per-function review."
     },
     "rail/routing-wasm.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-2",
       "owner": "Rust graph/forecast/directory/cache",
       "overrides": {
@@ -315,7 +446,8 @@
           "phase": "P3-2 bridge",
           "owner": "Rust graph/frame/compiler ownership; compatibility transport and rendering"
         }
-      }
+      },
+      "bridgeDisposition": "Loads and recycles WASM workspaces, copies numeric frames through linear memory, projects route and status objects and associates opaque revision tokens."
     },
     "rail/save-queue.js": {
       "role": "platform",
@@ -342,7 +474,7 @@
       "bridgeDisposition": "No game JSON parsing/encoding, envelope construction, migration, coalescing or cleanup policy in JavaScript. Platform transaction/CAS, Promise correlation and file/DOM calls remain for P3-8 binding consolidation."
     },
     "rail/service-plan.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-2",
       "owner": "Rust graph/forecast/directory/cache",
       "overrides": {
@@ -380,8 +512,29 @@
           "role": "platform",
           "phase": "P3-2 bridge",
           "owner": "Rust tariff and service projections; JS exposes compatible views"
+        },
+        "rawTrackPoints": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Map geometry and direction labels"
+        },
+        "trackPoints": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Map geometry and direction labels"
+        },
+        "linePoints": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Map geometry and direction labels"
+        },
+        "directionName": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Map geometry and direction labels"
         }
-      }
+      },
+      "bridgeDisposition": "Marshals fares, plans and track data into Rust. Retains native graph handles and assembles display points, stop names and route objects."
     },
     "rail/shell-ui.js": {
       "role": "ui",
@@ -417,9 +570,10 @@
       "owner": "Interface, visual geometry and private display preferences"
     },
     "rail/temporal-wasm.js": {
-      "role": "domain",
+      "role": "platform",
       "phase": "P3-3",
-      "owner": "Rust runtime/clock; edit lifecycle P3-4"
+      "owner": "Rust runtime/clock; edit lifecycle P3-4",
+      "bridgeDisposition": "Packs timetable and deployment frames, caches coefficient responses and decodes native allocations. Rust supplies time curves, headways and legacy durations."
     },
     "rail/tokyo-data.js": {
       "role": "platform",
@@ -470,32 +624,32 @@
       "owner": "Formats read-only native projections and renders panel HTML; no authoritative state mutation"
     },
     "rail/ui.js": {
-      "role": "mixed",
+      "role": "ui",
       "phase": "P3-8",
-      "owner": "UI shell; all embedded domain orchestration moves to Rust",
+      "owner": "DOM rendering, forms, browser input and view scheduling; native game owners supply state and decisions",
       "overrides": {
         "syncRecords": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-7",
           "owner": "Rust persistence/records"
         },
         "persistRecords": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-7",
           "owner": "Rust persistence/records"
         },
         "save": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-7",
           "owner": "Rust persistence/records"
         },
         "saveNow": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-7",
           "owner": "Rust persistence/records"
         },
         "downloadLocalSave": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-7",
           "owner": "Rust persistence/records"
         },
@@ -515,22 +669,22 @@
           "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets"
         },
         "calculate": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-2",
           "owner": "Rust forecast revisions"
         },
         "scheduleForecast": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-2",
           "owner": "Rust forecast revisions"
         },
         "refreshUrbanDemand": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-2",
           "owner": "Rust forecast revisions"
         },
         "commit": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-4",
           "owner": "Rust atomic commands/session replacement"
         },
@@ -540,22 +694,22 @@
           "owner": "Browser file, Worker and IndexedDB operations coordinated by Rust replacement tickets"
         },
         "setPlaying": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-3",
           "owner": "Rust run intent/clock"
         },
         "reviewPulse": {
-          "role": "domain",
+          "role": "ui",
           "phase": "P3-5",
           "owner": "Rust observation/statistics queries"
         },
         "stationForecast": {
-          "role": "domain",
+          "role": "platform",
           "phase": "P3-5",
           "owner": "Rust observation/statistics queries"
         },
         "capacityNote": {
-          "role": "domain",
+          "role": "ui",
           "phase": "P3-5",
           "owner": "Rust observation/statistics queries"
         },
@@ -563,13 +717,36 @@
           "role": "ui",
           "phase": "UI",
           "owner": "Navigation and recovery control for a committed checkpoint"
+        },
+        "sendClockIntent": {
+          "role": "platform",
+          "phase": "P3-8",
+          "owner": "Rust clock and replacement commands"
+        },
+        "transition": {
+          "role": "platform",
+          "phase": "P3-8",
+          "owner": "Rust clock and replacement commands"
         }
       }
     },
     "rail/urban-growth.js": {
-      "role": "mixed",
+      "role": "platform",
       "phase": "P3-6 bridge",
-      "owner": "Rust city/development initialization, growth, candidates and terrain; JS map markers only"
+      "owner": "Rust city/development initialization, growth, candidates and terrain; JS map markers only",
+      "bridgeDisposition": "Forwards initialization, growth, siting and cost operations to Rust, and synchronizes the resulting city views. Marker clustering and status text are presentation.",
+      "overrides": {
+        "markers": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Map marker clustering and localized connection status"
+        },
+        "connection": {
+          "role": "ui",
+          "phase": "UI",
+          "owner": "Map marker clustering and localized connection status"
+        }
+      }
     },
     "rail/value-wire.js": {
       "role": "platform",

@@ -30,6 +30,10 @@ fn vehicle_value(s: &V, cfg: &V) -> f64 {
         })
     }
 }
+pub(super) fn facility_upkeep(state: &V, config: &V) -> f64 {
+    facility_value(state, config) * 0.001
+}
+
 fn facility_value(s: &V, cfg: &V) -> f64 {
     s.get("urban")
         .get("facilities")
@@ -478,6 +482,7 @@ fn inner(input: &V, cfg: &V) -> Result<V, String> {
             )]))
         }
         "vehicleValue" => return Ok(obj(&[("result", n(vehicle_value(before, cfg)))])),
+        "facilityUpkeep" => return Ok(obj(&[("result", n(facility_upkeep(before, cfg)))])),
         "facilityValue" => return Ok(obj(&[("result", n(facility_value(before, cfg)))])),
         "reserved" | "free" => {
             let r = E::reserved(before, a.get("spec"), a.get("except"));

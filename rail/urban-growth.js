@@ -79,7 +79,7 @@
   }
 
   function upkeep(s) {
-    return facilitiesValue(s) * .001;
+    return assets().query(s,'facilityUpkeep');
   }
   const LAND_USES = {
     r: {

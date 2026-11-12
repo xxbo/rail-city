@@ -225,7 +225,7 @@
   };
   function createDemandClient() {
     const client=RailWorkerClient.create({
-      createWorker:()=>typeof Worker==='function'?new Worker('demand-worker.js?v=78'):null,
+      createWorker:()=>typeof Worker==='function'?new Worker('demand-worker.js?v=79'):null,
       timeout:45000,
       timeoutMessage:'后台需求计算超过45秒，已回收计算线程；旧需求继续运行。',
       errorMessage:'客流后台计算失败',
@@ -2753,20 +2753,13 @@
     const hour = Math.floor(traffic.minute / 60);
     if (!stationForecastCache || stationForecastCache.forecast !== forecast || stationForecastCache
       .hour !== hour) {
-      const compact=RailForecastCatalog.summary(forecast,s),entries=compact?.entries||{};
-      for (const f of compact?[]:forecast.flows) {
-        const n = f.trips * Q.factor(s, f);
-        for (const [station, key] of [
-            [f.from, 'entry'],
-            [f.to, 'exit']
-          ]) {
-          const st = entries[station] || (entries[station] = {
-            entry: 0,
-            exit: 0
-          });
-          st[key] += n;
-        }
-      }
+      const compact=RailForecastCatalog.summary(forecast,s);
+      const entries=compact?.entries || RailViewModel.query('stationEntries',{
+        state:{ridership:s.ridership && {model:s.ridership.model,lines:s.ridership.lines}},
+        flows:forecast.flows.map(({from,to,trips,lineIds,path,hub})=>({
+          from,to,trips,lineIds:lineIds||Object.keys(path?.fares||{}),hub:!!hub
+        }))
+      });
       stationForecastCache = {
         forecast,
         hour,

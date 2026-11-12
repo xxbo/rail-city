@@ -127,13 +127,13 @@ fn ipf(input: &[f64]) -> Vec<f64> {
 pub(super) fn distribution(input: &[f64]) -> Vec<f64> {
     assert!(input.len() >= 6);
     let n = int(input[0]);
-    let effective = input[1] != 0.0;
+    let effective = input[1] > 0.0;
     let population = input[2];
     assert_eq!(input.len(), 6 + n * 8);
     let zone = |i: usize, field: usize| input[6 + i * 8 + field];
     let mut out = vec![0.0; 5];
     for (p, (field, decay)) in [(4, 14.0), (5, 5.0), (7, 10.0)].into_iter().enumerate() {
-        let total = input[3 + p];
+        let total = if input[1] == -1.0 { population * crate::world::RATES[p] } else { input[3 + p] };
         let mut attraction = 0.0;
         for i in 0..n {
             attraction += zone(i, field);
@@ -258,8 +258,23 @@ pub(super) fn mode_value(input: &[f64]) -> f64 {
         0.0
     }
 }
+pub(super) fn mode_availability(km: f64) -> [f64; 5] {
+    [if km <= 5.0 { 1.0 } else { 0.0 }, if km <= 12.0 { 0.35 } else { 0.0 }, 0.5, 1.0, 1.0]
+}
+fn purpose_value(purpose: f64) -> f64 {
+    match purpose { 0.0 => crate::world::VOT[0], 2.0 => crate::world::VOT[2], _ => crate::world::VOT[1] }
+}
 fn mode(input: &[f64]) -> Vec<f64> {
-    vec![mode_value(input)]
+    if input.len() == 10 { return vec![mode_value(input)]; }
+    let [purpose, minutes, access, cost, has_cost, fare, km, mask, supplied @ ..] = input else { return vec![]; };
+    assert_eq!(supplied.len(), 5);
+    let mut availability = mode_availability(*km);
+    for (i, field) in availability.iter_mut().enumerate() {
+        if (*mask as usize) & (1 << i) != 0 { *field = supplied[i]; }
+    }
+    let access_cost = if *has_cost != 0.0 { *cost } else { 1.7 * access };
+    vec![mode_value(&[purpose_value(*purpose), *minutes, access_cost, *fare, *km,
+        availability[0], availability[1], availability[2], availability[3], availability[4]])]
 }
 #[no_mangle]
 pub extern "C" fn demand_mode_scalar(
@@ -296,8 +311,11 @@ struct OptionRow {
 pub(super) fn strategy(input: &[f64]) -> Vec<f64> {
     assert!(input.len() >= 2);
     let n = int(input[0]);
-    let value = input[1];
-    assert_eq!(input.len(), 2 + n * 5);
+    let has_purpose = input.len() == 3 + n * 5;
+    let value = if has_purpose && (input[1] == 0.0 || input[1].is_nan()) {
+        purpose_value(input[2 + n * 5])
+    } else { input[1] };
+    assert!(has_purpose || input.len() == 2 + n * 5);
     let mut unique: Vec<OptionRow> = vec![];
     let mut keys: HashMap<usize, usize> = HashMap::new();
     for i in 0..n {

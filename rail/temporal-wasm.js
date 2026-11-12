@@ -97,8 +97,8 @@
       input.push(...encode(cfg, weights).slice(2));
       const dirs = X.directions(l),
         ds = dirs.map(dir => rt.departures[l.id + '|' + dir]);
-      const duration = s.routeModel === 9 ? X.duration(s, l) : l.trackIds.reduce((m, id) => m + s
-        .tracks.find(t => t.id === id).km / 48 * 60 + .6, 0) + 1;
+      const duration = s.routeModel === 9 ? X.duration(s, l) : (node?require('./bootstrap-wasm'):root.RailBootstrap).viewModel('legacyFleetDuration',
+          {lengths:l.trackIds.map(id=>s.tracks.find(t=>t.id===id).km)});
       input.push(l.patternIndex, +(l.stops[0] === l.stops.at(-1)), dirs.length, duration, l
         .headway, ds.length);
       for (const d of ds) input.push(+!!d, d?.next ?? 0, d?.headway ?? 0, +(d?.lastRun != null), d
