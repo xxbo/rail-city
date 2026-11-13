@@ -3514,7 +3514,7 @@
       ]
     },
     "rail/console-ui.js": {
-      "sha256": "98b5b46fa4665a957cc26636e1dfe9d3675b6f9abc72a8ab94adb6e86e5f2000",
+      "sha256": "bb4c26a285cf65ad208a1dc5ba3fbc3eaddef8155e3743efd8580beb29cb90f3",
       "role": "ui",
       "owner": "Interface, visual geometry and private display preferences",
       "phase": "UI",
@@ -3530,7 +3530,7 @@
           "name": "<iife>",
           "line": 2,
           "end": 280,
-          "sha256": "2cd2503f49bd7528e192ce94e3bfcaf8aa905dc9c4f9989bc38c65815238a61f",
+          "sha256": "47be0080e0731e797436eadc5fc8092030150edf6ca5043a2c407dd77ff2e3d2",
           "scope": [],
           "role": "ui",
           "phase": "UI",
@@ -24988,7 +24988,7 @@
       ]
     },
     "rail/shell-ui.js": {
-      "sha256": "6bcfc9eafa826b0c6d5166dc76f821b863daa328b6b2df8fec9a7ee9b8d7e3b3",
+      "sha256": "a3c56b61bee4bbe2645a7bdc87d980faf987788827e651f30b92133d12099488",
       "role": "ui",
       "owner": "Interface, visual geometry and private display preferences",
       "phase": "UI",
@@ -25004,7 +25004,7 @@
           "name": "<iife>",
           "line": 1,
           "end": 260,
-          "sha256": "2e749cf3291ba13f7b2d26941d2f0c45e7561eb8f51093f80ed20c6f12956378",
+          "sha256": "38c5e2b2d53162ca7a7b59ab7a2f74e4cf4b1ced284d5566b813833752dbd955",
           "scope": [],
           "role": "ui",
           "phase": "UI",
